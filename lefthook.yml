@@ -1,0 +1,15 @@
+pre-commit:
+  jobs:
+    - name: biome-check
+      run: pnpm biome check --write {staged_files}
+      stage_fixed: true
+
+post-commit:
+  jobs:
+    - name: codegraph-sync
+      run: npx codegraph sync 2>/dev/null || true
+
+pre-push:
+  jobs:
+    - name: typecheck
+      run: pnpm typecheck
