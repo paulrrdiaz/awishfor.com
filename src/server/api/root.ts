@@ -1,3 +1,4 @@
+import { categoryRouter } from "@/server/api/routers/category";
 import {
 	createCallerFactory,
 	createTRPCRouter,
@@ -21,6 +22,7 @@ import {
  * auth-gated endpoints.
  */
 export const appRouter = createTRPCRouter({
+	category: categoryRouter,
 	health: publicProcedure.query(() => ({ ok: true, ts: Date.now() })),
 });
 

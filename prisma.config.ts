@@ -3,12 +3,22 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+const databaseUrl = process.env.DATABASE_URL;
+const shadowDatabaseUrl = databaseUrl
+	? (() => {
+			const url = new URL(databaseUrl);
+			url.searchParams.set("schema", "prisma_migrate_shadow");
+			return url.toString();
+		})()
+	: undefined;
+
 export default defineConfig({
 	schema: "prisma/schema.prisma",
 	migrations: {
 		path: "prisma/migrations",
 	},
 	datasource: {
-		url: process.env.DATABASE_URL,
+		url: databaseUrl,
+		shadowDatabaseUrl,
 	},
 });

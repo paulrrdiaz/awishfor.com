@@ -155,13 +155,13 @@ Categories are per-wishlist and can be created from event presets.
 
 Tasks:
 
-- [ ] Add `Category` model.
-- [ ] Add `wishlistId` relation.
-- [ ] Add `name`.
-- [ ] Add `sortOrder`.
-- [ ] Add timestamps.
-- [ ] Add category service methods for add, rename, delete, reorder.
-- [ ] Deleting category sets assigned gifts to uncategorized.
+- [x] Add `Category` model.
+- [x] Add `wishlistId` relation.
+- [x] Add `name`.
+- [x] Add `sortOrder`.
+- [x] Add timestamps.
+- [x] Add category service methods for add, rename, delete, reorder.
+- [x] Deleting category sets assigned gifts to uncategorized.
 
 Acceptance criteria:
 
