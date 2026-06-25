@@ -48,20 +48,44 @@ enum GiftVisibilityStatus {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  clerkId   String   @unique
-  email     String   @unique
+  id        Int        @id @default(autoincrement())
+  clerkId   String     @unique
+  email     String     @unique
   name      String?
   imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  wishlists Wishlist[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Wishlist {
-  id          String         @id @default(cuid())
-  status      WishlistStatus @default(draft)
-  publishedAt DateTime?
-  archivedAt  DateTime?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id               String         @id @default(cuid())
+  ownerId          Int
+  owner            User           @relation(fields: [ownerId], references: [id])
+  title            String
+  slug             String         @unique
+  eventType        EventType
+  language         Locale         @default(es)
+  currency         Currency       @default(PEN)
+  heroTitle        String?
+  welcomeMessage   String?
+  thankYouMessage  String?
+  displayName      String?
+  eventDate        DateTime?
+  eventTime        String?
+  eventLocation    String?
+  coverImageUrl    String?
+  themeId          String?
+  layoutId         String?
+  buttonStyle      String?
+  fontPairing      String?
+  showHowItWorks   Boolean        @default(true)
+  status           WishlistStatus @default(draft)
+  publishedAt      DateTime?
+  archivedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([ownerId])
+  @@index([ownerId, status])
 }

@@ -68,15 +68,15 @@ Details:
 
 Tasks:
 
-- [ ] Add `WishlistStatus = draft | published | archived`.
-- [ ] Add `EventType = baby_shower | birthday | wedding | housewarming | general`.
-- [ ] Add `Locale = es | en`.
-- [ ] Add `Currency = PEN | USD | EUR | MXN | COP | CLP | ARS`.
-- [ ] Add `GiftPriority = low | medium | high`.
-- [ ] Add `GiftVisibilityStatus = available | hidden`.
-- [ ] Add `publishedAt` to Wishlist.
-- [ ] Add `archivedAt` to Wishlist.
-- [ ] Add lifecycle helpers for publish/archive/restore.
+- [x] Add `WishlistStatus = draft | published | archived`.
+- [x] Add `EventType = baby_shower | birthday | wedding | housewarming | general`.
+- [x] Add `Locale = es | en`.
+- [x] Add `Currency = PEN | USD | EUR | MXN | COP | CLP | ARS`.
+- [x] Add `GiftPriority = low | medium | high`.
+- [x] Add `GiftVisibilityStatus = available | hidden`.
+- [x] Add `publishedAt` to Wishlist.
+- [x] Add `archivedAt` to Wishlist.
+- [x] Add lifecycle helpers for publish/archive/restore.
 
 Acceptance criteria:
 
@@ -107,25 +107,25 @@ Wishlist stores content, event, design, language, currency, lifecycle, and owner
 
 Tasks:
 
-- [ ] Add owner relation to `User`.
-- [ ] Add `title`.
-- [ ] Add globally unique `slug`.
-- [ ] Add `eventType`.
-- [ ] Add `language` default `es`.
-- [ ] Add `currency` default `PEN`.
-- [ ] Add `heroTitle`.
-- [ ] Add `welcomeMessage`.
-- [ ] Add `thankYouMessage`.
-- [ ] Add `displayName`.
-- [ ] Add `eventDate`.
-- [ ] Add `eventTime` as `HH:mm` string.
-- [ ] Add `eventLocation` as plain text.
-- [ ] Add `coverImageUrl`.
-- [ ] Add `themeId`.
-- [ ] Add `layoutId`.
-- [ ] Add `buttonStyle`.
-- [ ] Add `fontPairing`.
-- [ ] Add `showHowItWorks` default true.
+- [x] Add owner relation to `User`.
+- [x] Add `title`.
+- [x] Add globally unique `slug`.
+- [x] Add `eventType`.
+- [x] Add `language` default `es`.
+- [x] Add `currency` default `PEN`.
+- [x] Add `heroTitle`.
+- [x] Add `welcomeMessage`.
+- [x] Add `thankYouMessage`.
+- [x] Add `displayName`.
+- [x] Add `eventDate`.
+- [x] Add `eventTime` as `HH:mm` string.
+- [x] Add `eventLocation` as plain text.
+- [x] Add `coverImageUrl`.
+- [x] Add `themeId`.
+- [x] Add `layoutId`.
+- [x] Add `buttonStyle`.
+- [x] Add `fontPairing`.
+- [x] Add `showHowItWorks` default true.
 
 Acceptance criteria:
 

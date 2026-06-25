@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+	Currency,
+	EventType,
+	Locale,
 	type Prisma,
 	type Wishlist,
 	WishlistStatus,
@@ -14,12 +17,38 @@ import {
 
 const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	id: "wishlist_123",
+	ownerId: 42,
+	title: "Lista de boda",
+	slug: "lista-de-boda",
+	eventType: EventType.wedding,
+	language: Locale.es,
+	currency: Currency.PEN,
+	heroTitle: null,
+	welcomeMessage: null,
+	thankYouMessage: null,
+	displayName: null,
+	eventDate: null,
+	eventTime: null,
+	eventLocation: null,
+	coverImageUrl: null,
+	themeId: null,
+	layoutId: null,
+	buttonStyle: null,
+	fontPairing: null,
+	showHowItWorks: true,
 	status: WishlistStatus.draft,
 	publishedAt: null,
 	archivedAt: null,
 	createdAt: new Date("2026-06-25T00:00:00.000Z"),
 	updatedAt: new Date("2026-06-25T00:00:00.000Z"),
 	...overrides,
+});
+
+const createWishlistInput = () => ({
+	ownerId: 42,
+	title: "Lista de boda",
+	slug: "lista-de-boda",
+	eventType: EventType.wedding,
 });
 
 const createMockDatabase = (
@@ -52,21 +81,106 @@ const createMockDatabase = (
 };
 
 describe("wishlist service", () => {
-	it("creates wishlists as draft with null lifecycle timestamps", async () => {
+	it("creates wishlists with required ownership, defaults, and draft lifecycle", async () => {
 		const { db, create } = createMockDatabase();
 
-		const wishlist = await createWishlist(db);
+		const wishlist = await createWishlist(db, createWishlistInput());
 
 		expect(create).toHaveBeenCalledWith({
 			data: {
+				owner: {
+					connect: {
+						id: 42,
+					},
+				},
+				title: "Lista de boda",
+				slug: "lista-de-boda",
+				eventType: EventType.wedding,
+				language: Locale.es,
+				currency: Currency.PEN,
+				heroTitle: null,
+				welcomeMessage: null,
+				thankYouMessage: null,
+				displayName: null,
+				eventDate: null,
+				eventTime: null,
+				eventLocation: null,
+				coverImageUrl: null,
+				themeId: null,
+				layoutId: null,
+				buttonStyle: null,
+				fontPairing: null,
+				showHowItWorks: true,
 				status: WishlistStatus.draft,
 				publishedAt: null,
 				archivedAt: null,
 			},
 		});
+		expect(wishlist.ownerId).toBe(42);
 		expect(wishlist.status).toBe(WishlistStatus.draft);
+		expect(wishlist.language).toBe(Locale.es);
+		expect(wishlist.currency).toBe(Currency.PEN);
+		expect(wishlist.showHowItWorks).toBe(true);
 		expect(wishlist.publishedAt).toBeNull();
 		expect(wishlist.archivedAt).toBeNull();
+	});
+
+	it("persists expanded wishlist fields during creation", async () => {
+		const { db, create } = createMockDatabase();
+		const eventDate = new Date("2026-12-24T00:00:00.000Z");
+
+		await createWishlist(db, {
+			ownerId: 42,
+			title: "Cumple de Ana",
+			slug: "cumple-de-ana",
+			eventType: EventType.birthday,
+			language: Locale.en,
+			currency: Currency.USD,
+			heroTitle: "Celebra con nosotros",
+			welcomeMessage: "Gracias por ser parte de este dia.",
+			thankYouMessage: "Nos vemos pronto.",
+			displayName: "Ana y Luis",
+			eventDate,
+			eventTime: "18:30",
+			eventLocation: "Miraflores, Lima",
+			coverImageUrl: "https://example.com/cover.jpg",
+			themeId: "cielo-suave",
+			layoutId: "editorial",
+			buttonStyle: "pill",
+			fontPairing: "serif-soft",
+			showHowItWorks: false,
+		});
+
+		expect(create).toHaveBeenCalledWith({
+			data: {
+				owner: {
+					connect: {
+						id: 42,
+					},
+				},
+				title: "Cumple de Ana",
+				slug: "cumple-de-ana",
+				eventType: EventType.birthday,
+				language: Locale.en,
+				currency: Currency.USD,
+				heroTitle: "Celebra con nosotros",
+				welcomeMessage: "Gracias por ser parte de este dia.",
+				thankYouMessage: "Nos vemos pronto.",
+				displayName: "Ana y Luis",
+				eventDate,
+				eventTime: "18:30",
+				eventLocation: "Miraflores, Lima",
+				coverImageUrl: "https://example.com/cover.jpg",
+				themeId: "cielo-suave",
+				layoutId: "editorial",
+				buttonStyle: "pill",
+				fontPairing: "serif-soft",
+				showHowItWorks: false,
+				status: WishlistStatus.draft,
+				publishedAt: null,
+				archivedAt: null,
+			},
+		});
 	});
 
 	it("publishes a wishlist and sets publishedAt while clearing archivedAt", async () => {

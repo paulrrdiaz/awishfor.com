@@ -28,3 +28,4 @@ rules:
     - Include verification tasks when needed.
     - Prefer CodeGraph for structural repo analysis during apply work.
     - Apply work must run pnpm check, pnpm test, and pnpm typecheck before closing the session.
+    - Mark tasks complete in docs/TASKS.md after the related work is done and required validation has passed, or after any validation failure is explicitly reported.
