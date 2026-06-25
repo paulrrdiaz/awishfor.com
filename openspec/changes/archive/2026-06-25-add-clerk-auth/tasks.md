@@ -39,4 +39,4 @@
 ## 7. Verify
 
 - [x] 7.1 Run `pnpm typecheck` and `pnpm check` (Biome) and fix issues
-- [ ] 7.2 Manually verify: email sign-up + verification, email sign-in, Google on both pages, and redirect of unauthenticated users to sign-in
+- [x] 7.2 Manually verify: email sign-up + verification, email sign-in, Google on both pages, and redirect of unauthenticated users to sign-in
