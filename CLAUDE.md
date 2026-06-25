@@ -59,6 +59,13 @@ Tests use **Vitest** (config in `vitest.config.ts`, mirrors the `@/*` alias). Te
 
 Changes are tracked under `openspec/` (`changes/` for active proposals, `changes/archive/` for completed, `specs/` for current capability specs). Use the `opsx:propose` / `opsx:apply` / `opsx:archive` skills for this workflow.
 
+- **Default style:** OpenSpec workflow responses use `/caveman` by default unless the user explicitly asks for normal mode.
+- **Docs review:** During OpenSpec work, review relevant repo docs before acting. Use `docs/PRD.md`, `docs/TASKS.md`, and `docs/CLAUDE_DESIGN_PROMPT.md` when they apply. Review `.cursor/rules/codegraph.mdc` when structural code context matters.
+- **CodeGraph:** Prefer CodeGraph over grep-first exploration for structural repo questions during OpenSpec work: symbol lookup, callers/callees, impact analysis, architecture tracing, and task scoping.
+- **`opsx:propose`:** Read relevant repo context plus relevant docs before drafting artifacts. Run `/grill-me` only if ambiguity remains after repo and docs review, especially around scope, success criteria, tradeoffs, or conflicting constraints.
+- **`opsx:apply`:** Read proposal, specs, design, tasks, and any relevant docs before coding. Use CodeGraph for structural repo analysis. Implement tasks in order. Run `pnpm check`, `pnpm test`, and `pnpm typecheck` before closing the apply session. Mark tasks complete only after the related work is done and required validation has passed, or after any validation failure is explicitly reported.
+- **`opsx:archive`:** Review relevant change docs before archiving. If unchecked tasks remain, show them, ask for confirmation, then mark the remaining tasks complete before archiving. Assess delta specs against `openspec/specs` and sync when the change introduces real spec deltas. Forced task completion is administrative closure, not proof that validation passed.
+
 ## CodeGraph
 
 This project has a CodeGraph MCP server (`codegraph_*` tools) — a tree-sitter knowledge graph of every symbol, edge, and file. The index lives in `.codegraph/` (gitignored) and is kept fresh by the post-commit `codegraph sync` hook. Full guide: `.cursor/rules/codegraph.mdc`.

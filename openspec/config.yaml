@@ -1,20 +1,30 @@
 schema: spec-driven
+context: |
+  Stack: Next.js 16 App Router, React 19, TypeScript, tRPC v11, Prisma 7, Clerk, Tailwind CSS v4, shadcn/Base UI, Vitest, Biome, pnpm.
+  Use @/* imports for src modules.
+  Keep generated Prisma client files in src/generated/prisma untouched.
+  Validate new environment variables in src/env.ts and add placeholders to .env.example.
+  Changes follow Conventional Commits.
+  Treat docs/ as proposal and apply context. Read only relevant files, with docs/PRD.md, docs/TASKS.md, and docs/CLAUDE_DESIGN_PROMPT.md as primary examples when they apply.
+  Prefer CodeGraph for structural repo questions such as symbol lookup, callers/callees, impact analysis, and architecture tracing. Use grep/read for literal text or already-open files.
+  OpenSpec workflow defaults to caveman-style responses unless the user explicitly asks for normal mode.
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Read relevant docs/ files before drafting artifacts.
+    - Review repo workflow docs that apply, including CLAUDE.md and .cursor/rules/codegraph.mdc when structural code context matters.
+    - Prefer CodeGraph over grep-first exploration for structural repo questions.
+    - Use /grill-me only if ambiguity remains after repo and docs review, especially unclear scope, success criteria, tradeoffs, or conflicting constraints.
+    - State user/problem outcome first, then scope.
+    - Include explicit non-goals when adjacent work could be mistaken as in-scope.
+    - Call out affected capabilities/specs plus env, config, schema, or API impact when relevant.
+  design:
+    - Make design decision-complete for apply work.
+    - Include chosen approach, rejected alternatives, integration points, and validation expectations.
+    - Include data flow, validation, DB/API changes, and migration implications when relevant.
+  tasks:
+    - Break work into small sequential checkboxes with one observable outcome each.
+    - Order tasks by dependency.
+    - Include verification tasks when needed.
+    - Prefer CodeGraph for structural repo analysis during apply work.
+    - Apply work must run pnpm check, pnpm test, and pnpm typecheck before closing the session.
