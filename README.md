@@ -1,4 +1,4 @@
-# sietch-init
+# awishfor.com
 
 Opinionated starter for spinning up a new app fast. Clone it, run one setup command, and start building.
 
