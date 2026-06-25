@@ -7,6 +7,46 @@ datasource db {
   provider = "postgresql"
 }
 
+enum WishlistStatus {
+  draft
+  published
+  archived
+}
+
+enum EventType {
+  baby_shower
+  birthday
+  wedding
+  housewarming
+  general
+}
+
+enum Locale {
+  es
+  en
+}
+
+enum Currency {
+  PEN
+  USD
+  EUR
+  MXN
+  COP
+  CLP
+  ARS
+}
+
+enum GiftPriority {
+  low
+  medium
+  high
+}
+
+enum GiftVisibilityStatus {
+  available
+  hidden
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   clerkId   String   @unique
@@ -15,4 +55,13 @@ model User {
   imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Wishlist {
+  id          String         @id @default(cuid())
+  status      WishlistStatus @default(draft)
+  publishedAt DateTime?
+  archivedAt  DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }
