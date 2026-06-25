@@ -15,7 +15,7 @@ Opinionated starter for spinning up a new app fast. Clone it, run one setup comm
    ```
 3. **Run the setup wizard** — renames the project, scaffolds `.env`, and runs the first migration:
    ```bash
-   pnpm setup
+   pnpm bootstrap
    ```
    It prompts for the values it can't derive — your Neon `DATABASE_URL` and Clerk keys (see below). Press Enter to skip any and fill them into `.env` later.
 4. **Start the dev server:**
@@ -37,7 +37,7 @@ All environment variables are validated at runtime in `src/env.ts`. Add any new 
 
 | Command | Description |
 | --- | --- |
-| `pnpm setup` | One-time project setup wizard (rename + env + migrate) |
+| `pnpm bootstrap` | One-time project setup wizard (rename + env + migrate) |
 | `pnpm dev` | Start the dev server (loads `.env`) |
 | `pnpm build` / `pnpm start` | Production build / serve |
 | `pnpm test` / `pnpm test:watch` | Run Vitest |

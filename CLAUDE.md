@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-- `pnpm setup` — one-time project setup wizard (`scripts/setup.mjs`, zx): renames the project, scaffolds `.env` from `.env.example`, and runs the first migration
+- `pnpm bootstrap` — one-time project setup wizard (`scripts/setup.mjs`, zx): renames the project, scaffolds `.env` from `.env.example`, and runs the first migration
 - `pnpm dev` — start dev server (loads `.env` via `dotenv -e .env`)
 - `pnpm build` / `pnpm start` — production build / serve
 - `pnpm test` / `pnpm test:watch` — Vitest (`test` runs once; `test:watch` watches)

@@ -8,7 +8,7 @@
  *   3. (optional) points you at Neon for the database connection string
  *   4. generates the Prisma client and runs migrations
  *
- * Run with: pnpm setup
+ * Run with: pnpm bootstrap
  */
 import "zx/globals";
 

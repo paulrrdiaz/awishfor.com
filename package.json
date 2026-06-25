@@ -10,7 +10,7 @@
 		"check:write": "biome check --write .",
 		"dev": "dotenv -e .env -- next dev",
 		"preview": "next build && next start",
-		"setup": "zx scripts/setup.mjs",
+		"bootstrap": "zx scripts/setup.mjs",
 		"start": "next start",
 		"test": "vitest run",
 		"test:watch": "vitest",
