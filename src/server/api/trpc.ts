@@ -6,7 +6,8 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { auth } from "@clerk/nextjs/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { db } from "@/server/db";
@@ -103,3 +104,35 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Middleware that enforces a signed-in Clerk user.
+ *
+ * Route protection in `src/proxy.ts` only guards pages — it does not protect the API layer. Use this
+ * for any procedure that requires authentication; it throws `UNAUTHORIZED` when there is no session
+ * and injects the Clerk `userId` into `ctx` for downstream resolvers.
+ */
+const enforceAuth = t.middleware(async ({ ctx, next }) => {
+	const { userId } = await auth();
+
+	if (!userId) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+
+	return next({
+		ctx: {
+			...ctx,
+			userId,
+		},
+	});
+});
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * Builds on `publicProcedure` and guarantees a signed-in user. The resolver's `ctx.userId` is a
+ * non-null Clerk user id. Use this for anything that should be unavailable to logged-out users.
+ */
+export const protectedProcedure = t.procedure
+	.use(timingMiddleware)
+	.use(enforceAuth);

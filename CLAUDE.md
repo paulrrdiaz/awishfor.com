@@ -8,15 +8,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+- `pnpm setup` — one-time project setup wizard (`scripts/setup.mjs`, zx): renames the project, scaffolds `.env` from `.env.example`, and runs the first migration
 - `pnpm dev` — start dev server (loads `.env` via `dotenv -e .env`)
 - `pnpm build` / `pnpm start` — production build / serve
+- `pnpm test` / `pnpm test:watch` — Vitest (`test` runs once; `test:watch` watches)
 - `pnpm typecheck` — `tsc --noEmit` (also runs on pre-push)
 - `pnpm check` — Biome lint + format check (read-only)
 - `pnpm check:write` — Biome check with safe fixes applied
 - `pnpm tunnel` — ngrok tunnel for testing Clerk webhooks locally
 - DB: `pnpm prisma migrate dev`, `pnpm prisma studio`, `pnpm prisma generate`
 
-There is no test runner configured in this repo.
+Tests use **Vitest** (config in `vitest.config.ts`, mirrors the `@/*` alias). Tests are unit-level (e.g. `src/lib/utils.test.ts`); they are not wired into the pre-push hook.
 
 ## Critical conventions
 
@@ -31,7 +33,7 @@ There is no test runner configured in this repo.
 
 ### tRPC
 - Routers live in `src/server/api/routers/` and must be registered in `src/server/api/root.ts` (`appRouter`).
-- `src/server/api/trpc.ts` defines context (injects `db`), the superjson transformer, and `publicProcedure` (the only procedure type — there is no auth-gated procedure yet; route protection is handled in `src/proxy.ts`).
+- `src/server/api/trpc.ts` defines context (injects `db`), the superjson transformer, and two procedures: `publicProcedure` (open) and `protectedProcedure` (calls Clerk's `auth()`, throws `UNAUTHORIZED` if signed out, and injects `ctx.userId`). Page-level protection in `src/proxy.ts` does **not** guard the API layer — use `protectedProcedure` for anything user-specific.
 - Two consumption paths:
   - **Server Components** → `import { api, HydrateClient } from "@/trpc/server"` (server-side caller).
   - **Client Components** → `import { api } from "@/trpc/react"` (React Query hooks).
