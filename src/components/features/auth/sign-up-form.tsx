@@ -65,7 +65,7 @@ export function SignUpForm() {
 		}
 		if (signUp.status === "complete") {
 			await signUp.finalize();
-			router.push("/");
+			router.push("/dashboard");
 		}
 	}
 
@@ -74,7 +74,7 @@ export function SignUpForm() {
 		const { error } = await signUp.sso({
 			strategy: "oauth_google",
 			redirectUrl: "/sso-callback",
-			redirectCallbackUrl: "/",
+			redirectCallbackUrl: "/dashboard",
 		});
 		if (error) {
 			setClerkError(

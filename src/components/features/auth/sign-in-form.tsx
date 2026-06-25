@@ -40,7 +40,7 @@ export function SignInForm() {
 		}
 		if (signIn.status === "complete") {
 			await signIn.finalize();
-			router.push("/");
+			router.push("/dashboard");
 		}
 	}
 
@@ -49,7 +49,7 @@ export function SignInForm() {
 		const { error } = await signIn.sso({
 			strategy: "oauth_google",
 			redirectUrl: "/sso-callback",
-			redirectCallbackUrl: "/",
+			redirectCallbackUrl: "/dashboard",
 		});
 		if (error) {
 			setClerkError(

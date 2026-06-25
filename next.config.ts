@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
+import "./src/env";
 
-import "./src/env.js";
+import type { NextConfig } from "next";
 
 const config: NextConfig = {};
 
