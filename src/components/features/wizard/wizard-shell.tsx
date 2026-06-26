@@ -1,14 +1,24 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { DesignStep } from "./design-step";
+import { DetailsStep } from "./details-step";
 import { EventTypeStep } from "./event-type-step";
+import { GiftsStep } from "./gifts-step";
 import { RecoveryPrompt } from "./recovery-prompt";
 import { useWizardStore } from "./wizard-provider";
 
-type WizardStep = "event-type";
+type WizardStep = "event-type" | "details" | "design" | "gifts";
 
-const STEPS: WizardStep[] = ["event-type"];
+const STEPS: WizardStep[] = ["event-type", "details", "design", "gifts"];
 const DEFAULT_STEP: WizardStep = "event-type";
+
+const STEP_LABELS: Record<WizardStep, string> = {
+	"event-type": "Ocasión",
+	details: "Detalles",
+	design: "Diseño",
+	gifts: "Regalos",
+};
 
 function isValidStep(s: string | null): s is WizardStep {
 	return STEPS.includes(s as WizardStep);
@@ -16,14 +26,38 @@ function isValidStep(s: string | null): s is WizardStep {
 
 function StepContent({ step }: { step: WizardStep }) {
 	if (step === "event-type") return <EventTypeStep />;
+	if (step === "details") return <DetailsStep />;
+	if (step === "design") return <DesignStep />;
+	if (step === "gifts") return <GiftsStep />;
 	return null;
 }
 
 export function WizardShell() {
 	const searchParams = useSearchParams();
+	const router = useRouter();
 	const raw = searchParams.get("step");
 	const step: WizardStep = isValidStep(raw) ? raw : DEFAULT_STEP;
 	const hasHydrated = useWizardStore((s) => s._hasHydrated);
+
+	const currentIndex = STEPS.indexOf(step);
+	const isFirst = currentIndex === 0;
+	const isLast = currentIndex === STEPS.length - 1;
+
+	function navigate(targetStep: WizardStep) {
+		const params = new URLSearchParams(searchParams.toString());
+		params.set("step", targetStep);
+		router.push(`?${params.toString()}`);
+	}
+
+	function goBack() {
+		if (isFirst) return;
+		navigate(STEPS[currentIndex - 1]!);
+	}
+
+	function goNext() {
+		if (isLast) return;
+		navigate(STEPS[currentIndex + 1]!);
+	}
 
 	if (!hasHydrated) {
 		return (
@@ -36,7 +70,80 @@ export function WizardShell() {
 	return (
 		<main className="min-h-screen bg-gray-50">
 			<RecoveryPrompt />
+
+			{/* Step indicator */}
+			<div className="border-gray-100 border-b bg-white">
+				<div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+					{STEPS.map((s, i) => {
+						const isActive = s === step;
+						const isDone = i < currentIndex;
+						return (
+							<button
+								className={[
+									"flex items-center gap-2 text-sm transition-colors",
+									isActive
+										? "font-semibold text-gray-900"
+										: isDone
+											? "text-gray-500 hover:text-gray-700"
+											: "cursor-default text-gray-300",
+								].join(" ")}
+								disabled={!isDone && !isActive}
+								key={s}
+								onClick={() => isDone && navigate(s)}
+								type="button"
+							>
+								<span
+									className={[
+										"flex h-6 w-6 items-center justify-center rounded-full text-xs",
+										isActive
+											? "bg-gray-900 text-white"
+											: isDone
+												? "bg-gray-200 text-gray-600"
+												: "bg-gray-100 text-gray-400",
+									].join(" ")}
+								>
+									{isDone ? "✓" : i + 1}
+								</span>
+								<span className="hidden sm:inline">{STEP_LABELS[s]}</span>
+							</button>
+						);
+					})}
+				</div>
+			</div>
+
 			<StepContent step={step} />
+
+			{/* Back / Next navigation */}
+			<div className="sticky bottom-0 border-gray-100 border-t bg-white px-4 py-4">
+				<div className="mx-auto flex max-w-2xl items-center justify-between">
+					<button
+						className={[
+							"rounded-lg border border-gray-200 px-5 py-2 text-sm transition-colors",
+							isFirst
+								? "cursor-default text-gray-300"
+								: "text-gray-700 hover:bg-gray-50",
+						].join(" ")}
+						disabled={isFirst}
+						onClick={goBack}
+						type="button"
+					>
+						Atrás
+					</button>
+					<button
+						className={[
+							"rounded-lg px-5 py-2 text-sm transition-colors",
+							isLast
+								? "cursor-default bg-gray-100 text-gray-400"
+								: "bg-gray-900 text-white hover:bg-gray-800",
+						].join(" ")}
+						disabled={isLast}
+						onClick={goNext}
+						type="button"
+					>
+						{isLast ? "Finalizar" : "Siguiente"}
+					</button>
+				</div>
+			</div>
 		</main>
 	);
 }

@@ -44,3 +44,7 @@ export function resolveButtonStyle(
 ): PublicButtonStylePreset {
 	return buttonStyles[id ?? ""] ?? rounded;
 }
+
+export function getAllButtonStyles(): PublicButtonStylePreset[] {
+	return Object.values(buttonStyles);
+}

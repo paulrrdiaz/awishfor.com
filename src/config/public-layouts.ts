@@ -37,3 +37,7 @@ export function resolveLayout(
 ): PublicLayoutPreset {
 	return layouts[id ?? ""] ?? grid;
 }
+
+export function getAllLayouts(): PublicLayoutPreset[] {
+	return Object.values(layouts);
+}

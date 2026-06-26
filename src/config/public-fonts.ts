@@ -100,3 +100,9 @@ export function resolveFontPairing(
 ): PublicFontPairing {
 	return fontPairings[id ?? ""] ?? classic;
 }
+
+export type FontPairingOption = { id: string; label: string };
+
+export function getAllFontPairingOptions(): FontPairingOption[] {
+	return Object.values(fontPairings).map(({ id, label }) => ({ id, label }));
+}

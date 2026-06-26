@@ -1,6 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { PublishReadinessError } from "@/lib/wishlist/publish-readiness";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+	createTRPCRouter,
+	protectedProcedure,
+	publicProcedure,
+} from "@/server/api/trpc";
 import { checkSlugAvailability } from "@/server/services/slug.service";
 import { publishWishlist } from "@/server/services/wishlist.service";
 import {
@@ -9,7 +13,7 @@ import {
 } from "@/server/validators/wishlist.schema";
 
 export const wishlistRouter = createTRPCRouter({
-	checkSlugAvailability: protectedProcedure
+	checkSlugAvailability: publicProcedure
 		.input(checkSlugAvailabilitySchema)
 		.query(async ({ ctx, input }) => {
 			return checkSlugAvailability(ctx.db, input);

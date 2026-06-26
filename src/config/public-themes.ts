@@ -84,3 +84,7 @@ const themes: Record<string, PublicThemePreset> = {
 export function resolveTheme(id: string | null | undefined): PublicThemePreset {
 	return themes[id ?? ""] ?? linen;
 }
+
+export function getAllThemes(): PublicThemePreset[] {
+	return Object.values(themes);
+}
