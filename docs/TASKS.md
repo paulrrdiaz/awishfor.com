@@ -467,14 +467,14 @@ Server service fetches wishlist by slug and enforces public route rules.
 
 Tasks:
 
-- [ ] Add `src/server/services/public-wishlist.service.ts`.
-- [ ] Fetch wishlist by slug with categories, gifts, purchases.
-- [ ] Exclude soft-deleted gifts from calculations.
-- [ ] Apply draft/published/archived behavior.
-- [ ] Support owner draft preview.
-- [ ] Return public view model.
-- [ ] Return archived state when applicable.
-- [ ] Return not found for inaccessible draft.
+- [x] Add `src/server/services/public-wishlist.service.ts`.
+- [x] Fetch wishlist by slug with categories, gifts, purchases.
+- [x] Exclude soft-deleted gifts from calculations.
+- [x] Apply draft/published/archived behavior.
+- [x] Support owner draft preview.
+- [x] Return public view model.
+- [x] Return archived state when applicable.
+- [x] Return not found for inaccessible draft.
 
 Acceptance criteria:
 
@@ -503,12 +503,12 @@ Create public route and SEO/noindex behavior.
 
 Tasks:
 
-- [ ] Add `src/app/w/[slug]/page.tsx`.
-- [ ] Add metadata generation.
-- [ ] Add `noindex` for public wishlist pages.
-- [ ] Handle 404 state.
-- [ ] Handle archived state.
-- [ ] Handle owner preview banner.
+- [x] Add `src/app/w/[slug]/page.tsx`.
+- [x] Add metadata generation.
+- [x] Add `noindex` for public wishlist pages.
+- [x] Handle 404 state.
+- [x] Handle archived state.
+- [x] Handle owner preview banner.
 
 Acceptance criteria:
 
@@ -536,15 +536,15 @@ Implement hardcoded theme, layout, font, and button presets.
 
 Tasks:
 
-- [ ] Add `src/config/public-themes.ts`.
-- [ ] Add six theme presets.
-- [ ] Add scoped Shadcn/Tailwind CSS variable support.
-- [ ] Add `src/config/public-layouts.ts`.
-- [ ] Add three layout presets.
-- [ ] Add `src/config/public-fonts.ts`.
-- [ ] Add font pairings using `next/font`.
-- [ ] Add `src/config/public-button-styles.ts`.
-- [ ] Add button style presets.
+- [x] Add `src/config/public-themes.ts`.
+- [x] Add six theme presets.
+- [x] Add scoped Shadcn/Tailwind CSS variable support.
+- [x] Add `src/config/public-layouts.ts`.
+- [x] Add three layout presets.
+- [x] Add `src/config/public-fonts.ts`.
+- [x] Add font pairings using `next/font`.
+- [x] Add `src/config/public-button-styles.ts`.
+- [x] Add button style presets.
 
 Acceptance criteria:
 
