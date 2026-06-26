@@ -1,5 +1,11 @@
 import type { GiftPublicStatus } from "@/server/services/purchase.service";
 
+export type PublicWishlistProgress = {
+	availableGiftCount: number;
+	purchasedUnits: number;
+	totalUnits: number;
+};
+
 export type PublicGiftViewModel = {
 	id: string;
 	name: string;
@@ -44,6 +50,7 @@ export type PublicWishlistViewModel = {
 	showHowItWorks: boolean;
 	categories: PublicCategoryViewModel[];
 	gifts: PublicGiftViewModel[];
+	progress: PublicWishlistProgress;
 };
 
 export type DashboardGiftRowViewModel = {

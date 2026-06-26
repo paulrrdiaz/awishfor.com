@@ -233,6 +233,118 @@ describe("mapPublicWishlist", () => {
 		expect(result.gifts[0]?.status).toBe("available");
 	});
 
+	describe("progress aggregate", () => {
+		it("zero-state when no visible gifts", () => {
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [],
+			});
+			expect(result.progress).toEqual({
+				availableGiftCount: 0,
+				purchasedUnits: 0,
+				totalUnits: 0,
+			});
+		});
+
+		it("counts available and partial gifts in availableGiftCount", () => {
+			const available = makeGift({ id: "g1", quantityNeeded: 2 });
+			const partial = makeGift({
+				id: "g2",
+				quantityNeeded: 3,
+			});
+			const purchased = makeGift({ id: "g3", quantityNeeded: 1 });
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{ ...available, purchases: [] },
+					{
+						...partial,
+						purchases: [makePurchase({ id: "p2", giftId: "g2", quantity: 1 })],
+					},
+					{
+						...purchased,
+						purchases: [makePurchase({ id: "p3", giftId: "g3", quantity: 1 })],
+					},
+				],
+			});
+			expect(result.progress.availableGiftCount).toBe(2);
+			expect(result.progress.totalUnits).toBe(6);
+			expect(result.progress.purchasedUnits).toBe(2);
+		});
+
+		it("caps purchased units at quantityNeeded when over-purchased", () => {
+			const gift = makeGift({ id: "g1", quantityNeeded: 2 });
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{
+						...gift,
+						purchases: [
+							makePurchase({ id: "p1", giftId: "g1", quantity: 3 }),
+							makePurchase({ id: "p2", giftId: "g1", quantity: 2 }),
+						],
+					},
+				],
+			});
+			expect(result.progress.purchasedUnits).toBe(2);
+			expect(result.progress.totalUnits).toBe(2);
+		});
+
+		it("excludes hidden gifts from the aggregate", () => {
+			const hidden = makeGift({
+				id: "g1",
+				visibilityStatus: "hidden",
+				quantityNeeded: 5,
+			});
+			const visible = makeGift({ id: "g2", quantityNeeded: 1 });
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{ ...hidden, purchases: [] },
+					{ ...visible, purchases: [] },
+				],
+			});
+			expect(result.progress.totalUnits).toBe(1);
+			expect(result.progress.availableGiftCount).toBe(1);
+		});
+
+		it("excludes soft-deleted gifts from the aggregate", () => {
+			const deleted = makeGift({ id: "g1", deletedAt: now, quantityNeeded: 5 });
+			const visible = makeGift({ id: "g2", quantityNeeded: 2 });
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{ ...deleted, purchases: [] },
+					{ ...visible, purchases: [] },
+				],
+			});
+			expect(result.progress.totalUnits).toBe(2);
+			expect(result.progress.availableGiftCount).toBe(1);
+		});
+
+		it("counts partial gift toward purchasedUnits", () => {
+			const gift = makeGift({ id: "g1", quantityNeeded: 3 });
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{
+						...gift,
+						purchases: [makePurchase({ id: "p1", giftId: "g1", quantity: 1 })],
+					},
+				],
+			});
+			expect(result.progress.purchasedUnits).toBe(1);
+			expect(result.progress.totalUnits).toBe(3);
+			expect(result.progress.availableGiftCount).toBe(1);
+		});
+	});
+
 	it("maps categories", () => {
 		const category = makeCategory({ name: "Electronics" });
 		const gift = makeGift({ categoryId: "cat-1" });

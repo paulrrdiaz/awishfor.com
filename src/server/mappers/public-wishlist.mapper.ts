@@ -7,6 +7,7 @@ import type {
 import type {
 	PublicCategoryViewModel,
 	PublicGiftViewModel,
+	PublicWishlistProgress,
 	PublicWishlistViewModel,
 } from "@/server/mappers/view-models";
 import { deriveGiftPublicStatus } from "@/server/services/purchase.service";
@@ -45,6 +46,24 @@ function mapPublicGift(gift: GiftWithPurchases): PublicGiftViewModel {
 	};
 }
 
+function computeProgress(gifts: GiftWithPurchases[]): PublicWishlistProgress {
+	let availableGiftCount = 0;
+	let purchasedUnits = 0;
+	let totalUnits = 0;
+
+	for (const gift of gifts) {
+		const purchased = getPurchasedQuantityFromLoaded(gift.purchases);
+		const status = deriveGiftPublicStatus(gift.quantityNeeded, purchased);
+		totalUnits += gift.quantityNeeded;
+		purchasedUnits += Math.min(purchased, gift.quantityNeeded);
+		if (status === "available" || status === "partial") {
+			availableGiftCount += 1;
+		}
+	}
+
+	return { availableGiftCount, purchasedUnits, totalUnits };
+}
+
 export function mapPublicWishlist(
 	wishlist: WishlistWithRelations,
 ): PublicWishlistViewModel {
@@ -80,5 +99,6 @@ export function mapPublicWishlist(
 		showHowItWorks: wishlist.showHowItWorks,
 		categories,
 		gifts: visibleGifts.map(mapPublicGift),
+		progress: computeProgress(visibleGifts),
 	};
 }

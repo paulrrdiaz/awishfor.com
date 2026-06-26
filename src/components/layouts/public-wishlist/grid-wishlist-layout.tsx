@@ -1,6 +1,7 @@
 import { Countdown } from "@/components/features/wishlist/countdown";
 import { GiftGrid } from "@/components/features/wishlist/gift-grid";
 import { HowItWorks } from "@/components/features/wishlist/how-it-works";
+import { ProgressSummary } from "@/components/features/wishlist/progress-summary";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { WishlistFooter } from "@/components/features/wishlist/wishlist-footer";
 import { WishlistHero } from "@/components/features/wishlist/wishlist-hero";
@@ -43,6 +44,7 @@ export function GridWishlistLayout({ wishlist, layout, mode }: Props) {
 			)}
 
 			<section className="mx-auto w-full max-w-6xl px-6 py-10">
+				{isFull && <ProgressSummary progress={wishlist.progress} />}
 				{isFull ? (
 					<PublicGiftFilters
 						actionsEnabled
