@@ -1,9 +1,11 @@
 import { Countdown } from "@/components/features/wishlist/countdown";
 import { GiftList } from "@/components/features/wishlist/gift-list";
 import { HowItWorks } from "@/components/features/wishlist/how-it-works";
+import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { WishlistFooter } from "@/components/features/wishlist/wishlist-footer";
 import { WishlistHero } from "@/components/features/wishlist/wishlist-hero";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
+import { sortGifts } from "@/lib/wishlist/gift-filters";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 
 type Props = {
@@ -14,7 +16,7 @@ type Props = {
 
 export function MinimalWishlistLayout({ wishlist, layout, mode }: Props) {
 	const isCompact = mode === "compact";
-	const actionsEnabled = mode === "full";
+	const isFull = mode === "full";
 
 	return (
 		<div className="flex flex-col">
@@ -41,11 +43,20 @@ export function MinimalWishlistLayout({ wishlist, layout, mode }: Props) {
 			)}
 
 			<section className="mx-auto w-full max-w-2xl px-6 py-10">
-				<GiftList
-					actionsEnabled={actionsEnabled}
-					giftCardStyle={layout.giftCardStyle}
-					gifts={wishlist.gifts}
-				/>
+				{isFull ? (
+					<PublicGiftFilters
+						actionsEnabled
+						categories={wishlist.categories}
+						gifts={wishlist.gifts}
+						layout={layout}
+					/>
+				) : (
+					<GiftList
+						actionsEnabled={false}
+						giftCardStyle={layout.giftCardStyle}
+						gifts={sortGifts(wishlist.gifts, "recommended")}
+					/>
+				)}
 			</section>
 
 			{!isCompact && <HowItWorks showHowItWorks={wishlist.showHowItWorks} />}
