@@ -53,6 +53,8 @@ export type WishlistWizardState = {
 	copyTouched: CopyTouched;
 	slugTouched: boolean;
 	updatedAt: number | null;
+	savedWishlistId: string | null;
+	lastSavedAt: number | null;
 	needsRecovery: boolean;
 	_hasHydrated: boolean;
 };
@@ -71,6 +73,15 @@ export type WishlistWizardActions = {
 	updateGift: (id: string, updates: Partial<DraftGift>) => void;
 	removeGift: (id: string) => void;
 	reorderGifts: (orderedIds: string[]) => void;
+	replaceDraft: (
+		draft: WishlistDraft,
+		metadata?: {
+			savedWishlistId?: string | null;
+			lastSavedAt?: number | null;
+		},
+	) => void;
+	setSavedDraftMetadata: (savedWishlistId: string, lastSavedAt: number) => void;
+	clearSavedDraftMetadata: () => void;
 };
 
 export type WishlistWizardStore = WishlistWizardState & WishlistWizardActions;
@@ -116,6 +127,8 @@ export const createWishlistWizardStore = () =>
 				copyTouched: emptyCopyTouched(),
 				slugTouched: false,
 				updatedAt: null,
+				savedWishlistId: null,
+				lastSavedAt: null,
 				needsRecovery: false,
 				_hasHydrated: false,
 
@@ -196,6 +209,8 @@ export const createWishlistWizardStore = () =>
 						copyTouched: emptyCopyTouched(),
 						slugTouched: false,
 						updatedAt: null,
+						savedWishlistId: null,
+						lastSavedAt: null,
 						needsRecovery: false,
 					});
 				},
@@ -207,6 +222,8 @@ export const createWishlistWizardStore = () =>
 							copyTouched: emptyCopyTouched(),
 							slugTouched: false,
 							updatedAt: null,
+							savedWishlistId: null,
+							lastSavedAt: null,
 							needsRecovery: false,
 						});
 					} else {
@@ -270,6 +287,36 @@ export const createWishlistWizardStore = () =>
 						};
 					});
 				},
+
+				replaceDraft: (draft, metadata) => {
+					set({
+						draft,
+						copyTouched: {
+							heroTitle: draft.heroTitle.trim().length > 0,
+							welcomeMessage: draft.welcomeMessage.trim().length > 0,
+							thankYouMessage: draft.thankYouMessage.trim().length > 0,
+						},
+						slugTouched: draft.slug.trim().length > 0,
+						updatedAt: Date.now(),
+						savedWishlistId: metadata?.savedWishlistId ?? null,
+						lastSavedAt: metadata?.lastSavedAt ?? null,
+						needsRecovery: false,
+					});
+				},
+
+				setSavedDraftMetadata: (savedWishlistId, lastSavedAt) => {
+					set({
+						savedWishlistId,
+						lastSavedAt,
+					});
+				},
+
+				clearSavedDraftMetadata: () => {
+					set({
+						savedWishlistId: null,
+						lastSavedAt: null,
+					});
+				},
 			}),
 			{
 				name: "wishlist-wizard-draft",
@@ -288,6 +335,8 @@ export const createWishlistWizardStore = () =>
 					copyTouched: state.copyTouched,
 					slugTouched: state.slugTouched,
 					updatedAt: state.updatedAt,
+					savedWishlistId: state.savedWishlistId,
+					lastSavedAt: state.lastSavedAt,
 				}),
 				onRehydrateStorage: () => (state) => {
 					if (!state) return;

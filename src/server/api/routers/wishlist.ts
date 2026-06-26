@@ -1,16 +1,42 @@
 import { TRPCError } from "@trpc/server";
 import { PublishReadinessError } from "@/lib/wishlist/publish-readiness";
+import type { createTRPCContext } from "@/server/api/trpc";
 import {
 	createTRPCRouter,
 	protectedProcedure,
 	publicProcedure,
 } from "@/server/api/trpc";
 import { checkSlugAvailability } from "@/server/services/slug.service";
-import { publishWishlist } from "@/server/services/wishlist.service";
+import {
+	publishWishlist,
+	saveWishlistDraft,
+} from "@/server/services/wishlist.service";
 import {
 	checkSlugAvailabilitySchema,
 	publishWishlistSchema,
 } from "@/server/validators/wishlist.schema";
+import { saveDraftWishlistSchema } from "@/server/validators/wishlist-save-draft.schema";
+
+type WishlistRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
+	userId: string;
+};
+
+const getLocalUserId = async (ctx: WishlistRouterContext) => {
+	const user = await ctx.db.user.findUnique({
+		where: {
+			clerkId: ctx.userId,
+		},
+		select: {
+			id: true,
+		},
+	});
+
+	if (!user) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+
+	return user.id;
+};
 
 export const wishlistRouter = createTRPCRouter({
 	checkSlugAvailability: publicProcedure
@@ -34,5 +60,16 @@ export const wishlistRouter = createTRPCRouter({
 				}
 				throw error;
 			}
+		}),
+
+	saveDraft: protectedProcedure
+		.input(saveDraftWishlistSchema)
+		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+
+			return saveWishlistDraft(ctx.db, {
+				ownerId,
+				...input,
+			});
 		}),
 });

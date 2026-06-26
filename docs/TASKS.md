@@ -573,17 +573,17 @@ Create shared public wishlist page components and layout variants.
 
 Tasks:
 
-- [ ] Add `PublicWishlistPage` shell.
-- [ ] Add `GridWishlistLayout`.
-- [ ] Add `EditorialWishlistLayout`.
-- [ ] Add `MinimalWishlistLayout`.
-- [ ] Add `WishlistHero`.
-- [ ] Add `Countdown`.
-- [ ] Add `GiftCard`.
-- [ ] Add `GiftGrid/GiftList`.
-- [ ] Add `HowItWorks`.
-- [ ] Add `WishlistFooter`.
-- [ ] Support `full | preview | compact` render modes.
+- [x] Add `PublicWishlistPage` shell.
+- [x] Add `GridWishlistLayout`.
+- [x] Add `EditorialWishlistLayout`.
+- [x] Add `MinimalWishlistLayout`.
+- [x] Add `WishlistHero`.
+- [x] Add `Countdown`.
+- [x] Add `GiftCard`.
+- [x] Add `GiftGrid/GiftList`.
+- [x] Add `HowItWorks`.
+- [x] Add `WishlistFooter`.
+- [x] Support `full | preview | compact` render modes.
 
 Acceptance criteria:
 
@@ -611,15 +611,15 @@ Guests can filter and sort gifts.
 
 Tasks:
 
-- [ ] Add filter state.
-- [ ] Add `Todos` filter.
-- [ ] Add `Disponibles` filter.
-- [ ] Add `Comprados` filter.
-- [ ] Add `Infaltables` filter.
-- [ ] Add category filters.
-- [ ] Add sort dropdown.
-- [ ] Add default recommended order.
-- [ ] Add empty filter states.
+- [x] Add filter state.
+- [x] Add `Todos` filter.
+- [x] Add `Disponibles` filter.
+- [x] Add `Comprados` filter.
+- [x] Add `Infaltables` filter.
+- [x] Add category filters.
+- [x] Add sort dropdown.
+- [x] Add default recommended order.
+- [x] Add empty filter states.
 
 Acceptance criteria:
 
@@ -647,11 +647,11 @@ Show quantity-based progress summary.
 
 Tasks:
 
-- [ ] Add public progress component.
-- [ ] Show available gift count.
-- [ ] Show purchased units / total units.
-- [ ] Handle zero-state safely.
-- [ ] Reuse public view model progress.
+- [x] Add public progress component.
+- [x] Show available gift count.
+- [x] Show purchased units / total units.
+- [x] Handle zero-state safely.
+- [x] Reuse public view model progress.
 
 Acceptance criteria:
 
@@ -709,14 +709,14 @@ Event type presets drive default categories, suggested copy, sample gifts, and d
 
 Tasks:
 
-- [ ] Add `src/config/event-type-presets.ts`.
-- [ ] Add presets for baby shower, birthday, wedding, housewarming, general.
-- [ ] Add default categories.
-- [ ] Add default hero title template.
-- [ ] Add default welcome message.
-- [ ] Add default thank-you message.
-- [ ] Add sample gifts.
-- [ ] Add default theme/layout IDs.
+- [x] Add `src/config/event-type-presets.ts`.
+- [x] Add presets for baby shower, birthday, wedding, housewarming, general.
+- [x] Add default categories.
+- [x] Add default hero title template.
+- [x] Add default welcome message.
+- [x] Add default thank-you message.
+- [x] Add sample gifts.
+- [x] Add default theme/layout IDs.
 
 Acceptance criteria:
 
@@ -743,14 +743,14 @@ Wizard lives at `/create` with query-param steps.
 
 Tasks:
 
-- [ ] Add `/create` page.
-- [ ] Add step router using query params.
-- [ ] Add wizard state shape.
-- [ ] Add Zustand store.
-- [ ] Add localStorage persistence.
-- [ ] Add 30-day stale draft detection.
-- [ ] Add signed-out recovery prompt.
-- [ ] Add reset/start over behavior.
+- [x] Add `/create` page.
+- [x] Add step router using query params.
+- [x] Add wizard state shape.
+- [x] Add Zustand store.
+- [x] Add localStorage persistence.
+- [x] Add 30-day stale draft detection.
+- [x] Add signed-out recovery prompt.
+- [x] Add reset/start over behavior.
 
 Acceptance criteria:
 
@@ -779,12 +779,12 @@ User chooses event type and receives seeded defaults.
 
 Tasks:
 
-- [ ] Add event type cards.
-- [ ] Apply default categories.
-- [ ] Apply default design.
-- [ ] Apply default copy if fields untouched.
-- [ ] Track `copyTouched` local-only.
-- [ ] Add Spanish labels.
+- [x] Add event type cards.
+- [x] Apply default categories.
+- [x] Apply default design.
+- [x] Apply default copy if fields untouched.
+- [x] Track `copyTouched` local-only.
+- [x] Add Spanish labels.
 
 Acceptance criteria:
 
@@ -811,16 +811,16 @@ User enters title, display/event details, and public slug.
 
 Tasks:
 
-- [ ] Add title field.
-- [ ] Add display name field.
-- [ ] Add event date picker with Shadcn Calendar + Popover.
-- [ ] Add time input/select normalized to `HH:mm`.
-- [ ] Add location text field.
-- [ ] Add slug auto-generation from title.
-- [ ] Add editable slug field.
-- [ ] Add `use-debounce` slug availability check.
-- [ ] Add Checking/Available/Taken/Invalid states.
-- [ ] Add past date warning.
+- [x] Add title field.
+- [x] Add display name field.
+- [x] Add event date picker with Shadcn Calendar + Popover.
+- [x] Add time input/select normalized to `HH:mm`.
+- [x] Add location text field.
+- [x] Add slug auto-generation from title.
+- [x] Add editable slug field.
+- [x] Add `use-debounce` slug availability check.
+- [x] Add Checking/Available/Taken/Invalid states.
+- [x] Add past date warning.
 
 Acceptance criteria:
 
@@ -849,14 +849,14 @@ User picks theme/layout/font/button style and sees embedded preview.
 
 Tasks:
 
-- [ ] Add theme preview cards.
-- [ ] Add layout preview cards.
-- [ ] Add font pairing selector.
-- [ ] Add button style selector.
-- [ ] Add cover image upload hook placeholder/integration with UploadThing milestone if needed.
-- [ ] Add embedded public preview.
-- [ ] Use sample gifts before real gifts exist.
-- [ ] Disable purchase actions in preview mode.
+- [x] Add theme preview cards.
+- [x] Add layout preview cards.
+- [x] Add font pairing selector.
+- [x] Add button style selector.
+- [x] Add cover image upload hook placeholder/integration with UploadThing milestone if needed.
+- [x] Add embedded public preview.
+- [x] Use sample gifts before real gifts exist.
+- [x] Disable purchase actions in preview mode.
 
 Acceptance criteria:
 
@@ -884,15 +884,15 @@ User adds gifts manually or via URL importer.
 
 Tasks:
 
-- [ ] Add gift list editor.
-- [ ] Add manual gift form.
-- [ ] Add URL import entry point.
-- [ ] Add category assignment.
-- [ ] Add quantity field.
-- [ ] Add priority field.
-- [ ] Add public note/internal note.
-- [ ] Add hide gift toggle.
-- [ ] Add local draft gift handling before DB save.
+- [x] Add gift list editor.
+- [x] Add manual gift form.
+- [x] Add URL import entry point.
+- [x] Add category assignment.
+- [x] Add quantity field.
+- [x] Add priority field.
+- [x] Add public note/internal note.
+- [x] Add hide gift toggle.
+- [x] Add local draft gift handling before DB save.
 
 Acceptance criteria:
 
@@ -922,14 +922,14 @@ Authenticated users can persist local wizard draft to DB manually.
 
 Tasks:
 
-- [ ] Add `Guardar borrador` action.
-- [ ] Add save draft mutation.
-- [ ] Create DB draft on first save.
-- [ ] Update same DB draft on subsequent saves.
-- [ ] Store `savedWishlistId` and `lastSavedAt` locally.
-- [ ] Show Sonner toast.
-- [ ] Add `Ver en dashboard` link.
-- [ ] Add signed-in draft conflict handling.
+- [x] Add `Guardar borrador` action.
+- [x] Add save draft mutation.
+- [x] Create DB draft on first save.
+- [x] Update same DB draft on subsequent saves.
+- [x] Store `savedWishlistId` and `lastSavedAt` locally.
+- [x] Show Sonner toast.
+- [x] Add `Ver en dashboard` link.
+- [x] Add signed-in draft conflict handling.
 
 Acceptance criteria:
 

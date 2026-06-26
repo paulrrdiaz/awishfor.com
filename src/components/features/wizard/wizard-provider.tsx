@@ -18,10 +18,16 @@ const WizardStoreContext = createContext<WishlistWizardStoreInstance | null>(
 	null,
 );
 
-export function WizardProvider({ children }: { children: ReactNode }) {
+export function WizardProvider({
+	children,
+	store,
+}: {
+	children: ReactNode;
+	store?: WishlistWizardStoreInstance;
+}) {
 	const storeRef = useRef<WishlistWizardStoreInstance>(null);
 	if (!storeRef.current) {
-		storeRef.current = createWishlistWizardStore();
+		storeRef.current = store ?? createWishlistWizardStore();
 	}
 
 	useEffect(() => {

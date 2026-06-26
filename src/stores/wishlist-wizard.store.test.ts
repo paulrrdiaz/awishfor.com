@@ -139,7 +139,14 @@ describe("wishlist-wizard store", () => {
 				hidden: false,
 			});
 			store.getState().reset();
-			const { draft, copyTouched, updatedAt, slugTouched } = store.getState();
+			const {
+				draft,
+				copyTouched,
+				updatedAt,
+				savedWishlistId,
+				lastSavedAt,
+				slugTouched,
+			} = store.getState();
 			expect(draft.eventType).toBeNull();
 			expect(draft.heroTitle).toBe("");
 			expect(draft.title).toBe("");
@@ -147,7 +154,90 @@ describe("wishlist-wizard store", () => {
 			expect(draft.gifts).toEqual([]);
 			expect(copyTouched.heroTitle).toBe(false);
 			expect(updatedAt).toBeNull();
+			expect(savedWishlistId).toBeNull();
+			expect(lastSavedAt).toBeNull();
 			expect(slugTouched).toBe(false);
+		});
+	});
+
+	describe("saved draft metadata", () => {
+		it("stores saved draft metadata after a successful save", () => {
+			const store = makeStore();
+
+			store.getState().setSavedDraftMetadata("wishlist_123", 123456789);
+
+			expect(store.getState().savedWishlistId).toBe("wishlist_123");
+			expect(store.getState().lastSavedAt).toBe(123456789);
+		});
+
+		it("clears saved draft metadata without affecting the local draft", () => {
+			const store = makeStore();
+			store.getState().setField("title", "Mi wishlist");
+			store.getState().setSavedDraftMetadata("wishlist_123", 123456789);
+
+			store.getState().clearSavedDraftMetadata();
+
+			expect(store.getState().draft.title).toBe("Mi wishlist");
+			expect(store.getState().savedWishlistId).toBeNull();
+			expect(store.getState().lastSavedAt).toBeNull();
+		});
+
+		it("replaces the local draft with server content and metadata", () => {
+			const store = makeStore();
+
+			store.getState().replaceDraft(
+				{
+					eventType: "wedding",
+					title: "Versión del dashboard",
+					slug: "version-dashboard",
+					displayName: "Ana y Luis",
+					eventDate: "2026-12-24",
+					eventTime: "18:30",
+					eventLocation: "Barranco",
+					coverImageUrl: null,
+					heroTitle: "Nuestra boda",
+					welcomeMessage: "Bienvenidos",
+					thankYouMessage: "Gracias",
+					categories: ["Hogar"],
+					themeId: "soft",
+					layoutId: "editorial",
+					buttonStyle: "pill",
+					fontPairing: "serif-soft",
+					showHowItWorks: true,
+					gifts: [
+						{
+							id: "gift_1",
+							name: "Juego de sábanas",
+							productUrl: null,
+							imageUrl: null,
+							priceAmount: 120,
+							category: "Hogar",
+							quantityNeeded: 2,
+							priority: "high",
+							publicNote: "Algodón",
+							internalNote: "",
+							hidden: false,
+							sortOrder: 0,
+						},
+					],
+				},
+				{
+					savedWishlistId: "wishlist_123",
+					lastSavedAt: 123456789,
+				},
+			);
+
+			const { draft, copyTouched, savedWishlistId, lastSavedAt, slugTouched } =
+				store.getState();
+			expect(draft.title).toBe("Versión del dashboard");
+			expect(draft.slug).toBe("version-dashboard");
+			expect(draft.gifts[0]?.name).toBe("Juego de sábanas");
+			expect(copyTouched.heroTitle).toBe(true);
+			expect(copyTouched.welcomeMessage).toBe(true);
+			expect(copyTouched.thankYouMessage).toBe(true);
+			expect(slugTouched).toBe(true);
+			expect(savedWishlistId).toBe("wishlist_123");
+			expect(lastSavedAt).toBe(123456789);
 		});
 	});
 
@@ -263,9 +353,17 @@ describe("wishlist-wizard store", () => {
 				internalNote: "",
 				hidden: false,
 			});
-			const id = store.getState().draft.gifts[0]!.id;
-			store.getState().updateGift(id, { name: "Actualizado", priceAmount: 99 });
-			const gift = store.getState().draft.gifts[0]!;
+			const firstGift = store.getState().draft.gifts[0];
+			expect(firstGift).toBeDefined();
+			store.getState().updateGift(firstGift?.id ?? "", {
+				name: "Actualizado",
+				priceAmount: 99,
+			});
+			const gift = store.getState().draft.gifts[0];
+			expect(gift).toBeDefined();
+			if (!gift) {
+				throw new Error("Expected a gift to exist after update");
+			}
 			expect(gift.name).toBe("Actualizado");
 			expect(gift.priceAmount).toBe(99);
 			expect(gift.category).toBe("General");
@@ -310,7 +408,8 @@ describe("wishlist-wizard store", () => {
 				hidden: false,
 			});
 			const gifts = store.getState().draft.gifts;
-			store.getState().removeGift(gifts[1]!.id);
+			expect(gifts[1]).toBeDefined();
+			store.getState().removeGift(gifts[1]?.id ?? "");
 			const remaining = store.getState().draft.gifts;
 			expect(remaining).toHaveLength(2);
 			expect(remaining[0]?.name).toBe("A");
@@ -346,7 +445,9 @@ describe("wishlist-wizard store", () => {
 				hidden: false,
 			});
 			const [first, second] = store.getState().draft.gifts;
-			store.getState().reorderGifts([second!.id, first!.id]);
+			expect(first).toBeDefined();
+			expect(second).toBeDefined();
+			store.getState().reorderGifts([second?.id ?? "", first?.id ?? ""]);
 			const reordered = store.getState().draft.gifts;
 			expect(reordered[0]?.name).toBe("Segundo");
 			expect(reordered[0]?.sortOrder).toBe(0);

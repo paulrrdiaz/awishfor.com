@@ -6,6 +6,7 @@ import { DetailsStep } from "./details-step";
 import { EventTypeStep } from "./event-type-step";
 import { GiftsStep } from "./gifts-step";
 import { RecoveryPrompt } from "./recovery-prompt";
+import { SaveDraftControls } from "./save-draft-controls";
 import { useWizardStore } from "./wizard-provider";
 
 type WizardStep = "event-type" | "details" | "design" | "gifts";
@@ -51,12 +52,18 @@ export function WizardShell() {
 
 	function goBack() {
 		if (isFirst) return;
-		navigate(STEPS[currentIndex - 1]!);
+		const previousStep = STEPS[currentIndex - 1];
+		if (previousStep) {
+			navigate(previousStep);
+		}
 	}
 
 	function goNext() {
 		if (isLast) return;
-		navigate(STEPS[currentIndex + 1]!);
+		const nextStep = STEPS[currentIndex + 1];
+		if (nextStep) {
+			navigate(nextStep);
+		}
 	}
 
 	if (!hasHydrated) {
@@ -115,20 +122,23 @@ export function WizardShell() {
 
 			{/* Back / Next navigation */}
 			<div className="sticky bottom-0 border-gray-100 border-t bg-white px-4 py-4">
-				<div className="mx-auto flex max-w-2xl items-center justify-between">
-					<button
-						className={[
-							"rounded-lg border border-gray-200 px-5 py-2 text-sm transition-colors",
-							isFirst
-								? "cursor-default text-gray-300"
-								: "text-gray-700 hover:bg-gray-50",
-						].join(" ")}
-						disabled={isFirst}
-						onClick={goBack}
-						type="button"
-					>
-						Atrás
-					</button>
+				<div className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<div className="flex items-center justify-between gap-3">
+						<button
+							className={[
+								"rounded-lg border border-gray-200 px-5 py-2 text-sm transition-colors",
+								isFirst
+									? "cursor-default text-gray-300"
+									: "text-gray-700 hover:bg-gray-50",
+							].join(" ")}
+							disabled={isFirst}
+							onClick={goBack}
+							type="button"
+						>
+							Atrás
+						</button>
+						<SaveDraftControls />
+					</div>
 					<button
 						className={[
 							"rounded-lg px-5 py-2 text-sm transition-colors",
