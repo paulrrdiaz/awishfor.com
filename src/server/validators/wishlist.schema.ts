@@ -26,7 +26,7 @@ export const wishlistRestoreTargetStatusSchema = z.enum([
 	WishlistStatus.published,
 ]);
 
-const wishlistSlugPattern = /^(?!-)[a-z0-9-]{3,60}(?<!-)$/;
+export const wishlistSlugPattern = /^(?!-)[a-z0-9-]{3,60}(?<!-)$/;
 const eventTimePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 const requiredTrimmedString = (
@@ -261,9 +261,17 @@ export type UpdateWishlistInput = {
 	fontPairing?: string | null;
 	showHowItWorks?: boolean;
 };
+export const checkSlugAvailabilitySchema = z.object({
+	slug: wishlistSlugSchema,
+	excludeWishlistId: wishlistIdSchema.optional(),
+});
+
 export type PublishWishlistInput = z.infer<typeof publishWishlistSchema>;
 export type ArchiveWishlistInput = z.infer<typeof archiveWishlistSchema>;
 export type RestoreWishlistInput = z.infer<typeof restoreWishlistSchema>;
 export type WishlistRestoreTargetStatus = z.infer<
 	typeof wishlistRestoreTargetStatusSchema
+>;
+export type CheckSlugAvailabilityInput = z.infer<
+	typeof checkSlugAvailabilitySchema
 >;
