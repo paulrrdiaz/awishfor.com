@@ -1,4 +1,5 @@
 import { categoryRouter } from "@/server/api/routers/category";
+import { giftRouter } from "@/server/api/routers/gift";
 import { importerRouter } from "@/server/api/routers/importer";
 import { wishlistRouter } from "@/server/api/routers/wishlist";
 import {
@@ -25,6 +26,7 @@ import {
  */
 export const appRouter = createTRPCRouter({
 	category: categoryRouter,
+	gift: giftRouter,
 	importer: importerRouter,
 	wishlist: wishlistRouter,
 	health: publicProcedure.query(() => ({ ok: true, ts: Date.now() })),

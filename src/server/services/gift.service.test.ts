@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { Gift, Prisma } from "@/generated/prisma/client";
+import type { Gift, Prisma, Purchase } from "@/generated/prisma/client";
+import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import {
 	createGift,
+	type DashboardGiftDatabase,
 	findActiveGift,
 	type GiftDatabase,
+	type GiftWithPurchases,
+	getOwnedGift,
+	groupDashboardGifts,
+	listDashboardGifts,
 	listGifts,
 	softDeleteGift,
 	updateGift,
@@ -154,5 +160,192 @@ describe("gift service", () => {
 
 		expect(capturedData?.name).toBe("Updated");
 		expect(capturedData?.visibilityStatus).toBeUndefined();
+	});
+});
+
+const createPurchaseRecord = (overrides: Partial<Purchase> = {}): Purchase => ({
+	id: "purchase_1",
+	giftId: "gift_1",
+	guestName: "Alice",
+	guestEmail: null,
+	guestPhone: null,
+	message: null,
+	quantity: 1,
+	undoTokenHash: null,
+	undoExpiresAt: null,
+	createdAt: NOW,
+	updatedAt: NOW,
+	...overrides,
+});
+
+const makeDashboardDb = (
+	overrides: Partial<{
+		gift: Partial<DashboardGiftDatabase["gift"]>;
+		wishlist: Partial<DashboardGiftDatabase["wishlist"]>;
+	}> = {},
+): DashboardGiftDatabase => ({
+	gift: {
+		findMany: async () => [],
+		findFirst: async () => null,
+		update: async ({ data, where }) =>
+			createGiftRecord({ id: where.id as string, ...(data as Partial<Gift>) }),
+		...overrides.gift,
+	},
+	wishlist: {
+		findFirst: async () => ({ id: "wishlist_123" }),
+		...overrides.wishlist,
+	},
+});
+
+describe("listDashboardGifts", () => {
+	it("throws NOT_FOUND when wishlist is not owned by user", async () => {
+		const db = makeDashboardDb({
+			wishlist: { findFirst: async () => null },
+		});
+		await expect(
+			listDashboardGifts(db, { ownerId: 42, wishlistId: "wl_1" }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+
+	it("returns gifts with purchases when wishlist is owned", async () => {
+		const giftWithPurchases: GiftWithPurchases = {
+			...createGiftRecord(),
+			purchases: [createPurchaseRecord()],
+		};
+		const db = makeDashboardDb({
+			gift: { findMany: async () => [giftWithPurchases] },
+		});
+		const result = await listDashboardGifts(db, {
+			ownerId: 42,
+			wishlistId: "wishlist_123",
+		});
+		expect(result).toHaveLength(1);
+		expect(result[0]?.purchases).toHaveLength(1);
+	});
+
+	it("queries with deletedAt: null filter", async () => {
+		let capturedWhere: Prisma.GiftFindManyArgs["where"];
+		const db = makeDashboardDb({
+			gift: {
+				findMany: async (args) => {
+					capturedWhere = args.where;
+					return [];
+				},
+			},
+		});
+		await listDashboardGifts(db, { ownerId: 42, wishlistId: "wishlist_123" });
+		expect(capturedWhere).toMatchObject({ deletedAt: null });
+	});
+
+	it("includes hidden gifts in the result", async () => {
+		const hiddenGift: GiftWithPurchases = {
+			...createGiftRecord({ visibilityStatus: "hidden" }),
+			purchases: [],
+		};
+		const db = makeDashboardDb({
+			gift: { findMany: async () => [hiddenGift] },
+		});
+		const result = await listDashboardGifts(db, {
+			ownerId: 42,
+			wishlistId: "wishlist_123",
+		});
+		expect(result[0]?.visibilityStatus).toBe("hidden");
+	});
+});
+
+describe("getOwnedGift", () => {
+	it("returns gift when it belongs to owner", async () => {
+		const gift = createGiftRecord();
+		const db = makeDashboardDb({
+			gift: { findFirst: async () => gift },
+		});
+		const result = await getOwnedGift(db, { ownerId: 42, giftId: "gift_1" });
+		expect(result.id).toBe("gift_1");
+	});
+
+	it("throws NOT_FOUND when gift does not belong to owner", async () => {
+		const db = makeDashboardDb({
+			gift: { findFirst: async () => null },
+		});
+		await expect(
+			getOwnedGift(db, { ownerId: 42, giftId: "gift_1" }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+});
+
+const makeRow = (
+	overrides: Partial<DashboardGiftRowViewModel> = {},
+): DashboardGiftRowViewModel => ({
+	id: "gift_1",
+	name: "Test",
+	productUrl: null,
+	imageUrl: null,
+	storeName: null,
+	priceAmount: null,
+	priceCurrency: null,
+	quantityNeeded: 2,
+	purchasedQuantity: 0,
+	remainingQuantity: 2,
+	priority: "medium",
+	visibilityStatus: "available",
+	publicNote: null,
+	hasInternalNote: false,
+	sortOrder: 0,
+	categoryId: null,
+	deletedAt: null,
+	createdAt: NOW.toISOString(),
+	updatedAt: NOW.toISOString(),
+	...overrides,
+});
+
+describe("groupDashboardGifts", () => {
+	it("places hidden gifts in hidden group regardless of purchase progress", () => {
+		const row = makeRow({ visibilityStatus: "hidden", remainingQuantity: 0 });
+		const { available, purchased, hidden } = groupDashboardGifts([row]);
+		expect(hidden).toHaveLength(1);
+		expect(available).toHaveLength(0);
+		expect(purchased).toHaveLength(0);
+	});
+
+	it("places fully purchased non-hidden gifts in purchased group", () => {
+		const row = makeRow({
+			visibilityStatus: "available",
+			remainingQuantity: 0,
+			purchasedQuantity: 2,
+		});
+		const { purchased } = groupDashboardGifts([row]);
+		expect(purchased).toHaveLength(1);
+	});
+
+	it("places partially purchased non-hidden gifts in available group", () => {
+		const row = makeRow({
+			visibilityStatus: "available",
+			remainingQuantity: 1,
+			purchasedQuantity: 1,
+		});
+		const { available } = groupDashboardGifts([row]);
+		expect(available).toHaveLength(1);
+	});
+
+	it("places unpurchased non-hidden gifts in available group", () => {
+		const row = makeRow({
+			visibilityStatus: "available",
+			remainingQuantity: 2,
+			purchasedQuantity: 0,
+		});
+		const { available } = groupDashboardGifts([row]);
+		expect(available).toHaveLength(1);
+	});
+
+	it("correctly distributes mixed rows across three buckets", () => {
+		const rows = [
+			makeRow({ id: "a", visibilityStatus: "available", remainingQuantity: 1 }),
+			makeRow({ id: "b", visibilityStatus: "available", remainingQuantity: 0 }),
+			makeRow({ id: "c", visibilityStatus: "hidden", remainingQuantity: 2 }),
+		];
+		const { available, purchased, hidden } = groupDashboardGifts(rows);
+		expect(available).toHaveLength(1);
+		expect(purchased).toHaveLength(1);
+		expect(hidden).toHaveLength(1);
 	});
 });

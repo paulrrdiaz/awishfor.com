@@ -1028,20 +1028,20 @@ Server-side metadata importer with manual fallback.
 
 Tasks:
 
-- [ ] Add `src/server/services/importer.service.ts`.
-- [ ] Add URL safety validation.
-- [ ] Block private/internal URLs.
-- [ ] Add timeout with AbortController.
-- [ ] Limit redirects to 5.
-- [ ] Limit HTML size to 2MB.
-- [ ] Validate final URL after redirects.
-- [ ] Parse JSON-LD Product.
-- [ ] Parse Open Graph.
-- [ ] Parse Twitter Card.
-- [ ] Parse HTML title.
-- [ ] Add domain fallback.
-- [ ] Return `ImportedGiftDraft`.
-- [ ] Add importer tests.
+- [x] Add `src/server/services/importer.service.ts`.
+- [x] Add URL safety validation.
+- [x] Block private/internal URLs.
+- [x] Add timeout with AbortController.
+- [x] Limit redirects to 5.
+- [x] Limit HTML size to 2MB.
+- [x] Validate final URL after redirects.
+- [x] Parse JSON-LD Product.
+- [x] Parse Open Graph.
+- [x] Parse Twitter Card.
+- [x] Parse HTML title.
+- [x] Add domain fallback.
+- [x] Return `ImportedGiftDraft`.
+- [x] Add importer tests.
 
 Acceptance criteria:
 
@@ -1071,14 +1071,14 @@ Clean URLs and display friendly store names.
 
 Tasks:
 
-- [ ] Add tracking param cleanup helper.
-- [ ] Strip known UTM/click IDs.
-- [ ] Preserve unknown params.
-- [ ] Add `src/config/store-display-names.ts`.
-- [ ] Add Peru/LatAm store mappings.
-- [ ] Add international store mappings.
-- [ ] Add clean domain fallback.
-- [ ] Add tests.
+- [x] Add tracking param cleanup helper.
+- [x] Strip known UTM/click IDs.
+- [x] Preserve unknown params.
+- [x] Add `src/config/store-display-names.ts`.
+- [x] Add Peru/LatAm store mappings.
+- [x] Add international store mappings.
+- [x] Add clean domain fallback.
+- [x] Add tests.
 
 Acceptance criteria:
 
@@ -1107,15 +1107,15 @@ Support cover image and gift image upload using UploadThing.
 
 Tasks:
 
-- [ ] Add UploadThing routes/config.
-- [ ] Add cover image upload.
-- [ ] Add cover image remove.
-- [ ] Add gift image upload.
-- [ ] Add gift image replacement.
-- [ ] Add gift image remove.
-- [ ] Validate file types JPG/PNG/WEBP.
-- [ ] Validate cover max 4MB.
-- [ ] Validate gift max 3MB.
+- [x] Add UploadThing routes/config.
+- [x] Add cover image upload.
+- [x] Add cover image remove.
+- [x] Add gift image upload.
+- [x] Add gift image replacement.
+- [x] Add gift image remove.
+- [x] Validate file types JPG/PNG/WEBP.
+- [x] Validate cover max 4MB.
+- [x] Validate gift max 4MB.
 
 Acceptance criteria:
 
@@ -1795,10 +1795,10 @@ Owners can download PNG QR for current public URL.
 
 Tasks:
 
-- [ ] Add QR generation helper using `qrcode`.
-- [ ] Generate QR from current public URL.
-- [ ] Add download PNG action.
-- [ ] Use in publish success step.
+- [x] Add QR generation helper using `qrcode`.
+- [x] Generate QR from current public URL.
+- [x] Add download PNG action.
+- [x] Use in publish success step.
 - [ ] Use in dashboard share panel.
 
 Acceptance criteria:
@@ -1829,13 +1829,13 @@ Share messages vary by event type.
 
 Tasks:
 
-- [ ] Add WhatsApp template helper.
+- [x] Add WhatsApp template helper.
 - [ ] Add baby shower template.
 - [ ] Add birthday template.
 - [ ] Add wedding template.
 - [ ] Add housewarming template.
 - [ ] Add general template.
-- [ ] URL-encode message correctly.
+- [x] URL-encode message correctly.
 
 Acceptance criteria:
 
@@ -1928,19 +1928,19 @@ Test business logic and pure helpers first.
 
 Tasks:
 
-- [ ] Test slug validation and suggestions.
-- [ ] Test URL safety validation.
-- [ ] Test URL cleanup/tracking removal.
-- [ ] Test store display-name detection.
-- [ ] Test importer metadata parsing.
-- [ ] Test gift progress calculation.
-- [ ] Test public status derivation.
-- [ ] Test publish readiness validation.
-- [ ] Test purchase quantity validation.
-- [ ] Test undo token hashing/validation.
-- [ ] Test money formatting.
-- [ ] Test date/countdown formatting.
-- [ ] Test public/dashboard view model mappers.
+- [x] Test slug validation and suggestions.
+- [x] Test URL safety validation.
+- [x] Test URL cleanup/tracking removal.
+- [x] Test store display-name detection.
+- [x] Test importer metadata parsing.
+- [x] Test gift progress calculation.
+- [x] Test public status derivation.
+- [x] Test publish readiness validation.
+- [x] Test purchase quantity validation.
+- [x] Test undo token hashing/validation.
+- [x] Test money formatting.
+- [x] Test date/countdown formatting.
+- [x] Test public/dashboard view model mappers.
 
 Acceptance criteria:
 
@@ -1970,7 +1970,7 @@ Tasks:
 
 - [ ] Add `src/test/fixtures/wishlist-fixtures.ts`.
 - [ ] Add `src/test/fixtures/gift-fixtures.ts`.
-- [ ] Add `src/test/fixtures/importer-html-fixtures.ts`.
+- [x] Add `src/test/fixtures/importer-html-fixtures.ts`.
 
 Acceptance criteria:
 

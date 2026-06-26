@@ -1,8 +1,11 @@
+import { TRPCError } from "@trpc/server";
 import type {
 	Gift,
 	GiftVisibilityStatus,
 	Prisma,
+	Purchase,
 } from "@/generated/prisma/client";
+import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import type {
 	CreateGiftInput,
 	DeleteGiftInput,
@@ -20,6 +23,29 @@ type GiftDelegate = {
 
 export type GiftDatabase = {
 	gift: GiftDelegate;
+};
+
+export type GiftWithPurchases = Gift & { purchases: Purchase[] };
+
+type DashboardGiftDelegate = {
+	findMany(args: Prisma.GiftFindManyArgs): Promise<GiftWithPurchases[]>;
+	findFirst(args: Prisma.GiftFindFirstArgs): Promise<Gift | null>;
+	update(args: Prisma.GiftUpdateArgs): Promise<Gift>;
+};
+
+type WishlistDelegate = {
+	findFirst(args: Prisma.WishlistFindFirstArgs): Promise<{ id: string } | null>;
+};
+
+export type DashboardGiftDatabase = {
+	gift: DashboardGiftDelegate;
+	wishlist: WishlistDelegate;
+};
+
+export type GroupedDashboardGifts = {
+	available: DashboardGiftRowViewModel[];
+	purchased: DashboardGiftRowViewModel[];
+	hidden: DashboardGiftRowViewModel[];
 };
 
 export const listGifts = (
@@ -106,3 +132,58 @@ export const findActiveGift = (db: GiftDatabase, giftId: string) =>
 	db.gift.findFirst({
 		where: { id: giftId, ...ACTIVE_GIFT_FILTER },
 	});
+
+export const listDashboardGifts = async (
+	db: DashboardGiftDatabase,
+	{ ownerId, wishlistId }: { ownerId: number; wishlistId: string },
+): Promise<GiftWithPurchases[]> => {
+	const wishlist = await db.wishlist.findFirst({
+		where: { id: wishlistId, ownerId },
+		select: { id: true },
+	});
+	if (!wishlist) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
+	}
+	return db.gift.findMany({
+		where: { wishlistId, deletedAt: null },
+		orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+		include: { purchases: true },
+	});
+};
+
+export const getOwnedGift = async (
+	db: DashboardGiftDatabase,
+	{ ownerId, giftId }: { ownerId: number; giftId: string },
+): Promise<Gift> => {
+	const gift = await db.gift.findFirst({
+		where: {
+			id: giftId,
+			deletedAt: null,
+			wishlist: { ownerId },
+		},
+	});
+	if (!gift) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+	return gift;
+};
+
+export const groupDashboardGifts = (
+	rows: DashboardGiftRowViewModel[],
+): GroupedDashboardGifts => {
+	const result: GroupedDashboardGifts = {
+		available: [],
+		purchased: [],
+		hidden: [],
+	};
+	for (const row of rows) {
+		if (row.visibilityStatus === "hidden") {
+			result.hidden.push(row);
+		} else if (row.remainingQuantity === 0) {
+			result.purchased.push(row);
+		} else {
+			result.available.push(row);
+		}
+	}
+	return result;
+};
