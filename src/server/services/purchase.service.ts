@@ -1,0 +1,148 @@
+import { createHash, randomBytes } from "node:crypto";
+import { TRPCError } from "@trpc/server";
+import type { Gift, Prisma, Purchase } from "@/generated/prisma/client";
+import type { CreatePurchaseInput } from "@/server/validators/purchase.schema";
+
+const UNDO_TOKEN_EXPIRY_MINUTES = 15;
+
+type PurchaseDelegate = {
+	create(args: Prisma.PurchaseCreateArgs): Promise<Purchase>;
+	delete(args: Prisma.PurchaseDeleteArgs): Promise<Purchase>;
+	findFirst(args: Prisma.PurchaseFindFirstArgs): Promise<Purchase | null>;
+	aggregate(
+		args: Prisma.PurchaseAggregateArgs,
+	): Promise<Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>>;
+};
+
+type GiftDelegate = {
+	findFirst(args: Prisma.GiftFindFirstArgs): Promise<Gift | null>;
+};
+
+export type PurchaseDatabase = {
+	purchase: PurchaseDelegate;
+	gift: GiftDelegate;
+};
+
+const hashToken = (raw: string) =>
+	createHash("sha256").update(raw).digest("hex");
+
+export const getPurchasedQuantity = async (
+	db: PurchaseDatabase,
+	giftId: string,
+): Promise<number> => {
+	const result = await db.purchase.aggregate({
+		where: { giftId },
+		_sum: { quantity: true },
+	});
+	return result._sum?.quantity ?? 0;
+};
+
+export const getRemainingQuantity = async (
+	db: PurchaseDatabase,
+	gift: Pick<Gift, "id" | "quantityNeeded">,
+): Promise<number> => {
+	const purchased = await getPurchasedQuantity(db, gift.id);
+	return Math.max(0, gift.quantityNeeded - purchased);
+};
+
+export type GiftPublicStatus = "available" | "partial" | "purchased";
+
+export const deriveGiftPublicStatus = (
+	quantityNeeded: number,
+	purchasedQuantity: number,
+): GiftPublicStatus => {
+	if (purchasedQuantity <= 0) return "available";
+	if (purchasedQuantity >= quantityNeeded) return "purchased";
+	return "partial";
+};
+
+export type CreatePurchaseResult = {
+	purchase: Purchase;
+	undoToken: string;
+};
+
+export const createPurchase = async (
+	db: PurchaseDatabase,
+	input: CreatePurchaseInput,
+): Promise<CreatePurchaseResult> => {
+	const gift = await db.gift.findFirst({
+		where: { id: input.giftId, deletedAt: null },
+	});
+
+	if (!gift) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+
+	const remaining = await getRemainingQuantity(db, gift);
+
+	if (input.quantity < 1) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Purchase quantity must be at least 1",
+		});
+	}
+
+	if (input.quantity > remaining) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Purchase quantity exceeds remaining quantity",
+		});
+	}
+
+	const rawToken = randomBytes(32).toString("hex");
+	const tokenHash = hashToken(rawToken);
+	const expiresAt = new Date(
+		Date.now() + UNDO_TOKEN_EXPIRY_MINUTES * 60 * 1000,
+	);
+
+	const purchase = await db.purchase.create({
+		data: {
+			gift: { connect: { id: input.giftId } },
+			guestName: input.guestName,
+			guestEmail: input.guestEmail ?? null,
+			guestPhone: input.guestPhone ?? null,
+			message: input.message ?? null,
+			quantity: input.quantity,
+			undoTokenHash: tokenHash,
+			undoExpiresAt: expiresAt,
+		},
+	});
+
+	return { purchase, undoToken: rawToken };
+};
+
+export const undoPurchase = async (
+	db: PurchaseDatabase,
+	{ purchaseId, undoToken }: { purchaseId: string; undoToken: string },
+): Promise<Purchase> => {
+	const purchase = await db.purchase.findFirst({
+		where: { id: purchaseId },
+	});
+
+	if (!purchase) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Purchase not found" });
+	}
+
+	if (!purchase.undoTokenHash || !purchase.undoExpiresAt) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "This purchase does not support undo",
+		});
+	}
+
+	if (purchase.undoExpiresAt < new Date()) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Undo token has expired",
+		});
+	}
+
+	if (hashToken(undoToken) !== purchase.undoTokenHash) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Invalid undo token",
+		});
+	}
+
+	return db.purchase.delete({ where: { id: purchaseId } });
+};

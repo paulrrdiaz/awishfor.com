@@ -1,0 +1,6 @@
+-- This migration was applied to the remote database and is recorded here for history alignment.
+-- Its SQL content was superseded by the local migrations:
+--   20260625140156_add_wishlist_lifecycle
+--   20260625150102_add_wishlist_model_fields
+--   20260625160300_add_category_model
+-- which were applied to the remote database via prisma migrate resolve --applied.

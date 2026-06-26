@@ -192,23 +192,23 @@ Gift supports manual and URL-imported gifts, optional price/image/link, quantity
 
 Tasks:
 
-- [ ] Add `Gift` model.
-- [ ] Add wishlist relation.
-- [ ] Add optional category relation with `onDelete: SetNull`.
-- [ ] Add `name`.
-- [ ] Add optional `productUrl`.
-- [ ] Add optional `imageUrl`.
-- [ ] Add optional `storeName`.
-- [ ] Add optional `priceAmount Decimal(10,2)`.
-- [ ] Add optional `priceCurrency`.
-- [ ] Add `quantityNeeded Int @default(1)`.
-- [ ] Add `priority GiftPriority @default(medium)`.
-- [ ] Add `visibilityStatus GiftVisibilityStatus @default(available)`.
-- [ ] Add `publicNote`.
-- [ ] Add `internalNote`.
-- [ ] Add `sortOrder`.
-- [ ] Add `deletedAt`.
-- [ ] Add gift validation schema.
+- [x] Add `Gift` model.
+- [x] Add wishlist relation.
+- [x] Add optional category relation with `onDelete: SetNull`.
+- [x] Add `name`.
+- [x] Add optional `productUrl`.
+- [x] Add optional `imageUrl`.
+- [x] Add optional `storeName`.
+- [x] Add optional `priceAmount Decimal(10,2)`.
+- [x] Add optional `priceCurrency`.
+- [x] Add `quantityNeeded Int @default(1)`.
+- [x] Add `priority GiftPriority @default(medium)`.
+- [x] Add `visibilityStatus GiftVisibilityStatus @default(available)`.
+- [x] Add `publicNote`.
+- [x] Add `internalNote`.
+- [x] Add `sortOrder`.
+- [x] Add `deletedAt`.
+- [x] Add gift validation schema.
 
 Acceptance criteria:
 
@@ -242,19 +242,19 @@ Purchases are active records that represent guest or owner-confirmed purchased q
 
 Tasks:
 
-- [ ] Add `Purchase` model.
-- [ ] Add gift relation with cascade.
-- [ ] Add `guestName` required.
-- [ ] Add optional `guestEmail`.
-- [ ] Add optional `guestPhone`.
-- [ ] Add optional `message`.
-- [ ] Add `quantity Int @default(1)`.
-- [ ] Add `undoTokenHash`.
-- [ ] Add `undoExpiresAt`.
-- [ ] Add purchase validation schema.
-- [ ] Add helper to calculate purchased quantity.
-- [ ] Add helper to calculate remaining quantity.
-- [ ] Add helper to derive public gift status.
+- [x] Add `Purchase` model.
+- [x] Add gift relation with cascade.
+- [x] Add `guestName` required.
+- [x] Add optional `guestEmail`.
+- [x] Add optional `guestPhone`.
+- [x] Add optional `message`.
+- [x] Add `quantity Int @default(1)`.
+- [x] Add `undoTokenHash`.
+- [x] Add `undoExpiresAt`.
+- [x] Add purchase validation schema.
+- [x] Add helper to calculate purchased quantity.
+- [x] Add helper to calculate remaining quantity.
+- [x] Add helper to derive public gift status.
 
 Acceptance criteria:
 

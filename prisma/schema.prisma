@@ -63,6 +63,7 @@ model Wishlist {
   ownerId         Int
   owner           User           @relation(fields: [ownerId], references: [id])
   categories      Category[]
+  gifts           Gift[]
   title           String
   slug            String         @unique
   eventType       EventType
@@ -95,6 +96,7 @@ model Category {
   id         String   @id @default(cuid())
   wishlistId String
   wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  gifts      Gift[]
   name       String
   sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
@@ -102,4 +104,49 @@ model Category {
 
   @@index([wishlistId])
   @@index([wishlistId, sortOrder])
+}
+
+model Gift {
+  id               String               @id @default(cuid())
+  wishlistId       String
+  wishlist         Wishlist             @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  categoryId       String?
+  category         Category?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  purchases        Purchase[]
+  name             String
+  productUrl       String?
+  imageUrl         String?
+  storeName        String?
+  priceAmount      Decimal?             @db.Decimal(10, 2)
+  priceCurrency    Currency?
+  quantityNeeded   Int                  @default(1)
+  priority         GiftPriority         @default(medium)
+  visibilityStatus GiftVisibilityStatus @default(available)
+  publicNote       String?
+  internalNote     String?
+  sortOrder        Int                  @default(0)
+  deletedAt        DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([wishlistId])
+  @@index([wishlistId, sortOrder])
+  @@index([categoryId])
+}
+
+model Purchase {
+  id            String    @id @default(cuid())
+  giftId        String
+  gift          Gift      @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  guestName     String
+  guestEmail    String?
+  guestPhone    String?
+  message       String?
+  quantity      Int       @default(1)
+  undoTokenHash String?
+  undoExpiresAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([giftId])
 }
