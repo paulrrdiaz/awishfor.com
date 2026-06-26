@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	Currency,
 	EventType,
+	GiftVisibilityStatus,
 	Locale,
 	type Prisma,
 	type Wishlist,
 	WishlistStatus,
 } from "@/generated/prisma/client";
+import { PublishReadinessError } from "@/lib/wishlist/publish-readiness";
 import {
 	archiveWishlist,
 	createWishlist,
@@ -52,22 +54,41 @@ const createWishlistInput = () => ({
 });
 
 const createMockDatabase = (
-	existingWishlist: Pick<Wishlist, "publishedAt"> = { publishedAt: null },
+	opts: {
+		publishedAt?: Date | null;
+		title?: string;
+		eventType?: EventType;
+		slug?: string;
+		language?: Locale;
+		currency?: Currency;
+		visibleGiftCount?: number;
+	} = {},
 ) => {
+	const lookupData = {
+		publishedAt: opts.publishedAt ?? null,
+		title: opts.title ?? "Lista de boda",
+		eventType: opts.eventType ?? EventType.wedding,
+		slug: opts.slug ?? "lista-de-boda",
+		language: opts.language ?? Locale.es,
+		currency: opts.currency ?? Currency.PEN,
+	};
+	const visibleGiftCount = opts.visibleGiftCount ?? 1;
+
 	const create = vi.fn(async (_args: Prisma.WishlistCreateArgs) =>
 		createWishlistRecord(),
 	);
 	const findUniqueOrThrow = vi.fn(
-		async (_args: Prisma.WishlistFindUniqueOrThrowArgs) => existingWishlist,
+		async (_args: Prisma.WishlistFindUniqueOrThrowArgs) => lookupData,
 	);
 	const update = vi.fn(async (args: Prisma.WishlistUpdateArgs) => {
 		const data = args.data as Partial<Wishlist>;
 
 		return createWishlistRecord({
-			...existingWishlist,
+			...lookupData,
 			...data,
 		});
 	});
+	const count = vi.fn(async (_args: Prisma.GiftCountArgs) => visibleGiftCount);
 
 	const db: WishlistDatabase = {
 		wishlist: {
@@ -75,9 +96,12 @@ const createMockDatabase = (
 			findUniqueOrThrow,
 			update,
 		},
+		gift: {
+			count,
+		},
 	};
 
-	return { db, create, findUniqueOrThrow, update };
+	return { db, create, findUniqueOrThrow, update, count };
 };
 
 describe("wishlist service", () => {
@@ -183,8 +207,10 @@ describe("wishlist service", () => {
 		});
 	});
 
-	it("publishes a wishlist and sets publishedAt while clearing archivedAt", async () => {
-		const { db, update } = createMockDatabase();
+	it("publishes a ready wishlist and sets publishedAt while clearing archivedAt", async () => {
+		const { db, findUniqueOrThrow, count, update } = createMockDatabase({
+			visibleGiftCount: 1,
+		});
 		const now = new Date("2026-06-25T10:00:00.000Z");
 
 		const wishlist = await publishWishlist(db, {
@@ -192,6 +218,18 @@ describe("wishlist service", () => {
 			now,
 		});
 
+		expect(findUniqueOrThrow).toHaveBeenCalledWith(
+			expect.objectContaining({ where: { id: "wishlist_123" } }),
+		);
+		expect(count).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: expect.objectContaining({
+					wishlistId: "wishlist_123",
+					visibilityStatus: GiftVisibilityStatus.available,
+					deletedAt: null,
+				}),
+			}),
+		);
 		expect(update).toHaveBeenCalledWith({
 			where: { id: "wishlist_123" },
 			data: {
@@ -203,6 +241,32 @@ describe("wishlist service", () => {
 		expect(wishlist.status).toBe(WishlistStatus.published);
 		expect(wishlist.publishedAt).toBe(now);
 		expect(wishlist.archivedAt).toBeNull();
+	});
+
+	it("rejects an unready wishlist without updating its status", async () => {
+		const { db, update } = createMockDatabase({ visibleGiftCount: 0 });
+
+		await expect(
+			publishWishlist(db, { wishlistId: "wishlist_123" }),
+		).rejects.toBeInstanceOf(PublishReadinessError);
+
+		expect(update).not.toHaveBeenCalled();
+	});
+
+	it("rejects an unready wishlist and surfaces the failed checklist", async () => {
+		const { db } = createMockDatabase({
+			title: "",
+			visibleGiftCount: 0,
+		});
+
+		const error = await publishWishlist(db, {
+			wishlistId: "wishlist_123",
+		}).catch((e) => e);
+
+		expect(error).toBeInstanceOf(PublishReadinessError);
+		expect(error.result.ready).toBe(false);
+		expect(error.result.checks.title).toBe(false);
+		expect(error.result.checks.visibleGift).toBe(false);
 	});
 
 	it("archives a wishlist and sets archivedAt without deleting the record", async () => {

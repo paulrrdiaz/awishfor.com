@@ -1,11 +1,23 @@
 import type { Prisma, Wishlist } from "@/generated/prisma/client";
-import { Currency, Locale, WishlistStatus } from "@/generated/prisma/client";
+import {
+	Currency,
+	GiftVisibilityStatus,
+	Locale,
+	WishlistStatus,
+} from "@/generated/prisma/client";
+import {
+	evaluatePublishReadiness,
+	PublishReadinessError,
+} from "@/lib/wishlist/publish-readiness";
 import type {
 	CreateWishlistInput,
 	WishlistRestoreTargetStatus,
 } from "@/server/validators/wishlist.schema";
 
-type WishlistRecordLookup = Pick<Wishlist, "publishedAt">;
+type WishlistRecordLookup = Pick<
+	Wishlist,
+	"publishedAt" | "title" | "eventType" | "slug" | "language" | "currency"
+>;
 
 type WishlistDelegate = {
 	create(args: Prisma.WishlistCreateArgs): Promise<Wishlist>;
@@ -15,8 +27,13 @@ type WishlistDelegate = {
 	update(args: Prisma.WishlistUpdateArgs): Promise<Wishlist>;
 };
 
+type GiftDelegate = {
+	count(args: Prisma.GiftCountArgs): Promise<number>;
+};
+
 export type WishlistDatabase = {
 	wishlist: WishlistDelegate;
+	gift: GiftDelegate;
 };
 
 export const createWishlist = async (
@@ -57,8 +74,41 @@ export const createWishlist = async (
 export const publishWishlist = async (
 	db: WishlistDatabase,
 	{ wishlistId, now = new Date() }: { wishlistId: string; now?: Date },
-) =>
-	db.wishlist.update({
+) => {
+	const wishlist = await db.wishlist.findUniqueOrThrow({
+		where: { id: wishlistId },
+		select: {
+			publishedAt: true,
+			title: true,
+			eventType: true,
+			slug: true,
+			language: true,
+			currency: true,
+		},
+	});
+
+	const visibleGiftCount = await db.gift.count({
+		where: {
+			wishlistId,
+			visibilityStatus: GiftVisibilityStatus.available,
+			deletedAt: null,
+		},
+	});
+
+	const readiness = evaluatePublishReadiness({
+		title: wishlist.title,
+		eventType: wishlist.eventType,
+		slug: wishlist.slug,
+		language: wishlist.language,
+		currency: wishlist.currency,
+		visibleGiftCount,
+	});
+
+	if (!readiness.ready) {
+		throw new PublishReadinessError(readiness);
+	}
+
+	return db.wishlist.update({
 		where: { id: wishlistId },
 		data: {
 			status: WishlistStatus.published,
@@ -66,6 +116,7 @@ export const publishWishlist = async (
 			archivedAt: null,
 		},
 	});
+};
 
 export const archiveWishlist = async (
 	db: WishlistDatabase,
