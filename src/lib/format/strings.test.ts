@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { formatStoreDomain } from "@/lib/format/strings";
+import {
+	formatStoreDomain,
+	resolveStoreDisplayName,
+} from "@/lib/format/strings";
 
 describe("formatStoreDomain", () => {
 	it("strips www. and lowercases the hostname", () => {
@@ -34,5 +37,49 @@ describe("formatStoreDomain", () => {
 		expect(formatStoreDomain("https://WWW.EXAMPLE.COM/path")).toBe(
 			"example.com",
 		);
+	});
+});
+
+describe("resolveStoreDisplayName", () => {
+	it("returns the friendly name for a known store", () => {
+		expect(
+			resolveStoreDisplayName("https://falabella.com.pe/product/123"),
+		).toBe("Falabella");
+	});
+
+	it("ignores www. prefix and still returns the friendly name", () => {
+		expect(
+			resolveStoreDisplayName("https://www.falabella.com.pe/product/123"),
+		).toBe("Falabella");
+	});
+
+	it("falls back to the clean domain for an unknown store", () => {
+		expect(
+			resolveStoreDisplayName("https://www.unknownstore.com/item?id=1"),
+		).toBe("unknownstore.com");
+	});
+
+	it("returns the friendly name for a Peru/LatAm store", () => {
+		expect(resolveStoreDisplayName("https://mercadolibre.com.pe/item")).toBe(
+			"Mercado Libre",
+		);
+	});
+
+	it("returns the friendly name for an international store", () => {
+		expect(resolveStoreDisplayName("https://amazon.com/dp/B08N5LNQCX")).toBe(
+			"Amazon",
+		);
+	});
+
+	it("returns empty string for empty input", () => {
+		expect(resolveStoreDisplayName("")).toBe("");
+	});
+
+	it("returns empty string for null", () => {
+		expect(resolveStoreDisplayName(null)).toBe("");
+	});
+
+	it("returns empty string for malformed URL", () => {
+		expect(resolveStoreDisplayName("not-a-url")).toBe("");
 	});
 });
