@@ -144,6 +144,7 @@ describe("wishlist-wizard store", () => {
 				copyTouched,
 				updatedAt,
 				savedWishlistId,
+				savedSlug,
 				lastSavedAt,
 				slugTouched,
 			} = store.getState();
@@ -155,6 +156,7 @@ describe("wishlist-wizard store", () => {
 			expect(copyTouched.heroTitle).toBe(false);
 			expect(updatedAt).toBeNull();
 			expect(savedWishlistId).toBeNull();
+			expect(savedSlug).toBeNull();
 			expect(lastSavedAt).toBeNull();
 			expect(slugTouched).toBe(false);
 		});
@@ -164,21 +166,27 @@ describe("wishlist-wizard store", () => {
 		it("stores saved draft metadata after a successful save", () => {
 			const store = makeStore();
 
-			store.getState().setSavedDraftMetadata("wishlist_123", 123456789);
+			store
+				.getState()
+				.setSavedDraftMetadata("wishlist_123", 123456789, "lista-guardada");
 
 			expect(store.getState().savedWishlistId).toBe("wishlist_123");
+			expect(store.getState().savedSlug).toBe("lista-guardada");
 			expect(store.getState().lastSavedAt).toBe(123456789);
 		});
 
 		it("clears saved draft metadata without affecting the local draft", () => {
 			const store = makeStore();
 			store.getState().setField("title", "Mi wishlist");
-			store.getState().setSavedDraftMetadata("wishlist_123", 123456789);
+			store
+				.getState()
+				.setSavedDraftMetadata("wishlist_123", 123456789, "mi-wishlist");
 
 			store.getState().clearSavedDraftMetadata();
 
 			expect(store.getState().draft.title).toBe("Mi wishlist");
 			expect(store.getState().savedWishlistId).toBeNull();
+			expect(store.getState().savedSlug).toBeNull();
 			expect(store.getState().lastSavedAt).toBeNull();
 		});
 
@@ -223,12 +231,19 @@ describe("wishlist-wizard store", () => {
 				},
 				{
 					savedWishlistId: "wishlist_123",
+					savedSlug: "version-dashboard",
 					lastSavedAt: 123456789,
 				},
 			);
 
-			const { draft, copyTouched, savedWishlistId, lastSavedAt, slugTouched } =
-				store.getState();
+			const {
+				draft,
+				copyTouched,
+				savedWishlistId,
+				savedSlug,
+				lastSavedAt,
+				slugTouched,
+			} = store.getState();
 			expect(draft.title).toBe("Versión del dashboard");
 			expect(draft.slug).toBe("version-dashboard");
 			expect(draft.gifts[0]?.name).toBe("Juego de sábanas");
@@ -237,7 +252,51 @@ describe("wishlist-wizard store", () => {
 			expect(copyTouched.thankYouMessage).toBe(true);
 			expect(slugTouched).toBe(true);
 			expect(savedWishlistId).toBe("wishlist_123");
+			expect(savedSlug).toBe("version-dashboard");
 			expect(lastSavedAt).toBe(123456789);
+		});
+	});
+
+	describe("publish success session state", () => {
+		it("clears persisted draft data while keeping publish share metadata in memory", () => {
+			const store = makeStore();
+			store.getState().setField("title", "Mi wishlist");
+			store
+				.getState()
+				.setSavedDraftMetadata("wishlist_123", 123456789, "mi-wishlist");
+
+			store.getState().completePublish({
+				wishlistId: "wishlist_123",
+				slug: "mi-wishlist",
+				publicUrlPath: "/w/mi-wishlist",
+				dashboardUrlPath: "/dashboard",
+			});
+
+			const state = store.getState();
+			expect(state.draft.title).toBe("");
+			expect(state.savedWishlistId).toBeNull();
+			expect(state.savedSlug).toBeNull();
+			expect(state.lastSavedAt).toBeNull();
+			expect(state.publishSuccess).toEqual({
+				wishlistId: "wishlist_123",
+				slug: "mi-wishlist",
+				publicUrlPath: "/w/mi-wishlist",
+				dashboardUrlPath: "/dashboard",
+			});
+		});
+
+		it("drops publish success once the user edits a new draft", () => {
+			const store = makeStore();
+			store.getState().completePublish({
+				wishlistId: "wishlist_123",
+				slug: "mi-wishlist",
+				publicUrlPath: "/w/mi-wishlist",
+				dashboardUrlPath: "/dashboard",
+			});
+
+			store.getState().setField("title", "Nueva wishlist");
+
+			expect(store.getState().publishSuccess).toBeNull();
 		});
 	});
 

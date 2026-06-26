@@ -5,31 +5,25 @@ import { DesignStep } from "./design-step";
 import { DetailsStep } from "./details-step";
 import { EventTypeStep } from "./event-type-step";
 import { GiftsStep } from "./gifts-step";
+import { PublishStep } from "./publish-step";
 import { RecoveryPrompt } from "./recovery-prompt";
 import { SaveDraftControls } from "./save-draft-controls";
 import { useWizardStore } from "./wizard-provider";
-
-type WizardStep = "event-type" | "details" | "design" | "gifts";
-
-const STEPS: WizardStep[] = ["event-type", "details", "design", "gifts"];
-const DEFAULT_STEP: WizardStep = "event-type";
-
-const STEP_LABELS: Record<WizardStep, string> = {
-	"event-type": "Ocasión",
-	details: "Detalles",
-	design: "Diseño",
-	gifts: "Regalos",
-};
-
-function isValidStep(s: string | null): s is WizardStep {
-	return STEPS.includes(s as WizardStep);
-}
+import {
+	getNextWizardStep,
+	getPreviousWizardStep,
+	resolveWizardStep,
+	WIZARD_STEP_LABELS,
+	WIZARD_STEPS,
+	type WizardStep,
+} from "./wizard-steps";
 
 function StepContent({ step }: { step: WizardStep }) {
 	if (step === "event-type") return <EventTypeStep />;
 	if (step === "details") return <DetailsStep />;
 	if (step === "design") return <DesignStep />;
 	if (step === "gifts") return <GiftsStep />;
+	if (step === "publish") return <PublishStep />;
 	return null;
 }
 
@@ -37,12 +31,13 @@ export function WizardShell() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const raw = searchParams.get("step");
-	const step: WizardStep = isValidStep(raw) ? raw : DEFAULT_STEP;
+	const step = resolveWizardStep(raw);
 	const hasHydrated = useWizardStore((s) => s._hasHydrated);
+	const publishSuccess = useWizardStore((s) => s.publishSuccess);
 
-	const currentIndex = STEPS.indexOf(step);
+	const currentIndex = WIZARD_STEPS.indexOf(step);
 	const isFirst = currentIndex === 0;
-	const isLast = currentIndex === STEPS.length - 1;
+	const isLast = currentIndex === WIZARD_STEPS.length - 1;
 
 	function navigate(targetStep: WizardStep) {
 		const params = new URLSearchParams(searchParams.toString());
@@ -52,7 +47,7 @@ export function WizardShell() {
 
 	function goBack() {
 		if (isFirst) return;
-		const previousStep = STEPS[currentIndex - 1];
+		const previousStep = getPreviousWizardStep(step);
 		if (previousStep) {
 			navigate(previousStep);
 		}
@@ -60,7 +55,7 @@ export function WizardShell() {
 
 	function goNext() {
 		if (isLast) return;
-		const nextStep = STEPS[currentIndex + 1];
+		const nextStep = getNextWizardStep(step);
 		if (nextStep) {
 			navigate(nextStep);
 		}
@@ -81,7 +76,7 @@ export function WizardShell() {
 			{/* Step indicator */}
 			<div className="border-gray-100 border-b bg-white">
 				<div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-					{STEPS.map((s, i) => {
+					{WIZARD_STEPS.map((s, i) => {
 						const isActive = s === step;
 						const isDone = i < currentIndex;
 						return (
@@ -111,7 +106,9 @@ export function WizardShell() {
 								>
 									{isDone ? "✓" : i + 1}
 								</span>
-								<span className="hidden sm:inline">{STEP_LABELS[s]}</span>
+								<span className="hidden sm:inline">
+									{WIZARD_STEP_LABELS[s]}
+								</span>
 							</button>
 						);
 					})}
@@ -137,21 +134,17 @@ export function WizardShell() {
 						>
 							Atrás
 						</button>
-						<SaveDraftControls />
+						{!publishSuccess && <SaveDraftControls />}
 					</div>
-					<button
-						className={[
-							"rounded-lg px-5 py-2 text-sm transition-colors",
-							isLast
-								? "cursor-default bg-gray-100 text-gray-400"
-								: "bg-gray-900 text-white hover:bg-gray-800",
-						].join(" ")}
-						disabled={isLast}
-						onClick={goNext}
-						type="button"
-					>
-						{isLast ? "Finalizar" : "Siguiente"}
-					</button>
+					{!isLast && (
+						<button
+							className="rounded-lg bg-gray-900 px-5 py-2 text-sm text-white transition-colors hover:bg-gray-800"
+							onClick={goNext}
+							type="button"
+						>
+							Siguiente
+						</button>
+					)}
 				</div>
 			</div>
 		</main>

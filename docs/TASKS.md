@@ -958,16 +958,16 @@ Final step validates, gates auth, publishes, and shows share state.
 
 Tasks:
 
-- [ ] Add final embedded preview.
-- [ ] Add full page preview button.
-- [ ] Add publish readiness checklist.
-- [ ] Add auth gate if unauthenticated.
-- [ ] Add publish mutation.
-- [ ] Add publish success state.
-- [ ] Add copy link action.
-- [ ] Add WhatsApp share action.
-- [ ] Add QR download action.
-- [ ] Clear local draft after successful publish.
+- [x] Add final embedded preview.
+- [x] Add full page preview button.
+- [x] Add publish readiness checklist.
+- [x] Add auth gate if unauthenticated.
+- [x] Add publish mutation.
+- [x] Add publish success state.
+- [x] Add copy link action.
+- [x] Add WhatsApp share action.
+- [x] Add QR download action.
+- [x] Clear local draft after successful publish.
 
 Acceptance criteria:
 

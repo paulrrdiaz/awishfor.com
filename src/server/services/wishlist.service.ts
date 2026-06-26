@@ -88,6 +88,22 @@ export type SaveDraftResult =
 			serverDraft: SaveDraftServerDraft;
 	  };
 
+export type PublishedWishlistShareMetadata = {
+	wishlistId: string;
+	slug: string;
+	publicUrlPath: string;
+	dashboardUrlPath: string;
+};
+
+export type WizardPublishResult =
+	| ({
+			status: "published";
+	  } & PublishedWishlistShareMetadata)
+	| {
+			status: "conflict";
+			serverDraft: SaveDraftServerDraft;
+	  };
+
 const draftCategoryOrderBy = [
 	{ sortOrder: "asc" },
 	{ createdAt: "asc" },
@@ -428,19 +444,32 @@ export const saveWishlistDraft = async (
 
 export const publishWishlist = async (
 	db: WishlistDatabase,
-	{ wishlistId, now = new Date() }: { wishlistId: string; now?: Date },
+	{
+		ownerId,
+		wishlistId,
+		now = new Date(),
+	}: { ownerId: number; wishlistId: string; now?: Date },
 ) => {
-	const wishlist = (await db.wishlist.findUniqueOrThrow({
-		where: { id: wishlistId },
-		select: {
-			publishedAt: true,
-			title: true,
-			eventType: true,
-			slug: true,
-			language: true,
-			currency: true,
+	const wishlist = await db.wishlist.findFirst({
+		where: {
+			id: wishlistId,
+			ownerId,
 		},
-	})) as WishlistRecordLookup;
+	});
+
+	if (!wishlist) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Wishlist not found",
+		});
+	}
+
+	if (wishlist.status !== WishlistStatus.draft) {
+		throw new TRPCError({
+			code: "PRECONDITION_FAILED",
+			message: "Only draft wishlists can be published",
+		});
+	}
 
 	const visibleGiftCount = await db.gift.count({
 		where: {
@@ -471,6 +500,31 @@ export const publishWishlist = async (
 			archivedAt: null,
 		},
 	});
+};
+
+export const publishWishlistFromWizard = async (
+	db: WishlistDatabase,
+	input: SaveDraftWishlistInput & { ownerId: number; now?: Date },
+): Promise<WizardPublishResult> => {
+	const saveResult = await saveWishlistDraft(db, input);
+
+	if (saveResult.status === "conflict") {
+		return saveResult;
+	}
+
+	const publishedWishlist = await publishWishlist(db, {
+		ownerId: input.ownerId,
+		wishlistId: saveResult.wishlistId,
+		now: input.now,
+	});
+
+	return {
+		status: "published",
+		wishlistId: publishedWishlist.id,
+		slug: publishedWishlist.slug,
+		publicUrlPath: `/w/${publishedWishlist.slug}`,
+		dashboardUrlPath: "/dashboard",
+	};
 };
 
 export const archiveWishlist = async (

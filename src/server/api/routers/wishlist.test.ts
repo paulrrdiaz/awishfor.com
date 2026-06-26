@@ -5,6 +5,8 @@ import { createCallerFactory } from "@/server/api/trpc";
 import type { SaveDraftWishlistInput } from "@/server/validators/wishlist-save-draft.schema";
 
 const authMock = vi.hoisted(() => vi.fn());
+const publishWishlistMock = vi.hoisted(() => vi.fn());
+const publishWishlistFromWizardMock = vi.hoisted(() => vi.fn());
 const saveWishlistDraftMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@clerk/nextjs/server", () => ({
@@ -12,7 +14,8 @@ vi.mock("@clerk/nextjs/server", () => ({
 }));
 
 vi.mock("@/server/services/wishlist.service", () => ({
-	publishWishlist: vi.fn(),
+	publishWishlist: publishWishlistMock,
+	publishWishlistFromWizard: publishWishlistFromWizardMock,
 	saveWishlistDraft: saveWishlistDraftMock,
 }));
 
@@ -158,5 +161,130 @@ describe("wishlistRouter.saveDraft", () => {
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
 		});
+	});
+});
+
+describe("wishlistRouter.publish", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("resolves the Clerk user to the local owner before publishing", async () => {
+		authMock.mockResolvedValue({ userId: "clerk_123" });
+		publishWishlistMock.mockResolvedValue({
+			id: "wishlist_123",
+			slug: "lista-de-boda",
+			status: "published",
+		});
+		const userFindUnique = vi.fn().mockResolvedValue({ id: 42 });
+		const caller = createCaller({
+			db: {
+				user: {
+					findUnique: userFindUnique,
+				},
+			},
+			headers: new Headers(),
+		} as never);
+
+		await caller.publish({ wishlistId: "wishlist_123" });
+
+		expect(userFindUnique).toHaveBeenCalledWith({
+			where: {
+				clerkId: "clerk_123",
+			},
+			select: {
+				id: true,
+			},
+		});
+		expect(publishWishlistMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				user: expect.any(Object),
+			}),
+			{
+				ownerId: 42,
+				wishlistId: "wishlist_123",
+			},
+		);
+	});
+
+	it("rejects unauthenticated publish requests before owner lookup", async () => {
+		authMock.mockResolvedValue({ userId: null });
+		const userFindUnique = vi.fn();
+		const caller = createCaller({
+			db: {
+				user: {
+					findUnique: userFindUnique,
+				},
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.publish({ wishlistId: "wishlist_123" }),
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+		});
+
+		expect(userFindUnique).not.toHaveBeenCalled();
+		expect(publishWishlistMock).not.toHaveBeenCalled();
+	});
+});
+
+describe("wishlistRouter.publishWizard", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("derives the owner from Clerk and never accepts owner identity from the client", async () => {
+		authMock.mockResolvedValue({ userId: "clerk_123" });
+		publishWishlistFromWizardMock.mockResolvedValue({
+			status: "published",
+			wishlistId: "wishlist_123",
+			slug: "lista-de-boda",
+			publicUrlPath: "/w/lista-de-boda",
+			dashboardUrlPath: "/dashboard",
+		});
+		const userFindUnique = vi.fn().mockResolvedValue({ id: 42 });
+		const caller = createCaller({
+			db: {
+				user: {
+					findUnique: userFindUnique,
+				},
+			},
+			headers: new Headers(),
+		} as never);
+
+		await caller.publishWizard(makeInput());
+
+		expect(publishWishlistFromWizardMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				user: expect.any(Object),
+			}),
+			expect.objectContaining({
+				ownerId: 42,
+				title: "Lista de boda",
+				savedWishlistId: null,
+			}),
+		);
+	});
+
+	it("rejects unauthenticated wizard publish requests before owner lookup", async () => {
+		authMock.mockResolvedValue({ userId: null });
+		const userFindUnique = vi.fn();
+		const caller = createCaller({
+			db: {
+				user: {
+					findUnique: userFindUnique,
+				},
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.publishWizard(makeInput())).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+		});
+
+		expect(userFindUnique).not.toHaveBeenCalled();
+		expect(publishWishlistFromWizardMock).not.toHaveBeenCalled();
 	});
 });

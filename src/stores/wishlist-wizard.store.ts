@@ -3,8 +3,10 @@ import { createStore } from "zustand/vanilla";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import type { EventType, GiftPriority } from "@/generated/prisma/enums";
 import { slugify } from "@/lib/slug";
+import type { WishlistShareMetadata } from "@/lib/wishlist/share";
 
 const STALE_DAYS = 30;
+export const WISHLIST_WIZARD_STORAGE_KEY = "wishlist-wizard-draft";
 
 type CopyTouched = {
 	heroTitle: boolean;
@@ -54,8 +56,10 @@ export type WishlistWizardState = {
 	slugTouched: boolean;
 	updatedAt: number | null;
 	savedWishlistId: string | null;
+	savedSlug: string | null;
 	lastSavedAt: number | null;
 	needsRecovery: boolean;
+	publishSuccess: WishlistShareMetadata | null;
 	_hasHydrated: boolean;
 };
 
@@ -77,11 +81,18 @@ export type WishlistWizardActions = {
 		draft: WishlistDraft,
 		metadata?: {
 			savedWishlistId?: string | null;
+			savedSlug?: string | null;
 			lastSavedAt?: number | null;
 		},
 	) => void;
-	setSavedDraftMetadata: (savedWishlistId: string, lastSavedAt: number) => void;
+	setSavedDraftMetadata: (
+		savedWishlistId: string,
+		lastSavedAt: number,
+		savedSlug: string,
+	) => void;
 	clearSavedDraftMetadata: () => void;
+	completePublish: (shareMetadata: WishlistShareMetadata) => void;
+	clearPublishSuccess: () => void;
 };
 
 export type WishlistWizardStore = WishlistWizardState & WishlistWizardActions;
@@ -113,6 +124,14 @@ const emptyCopyTouched = (): CopyTouched => ({
 	thankYouMessage: false,
 });
 
+export const clearPersistedWishlistWizardDraft = () => {
+	if (typeof window === "undefined") {
+		return;
+	}
+
+	window.localStorage.removeItem(WISHLIST_WIZARD_STORAGE_KEY);
+};
+
 const isStale = (updatedAt: number | null): boolean => {
 	if (updatedAt === null) return false;
 	const cutoff = Date.now() - STALE_DAYS * 24 * 60 * 60 * 1000;
@@ -128,8 +147,10 @@ export const createWishlistWizardStore = () =>
 				slugTouched: false,
 				updatedAt: null,
 				savedWishlistId: null,
+				savedSlug: null,
 				lastSavedAt: null,
 				needsRecovery: false,
+				publishSuccess: null,
 				_hasHydrated: false,
 
 				setField: (key, value) => {
@@ -157,6 +178,7 @@ export const createWishlistWizardStore = () =>
 							copyTouched: isCopyField(key)
 								? { ...state.copyTouched, [key]: true }
 								: state.copyTouched,
+							publishSuccess: null,
 							slugTouched: nextSlugTouched,
 							updatedAt: Date.now(),
 						};
@@ -183,6 +205,7 @@ export const createWishlistWizardStore = () =>
 								? state.draft.thankYouMessage
 								: preset.defaultThankYouMessage,
 						},
+						publishSuccess: null,
 						updatedAt: Date.now(),
 					}));
 				},
@@ -199,6 +222,7 @@ export const createWishlistWizardStore = () =>
 							thankYouMessage: preset.defaultThankYouMessage,
 						},
 						copyTouched: emptyCopyTouched(),
+						publishSuccess: null,
 						updatedAt: Date.now(),
 					});
 				},
@@ -210,8 +234,10 @@ export const createWishlistWizardStore = () =>
 						slugTouched: false,
 						updatedAt: null,
 						savedWishlistId: null,
+						savedSlug: null,
 						lastSavedAt: null,
 						needsRecovery: false,
+						publishSuccess: null,
 					});
 				},
 
@@ -223,8 +249,10 @@ export const createWishlistWizardStore = () =>
 							slugTouched: false,
 							updatedAt: null,
 							savedWishlistId: null,
+							savedSlug: null,
 							lastSavedAt: null,
 							needsRecovery: false,
+							publishSuccess: null,
 						});
 					} else {
 						set({ needsRecovery: false });
@@ -243,6 +271,7 @@ export const createWishlistWizardStore = () =>
 						};
 						return {
 							draft: { ...state.draft, gifts: [...state.draft.gifts, newGift] },
+							publishSuccess: null,
 							updatedAt: Date.now(),
 						};
 					});
@@ -256,6 +285,7 @@ export const createWishlistWizardStore = () =>
 								g.id === id ? { ...g, ...updates } : g,
 							),
 						},
+						publishSuccess: null,
 						updatedAt: Date.now(),
 					}));
 				},
@@ -268,6 +298,7 @@ export const createWishlistWizardStore = () =>
 								.filter((g) => g.id !== id)
 								.map((g, i) => ({ ...g, sortOrder: i })),
 						},
+						publishSuccess: null,
 						updatedAt: Date.now(),
 					}));
 				},
@@ -283,6 +314,7 @@ export const createWishlistWizardStore = () =>
 							.filter((g): g is DraftGift => g !== null);
 						return {
 							draft: { ...state.draft, gifts: reordered },
+							publishSuccess: null,
 							updatedAt: Date.now(),
 						};
 					});
@@ -299,14 +331,19 @@ export const createWishlistWizardStore = () =>
 						slugTouched: draft.slug.trim().length > 0,
 						updatedAt: Date.now(),
 						savedWishlistId: metadata?.savedWishlistId ?? null,
+						savedSlug:
+							metadata?.savedSlug ??
+							(metadata?.savedWishlistId ? draft.slug : null),
 						lastSavedAt: metadata?.lastSavedAt ?? null,
 						needsRecovery: false,
+						publishSuccess: null,
 					});
 				},
 
-				setSavedDraftMetadata: (savedWishlistId, lastSavedAt) => {
+				setSavedDraftMetadata: (savedWishlistId, lastSavedAt, savedSlug) => {
 					set({
 						savedWishlistId,
+						savedSlug,
 						lastSavedAt,
 					});
 				},
@@ -314,12 +351,33 @@ export const createWishlistWizardStore = () =>
 				clearSavedDraftMetadata: () => {
 					set({
 						savedWishlistId: null,
+						savedSlug: null,
 						lastSavedAt: null,
+					});
+				},
+
+				completePublish: (shareMetadata) => {
+					set({
+						draft: emptyDraft(),
+						copyTouched: emptyCopyTouched(),
+						slugTouched: false,
+						updatedAt: null,
+						savedWishlistId: null,
+						savedSlug: null,
+						lastSavedAt: null,
+						needsRecovery: false,
+						publishSuccess: shareMetadata,
+					});
+				},
+
+				clearPublishSuccess: () => {
+					set({
+						publishSuccess: null,
 					});
 				},
 			}),
 			{
-				name: "wishlist-wizard-draft",
+				name: WISHLIST_WIZARD_STORAGE_KEY,
 				storage: createJSONStorage(() => {
 					if (typeof window === "undefined") {
 						return {
@@ -336,6 +394,7 @@ export const createWishlistWizardStore = () =>
 					slugTouched: state.slugTouched,
 					updatedAt: state.updatedAt,
 					savedWishlistId: state.savedWishlistId,
+					savedSlug: state.savedSlug,
 					lastSavedAt: state.lastSavedAt,
 				}),
 				onRehydrateStorage: () => (state) => {

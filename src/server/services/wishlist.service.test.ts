@@ -15,6 +15,7 @@ import {
 	archiveWishlist,
 	createWishlist,
 	publishWishlist,
+	publishWishlistFromWizard,
 	restoreWishlist,
 	saveWishlistDraft,
 	type WishlistDatabase,
@@ -856,19 +857,23 @@ describe("wishlist service", () => {
 	});
 
 	it("publishes a ready wishlist and sets publishedAt while clearing archivedAt", async () => {
-		const { db, findUniqueOrThrow, count, update } = createMockDatabase({
+		const { db, findFirst, count, update } = createMockDatabase({
 			visibleGiftCount: 1,
 		});
 		const now = new Date("2026-06-25T10:00:00.000Z");
 
 		const wishlist = await publishWishlist(db, {
+			ownerId: 42,
 			wishlistId: "wishlist_123",
 			now,
 		});
 
-		expect(findUniqueOrThrow).toHaveBeenCalledWith(
-			expect.objectContaining({ where: { id: "wishlist_123" } }),
-		);
+		expect(findFirst).toHaveBeenCalledWith({
+			where: {
+				id: "wishlist_123",
+				ownerId: 42,
+			},
+		});
 		expect(count).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: expect.objectContaining({
@@ -895,7 +900,7 @@ describe("wishlist service", () => {
 		const { db, update } = createMockDatabase({ visibleGiftCount: 0 });
 
 		await expect(
-			publishWishlist(db, { wishlistId: "wishlist_123" }),
+			publishWishlist(db, { ownerId: 42, wishlistId: "wishlist_123" }),
 		).rejects.toBeInstanceOf(PublishReadinessError);
 
 		expect(update).not.toHaveBeenCalled();
@@ -912,6 +917,7 @@ describe("wishlist service", () => {
 		});
 
 		const error = await publishWishlist(db, {
+			ownerId: 42,
 			wishlistId: "wishlist_123",
 		}).catch((e) => e);
 
@@ -919,6 +925,130 @@ describe("wishlist service", () => {
 		expect(error.result.ready).toBe(false);
 		expect(error.result.checks.title).toBe(false);
 		expect(error.result.checks.visibleGift).toBe(false);
+	});
+
+	it("returns not found when an authenticated owner tries to publish another owner's wishlist", async () => {
+		const { db, update } = createMockDatabase();
+
+		await expect(
+			publishWishlist(db, {
+				ownerId: 7,
+				wishlistId: "wishlist_123",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+
+		expect(update).not.toHaveBeenCalled();
+	});
+
+	it("rejects non-draft wishlists before changing lifecycle state", async () => {
+		const { db, update } = createMockDatabase({
+			wishlists: [
+				createWishlistRecord({
+					status: WishlistStatus.published,
+					publishedAt: new Date("2026-06-24T10:00:00.000Z"),
+				}),
+			],
+			visibleGiftCount: 1,
+		});
+
+		await expect(
+			publishWishlist(db, {
+				ownerId: 42,
+				wishlistId: "wishlist_123",
+			}),
+		).rejects.toMatchObject({
+			code: "PRECONDITION_FAILED",
+		});
+
+		expect(update).not.toHaveBeenCalled();
+	});
+
+	it("creates, publishes, and returns share metadata for an unsaved wizard draft", async () => {
+		const { db, state } = createMockDatabase({ wishlists: [] });
+
+		const result = await publishWishlistFromWizard(db, makeDraftInput());
+
+		expect(result).toEqual({
+			status: "published",
+			wishlistId: "wishlist_1",
+			slug: "lista-de-boda",
+			publicUrlPath: "/w/lista-de-boda",
+			dashboardUrlPath: "/dashboard",
+		});
+		expect(state.wishlists[0]?.status).toBe(WishlistStatus.published);
+		expect(state.wishlists[0]?.publishedAt).not.toBeNull();
+	});
+
+	it("updates, publishes, and returns share metadata for an existing saved draft", async () => {
+		const existingWishlist = createWishlistRecord({
+			id: "wishlist_existing",
+			title: "Versión anterior",
+			updatedAt: new Date("2026-06-25T08:00:00.000Z"),
+		});
+		const { db, state } = createMockDatabase({
+			wishlists: [existingWishlist],
+		});
+
+		const result = await publishWishlistFromWizard(
+			db,
+			makeDraftInput({
+				savedWishlistId: existingWishlist.id,
+				lastSavedAt: existingWishlist.updatedAt.getTime(),
+				title: "Versión final",
+				slug: "version-final",
+			}),
+		);
+
+		expect(result).toEqual({
+			status: "published",
+			wishlistId: existingWishlist.id,
+			slug: "version-final",
+			publicUrlPath: "/w/version-final",
+			dashboardUrlPath: "/dashboard",
+		});
+		expect(state.wishlists[0]?.title).toBe("Versión final");
+		expect(state.wishlists[0]?.status).toBe(WishlistStatus.published);
+	});
+
+	it("returns the draft conflict response and does not publish when wizard save conflicts", async () => {
+		const existingWishlist = createWishlistRecord({
+			id: "wishlist_existing",
+			title: "Versión del dashboard",
+			updatedAt: new Date("2026-06-25T10:00:00.000Z"),
+		});
+		const { db, state } = createMockDatabase({
+			wishlists: [existingWishlist],
+			categories: [
+				{
+					id: "category_server_1",
+					wishlistId: existingWishlist.id,
+					name: "Dashboard",
+					sortOrder: 0,
+					createdAt: BASE_DATE,
+					updatedAt: BASE_DATE,
+				},
+			],
+		});
+
+		const result = await publishWishlistFromWizard(
+			db,
+			makeDraftInput({
+				savedWishlistId: existingWishlist.id,
+				lastSavedAt: new Date("2026-06-25T09:00:00.000Z").getTime(),
+			}),
+		);
+
+		expect(result).toEqual({
+			status: "conflict",
+			serverDraft: expect.objectContaining({
+				title: "Versión del dashboard",
+				savedWishlistId: existingWishlist.id,
+			}),
+		});
+		expect(state.wishlists[0]?.status).toBe(WishlistStatus.draft);
+		expect(state.wishlists[0]?.publishedAt).toBeNull();
 	});
 
 	it("archives a wishlist and sets archivedAt without deleting the record", async () => {

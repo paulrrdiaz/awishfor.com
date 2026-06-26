@@ -9,6 +9,7 @@ import {
 import { checkSlugAvailability } from "@/server/services/slug.service";
 import {
 	publishWishlist,
+	publishWishlistFromWizard,
 	saveWishlistDraft,
 } from "@/server/services/wishlist.service";
 import {
@@ -48,8 +49,35 @@ export const wishlistRouter = createTRPCRouter({
 	publish: protectedProcedure
 		.input(publishWishlistSchema)
 		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+
 			try {
-				return await publishWishlist(ctx.db, input);
+				return await publishWishlist(ctx.db, {
+					ownerId,
+					...input,
+				});
+			} catch (error) {
+				if (error instanceof PublishReadinessError) {
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: "Wishlist is not ready to publish",
+						cause: error,
+					});
+				}
+				throw error;
+			}
+		}),
+
+	publishWizard: protectedProcedure
+		.input(saveDraftWishlistSchema)
+		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+
+			try {
+				return await publishWishlistFromWizard(ctx.db, {
+					ownerId,
+					...input,
+				});
 			} catch (error) {
 				if (error instanceof PublishReadinessError) {
 					throw new TRPCError({

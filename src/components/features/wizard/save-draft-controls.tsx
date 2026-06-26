@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { type ReactNode, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
 	draftToSaveDraftInput,
@@ -13,29 +13,10 @@ import type {
 	SaveDraftWishlistInput,
 } from "@/server/validators/wishlist-save-draft.schema";
 import { api } from "@/trpc/react";
+import { WizardModal } from "./wizard-modal";
 import { useWizardStore } from "./wizard-provider";
 
 const SIGN_IN_HREF = "/sign-in?redirect_url=%2Fcreate";
-
-function Modal({
-	title,
-	description,
-	children,
-}: {
-	title: string;
-	description: string;
-	children: ReactNode;
-}) {
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/40 px-4">
-			<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-				<h2 className="font-semibold text-gray-900 text-lg">{title}</h2>
-				<p className="mt-2 text-gray-600 text-sm">{description}</p>
-				<div className="mt-6 flex flex-col gap-3">{children}</div>
-			</div>
-		</div>
-	);
-}
 
 const isNotFoundError = (error: unknown) =>
 	typeof error === "object" &&
@@ -91,7 +72,7 @@ export function SaveDraftControls() {
 				return;
 			}
 
-			setSavedDraftMetadata(result.wishlistId, result.lastSavedAt);
+			setSavedDraftMetadata(result.wishlistId, result.lastSavedAt, input.slug);
 			setConflictDraft(null);
 			setSaveAsNewInput(null);
 			toast.success("Borrador guardado");
@@ -130,6 +111,7 @@ export function SaveDraftControls() {
 		const mapped = serverDraftToLocalDraft(conflictDraft.serverDraft);
 		replaceDraft(mapped.draft, {
 			savedWishlistId: mapped.savedWishlistId,
+			savedSlug: mapped.draft.slug,
 			lastSavedAt: mapped.lastSavedAt,
 		});
 		setConflictDraft(null);
@@ -178,7 +160,7 @@ export function SaveDraftControls() {
 			</div>
 
 			{showAuthPrompt && (
-				<Modal
+				<WizardModal
 					description="Inicia sesión para guardar este borrador en tu cuenta sin perder lo que ya avanzaste aquí."
 					title="Guarda tu borrador en tu cuenta"
 				>
@@ -195,11 +177,11 @@ export function SaveDraftControls() {
 					>
 						Seguir editando
 					</button>
-				</Modal>
+				</WizardModal>
 			)}
 
 			{conflictDraft && (
-				<Modal
+				<WizardModal
 					description="Este borrador fue actualizado desde el dashboard después de tu último guardado."
 					title="Hay una versión más reciente"
 				>
@@ -218,11 +200,11 @@ export function SaveDraftControls() {
 					>
 						Continuar con este borrador local
 					</button>
-				</Modal>
+				</WizardModal>
 			)}
 
 			{saveAsNewInput && (
-				<Modal
+				<WizardModal
 					description="El ID guardado en este navegador ya no existe para tu cuenta actual. Puedes guardar este contenido como un borrador nuevo."
 					title="Guarda este borrador como nuevo"
 				>
@@ -241,7 +223,7 @@ export function SaveDraftControls() {
 					>
 						Cancelar
 					</button>
-				</Modal>
+				</WizardModal>
 			)}
 		</>
 	);
