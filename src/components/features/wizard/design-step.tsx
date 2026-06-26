@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageUpload } from "@/components/features/wishlist/image-upload";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { getAllButtonStyles } from "@/config/public-button-styles";
 import { getAllFontPairingOptions } from "@/config/public-fonts";
@@ -106,25 +107,16 @@ export function DesignStep() {
 						selected={draft.buttonStyle}
 					/>
 
-					{/* Cover image upload placeholder */}
+					{/* Cover image upload */}
 					<div>
 						<p className="mb-2 font-medium text-gray-700 text-sm">
 							Imagen de portada
 						</p>
-						<div className="flex items-center justify-center rounded-lg border-2 border-gray-200 border-dashed bg-gray-50 px-4 py-8">
-							<div className="text-center">
-								<p className="text-gray-400 text-sm">
-									Carga de imagen disponible próximamente
-								</p>
-								<button
-									className="mt-2 cursor-not-allowed rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-400 text-sm opacity-50"
-									disabled
-									type="button"
-								>
-									Subir imagen
-								</button>
-							</div>
-						</div>
+						<ImageUpload
+							endpoint="coverImage"
+							onChange={(url) => setField("coverImageUrl", url)}
+							value={draft.coverImageUrl}
+						/>
 					</div>
 				</div>
 

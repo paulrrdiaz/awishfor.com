@@ -7,6 +7,7 @@ export const env = createEnv({
 		CLERK_SECRET_KEY: z.string(),
 		DATABASE_URL: z.string().url(),
 		CLERK_WEBHOOK_SIGNING_SECRET: z.string(),
+		UPLOADTHING_TOKEN: z.string(),
 	},
 
 	client: {
@@ -18,6 +19,7 @@ export const env = createEnv({
 		CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
 		DATABASE_URL: process.env.DATABASE_URL,
 		CLERK_WEBHOOK_SIGNING_SECRET: process.env.CLERK_WEBHOOK_SIGNING_SECRET,
+		UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
 			process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
 	},

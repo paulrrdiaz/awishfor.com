@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { GiftPriority } from "@/generated/prisma/enums";
 import type { DraftGift } from "@/stores/wishlist-wizard.store";
+import { ImageUpload } from "./image-upload";
 
 type GiftFormValues = Omit<DraftGift, "id" | "sortOrder">;
 
@@ -103,22 +104,16 @@ export function GiftForm({
 				/>
 			</div>
 
-			{/* Image URL */}
+			{/* Gift image upload */}
 			<div>
-				<label
-					className="mb-1 block font-medium text-gray-700 text-sm"
-					htmlFor="gift-image"
-				>
-					URL de imagen{" "}
+				<p className="mb-1 block font-medium text-gray-700 text-sm">
+					Imagen del regalo{" "}
 					<span className="font-normal text-gray-400">(opcional)</span>
-				</label>
-				<input
-					className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-					id="gift-image"
-					onChange={(e) => set("imageUrl", e.target.value || null)}
-					placeholder="https://..."
-					type="url"
-					value={values.imageUrl ?? ""}
+				</p>
+				<ImageUpload
+					endpoint="giftImage"
+					onChange={(url) => set("imageUrl", url)}
+					value={values.imageUrl}
 				/>
 			</div>
 
