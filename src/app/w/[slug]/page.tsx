@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { db } from "@/server/db";
 import {
 	getPublicWishlistBySlug,
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	};
 }
 
-export default async function PublicWishlistPage({ params }: Props) {
+export default async function WishlistSlugPage({ params }: Props) {
 	const { slug } = await params;
 	const { userId } = await auth();
 	const result = await getPublicWishlistBySlug(publicDb, {
@@ -72,24 +73,7 @@ export default async function PublicWishlistPage({ params }: Props) {
 	}
 
 	const { wishlist } = result;
-	const isPreview = result.kind === "preview";
+	const mode = result.kind === "preview" ? "preview" : "full";
 
-	return (
-		<main className="flex min-h-svh flex-col">
-			{isPreview && (
-				<div className="bg-yellow-50 px-6 py-3 text-center text-sm text-yellow-800">
-					Vista previa — esta lista aún no es pública
-				</div>
-			)}
-			<div className="flex flex-col items-center p-8">
-				<h1 className="font-semibold text-2xl">{wishlist.title}</h1>
-				{wishlist.displayName && (
-					<p className="mt-2 text-muted-foreground">{wishlist.displayName}</p>
-				)}
-				{wishlist.welcomeMessage && (
-					<p className="mt-4 text-center">{wishlist.welcomeMessage}</p>
-				)}
-			</div>
-		</main>
-	);
+	return <PublicWishlistPage mode={mode} wishlist={wishlist} />;
 }
