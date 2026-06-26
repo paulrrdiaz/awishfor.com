@@ -286,15 +286,15 @@ Slugs are global and power `/w/[slug]`.
 
 Tasks:
 
-- [ ] Add slug validation helper.
-- [ ] Add slug suggestion helper from title.
-- [ ] Enforce lowercase letters, numbers, hyphens only.
-- [ ] Enforce length 3–60.
-- [ ] Reject start/end hyphen.
-- [ ] Add availability service.
-- [ ] Add `excludeWishlistId` support.
-- [ ] Add tRPC endpoint for availability checks.
-- [ ] Add tests.
+- [x] Add slug validation helper.
+- [x] Add slug suggestion helper from title.
+- [x] Enforce lowercase letters, numbers, hyphens only.
+- [x] Enforce length 3–60.
+- [x] Reject start/end hyphen.
+- [x] Add availability service.
+- [x] Add `excludeWishlistId` support.
+- [x] Add tRPC endpoint for availability checks.
+- [x] Add tests.
 
 Acceptance criteria:
 
@@ -324,15 +324,15 @@ Publish requires minimum valid public wishlist data.
 
 Tasks:
 
-- [ ] Add publish readiness helper.
-- [ ] Validate title.
-- [ ] Validate event type.
-- [ ] Validate slug.
-- [ ] Validate language.
-- [ ] Validate currency.
-- [ ] Validate at least one visible non-deleted gift.
-- [ ] Return checklist-friendly result.
-- [ ] Add tests.
+- [x] Add publish readiness helper.
+- [x] Validate title.
+- [x] Validate event type.
+- [x] Validate slug.
+- [x] Validate language.
+- [x] Validate currency.
+- [x] Validate at least one visible non-deleted gift.
+- [x] Return checklist-friendly result.
+- [x] Add tests.
 
 Acceptance criteria:
 
@@ -363,17 +363,17 @@ Components should consume view models, not raw Prisma models.
 
 Tasks:
 
-- [ ] Add `src/server/mappers/public-wishlist.mapper.ts`.
-- [ ] Add `src/server/mappers/dashboard-wishlist.mapper.ts`.
-- [ ] Add `src/server/mappers/dashboard-gift.mapper.ts`.
-- [ ] Add public wishlist view model types.
-- [ ] Add public gift view model types.
-- [ ] Add dashboard card view model types.
-- [ ] Add dashboard gift row view model types.
-- [ ] Serialize Decimal to string.
-- [ ] Serialize Date to ISO string.
-- [ ] Exclude public-private data leaks.
-- [ ] Add mapper tests.
+- [x] Add `src/server/mappers/public-wishlist.mapper.ts`.
+- [x] Add `src/server/mappers/dashboard-wishlist.mapper.ts`.
+- [x] Add `src/server/mappers/dashboard-gift.mapper.ts`.
+- [x] Add public wishlist view model types.
+- [x] Add public gift view model types.
+- [x] Add dashboard card view model types.
+- [x] Add dashboard gift row view model types.
+- [x] Serialize Decimal to string.
+- [x] Serialize Date to ISO string.
+- [x] Exclude public-private data leaks.
+- [x] Add mapper tests.
 
 Acceptance criteria:
 
@@ -403,14 +403,14 @@ Centralize money, date, relative date, and string/domain formatting.
 
 Tasks:
 
-- [ ] Add `src/lib/format/money.ts`.
-- [ ] Add `src/lib/format/dates.ts`.
-- [ ] Add `src/lib/format/strings.ts`.
-- [ ] Add `formatMoney`.
-- [ ] Add `formatEventDate`.
-- [ ] Add `formatRelativeDate`.
-- [ ] Add `formatStoreDomain`.
-- [ ] Add tests.
+- [x] Add `src/lib/format/money.ts`.
+- [x] Add `src/lib/format/dates.ts`.
+- [x] Add `src/lib/format/strings.ts`.
+- [x] Add `formatMoney`.
+- [x] Add `formatEventDate`.
+- [x] Add `formatRelativeDate`.
+- [x] Add `formatStoreDomain`.
+- [x] Add tests.
 
 Acceptance criteria:
 
