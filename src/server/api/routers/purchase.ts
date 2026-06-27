@@ -15,12 +15,14 @@ import {
 	deleteOwnerPurchase,
 	listOwnerGiftPurchases,
 	markGiftPurchasedPublic,
+	undoPurchase,
 } from "@/server/services/purchase.service";
 import {
 	createOwnerManualPurchaseSchema,
 	createPurchaseSchema,
 	deleteOwnerPurchaseSchema,
 	listGiftPurchasesSchema,
+	undoPurchaseSchema,
 } from "@/server/validators/purchase.schema";
 
 type PurchaseRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
@@ -55,6 +57,13 @@ export const purchaseRouter = createTRPCRouter({
 				purchase: mapOwnerPurchaseRecord(result.purchase),
 				undoToken: result.undoToken,
 			};
+		}),
+
+	undoRecentPurchase: publicProcedure
+		.input(undoPurchaseSchema)
+		.mutation(async ({ ctx, input }) => {
+			await undoPurchase(asPublicPurchaseDb(ctx), input);
+			return { ok: true } as const;
 		}),
 
 	listForGift: protectedProcedure

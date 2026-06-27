@@ -6,6 +6,8 @@ const authMock = vi.hoisted(() => vi.fn());
 const listOwnerGiftPurchasesMock = vi.hoisted(() => vi.fn());
 const createOwnerManualPurchaseMock = vi.hoisted(() => vi.fn());
 const deleteOwnerPurchaseMock = vi.hoisted(() => vi.fn());
+const markGiftPurchasedPublicMock = vi.hoisted(() => vi.fn());
+const undoPurchaseMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/db", () => ({ db: {} }));
 
@@ -17,6 +19,8 @@ vi.mock("@/server/services/purchase.service", () => ({
 	listOwnerGiftPurchases: listOwnerGiftPurchasesMock,
 	createOwnerManualPurchase: createOwnerManualPurchaseMock,
 	deleteOwnerPurchase: deleteOwnerPurchaseMock,
+	markGiftPurchasedPublic: markGiftPurchasedPublicMock,
+	undoPurchase: undoPurchaseMock,
 	getRemainingQuantity: vi.fn(),
 }));
 
@@ -62,6 +66,44 @@ describe("purchaseRouter — unauthenticated rejection", () => {
 		await expect(
 			caller.delete({ purchaseId: "purchase_1" }),
 		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+});
+
+describe("purchaseRouter — undoRecentPurchase (public)", () => {
+	beforeEach(() => vi.clearAllMocks());
+
+	it("calls undoPurchase and returns { ok: true } on valid token", async () => {
+		undoPurchaseMock.mockResolvedValue({});
+		const caller = createCaller(makeDb() as never);
+
+		const result = await caller.undoRecentPurchase({
+			purchaseId: "purchase_1",
+			undoToken: "raw-token",
+		});
+
+		expect(undoPurchaseMock).toHaveBeenCalledWith(expect.anything(), {
+			purchaseId: "purchase_1",
+			undoToken: "raw-token",
+		});
+		expect(result).toEqual({ ok: true });
+	});
+
+	it("propagates TRPC error when undoPurchase rejects", async () => {
+		undoPurchaseMock.mockRejectedValue(
+			Object.assign(new Error("Undo token has expired"), {
+				code: "BAD_REQUEST",
+			}),
+		);
+		const caller = createCaller(makeDb() as never);
+
+		await expect(
+			caller.undoRecentPurchase({
+				purchaseId: "purchase_1",
+				undoToken: "expired-token",
+			}),
+		).rejects.toThrow("Undo token has expired");
+
+		expect(undoPurchaseMock).toHaveBeenCalledTimes(1);
 	});
 });
 

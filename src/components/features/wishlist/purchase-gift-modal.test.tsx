@@ -1,21 +1,59 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PurchaseGiftModal } from "@/components/features/wishlist/purchase-gift-modal";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 
 const mutateMock = vi.hoisted(() => vi.fn());
+const undoMutateMock = vi.hoisted(() => vi.fn());
+const refreshMock = vi.hoisted(() => vi.fn());
+
+const mockCallbacks = vi.hoisted(() => ({
+	purchaseSuccess: undefined as
+		| ((data: { purchase: { id: string }; undoToken: string }) => void)
+		| undefined,
+	purchaseError: undefined as ((e: { message: string }) => void) | undefined,
+	undoSuccess: undefined as (() => void) | undefined,
+	undoError: undefined as ((e: { message: string }) => void) | undefined,
+}));
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({ refresh: refreshMock }),
+}));
 
 vi.mock("@/trpc/react", () => ({
 	api: {
 		purchase: {
 			markGiftPurchased: {
-				useMutation: () => ({
-					mutate: mutateMock,
-					isPending: false,
-				}),
+				useMutation: (opts: {
+					onSuccess?: (data: {
+						purchase: { id: string };
+						undoToken: string;
+					}) => void;
+					onError?: (e: { message: string }) => void;
+				}) => {
+					mockCallbacks.purchaseSuccess = opts?.onSuccess;
+					mockCallbacks.purchaseError = opts?.onError;
+					return { mutate: mutateMock, isPending: false };
+				},
+			},
+			undoRecentPurchase: {
+				useMutation: (opts: {
+					onSuccess?: () => void;
+					onError?: (e: { message: string }) => void;
+				}) => {
+					mockCallbacks.undoSuccess = opts?.onSuccess;
+					mockCallbacks.undoError = opts?.onError;
+					return { mutate: undoMutateMock, isPending: false };
+				},
 			},
 		},
 	},
@@ -179,6 +217,112 @@ describe("PurchaseGiftModal", () => {
 
 			expect(await screen.findByText(/500 caracteres/i)).toBeTruthy();
 			expect(mutateMock).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("success state", () => {
+		function triggerPurchaseSuccess() {
+			act(() => {
+				mockCallbacks.purchaseSuccess?.({
+					purchase: { id: "purchase-1" },
+					undoToken: "raw-token-abc",
+				});
+			});
+		}
+
+		it("shows success state with thank-you copy after purchase succeeds", () => {
+			renderModal();
+			triggerPurchaseSuccess();
+
+			expect(screen.getByText(/regalo confirmado/i)).toBeTruthy();
+			expect(screen.getByText(/tienes 60 segundos/i)).toBeTruthy();
+		});
+
+		it("shows Deshacer and Cerrar buttons in success state", () => {
+			renderModal();
+			triggerPurchaseSuccess();
+
+			expect(screen.getByRole("button", { name: /deshacer/i })).toBeTruthy();
+			expect(screen.getByRole("button", { name: /cerrar/i })).toBeTruthy();
+		});
+
+		it("hides the form in success state", () => {
+			renderModal();
+			triggerPurchaseSuccess();
+
+			expect(
+				screen.queryByRole("button", { name: /confirmar regalo/i }),
+			).toBeNull();
+			expect(screen.queryByLabelText(/tu nombre/i)).toBeNull();
+		});
+
+		it("calls router.refresh after purchase succeeds", () => {
+			renderModal();
+			triggerPurchaseSuccess();
+
+			expect(refreshMock).toHaveBeenCalledTimes(1);
+		});
+
+		it("Deshacer invokes undoRecentPurchase mutation with stored purchaseId and undoToken", async () => {
+			const user = userEvent.setup();
+			renderModal();
+			triggerPurchaseSuccess();
+
+			await user.click(screen.getByRole("button", { name: /deshacer/i }));
+
+			expect(undoMutateMock).toHaveBeenCalledWith({
+				purchaseId: "purchase-1",
+				undoToken: "raw-token-abc",
+			});
+		});
+
+		it("shows undo error when undo fails and keeps success state", () => {
+			renderModal();
+			triggerPurchaseSuccess();
+
+			act(() => {
+				mockCallbacks.undoError?.({ message: "Undo token has expired" });
+			});
+
+			expect(screen.getByText(/undo token has expired/i)).toBeTruthy();
+			expect(screen.getByRole("button", { name: /deshacer/i })).toBeTruthy();
+		});
+
+		it("Cerrar closes the modal without calling undo mutation", async () => {
+			const user = userEvent.setup();
+			const onOpenChange = vi.fn();
+			render(
+				<PurchaseGiftModal
+					gift={makeGift()}
+					onOpenChange={onOpenChange}
+					open
+				/>,
+			);
+			triggerPurchaseSuccess();
+
+			await user.click(screen.getByRole("button", { name: /cerrar/i }));
+
+			expect(onOpenChange).toHaveBeenCalledWith(false);
+			expect(undoMutateMock).not.toHaveBeenCalled();
+		});
+
+		it("calls router.refresh and closes after successful undo", () => {
+			const onOpenChange = vi.fn();
+			render(
+				<PurchaseGiftModal
+					gift={makeGift()}
+					onOpenChange={onOpenChange}
+					open
+				/>,
+			);
+			triggerPurchaseSuccess();
+
+			act(() => {
+				mockCallbacks.undoSuccess?.();
+			});
+
+			expect(refreshMock).toHaveBeenCalledTimes(2);
+			expect(onOpenChange).toHaveBeenCalledWith(false);
 		});
 	});
 });

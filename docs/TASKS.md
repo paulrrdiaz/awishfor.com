@@ -1395,14 +1395,14 @@ Guest sees thank-you state and can undo briefly.
 
 Tasks:
 
-- [ ] Add success state copy.
-- [ ] Add `Deshacer` action.
-- [ ] Add `Cerrar` action.
-- [ ] Add `purchase.undoRecentPurchase` mutation.
-- [ ] Validate token hash.
-- [ ] Validate token expiry.
-- [ ] Delete purchase record on valid undo.
-- [ ] Update UI after undo.
+- [x] Add success state copy.
+- [x] Add `Deshacer` action.
+- [x] Add `Cerrar` action.
+- [x] Add `purchase.undoRecentPurchase` mutation.
+- [x] Validate token hash.
+- [x] Validate token expiry.
+- [x] Delete purchase record on valid undo.
+- [x] Update UI after undo.
 
 Acceptance criteria:
 
@@ -1431,11 +1431,11 @@ After purchase/undo, public gift status and progress should reflect changes.
 
 Tasks:
 
-- [ ] Refresh public data after purchase.
-- [ ] Refresh public data after undo.
-- [ ] Update gift card quantity progress.
-- [ ] Move fully purchased gifts into purchased group.
-- [ ] Remove CTAs from purchased gift.
+- [x] Refresh public data after purchase.
+- [x] Refresh public data after undo.
+- [x] Update gift card quantity progress.
+- [x] Move fully purchased gifts into purchased group.
+- [x] Remove CTAs from purchased gift.
 
 Acceptance criteria:
 
