@@ -1,13 +1,17 @@
 import { z } from "zod";
 import { giftIdSchema } from "@/server/validators/gift.schema";
 
-export const PURCHASE_GUEST_NAME_MAX_LENGTH = 120;
+export const PURCHASE_GUEST_NAME_MIN_LENGTH = 2;
+export const PURCHASE_GUEST_NAME_MAX_LENGTH = 80;
 export const PURCHASE_MESSAGE_MAX_LENGTH = 1_000;
 
 export const purchaseGuestNameSchema = z
 	.string()
 	.trim()
-	.min(1, "Guest name is required")
+	.min(
+		PURCHASE_GUEST_NAME_MIN_LENGTH,
+		`Guest name must be at least ${PURCHASE_GUEST_NAME_MIN_LENGTH} characters`,
+	)
 	.max(
 		PURCHASE_GUEST_NAME_MAX_LENGTH,
 		`Guest name must be at most ${PURCHASE_GUEST_NAME_MAX_LENGTH} characters`,

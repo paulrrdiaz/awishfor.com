@@ -17,11 +17,11 @@ describe("purchase validation", () => {
 	it("requires a guest name", () => {
 		expect(() =>
 			createPurchaseSchema.parse({ giftId: "gift_1", guestName: "" }),
-		).toThrow("Guest name is required");
+		).toThrow("Guest name must be at least 2 characters");
 
 		expect(() =>
 			createPurchaseSchema.parse({ giftId: "gift_1", guestName: "   " }),
-		).toThrow("Guest name is required");
+		).toThrow("Guest name must be at least 2 characters");
 	});
 
 	it("trims guest name", () => {

@@ -1,4 +1,8 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import { PurchaseGiftModal } from "@/components/features/wishlist/purchase-gift-modal";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 
 type GiftCardStyle = "card" | "row" | "minimal";
@@ -27,6 +31,7 @@ export function GiftCard({
 	cardStyle = "card",
 	actionsEnabled = false,
 }: Props) {
+	const [modalOpen, setModalOpen] = useState(false);
 	const isPurchased = gift.status === "purchased";
 	const isPartial = gift.status === "partial";
 	const isHigh = gift.priority === "high";
@@ -90,6 +95,21 @@ export function GiftCard({
 							<span>{formatPrice(gift.priceAmount, gift.priceCurrency)}</span>
 						)}
 						{gift.storeName && <span>{gift.storeName}</span>}
+						{gift.productUrl && (
+							<a
+								aria-disabled={isPurchased}
+								className="underline underline-offset-2"
+								href={isPurchased ? undefined : gift.productUrl}
+								rel="noopener noreferrer"
+								style={{
+									color: "var(--public-text-muted)",
+									pointerEvents: isPurchased ? "none" : undefined,
+								}}
+								target="_blank"
+							>
+								Ver producto
+							</a>
+						)}
 					</div>
 					{gift.publicNote && (
 						<p
@@ -111,7 +131,7 @@ export function GiftCard({
 				{actionsEnabled && !isPurchased && (
 					<button
 						className="shrink-0 rounded px-4 py-2 font-medium text-sm transition-colors"
-						disabled
+						onClick={() => setModalOpen(true)}
 						style={{
 							backgroundColor: "var(--public-accent)",
 							color: "var(--public-bg)",
@@ -122,6 +142,13 @@ export function GiftCard({
 					>
 						Regalar
 					</button>
+				)}
+				{actionsEnabled && (
+					<PurchaseGiftModal
+						gift={gift}
+						onOpenChange={setModalOpen}
+						open={modalOpen}
+					/>
 				)}
 			</div>
 		);
@@ -177,6 +204,21 @@ export function GiftCard({
 						</span>
 					)}
 					{gift.storeName && <span>{gift.storeName}</span>}
+					{gift.productUrl && (
+						<a
+							aria-disabled={isPurchased}
+							className="underline underline-offset-2"
+							href={isPurchased ? undefined : gift.productUrl}
+							rel="noopener noreferrer"
+							style={{
+								color: "var(--public-text-muted)",
+								pointerEvents: isPurchased ? "none" : undefined,
+							}}
+							target="_blank"
+						>
+							Ver producto
+						</a>
+					)}
 				</div>
 				{gift.publicNote && (
 					<p
@@ -208,7 +250,7 @@ export function GiftCard({
 					{actionsEnabled && !isPurchased && (
 						<button
 							className="ml-auto rounded px-4 py-2 font-medium text-sm"
-							disabled
+							onClick={() => setModalOpen(true)}
 							style={{
 								backgroundColor: "var(--public-accent)",
 								color: "var(--public-bg)",
@@ -221,6 +263,13 @@ export function GiftCard({
 						</button>
 					)}
 				</div>
+				{actionsEnabled && (
+					<PurchaseGiftModal
+						gift={gift}
+						onOpenChange={setModalOpen}
+						open={modalOpen}
+					/>
+				)}
 			</div>
 		</div>
 	);

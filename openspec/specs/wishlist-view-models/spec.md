@@ -52,6 +52,18 @@ The public gift view model SHALL include a derived public status of `available`,
 - **WHEN** a gift has at least one purchase but purchased quantity is below quantity needed
 - **THEN** the public gift view model status is `partial`
 
+### Requirement: Public gift view model exposes remaining quantity
+
+The public gift view model SHALL include the gift's remaining quantity, computed as quantity needed minus purchased quantity and never below zero, without exposing individual purchaser identities.
+
+#### Scenario: Partially purchased gift remaining quantity
+- **WHEN** a gift with quantity needed of 3 and purchased quantity of 1 is mapped to the public gift view model
+- **THEN** the view model includes a remaining quantity of 2
+
+#### Scenario: Fully purchased gift remaining quantity
+- **WHEN** a gift's purchased quantity is greater than or equal to its quantity needed
+- **THEN** the view model includes a remaining quantity of 0
+
 ### Requirement: Dashboard view models include management-ready derived fields
 
 The dashboard wishlist and dashboard gift mappers SHALL include owner-facing derived fields such as wishlist status, visible gift count, and per-gift purchased and remaining quantities, while still serializing `Decimal` and `Date` values.

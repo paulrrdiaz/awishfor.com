@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto";
+import { TRPCError } from "@trpc/server";
 import { describe, expect, it } from "vitest";
-import type { Gift, Prisma, Purchase } from "@/generated/prisma/client";
+import type {
+	Gift,
+	Prisma,
+	Purchase,
+	Wishlist,
+} from "@/generated/prisma/client";
 import {
 	createOwnerManualPurchase,
 	createPurchase,
@@ -9,7 +15,10 @@ import {
 	getPurchasedQuantity,
 	getRemainingQuantity,
 	listOwnerGiftPurchases,
+	markGiftPurchasedPublic,
 	type OwnerPurchaseDatabase,
+	PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS,
+	type PublicPurchaseDatabase,
 	type PurchaseDatabase,
 	undoPurchase,
 } from "@/server/services/purchase.service";
@@ -419,5 +428,176 @@ describe("deleteOwnerPurchase", () => {
 			deleteOwnerPurchase(db, { ownerId: 99, purchaseId: "purchase_1" }),
 		).rejects.toThrow("Not authorized");
 		expect(giftFindFirstCalled).toBe(1);
+	});
+});
+
+// --- markGiftPurchasedPublic ---
+
+const makeWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
+	id: "wl-1",
+	ownerId: 1,
+	title: "My Wishlist",
+	slug: "my-wishlist",
+	eventType: "birthday",
+	language: "es",
+	currency: "PEN",
+	heroTitle: null,
+	welcomeMessage: null,
+	thankYouMessage: null,
+	displayName: null,
+	eventDate: null,
+	eventTime: null,
+	eventLocation: null,
+	coverImageUrl: null,
+	themeId: null,
+	layoutId: null,
+	buttonStyle: null,
+	fontPairing: null,
+	showHowItWorks: true,
+	status: "published",
+	publishedAt: null,
+	archivedAt: null,
+	createdAt: NOW,
+	updatedAt: NOW,
+	...overrides,
+});
+
+const makePublicDb = (
+	gift: (Gift & { wishlist: Wishlist }) | null,
+	purchasedQuantity = 0,
+): PublicPurchaseDatabase => ({
+	gift: {
+		findFirst: async () => gift,
+	},
+	purchase: {
+		aggregate: async () =>
+			({
+				_sum: { quantity: purchasedQuantity },
+			}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
+		create: async ({ data }) =>
+			createPurchaseRecord({
+				quantity:
+					((data as Prisma.PurchaseUncheckedCreateInput).quantity as number) ??
+					1,
+				undoTokenHash:
+					((data as Prisma.PurchaseUncheckedCreateInput)
+						.undoTokenHash as string) ?? null,
+				undoExpiresAt:
+					((data as Prisma.PurchaseUncheckedCreateInput)
+						.undoExpiresAt as Date) ?? null,
+			}),
+		delete: async ({ where }) =>
+			createPurchaseRecord({ id: where.id as string }),
+		findFirst: async () => null,
+	},
+});
+
+const publicInput = {
+	giftId: "gift_1",
+	guestName: "Ana García",
+	quantity: 1,
+} as const;
+
+describe("markGiftPurchasedPublic", () => {
+	it("succeeds for a published, visible, non-deleted gift", async () => {
+		const gift = createGiftRecord();
+		const wishlist = makeWishlistRecord({ status: "published" });
+		const db = makePublicDb({ ...gift, wishlist });
+
+		const result = await markGiftPurchasedPublic(db, publicInput);
+
+		expect(result.purchase.quantity).toBe(1);
+		expect(typeof result.undoToken).toBe("string");
+		expect(result.undoToken.length).toBeGreaterThan(0);
+	});
+
+	it("stores hash of undo token, not raw token", async () => {
+		const gift = createGiftRecord();
+		const wishlist = makeWishlistRecord();
+		const db = makePublicDb({ ...gift, wishlist });
+
+		const result = await markGiftPurchasedPublic(db, publicInput);
+
+		const expectedHash = createHash("sha256")
+			.update(result.undoToken)
+			.digest("hex");
+		expect(result.purchase.undoTokenHash).toBe(expectedHash);
+		expect(result.purchase.undoTokenHash).not.toBe(result.undoToken);
+	});
+
+	it("sets undo expiry to 60 seconds", async () => {
+		const before = Date.now();
+		const gift = createGiftRecord();
+		const wishlist = makeWishlistRecord();
+		const db = makePublicDb({ ...gift, wishlist });
+
+		const result = await markGiftPurchasedPublic(db, publicInput);
+		const after = Date.now();
+
+		const expiresAt = result.purchase.undoExpiresAt?.getTime();
+		expect(expiresAt).toBeGreaterThanOrEqual(
+			before + PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS * 1000,
+		);
+		expect(expiresAt).toBeLessThanOrEqual(
+			after + PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS * 1000,
+		);
+	});
+
+	it("rejects when wishlist is draft", async () => {
+		const gift = createGiftRecord();
+		const wishlist = makeWishlistRecord({ status: "draft" });
+		const db = makePublicDb({ ...gift, wishlist });
+
+		await expect(markGiftPurchasedPublic(db, publicInput)).rejects.toThrow(
+			TRPCError,
+		);
+	});
+
+	it("rejects when wishlist is archived", async () => {
+		const gift = createGiftRecord();
+		const wishlist = makeWishlistRecord({ status: "archived" });
+		const db = makePublicDb({ ...gift, wishlist });
+
+		await expect(markGiftPurchasedPublic(db, publicInput)).rejects.toThrow(
+			TRPCError,
+		);
+	});
+
+	it("rejects when gift is hidden", async () => {
+		const gift = createGiftRecord({ visibilityStatus: "hidden" });
+		const wishlist = makeWishlistRecord();
+		const db = makePublicDb({ ...gift, wishlist });
+
+		await expect(markGiftPurchasedPublic(db, publicInput)).rejects.toThrow(
+			TRPCError,
+		);
+	});
+
+	it("rejects when gift is soft-deleted", async () => {
+		const gift = createGiftRecord({ deletedAt: NOW });
+		const wishlist = makeWishlistRecord();
+		const db = makePublicDb({ ...gift, wishlist });
+
+		await expect(markGiftPurchasedPublic(db, publicInput)).rejects.toThrow(
+			TRPCError,
+		);
+	});
+
+	it("rejects when quantity exceeds remaining", async () => {
+		const gift = createGiftRecord({ quantityNeeded: 2 });
+		const wishlist = makeWishlistRecord();
+		const db = makePublicDb({ ...gift, wishlist }, 2);
+
+		await expect(
+			markGiftPurchasedPublic(db, { ...publicInput, quantity: 1 }),
+		).rejects.toThrow("Purchase quantity exceeds remaining quantity");
+	});
+
+	it("rejects when gift is not found", async () => {
+		const db = makePublicDb(null);
+
+		await expect(markGiftPurchasedPublic(db, publicInput)).rejects.toThrow(
+			TRPCError,
+		);
 	});
 });

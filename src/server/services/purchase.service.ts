@@ -1,12 +1,18 @@
 import { createHash, randomBytes } from "node:crypto";
 import { TRPCError } from "@trpc/server";
-import type { Gift, Prisma, Purchase } from "@/generated/prisma/client";
+import type {
+	Gift,
+	Prisma,
+	Purchase,
+	Wishlist,
+} from "@/generated/prisma/client";
 import type {
 	CreateOwnerManualPurchaseInput,
 	CreatePurchaseInput,
 } from "@/server/validators/purchase.schema";
 
 const UNDO_TOKEN_EXPIRY_MINUTES = 15;
+export const PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS = 60;
 
 type PurchaseDelegate = {
 	create(args: Prisma.PurchaseCreateArgs): Promise<Purchase>;
@@ -197,6 +203,79 @@ export const deleteOwnerPurchase = async (
 	}
 
 	return db.purchase.delete({ where: { id: purchaseId } });
+};
+
+type GiftWithWishlist = Gift & { wishlist: Wishlist };
+
+type PublicGiftDelegate = {
+	findFirst(args: Prisma.GiftFindFirstArgs): Promise<GiftWithWishlist | null>;
+};
+
+export type PublicPurchaseDatabase = {
+	purchase: PurchaseDelegate;
+	gift: PublicGiftDelegate;
+};
+
+export const markGiftPurchasedPublic = async (
+	db: PublicPurchaseDatabase,
+	input: CreatePurchaseInput,
+): Promise<CreatePurchaseResult> => {
+	const gift = await db.gift.findFirst({
+		where: { id: input.giftId },
+		include: { wishlist: true },
+	});
+
+	if (!gift) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+
+	if (gift.wishlist.status !== "published") {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Wishlist is not published",
+		});
+	}
+
+	if (gift.visibilityStatus === "hidden") {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Gift is not available",
+		});
+	}
+
+	if (gift.deletedAt !== null) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+
+	const remaining = await getRemainingQuantity(db, gift);
+
+	if (input.quantity > remaining) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Purchase quantity exceeds remaining quantity",
+		});
+	}
+
+	const rawToken = randomBytes(32).toString("hex");
+	const tokenHash = hashToken(rawToken);
+	const expiresAt = new Date(
+		Date.now() + PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS * 1000,
+	);
+
+	const purchase = await db.purchase.create({
+		data: {
+			gift: { connect: { id: input.giftId } },
+			guestName: input.guestName,
+			guestEmail: input.guestEmail ?? null,
+			guestPhone: input.guestPhone ?? null,
+			message: input.message ?? null,
+			quantity: input.quantity,
+			undoTokenHash: tokenHash,
+			undoExpiresAt: expiresAt,
+		},
+	});
+
+	return { purchase, undoToken: rawToken };
 };
 
 export const undoPurchase = async (

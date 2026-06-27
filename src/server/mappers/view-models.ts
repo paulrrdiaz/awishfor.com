@@ -20,6 +20,7 @@ export type PublicGiftViewModel = {
 	sortOrder: number;
 	categoryId: string | null;
 	status: GiftPublicStatus;
+	remainingQuantity: number;
 };
 
 export type PublicCategoryViewModel = {

@@ -43,6 +43,7 @@ function mapPublicGift(gift: GiftWithPurchases): PublicGiftViewModel {
 		sortOrder: gift.sortOrder,
 		categoryId: gift.categoryId,
 		status: deriveGiftPublicStatus(gift.quantityNeeded, purchasedQuantity),
+		remainingQuantity: Math.max(0, gift.quantityNeeded - purchasedQuantity),
 	};
 }
 

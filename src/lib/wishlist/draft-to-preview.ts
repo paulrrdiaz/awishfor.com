@@ -25,6 +25,7 @@ function sampleGiftToViewModel(
 		sortOrder: index,
 		categoryId,
 		status: "available",
+		remainingQuantity: 1,
 	};
 }
 
@@ -43,6 +44,7 @@ function draftGiftToViewModel(gift: DraftGift): PublicGiftViewModel {
 		sortOrder: gift.sortOrder,
 		categoryId: gift.category || null,
 		status: "available",
+		remainingQuantity: gift.quantityNeeded,
 	};
 }
 

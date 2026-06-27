@@ -1319,16 +1319,16 @@ Public mutation lets guests mark gifts as purchased without auth.
 
 Tasks:
 
-- [ ] Add `purchase.markGiftPurchased` public mutation.
-- [ ] Validate gift belongs to published wishlist.
-- [ ] Validate gift is not hidden.
-- [ ] Validate gift is not soft-deleted.
-- [ ] Validate quantity remaining.
-- [ ] Create purchase record.
-- [ ] Generate raw undo token.
-- [ ] Hash undo token.
-- [ ] Set undo expiry to 60 seconds.
-- [ ] Return success payload and raw undo token once.
+- [x] Add `purchase.markGiftPurchased` public mutation.
+- [x] Validate gift belongs to published wishlist.
+- [x] Validate gift is not hidden.
+- [x] Validate gift is not soft-deleted.
+- [x] Validate quantity remaining.
+- [x] Create purchase record.
+- [x] Generate raw undo token.
+- [x] Hash undo token.
+- [x] Set undo expiry to 60 seconds.
+- [x] Return success payload and raw undo token once.
 
 Acceptance criteria:
 
@@ -1357,15 +1357,15 @@ Guest enters name, optional contact/message, quantity, and consent.
 
 Tasks:
 
-- [ ] Add `PurchaseGiftModal`.
-- [ ] Add required name field.
-- [ ] Add optional email field.
-- [ ] Add optional phone field.
-- [ ] Add optional message field.
-- [ ] Add quantity selector if remaining > 1.
-- [ ] Add consent copy.
-- [ ] Add loading/error states.
-- [ ] Disable product link for purchased gifts.
+- [x] Add `PurchaseGiftModal`.
+- [x] Add required name field.
+- [x] Add optional email field.
+- [x] Add optional phone field.
+- [x] Add optional message field.
+- [x] Add quantity selector if remaining > 1.
+- [x] Add consent copy.
+- [x] Add loading/error states.
+- [x] Disable product link for purchased gifts.
 
 Acceptance criteria:
 

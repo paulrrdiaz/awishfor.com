@@ -27,6 +27,7 @@ function makeGift(
 		sortOrder: overrides.sortOrder ?? 0,
 		categoryId: overrides.categoryId ?? null,
 		status: overrides.status ?? "available",
+		remainingQuantity: overrides.remainingQuantity ?? 1,
 	};
 }
 
