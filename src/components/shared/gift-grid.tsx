@@ -1,5 +1,5 @@
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
-import { GiftCard } from "./gift-card";
+import { GiftCard, type GiftCardStyle } from "./gift-card";
 
 // Static lookup — Tailwind JIT requires full class literals (no interpolation)
 const COLUMN_CLASSES: Record<number, string> = {
@@ -12,8 +12,9 @@ const COLUMN_CLASSES: Record<number, string> = {
 type Props = {
 	gifts: PublicGiftViewModel[];
 	giftColumns?: number;
-	giftCardStyle?: "card" | "row" | "minimal";
+	giftCardStyle?: GiftCardStyle;
 	actionsEnabled?: boolean;
+	onGiftAction?: (gift: PublicGiftViewModel) => void;
 };
 
 export function GiftGrid({
@@ -21,6 +22,7 @@ export function GiftGrid({
 	giftColumns = 3,
 	giftCardStyle = "card",
 	actionsEnabled = false,
+	onGiftAction,
 }: Props) {
 	if (gifts.length === 0) return null;
 
@@ -34,6 +36,7 @@ export function GiftGrid({
 					cardStyle={giftCardStyle}
 					gift={gift}
 					key={gift.id}
+					onGiftAction={onGiftAction}
 				/>
 			))}
 		</div>

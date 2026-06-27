@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { PurchaseGiftModal } from "@/components/features/wishlist/purchase-gift-modal";
+import { EmptyState } from "@/components/shared/empty-state";
+import { GiftGrid } from "@/components/shared/gift-grid";
+import { GiftList } from "@/components/shared/gift-list";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import {
 	buildCategoryFilters,
@@ -16,8 +20,6 @@ import type {
 	PublicCategoryViewModel,
 	PublicGiftViewModel,
 } from "@/server/mappers/view-models";
-import { GiftGrid } from "./gift-grid";
-import { GiftList } from "./gift-list";
 
 type Props = {
 	gifts: PublicGiftViewModel[];
@@ -69,6 +71,9 @@ export function PublicGiftFilters({
 }: Props) {
 	const [activeFilter, setActiveFilter] = useState<GiftFilter>(DEFAULT_FILTER);
 	const [sortMode, setSortMode] = useState<GiftSortMode>(DEFAULT_SORT_MODE);
+	const [selectedGift, setSelectedGift] = useState<PublicGiftViewModel | null>(
+		null,
+	);
 
 	const counts = useMemo(() => countByStatusFilter(gifts), [gifts]);
 	const categoryFilters = useMemo(
@@ -105,14 +110,14 @@ export function PublicGiftFilters({
 	function chipStyle(active: boolean): React.CSSProperties {
 		return active
 			? {
-					backgroundColor: "var(--public-accent)",
-					color: "var(--public-bg)",
-					borderColor: "var(--public-accent)",
+					backgroundColor: "var(--primary)",
+					color: "var(--primary-foreground)",
+					borderColor: "var(--primary)",
 				}
 			: {
 					backgroundColor: "transparent",
-					color: "var(--public-text)",
-					borderColor: "var(--public-border)",
+					color: "var(--foreground)",
+					borderColor: "var(--border)",
 				};
 	}
 
@@ -190,13 +195,8 @@ export function PublicGiftFilters({
 				{/* Sort dropdown pushed to the end */}
 				<div className="ml-auto">
 					<select
-						className="rounded-lg border px-3 py-1 text-sm"
+						className="rounded-lg border border-border bg-card px-3 py-1 text-card-foreground text-sm"
 						onChange={(e) => setSortMode(e.target.value as GiftSortMode)}
-						style={{
-							borderColor: "var(--public-border)",
-							backgroundColor: "var(--public-surface)",
-							color: "var(--public-text)",
-						}}
 						value={sortMode}
 					>
 						<option value="recommended">Recomendado</option>
@@ -208,29 +208,31 @@ export function PublicGiftFilters({
 
 			{/* Gift list or empty state */}
 			{isEmpty ? (
-				<div className="flex flex-col items-center gap-4 py-16 text-center">
-					<p style={{ color: "var(--public-text-muted)" }}>
-						{isAllFilter ? "Esta lista aún no tiene regalos." : emptyState.copy}
-					</p>
-					{!isAllFilter && (
-						<button
-							className="rounded-full border px-4 py-2 font-medium text-sm transition-colors"
-							onClick={() => setStatusFilter("all")}
-							style={{
-								borderColor: "var(--public-accent)",
-								color: "var(--public-accent)",
-							}}
-							type="button"
-						>
-							{emptyState.ctaLabel}
-						</button>
-					)}
-				</div>
+				<EmptyState
+					action={
+						!isAllFilter && (
+							<button
+								className="rounded-full border border-primary px-4 py-2 font-medium text-primary text-sm transition-colors hover:bg-primary/10"
+								onClick={() => setStatusFilter("all")}
+								type="button"
+							>
+								{emptyState.ctaLabel}
+							</button>
+						)
+					}
+					description={isAllFilter ? undefined : emptyState.copy}
+					title={
+						isAllFilter
+							? "Esta lista aún no tiene regalos."
+							: "No hay regalos para mostrar."
+					}
+				/>
 			) : layout.id === "minimal" ? (
 				<GiftList
 					actionsEnabled={actionsEnabled}
 					giftCardStyle={layout.giftCardStyle}
 					gifts={filteredGifts}
+					onGiftAction={setSelectedGift}
 				/>
 			) : (
 				<GiftGrid
@@ -238,6 +240,16 @@ export function PublicGiftFilters({
 					giftCardStyle={layout.giftCardStyle}
 					giftColumns={layout.giftColumns}
 					gifts={filteredGifts}
+					onGiftAction={setSelectedGift}
+				/>
+			)}
+			{actionsEnabled && selectedGift && (
+				<PurchaseGiftModal
+					gift={selectedGift}
+					onOpenChange={(open) => {
+						if (!open) setSelectedGift(null);
+					}}
+					open
 				/>
 			)}
 		</div>

@@ -9,10 +9,7 @@ export function Countdown({ eventDate }: Props) {
 
 	return (
 		<div className="py-4 text-center">
-			<span
-				className="font-medium text-sm uppercase tracking-wide"
-				style={{ color: "var(--public-accent)" }}
-			>
+			<span className="font-medium text-primary text-sm uppercase tracking-wide">
 				{text}
 			</span>
 		</div>

@@ -1,10 +1,10 @@
-import { Countdown } from "@/components/features/wishlist/countdown";
-import { GiftList } from "@/components/features/wishlist/gift-list";
-import { HowItWorks } from "@/components/features/wishlist/how-it-works";
-import { ProgressSummary } from "@/components/features/wishlist/progress-summary";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
-import { WishlistFooter } from "@/components/features/wishlist/wishlist-footer";
-import { WishlistHero } from "@/components/features/wishlist/wishlist-hero";
+import { Countdown } from "@/components/shared/countdown";
+import { GiftList } from "@/components/shared/gift-list";
+import { HowItWorks } from "@/components/shared/how-it-works";
+import { ProgressSummary } from "@/components/shared/progress-summary";
+import { WishlistFooter } from "@/components/shared/wishlist-footer";
+import { WishlistHero } from "@/components/shared/wishlist-hero";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import { sortGifts } from "@/lib/wishlist/gift-filters";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
@@ -35,10 +35,7 @@ export function MinimalWishlistLayout({ wishlist, layout, mode }: Props) {
 			)}
 
 			{!isCompact && wishlist.welcomeMessage && (
-				<div
-					className="mx-auto max-w-2xl px-6 py-6 text-center text-base leading-relaxed"
-					style={{ color: "var(--public-text)" }}
-				>
+				<div className="mx-auto max-w-2xl px-6 py-6 text-center text-base leading-relaxed">
 					{wishlist.welcomeMessage}
 				</div>
 			)}

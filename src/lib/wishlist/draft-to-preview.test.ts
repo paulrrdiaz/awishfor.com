@@ -17,10 +17,10 @@ function makeDraft(overrides: Partial<WishlistDraft> = {}): WishlistDraft {
 		welcomeMessage: "Gracias por venir",
 		thankYouMessage: "Gracias por el regalo",
 		categories: ["Pañales", "Ropa", "Otros"],
-		themeId: "sky",
+		themeId: "cielo-suave",
 		layoutId: "grid",
 		buttonStyle: "rounded",
-		fontPairing: "classic",
+		fontPairing: "serif-soft",
 		showHowItWorks: true,
 		gifts: [],
 		...overrides,
@@ -143,9 +143,9 @@ describe("draftToPreview", () => {
 			const vm = draftToPreview(draft);
 			expect(vm.title).toBe("Baby shower de Ana");
 			expect(vm.slug).toBe("baby-shower-de-ana");
-			expect(vm.themeId).toBe("sky");
+			expect(vm.themeId).toBe("cielo-suave");
 			expect(vm.layoutId).toBe("grid");
-			expect(vm.fontPairing).toBe("classic");
+			expect(vm.fontPairing).toBe("serif-soft");
 			expect(vm.buttonStyle).toBe("rounded");
 			expect(vm.showHowItWorks).toBe(true);
 		});

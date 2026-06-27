@@ -8,13 +8,14 @@
 
 @theme {
 	--font-sans:
-		var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+		var(--font-inter, Inter), ui-sans-serif, system-ui, sans-serif,
 		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-serif:
+		var(--font-lora, Lora), Georgia, Cambria, "Times New Roman", serif;
 }
 
 @theme inline {
-	--font-heading: var(--font-sans);
-	--font-sans: Inter, system-ui, sans-serif;
+	--font-heading: var(--font-public-heading, var(--font-serif));
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -54,7 +55,6 @@
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-4xl: calc(var(--radius) * 2.6);
 	--font-mono: JetBrains Mono, monospace;
-	--font-serif: Georgia, serif;
 	--radius: 1rem;
 	--tracking-tighter: calc(var(--tracking-normal) - 0.05em);
 	--tracking-tight: calc(var(--tracking-normal) - 0.025em);
@@ -81,6 +81,10 @@
 	--color-destructive-foreground: var(--destructive-foreground);
 }
 
+/*
+	App tokens are the dashboard/wizard source of truth. Public themes must not
+	write to :root; they scope semantic overrides to .public-theme only.
+*/
 :root {
 	--background: oklch(0.9892 0.0054 117.9205);
 	--foreground: oklch(0.2077 0.0398 265.7549);
@@ -115,8 +119,11 @@
 	--sidebar-border: oklch(0.9683 0.0069 247.8956);
 	--sidebar-ring: oklch(0.8871 0.2122 128.5041);
 	--destructive-foreground: oklch(1 0 0);
-	--font-sans: Inter, system-ui, sans-serif;
-	--font-serif: Georgia, serif;
+	--font-sans:
+		var(--font-inter, Inter), ui-sans-serif, system-ui, sans-serif,
+		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-serif:
+		var(--font-lora, Lora), Georgia, Cambria, "Times New Roman", serif;
 	--font-mono: JetBrains Mono, monospace;
 	--shadow-color: #000000;
 	--shadow-opacity: 0.05;
@@ -176,8 +183,11 @@
 	--sidebar-ring: oklch(0.8871 0.2122 128.5041);
 	--destructive-foreground: oklch(1 0 0);
 	--radius: 1rem;
-	--font-sans: Inter, system-ui, sans-serif;
-	--font-serif: Georgia, serif;
+	--font-sans:
+		var(--font-inter, Inter), ui-sans-serif, system-ui, sans-serif,
+		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-serif:
+		var(--font-lora, Lora), Georgia, Cambria, "Times New Roman", serif;
 	--font-mono: JetBrains Mono, monospace;
 	--shadow-color: #000000;
 	--shadow-opacity: 0.4;
@@ -200,6 +210,31 @@
 	--shadow-xl:
 		0px 10px 25px 0px hsl(0 0% 0% / 0.4), 0px 8px 10px -1px hsl(0 0% 0% / 0.4);
 	--shadow-2xl: 0px 10px 25px 0px hsl(0 0% 0% / 1);
+}
+
+.public-theme {
+	--font-public-heading: var(--font-serif);
+	--font-public-body: var(--font-sans);
+	font-family: var(--font-public-body);
+}
+
+.public-theme[data-font-pairing="serif-soft"] {
+	--font-public-heading: var(--font-serif);
+	--font-public-body: var(--font-sans);
+}
+
+.public-theme[data-font-pairing="sans-modern"] {
+	--font-public-heading: var(--font-sans);
+	--font-public-body: var(--font-sans);
+}
+
+.public-theme[data-font-pairing="rounded-friendly"] {
+	--font-public-heading:
+		var(--font-rounded, Nunito), ui-rounded, "Nunito", ui-sans-serif, system-ui,
+		sans-serif;
+	--font-public-body:
+		var(--font-rounded, Nunito), ui-rounded, "Nunito", ui-sans-serif, system-ui,
+		sans-serif;
 }
 
 @layer base {

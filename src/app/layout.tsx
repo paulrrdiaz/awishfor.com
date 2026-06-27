@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter, Lora, Nunito } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,16 +14,32 @@ export const metadata: Metadata = {
 	icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
+const inter = Inter({
 	subsets: ["latin"],
-	variable: "--font-geist-sans",
+	variable: "--font-inter",
+	display: "swap",
+});
+
+const lora = Lora({
+	subsets: ["latin"],
+	variable: "--font-lora",
+	display: "swap",
+});
+
+const nunito = Nunito({
+	subsets: ["latin"],
+	variable: "--font-rounded",
+	display: "swap",
 });
 
 export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<html className={`${geist.variable}`} lang="en">
+		<html
+			className={`${inter.variable} ${lora.variable} ${nunito.variable}`}
+			lang="en"
+		>
 			<body>
 				<ClerkProvider>
 					<TRPCReactProvider>

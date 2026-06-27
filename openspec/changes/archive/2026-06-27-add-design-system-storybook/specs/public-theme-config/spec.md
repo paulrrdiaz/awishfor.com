@@ -1,8 +1,4 @@
-## Purpose
-
-Define the public wishlist preset configuration for themes, layouts, fonts, button styles, and public-theme scoping.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Theme presets selectable by id
 
@@ -22,34 +18,6 @@ The system SHALL provide seven hardcoded public theme presets, each addressable 
 
 - **WHEN** a wishlist uses `themeId` `cielo-suave-rosa`
 - **THEN** the public page applies the rose-on-blush niña variant that shares the `cielo-suave` family's ivory accent
-
-### Requirement: Layout presets selectable by id
-
-The system SHALL provide three hardcoded public layout presets, each addressable by a stable id, and SHALL resolve a wishlist's `layoutId` to its preset with a default fallback.
-
-#### Scenario: Layout id resolves to its preset
-
-- **WHEN** a wishlist has a `layoutId` matching a defined preset
-- **THEN** the public page resolves and applies that layout preset
-
-#### Scenario: Missing or unknown layout id falls back
-
-- **WHEN** a wishlist's `layoutId` is null or does not match any preset
-- **THEN** the resolver returns the default layout preset
-
-### Requirement: Font pairing and button style presets
-
-The system SHALL provide font-pairing presets wired through `next/font` and button-style presets, each selectable by id with a default fallback, and SHALL NOT include a square button style.
-
-#### Scenario: Font pairing resolves to a next/font pairing
-
-- **WHEN** a wishlist references a font pairing id
-- **THEN** the resolver returns the matching `next/font` pairing, or the default when null or unknown
-
-#### Scenario: Button style resolves by id
-
-- **WHEN** a wishlist references a button style id
-- **THEN** the resolver returns the matching button style preset, or the default when null or unknown
 
 ### Requirement: Theme styling is scoped to public pages
 

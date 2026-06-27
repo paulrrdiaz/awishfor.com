@@ -1,16 +1,18 @@
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
-import { GiftCard } from "./gift-card";
+import { GiftCard, type GiftCardStyle } from "./gift-card";
 
 type Props = {
 	gifts: PublicGiftViewModel[];
-	giftCardStyle?: "card" | "row" | "minimal";
+	giftCardStyle?: GiftCardStyle;
 	actionsEnabled?: boolean;
+	onGiftAction?: (gift: PublicGiftViewModel) => void;
 };
 
 export function GiftList({
 	gifts,
 	giftCardStyle = "row",
 	actionsEnabled = false,
+	onGiftAction,
 }: Props) {
 	if (gifts.length === 0) return null;
 
@@ -22,6 +24,7 @@ export function GiftList({
 					cardStyle={giftCardStyle}
 					gift={gift}
 					key={gift.id}
+					onGiftAction={onGiftAction}
 				/>
 			))}
 		</div>

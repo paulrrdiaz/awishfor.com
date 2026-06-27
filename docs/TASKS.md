@@ -23,6 +23,15 @@ Do not add foundational setup tasks for:
 
 Tasks below are product implementation work for A Wish For.
 
+The visual system is defined by the Claude Design brief (`Claude Design Output.md`,
+canvas `A Wish For.dc.html`). Treat that brief as the source of truth for themes,
+layouts, type, copy, and interaction behavior. Key brief-driven facts:
+
+- **Seven** scoped public theme presets (adds `cielo-suave-rosa`, the niña variant).
+- `serif-soft` default type system: **Lora** headings + **Inter** body via `next/font`.
+- Public CSS variables are scoped to a `.public-theme` wrapper; the dashboard never sees them.
+- Reusable presentational components live in `src/components/shared/` and ship with Storybook stories.
+
 Priority labels:
 
 - P0 = required for MVP launch
@@ -126,6 +135,7 @@ Tasks:
 - [x] Add `buttonStyle`.
 - [x] Add `fontPairing`.
 - [x] Add `showHowItWorks` default true.
+- [ ] Add `dressCode` optional plain text (powers the "Código de vestimenta" details card).
 
 Acceptance criteria:
 
@@ -133,6 +143,7 @@ Acceptance criteria:
 - Missing design values can fall back to presets.
 - Event date/time/location are optional.
 - Date can be in the past.
+- Dress code is optional; details card hides when empty.
 
 Affected areas:
 
@@ -445,7 +456,210 @@ Do not defer:
 
 ---
 
-## Milestone 2 — Public wishlist foundation
+## Milestone 2 — Design system foundation & Storybook
+
+### Goal
+
+Establish the shared visual foundation the rest of the product builds on: app + public
+design tokens aligned to the brief, the `serif-soft` font system, the scoped public-theme
+provider with all seven presets, a `src/components/shared/` design-system layer, and a
+Storybook for those shared components. This milestone front-loads the design system so
+public, wizard, and dashboard UI consume a single source of truth.
+
+### Dependencies
+
+- Existing shadcn (`base-nova`) + Tailwind v4 setup (`src/styles/globals.css`, `components.json`).
+- Milestone 1 view models (shared components consume view-model props).
+- Claude Design brief (`Claude Design Output.md`) as the visual source of truth.
+
+### 2.1 Align design tokens to the brief
+
+Priority: P0
+
+Details:
+
+Reconcile the app theme tokens in `globals.css` with the brief's app palette and shape
+language. Tokens largely exist — this is alignment, not a rebuild.
+
+Tasks:
+
+- [ ] Align app `:root` tokens to warm near-white surface `#F7F8F1`, deep-navy ink, lime-chartreuse primary used sparingly.
+- [ ] Confirm `--radius` app scale (`1rem`) and shadow scale match the brief (low-contrast, 1px tinted borders).
+- [ ] Document the app-theme tokens that must stay untouched by public themes.
+- [ ] Verify dark-mode variants remain coherent after alignment.
+
+Acceptance criteria:
+
+- App chrome (dashboard/wizard) matches the brief's app theme.
+- Lime primary appears on at most one important action per view by convention.
+- Existing components render unchanged in structure after token alignment.
+
+Affected areas:
+
+- `src/styles/globals.css`
+
+Notes/out-of-scope:
+
+- No freeform color picker.
+- No per-component color overrides.
+
+### 2.2 Add the `serif-soft` font system
+
+Priority: P0
+
+Details:
+
+Add Lora serif and the three shippable font pairings as tokens via `next/font`.
+
+Tasks:
+
+- [ ] Load **Lora** via `next/font`; expose `--font-serif`.
+- [ ] Confirm **Inter** body via `--font-sans`.
+- [ ] Replace `--font-serif: Georgia, serif` in `globals.css` with the Lora token.
+- [ ] Add `src/config/public-fonts.ts` with `serif-soft` (default), `sans-modern`, `rounded-friendly` pairings.
+- [ ] Expose font pairing via a wrapper data-attribute, not per-element classes.
+
+Acceptance criteria:
+
+- Serif moments (names, section titles, gift names) render in Lora at 26–60px.
+- Body/UI renders in Inter.
+- Switching `fontPairing` changes the active pair with zero per-element changes.
+
+Affected areas:
+
+- `src/app/layout.tsx` (or font registration module)
+- `src/styles/globals.css`
+- `src/config/public-fonts.ts`
+
+Notes/out-of-scope:
+
+- Alternate pairings are font tokens only, not redesigns.
+
+### 2.3 Add scoped public theme provider and presets
+
+Priority: P0
+
+Details:
+
+Implement the seven theme presets and a provider that scopes their CSS vars to the public
+page wrapper only.
+
+Tasks:
+
+- [ ] Add `src/config/public-themes.ts` as typed `ThemePreset[]`.
+- [ ] Add all seven presets: `dulce-rosa`, `cielo-suave` (default ★), `cielo-suave-rosa`, `jardin-verde`, `crema-elegante`, `lavanda-fiesta`, `clasico-minimal`.
+- [ ] Add `PublicThemeProvider` that writes preset vars to a `.public-theme` wrapper as inline styles with `data-theme`.
+- [ ] Apply `--radius: 18px` public override on the wrapper.
+- [ ] Confirm Tailwind v4 `@theme inline` maps `--color-*` so semantic utilities resolve per theme.
+- [ ] Ensure dashboard `:root` theme is never affected by public vars.
+
+Acceptance criteria:
+
+- Public page switches palette by `data-theme` with zero per-theme class names.
+- All seven themes render with brief-accurate bg/primary/accent.
+- `cielo-suave` and `cielo-suave-rosa` read as a matching baby-shower set.
+- Dashboard chrome is visually unchanged when public themes mount.
+
+Affected areas:
+
+- `src/config/public-themes.ts`
+- `src/components/layouts/public-wishlist/public-theme-provider.tsx`
+- `src/styles/globals.css`
+
+Notes/out-of-scope:
+
+- No square button style.
+- No custom hex input.
+
+### 2.4 Establish `src/components/shared/` and migrate reusable components
+
+Priority: P1
+
+Details:
+
+Create the shared design-system layer and migrate reusable, presentational, theme-driven
+components out of `features/`. Stateful/domain-coupled components stay in `features/`.
+
+Tasks:
+
+- [ ] Create `src/components/shared/` and keep `@/components/shared/*` alias consistent with `components.json`.
+- [ ] Move presentational components into `shared/`: `gift-card`, `gift-grid`, `gift-list`, `countdown`, `how-it-works`, `progress-summary`, `wishlist-hero`, `wishlist-footer`.
+- [ ] Add new shared DS pieces from the brief inventory: `StatusBadge`, `PriorityBadge`, `MetricCard`, `EmptyState`, `SharePanel`, `StepProgress`.
+- [ ] Update import paths across public layouts, `src/app/w/[slug]/*`, wizard preview, and marketing demo.
+- [ ] Keep stateful/domain components in `features/`: `purchase-gift-modal`, `public-filters`, `gift-form`, `image-upload`, all `wizard/*` steps, all `dashboard/*` tables/drawers, importer UI.
+- [ ] Use `cn()` + `cva` for variant components (e.g. `GiftCard` status variants).
+
+Acceptance criteria:
+
+- Shared components are presentational and consume view-model/typed props only.
+- No domain/data-fetching logic leaks into `shared/`.
+- App builds and typechecks after the move.
+- `GiftCard` exposes `available | partial | purchased | hidden` variants via `cva`.
+
+Affected areas:
+
+- `src/components/shared/*`
+- `src/components/features/wishlist/*`
+- `src/components/layouts/public-wishlist/*`
+- `src/app/w/[slug]/*`
+
+Notes/out-of-scope:
+
+- Do not move stateful modals/forms into `shared/`.
+
+### 2.5 Set up Storybook for shared components
+
+Priority: P1
+
+Details:
+
+Stand up Storybook 9 with the Vite builder for the `shared/` design-system layer.
+
+Tasks:
+
+- [ ] Install and configure **Storybook 9 + `@storybook/nextjs-vite`**.
+- [ ] Import `src/styles/globals.css` in `.storybook/preview` so Tailwind v4 tokens load.
+- [ ] Add a public-theme decorator/toolbar to preview components under each `data-theme`.
+- [ ] Add a11y and docs addons.
+- [ ] Add colocated `*.stories.tsx` for every `shared/` component, covering key variants/states.
+- [ ] Add `pnpm storybook` and `pnpm build-storybook` scripts.
+
+Acceptance criteria:
+
+- `pnpm storybook` boots and renders all `shared/` stories.
+- `GiftCard` story shows available/partial/purchased/hidden variants.
+- Theme toolbar switches stories across the seven presets.
+- a11y addon reports on shared components.
+
+Affected areas:
+
+- `.storybook/*`
+- `src/components/shared/**/*.stories.tsx`
+- `package.json` scripts
+
+Notes/out-of-scope:
+
+- No visual regression / Chromatic in MVP.
+- No stories for stateful `features/` components in this milestone.
+
+### Cut line
+
+If scope gets tight, defer:
+
+- Storybook a11y/docs polish.
+- Stories for lower-traffic shared components.
+- Alternate font pairings beyond `serif-soft`.
+
+Do not defer:
+
+- Token alignment.
+- Lora serif + `--font-serif`.
+- Seven theme presets + scoped provider.
+- `src/components/shared/` existence (downstream depends on it).
+
+---
+
+## Milestone 3 — Public wishlist foundation
 
 ### Goal
 
@@ -454,10 +668,10 @@ Render `/w/[slug]` correctly, safely, beautifully, and mobile-first before compl
 ### Dependencies
 
 - Milestone 1 core models.
+- Milestone 2 design system (themes, fonts, shared components).
 - Public wishlist view model mapper.
-- Theme/layout config.
 
-### 2.1 Add public wishlist service
+### 3.1 Add public wishlist service
 
 Priority: P0
 
@@ -493,7 +707,7 @@ Notes/out-of-scope:
 
 - No public search/discovery.
 
-### 2.2 Add public route and metadata behavior
+### 3.2 Add public route and metadata behavior
 
 Priority: P0
 
@@ -516,6 +730,8 @@ Acceptance criteria:
 - Public wishlist pages are `noindex`.
 - Marketing pages remain indexable.
 - Archived page has correct message.
+- Draft owner preview shows sticky top banner: "Vista previa — esta lista aún no está publicada." + bottom `Publicar wishlist`.
+- Archived page shows: "Esta lista ya no está activa. El creador ha archivado esta wishlist." + `Crear mi wishlist`.
 
 Affected areas:
 
@@ -526,29 +742,29 @@ Notes/out-of-scope:
 
 - No locale prefix.
 
-### 2.3 Add public theme and layout config
+### 3.3 Add public theme and layout config
 
 Priority: P0
 
 Details:
 
-Implement hardcoded theme, layout, font, and button presets.
+Wire the public theme/layout/font/button presets (from Milestone 2) into the page.
 
 Tasks:
 
 - [x] Add `src/config/public-themes.ts`.
-- [x] Add six theme presets.
+- [x] Add theme presets (now seven — see 2.3; add `cielo-suave-rosa`).
 - [x] Add scoped Shadcn/Tailwind CSS variable support.
 - [x] Add `src/config/public-layouts.ts`.
 - [x] Add three layout presets.
 - [x] Add `src/config/public-fonts.ts`.
-- [x] Add font pairings using `next/font`.
+- [x] Add font pairings using `next/font` (now Lora-based — see 2.2).
 - [x] Add `src/config/public-button-styles.ts`.
 - [x] Add button style presets.
 
 Acceptance criteria:
 
-- Public page can switch theme by `themeId`.
+- Public page can switch theme by `themeId` (all seven).
 - Public page can switch layout by `layoutId`.
 - Dashboard theme remains unaffected.
 - Public components use scoped variables.
@@ -563,7 +779,7 @@ Notes/out-of-scope:
 - No custom color picker.
 - No square button style.
 
-### 2.4 Add public layout components
+### 3.4 Add public layout components
 
 Priority: P0
 
@@ -584,24 +800,28 @@ Tasks:
 - [x] Add `HowItWorks`.
 - [x] Add `WishlistFooter`.
 - [x] Support `full | preview | compact` render modes.
+- [ ] Add event-details section: 3 cards (Fecha · Lugar · Código de vestimenta), hiding empty cards.
+- [ ] Add countdown states: `Faltan N días` · `Falta 1 día` · `Es hoy` · post-event "Gracias por celebrar con nosotros."
+- [ ] De-emphasize purchased gifts: ~60% opacity + line-through name, sorted below available.
 
 Acceptance criteria:
 
-- Public page renders all required sections in correct order.
+- Public page renders all required sections in correct brief order (hero → details → countdown → welcome → gifts → how it works → thank-you → footer).
 - Components support preview mode with disabled actions.
 - Compact mode works for landing preview.
-- Page is mobile-first.
+- Page is mobile-first (designed at 390px).
+- Countdown recomputes client-side and flips to post-event message at T-0.
 
 Affected areas:
 
 - `src/components/layouts/public-wishlist/*`
-- `src/components/features/wishlist/*`
+- `src/components/shared/*` (migrated section components)
 
 Notes/out-of-scope:
 
-- No advanced animations required.
+- No advanced animations required on the public page.
 
-### 2.5 Add public gift filters and sorting
+### 3.5 Add public gift filters and sorting
 
 Priority: P0
 
@@ -620,24 +840,27 @@ Tasks:
 - [x] Add sort dropdown.
 - [x] Add default recommended order.
 - [x] Add empty filter states.
+- [ ] Render filter chips as a scroll-snap toggle group with `aria-pressed`; selected chip inverted (`bg-foreground text-background`).
+- [ ] Use exact empty-filter copy from brief §11.
 
 Acceptance criteria:
 
 - One active filter at a time.
 - Category filters follow category sort order.
 - Purchased gifts appear below available gifts by default.
-- Empty states show correct copy and CTA.
+- Sort options: Recomendados · Precio: menor a mayor · Precio: mayor a menor · Nombre: A–Z.
+- Empty states show exact copy and a single corrective CTA that resets to `Todos`.
 
 Affected areas:
 
 - `src/components/features/wishlist/public-filters.tsx`
-- `src/components/features/wishlist/gift-list.tsx`
+- `src/components/shared/gift-list.tsx`
 
 Notes/out-of-scope:
 
 - No multi-select filters.
 
-### 2.6 Add public progress display
+### 3.6 Add public progress display
 
 Priority: P0
 
@@ -661,7 +884,7 @@ Acceptance criteria:
 
 Affected areas:
 
-- `src/components/features/wishlist/progress-summary.tsx`
+- `src/components/shared/progress-summary.tsx`
 - `src/server/mappers/public-wishlist.mapper.ts`
 
 Notes/out-of-scope:
@@ -687,7 +910,7 @@ Do not defer:
 
 ---
 
-## Milestone 3 — Wishlist creation wizard
+## Milestone 4 — Wishlist creation wizard
 
 ### Goal
 
@@ -696,10 +919,11 @@ Build the unauthenticated-first creation flow with local drafts, event presets, 
 ### Dependencies
 
 - Milestone 1 models/validation.
-- Milestone 2 public preview components.
+- Milestone 2 design system.
+- Milestone 3 public preview components.
 - Existing Clerk auth from template.
 
-### 3.1 Add event presets config
+### 4.1 Add event presets config
 
 Priority: P0
 
@@ -717,12 +941,14 @@ Tasks:
 - [x] Add default thank-you message.
 - [x] Add sample gifts.
 - [x] Add default theme/layout IDs.
+- [ ] Align default-by-event-type to brief: Baby Shower → Cielo Suave + Editorial; Birthday → Lavanda Fiesta + Galería; Wedding → Crema Elegante + Editorial; Housewarming → Jardín Verde + Lista Minimal; General → Clásico Minimal + Galería.
 
 Acceptance criteria:
 
 - Selecting event type seeds default content.
 - Sample gifts render in preview before real gifts exist.
 - Defaults can be regenerated manually.
+- Seeded theme/layout match the brief's default-by-event-type table.
 
 Affected areas:
 
@@ -733,7 +959,7 @@ Notes/out-of-scope:
 
 - No AI copy generation.
 
-### 3.2 Add wizard route and state structure
+### 4.2 Add wizard route and state structure
 
 Priority: P0
 
@@ -769,7 +995,7 @@ Notes/out-of-scope:
 
 - No DB autosave.
 
-### 3.3 Add Event Type step
+### 4.3 Add Event Type step
 
 Priority: P0
 
@@ -801,7 +1027,7 @@ Notes/out-of-scope:
 
 - No custom event type in MVP.
 
-### 3.4 Add Event Details + slug step
+### 4.4 Add Event Details + slug step
 
 Priority: P0
 
@@ -821,13 +1047,16 @@ Tasks:
 - [x] Add `use-debounce` slug availability check.
 - [x] Add Checking/Available/Taken/Invalid states.
 - [x] Add past date warning.
+- [ ] Add optional dress-code ("Código de vestimenta") field.
+- [ ] Use exact slug-state copy: `◌ Verificando…` · `✓ Disponible` (green ring) · `✕ Ya está en uso` · `✕ Solo letras, números y guiones`.
+- [ ] Use exact past-date copy: "Esta fecha ya pasó. Puedes continuar, pero el contador mostrará un mensaje de cierre."
 
 Acceptance criteria:
 
-- Slug validates client-side and server-side.
+- Slug validates client-side and server-side, debounced ~350ms.
 - Slug is checked before save/publish.
 - Past dates allowed with warning.
-- Event date/time/location optional.
+- Event date/time/location/dress-code optional.
 
 Affected areas:
 
@@ -839,7 +1068,7 @@ Notes/out-of-scope:
 
 - No map autocomplete.
 
-### 3.5 Add Design & Preview step
+### 4.5 Add Design & Preview step
 
 Priority: P0
 
@@ -857,6 +1086,8 @@ Tasks:
 - [x] Add embedded public preview.
 - [x] Use sample gifts before real gifts exist.
 - [x] Disable purchase actions in preview mode.
+- [ ] Label the embedded preview "Vista previa con ejemplos".
+- [ ] Show all seven theme swatches including `cielo-suave-rosa`.
 
 Acceptance criteria:
 
@@ -874,7 +1105,7 @@ Notes/out-of-scope:
 
 - No freeform theme builder.
 
-### 3.6 Add Gifts step
+### 4.6 Add Gifts step
 
 Priority: P0
 
@@ -912,7 +1143,7 @@ Notes/out-of-scope:
 
 - Full drag-and-drop gift ordering can be dashboard-first.
 
-### 3.7 Add authenticated save draft
+### 4.7 Add authenticated save draft
 
 Priority: P0
 
@@ -948,7 +1179,7 @@ Notes/out-of-scope:
 
 - No autosave MVP.
 
-### 3.8 Add Final Preview, Auth Gate, Publish & Share step
+### 4.8 Add Final Preview, Auth Gate, Publish & Share step
 
 Priority: P0
 
@@ -968,6 +1199,8 @@ Tasks:
 - [x] Add WhatsApp share action.
 - [x] Add QR download action.
 - [x] Clear local draft after successful publish.
+- [ ] Label the final preview "Vista previa de tu wishlist"; auth gate copy "tu progreso ya está guardado".
+- [ ] Publish success copy + actions: Copiar enlace · Compartir por WhatsApp · Descargar QR · Ver lista pública · Gestionar en dashboard.
 
 Acceptance criteria:
 
@@ -1005,7 +1238,7 @@ Do not defer:
 
 ---
 
-## Milestone 4 — Gift management & importer
+## Milestone 5 — Gift management & importer
 
 ### Goal
 
@@ -1015,10 +1248,10 @@ Make gift creation/editing powerful in dashboard and wizard, including URL impor
 
 - Gift model and service.
 - Category model and service.
-- Public gift components.
+- Milestone 2 shared gift components.
 - UploadThing product dependency.
 
-### 4.1 Add URL importer service
+### 5.1 Add URL importer service
 
 Priority: P0
 
@@ -1061,7 +1294,7 @@ Notes/out-of-scope:
 - No JavaScript execution.
 - No Puppeteer/Playwright.
 
-### 4.2 Add URL cleanup and store display mapping
+### 5.2 Add URL cleanup and store display mapping
 
 Priority: P0
 
@@ -1097,7 +1330,7 @@ Notes/out-of-scope:
 
 - No affiliate link rewrite.
 
-### 4.3 Add image upload support
+### 5.3 Add image upload support
 
 Priority: P0
 
@@ -1137,7 +1370,7 @@ Notes/out-of-scope:
 - No AI image features.
 - No multiple images per gift.
 
-### 4.4 Add dashboard gift management table/list
+### 5.4 Add dashboard gift management table/list
 
 Priority: P0
 
@@ -1152,7 +1385,7 @@ Tasks:
 - [ ] Add available/partial group.
 - [ ] Add purchased group.
 - [ ] Add hidden group.
-- [ ] Add status badges.
+- [ ] Add status badges (reuse `shared/StatusBadge`).
 - [ ] Add quantity progress per gift.
 - [ ] Add edit action.
 - [ ] Add hide/unhide action.
@@ -1162,7 +1395,7 @@ Tasks:
 Acceptance criteria:
 
 - Dashboard shows available, purchased, and hidden gifts.
-- Hidden gifts are shown with badge in dashboard.
+- Hidden gifts are shown with `Oculto` badge in dashboard.
 - Soft-deleted gifts disappear from dashboard.
 - Gift with purchases shows stronger delete warning.
 
@@ -1175,7 +1408,7 @@ Notes/out-of-scope:
 
 - No restore UI for deleted gifts.
 
-### 4.5 Add drag-and-drop gift ordering
+### 5.5 Add drag-and-drop gift ordering
 
 Priority: P1
 
@@ -1207,7 +1440,7 @@ Notes/out-of-scope:
 
 - No category drag-and-drop in wizard.
 
-### 4.6 Add category management UI
+### 5.6 Add category management UI
 
 Priority: P1
 
@@ -1241,7 +1474,7 @@ Notes/out-of-scope:
 
 - No nested categories.
 
-### 4.7 Add purchase drawer for owner
+### 5.7 Add purchase drawer for owner
 
 Priority: P0
 
@@ -1296,7 +1529,7 @@ Do not defer:
 
 ---
 
-## Milestone 5 — Guest purchase flow
+## Milestone 6 — Guest purchase flow
 
 ### Goal
 
@@ -1309,7 +1542,7 @@ Complete the public conversion action: guests can mark gifts as purchased safely
 - Gift quantity logic.
 - Upstash Redis.
 
-### 5.1 Add public purchase mutation
+### 6.1 Add public purchase mutation
 
 Priority: P0
 
@@ -1347,7 +1580,7 @@ Notes/out-of-scope:
 
 - No guest account creation.
 
-### 5.2 Add public purchase modal
+### 6.2 Add public purchase modal
 
 Priority: P0
 
@@ -1366,6 +1599,8 @@ Tasks:
 - [x] Add consent copy.
 - [x] Add loading/error states.
 - [x] Disable product link for purchased gifts.
+- [ ] Render as bottom sheet on mobile, centered dialog ≥ md; sticky 48px footer actions.
+- [ ] Use exact consent copy: "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."
 
 Acceptance criteria:
 
@@ -1373,19 +1608,19 @@ Acceptance criteria:
 - Email validates if present.
 - Phone validates if present.
 - Message max 500 chars.
-- Quantity min 1 and max remaining.
+- Quantity min 1 and max remaining; selector only renders when remaining > 1.
 - Consent copy visible.
 
 Affected areas:
 
 - `src/components/features/wishlist/purchase-gift-modal.tsx`
-- `src/components/features/wishlist/gift-card.tsx`
+- `src/components/shared/gift-card.tsx`
 
 Notes/out-of-scope:
 
 - No CAPTCHA unless abuse appears.
 
-### 5.3 Add success and undo flow
+### 6.3 Add success and undo flow
 
 Priority: P0
 
@@ -1395,18 +1630,19 @@ Guest sees thank-you state and can undo briefly.
 
 Tasks:
 
-- [x] Add success state copy.
-- [x] Add `Deshacer` action.
-- [x] Add `Cerrar` action.
-- [x] Add `purchase.undoRecentPurchase` mutation.
-- [x] Validate token hash.
-- [x] Validate token expiry.
-- [x] Delete purchase record on valid undo.
-- [x] Update UI after undo.
+- [ ] Add success state copy: "¡Gracias, {nombre}! Tu regalo fue marcado como comprado. Gracias por tu cariño y por ser parte de este momento."
+- [ ] Add `Deshacer` action with live 8s countdown.
+- [ ] Add `Cerrar` action.
+- [ ] Add `purchase.undoRecentPurchase` mutation.
+- [ ] Validate token hash.
+- [ ] Validate token expiry.
+- [ ] Delete purchase record on valid undo.
+- [ ] Update UI after undo.
+- [ ] Show "el tiempo para deshacer expiró" on expiry.
 
 Acceptance criteria:
 
-- Guest can undo within 60 seconds.
+- Guest can undo within the undo window.
 - Expired/invalid token fails safely.
 - Undo deletes only the just-created purchase.
 - Public progress updates after undo.
@@ -1421,7 +1657,7 @@ Notes/out-of-scope:
 
 - Undo is not available across devices/browsers.
 
-### 5.4 Add public progress refresh behavior
+### 6.4 Add public progress refresh behavior
 
 Priority: P0
 
@@ -1431,11 +1667,11 @@ After purchase/undo, public gift status and progress should reflect changes.
 
 Tasks:
 
-- [x] Refresh public data after purchase.
-- [x] Refresh public data after undo.
-- [x] Update gift card quantity progress.
-- [x] Move fully purchased gifts into purchased group.
-- [x] Remove CTAs from purchased gift.
+- [ ] Refresh public data after purchase.
+- [ ] Refresh public data after undo.
+- [ ] Update gift card quantity progress.
+- [ ] Move fully purchased gifts into purchased group.
+- [ ] Remove CTAs from purchased gift.
 
 Acceptance criteria:
 
@@ -1452,7 +1688,7 @@ Notes/out-of-scope:
 
 - No realtime updates between different guests.
 
-### 5.5 Add rate limiting
+### 6.5 Add rate limiting
 
 Priority: P0
 
@@ -1504,7 +1740,7 @@ Do not defer:
 
 ---
 
-## Milestone 6 — Owner dashboard
+## Milestone 7 — Owner dashboard
 
 ### Goal
 
@@ -1513,10 +1749,10 @@ Allow owners to manage existing wishlists, view progress, publish readiness, sha
 ### Dependencies
 
 - Product models/services.
-- Public view components.
+- Milestone 2 shared components (MetricCard, SharePanel, PublishChecklist, etc.).
 - Dashboard shell from template.
 
-### 6.1 Add dashboard wishlist list
+### 7.1 Add dashboard wishlist list
 
 Priority: P0
 
@@ -1539,7 +1775,7 @@ Acceptance criteria:
 
 - Owner sees their wishlists only.
 - Archived hidden from default list.
-- Empty state CTA goes to `/create`.
+- Empty state CTA goes to `/create` with copy: "Aún no tienes wishlists / Crea tu primera wishlist…".
 
 Affected areas:
 
@@ -1551,7 +1787,7 @@ Notes/out-of-scope:
 
 - No search in MVP.
 
-### 6.2 Add wishlist overview page
+### 7.2 Add wishlist overview page
 
 Priority: P0
 
@@ -1562,12 +1798,12 @@ Overview shows metrics, link, sharing, readiness, and recent purchases.
 Tasks:
 
 - [ ] Add overview page.
-- [ ] Add metrics cards.
+- [ ] Add 4 metric cards (Regalos totales · Disponibles · Comprados · Progreso de compras with bar).
 - [ ] Add public link section.
 - [ ] Add copy link action.
 - [ ] Add WhatsApp share action.
 - [ ] Add QR download action.
-- [ ] Add recent purchases section.
+- [ ] Add recent purchases section (avatar + buyer + gift + relative time + status badge).
 - [ ] Add publish readiness checklist.
 - [ ] Add publish action.
 
@@ -1587,7 +1823,7 @@ Notes/out-of-scope:
 
 - No full analytics dashboard.
 
-### 6.3 Add dashboard navigation
+### 7.3 Add dashboard navigation
 
 Priority: P0
 
@@ -1599,13 +1835,14 @@ Tasks:
 
 - [ ] Add wishlist detail layout.
 - [ ] Add desktop/tablet tabs.
-- [ ] Add mobile select/dropdown.
+- [ ] Add mobile select/dropdown (< md).
 - [ ] Add nav items: Resumen, Regalos, Diseño, Configuración.
 
 Acceptance criteria:
 
 - Navigation works on desktop and mobile.
 - Active section clearly indicated.
+- Tabs collapse to a `Select` below md.
 
 Affected areas:
 
@@ -1616,7 +1853,7 @@ Notes/out-of-scope:
 
 - No breadcrumbs required unless already in template.
 
-### 6.4 Add dashboard design page
+### 7.4 Add dashboard design page
 
 Priority: P1
 
@@ -1627,7 +1864,7 @@ Owner can update design after wishlist creation.
 Tasks:
 
 - [ ] Add design page.
-- [ ] Add theme selector.
+- [ ] Add theme selector (all seven themes).
 - [ ] Add layout selector.
 - [ ] Add font selector.
 - [ ] Add button style selector.
@@ -1650,7 +1887,7 @@ Notes/out-of-scope:
 
 - No freeform custom colors.
 
-### 6.5 Add dashboard settings page
+### 7.5 Add dashboard settings page
 
 Priority: P0
 
@@ -1663,7 +1900,7 @@ Tasks:
 - [ ] Add settings page.
 - [ ] Edit title.
 - [ ] Edit slug.
-- [ ] Edit event details.
+- [ ] Edit event details (incl. dress code).
 - [ ] Edit hero/welcome/thank-you copy.
 - [ ] Edit language/currency.
 - [ ] Toggle How it works.
@@ -1674,9 +1911,9 @@ Tasks:
 Acceptance criteria:
 
 - Owner can edit core settings.
-- Published slug change shows QR/link warning.
+- Published slug change shows QR/link warning with exact brief copy.
 - Archive makes public page inactive.
-- Restore as draft or published works.
+- Restore dialog offers `Restaurar publicada` / `Restaurar como borrador`.
 
 Affected areas:
 
@@ -1707,42 +1944,47 @@ Do not defer:
 
 ---
 
-## Milestone 7 — Marketing, legal, and sharing polish
+## Milestone 8 — Marketing, legal, and sharing polish
 
 ### Goal
 
-Make the app launch-ready publicly with landing page, legal pages, demo preview, footer/report links, QR, and Spanish copy polish.
+Make the app launch-ready publicly with a rich light-green landing page, legal pages, demo preview, footer/report links, QR, WhatsApp templates, and Spanish copy polish.
 
 ### Dependencies
 
-- Public components.
+- Milestone 2 + 3 public/shared components.
 - QR package.
 - WhatsApp templates.
 
-### 7.1 Add marketing landing page
+### 8.1 Add marketing landing page
 
 Priority: P0
 
 Details:
 
-Landing page explains product and drives users to `/create`.
+Landing page (fresh light-green theme) explains the product and drives users to `/create`.
+Palette: mint `#F1F7EC` bg, forest-green ink `#173E29`, sage muted `#5E7865`, lime pop
+`#BCE25A`, sunshine accent `#F4C84A`. Deep-green serif headlines, lime primary buttons.
 
 Tasks:
 
-- [ ] Add hero section.
-- [ ] Add Cómo funciona section.
-- [ ] Add Casos de uso section.
-- [ ] Add theme previews section.
-- [ ] Add example public wishlist preview.
-- [ ] Add final CTA section.
+- [ ] Add hero section (split: serif headline + CTAs left, rotated public-page card right).
+- [ ] Add ¿Por qué A Wish For? benefits row (4 cards: todo en un lugar · gratis sin comisiones · enlace/QR · listas sugeridas).
+- [ ] Add Cómo funciona section (3 numbered cards).
+- [ ] Add Casos de uso section (5 event pills).
+- [ ] Add Tiendas aliadas partner-logo strip (+ "y cualquier tienda con enlace").
+- [ ] Add theme previews section (gradient swatches for the seven themes).
+- [ ] Add example public wishlist preview (real `PublicWishlistPage` in compact mode).
+- [ ] Add final CTA section (dark-green band).
 - [ ] Add minimal nav.
 
 Acceptance criteria:
 
 - CTA `Crear mi wishlist` links to `/create`.
-- Secondary CTA `Ver ejemplo` links to `#ejemplo`.
+- Secondary CTA `Ver ejemplo` links to the example block.
 - Signed-out nav shows Iniciar sesión + Crear mi wishlist.
-- Signed-in nav shows Dashboard + Crear mi wishlist.
+- Signed-in nav shows Dashboard + Crear mi wishlist (Clerk `<SignedIn>/<SignedOut>`).
+- Example block reuses the real public components (single source of truth).
 
 Affected areas:
 
@@ -1754,9 +1996,73 @@ Notes/out-of-scope:
 
 - No pricing.
 - No testimonials.
-- No FAQ.
 
-### 7.2 Add demo wishlist config
+### 8.2 Add guest list-finder and FAQ
+
+Priority: P1
+
+Details:
+
+Discovery + trust sections adapted from the LatAm category leader, re-expressed in A Wish
+For's softer editorial language.
+
+Tasks:
+
+- [ ] Add guest list-finder section ("¿Buscas la lista de alguien?" — search by name/link).
+- [ ] Wire finder to slug/name lookup behavior.
+- [ ] Add FAQ accordion (Base UI `Collapsible`).
+
+Acceptance criteria:
+
+- Guest can search for a friend's list by name or link.
+- FAQ expands/collapses accessibly with rotating chevron.
+
+Affected areas:
+
+- `src/components/layouts/marketing/*`
+- `src/server/api/routers/wishlist.ts` (lookup, if needed)
+
+Notes/out-of-scope:
+
+- No full search index.
+
+### 8.3 Add landing animations (reduced-motion safe)
+
+Priority: P1
+
+Details:
+
+Subtle celebratory motion, fully static under `prefers-reduced-motion: reduce`.
+
+Tasks:
+
+- [ ] Add `useInView()` hook to fire reveals once on enter.
+- [ ] Add hero mesh-gradient drift + blurred blobs + floating emoji.
+- [ ] Add staggered `rise` entrance + "hermosa" shimmer sweep.
+- [ ] Add hero card `bob` + pulsing status dot.
+- [ ] Add stats count-up via IntersectionObserver.
+- [ ] Add allied-stores infinite marquee (edge-masked, pause on hover).
+- [ ] Add card fade-up stagger + hover lift.
+- [ ] Add button hover scale + arrow nudge.
+- [ ] Keep all `@keyframes` in `globals.css`, every animated rule inside the reduced-motion guard.
+
+Acceptance criteria:
+
+- Animations run only when motion is allowed.
+- Page is fully static for `prefers-reduced-motion: reduce`.
+- No layout shift from animations.
+
+Affected areas:
+
+- `src/styles/globals.css`
+- `src/hooks/use-in-view.ts`
+- `src/components/layouts/marketing/*`
+
+Notes/out-of-scope:
+
+- No JS animation library.
+
+### 8.4 Add demo wishlist config
 
 Priority: P1
 
@@ -1768,12 +2074,12 @@ Tasks:
 
 - [ ] Add `src/config/demo-wishlist.ts`.
 - [ ] Add compact public wishlist view model sample.
-- [ ] Render using compact mode.
+- [ ] Render using compact mode (Crema Elegante in brief).
 - [ ] Ensure actions disabled.
 
 Acceptance criteria:
 
-- Landing preview looks like real public wishlist.
+- Landing preview looks like a real public wishlist.
 - Demo does not mutate anything.
 
 Affected areas:
@@ -1785,7 +2091,7 @@ Notes/out-of-scope:
 
 - No separate screenshot carousel.
 
-### 7.3 Add QR download
+### 8.5 Add QR download
 
 Priority: P0
 
@@ -1819,7 +2125,7 @@ Notes/out-of-scope:
 - No SVG.
 - No scan tracking.
 
-### 7.4 Add WhatsApp share templates
+### 8.6 Add WhatsApp share templates
 
 Priority: P0
 
@@ -1853,7 +2159,7 @@ Notes/out-of-scope:
 
 - No custom WhatsApp message editor.
 
-### 7.5 Add legal pages and footer links
+### 8.7 Add legal pages and footer links
 
 Priority: P0
 
@@ -1867,7 +2173,7 @@ Tasks:
 - [ ] Add `/terms`.
 - [ ] Mention Clerk, PostHog, Sentry, UploadThing, Neon.
 - [ ] Mention guest purchase/contact data.
-- [ ] Add public footer links.
+- [ ] Add public footer links ("Hecho con cariño en A Wish For").
 - [ ] Add report mailto link.
 - [ ] Add support email `hola@awishfor.com`.
 
@@ -1882,7 +2188,7 @@ Affected areas:
 
 - `src/app/(marketing)/privacy/page.tsx`
 - `src/app/(marketing)/terms/page.tsx`
-- `src/components/features/wishlist/wishlist-footer.tsx`
+- `src/components/shared/wishlist-footer.tsx`
 
 Notes/out-of-scope:
 
@@ -1892,9 +2198,10 @@ Notes/out-of-scope:
 
 If scope gets tight, defer:
 
-- Theme preview section detail.
+- Guest list-finder + FAQ.
+- Landing animations.
 - Demo preview polish.
-- Extra landing copy sections.
+- Theme preview section detail.
 
 Do not defer:
 
@@ -1906,7 +2213,7 @@ Do not defer:
 
 ---
 
-## Milestone 8 — Observability, tests, and release hardening
+## Milestone 9 — Observability, tests, and release hardening
 
 ### Goal
 
@@ -1918,7 +2225,7 @@ Add confidence before launch with product logic tests, analytics, error monitori
 - Vitest from template.
 - PostHog/Sentry if enabled.
 
-### 8.1 Add product logic tests
+### 9.1 Add product logic tests
 
 Priority: P0
 
@@ -1958,7 +2265,7 @@ Notes/out-of-scope:
 - No full E2E test suite in MVP.
 - No visual regression tests in MVP.
 
-### 8.2 Add shared test fixtures
+### 9.2 Add shared test fixtures
 
 Priority: P1
 
@@ -1985,7 +2292,7 @@ Notes/out-of-scope:
 
 - No test database required unless already supported by template.
 
-### 8.3 Add PostHog events
+### 9.3 Add PostHog events
 
 Priority: P1
 
@@ -2023,7 +2330,7 @@ Notes/out-of-scope:
 
 - No owner analytics dashboard.
 
-### 8.4 Add Sentry coverage
+### 9.4 Add Sentry coverage
 
 Priority: P1
 
@@ -2053,7 +2360,7 @@ Notes/out-of-scope:
 
 - No custom Sentry dashboard setup required.
 
-### 8.5 Add release QA checklist
+### 9.5 Add release QA checklist
 
 Priority: P0
 
@@ -2078,6 +2385,8 @@ Tasks:
 - [ ] Verify WhatsApp share.
 - [ ] Verify privacy/terms links.
 - [ ] Verify no public data leak.
+- [ ] Verify all seven themes render correctly via `data-theme`.
+- [ ] Verify reduced-motion disables landing animations.
 
 Acceptance criteria:
 

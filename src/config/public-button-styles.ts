@@ -8,35 +8,21 @@ export type PublicButtonStylePreset = {
 
 const rounded: PublicButtonStylePreset = {
 	id: "rounded",
-	label: "Rounded",
-	borderRadius: "0.375rem",
+	label: "Redondeado",
+	borderRadius: "0.75rem",
 	borderWidth: "0",
 	fontWeight: "500",
 };
 
 const buttonStyles: Record<string, PublicButtonStylePreset> = {
-	rounded,
 	pill: {
 		id: "pill",
-		label: "Pill",
+		label: "Píldora",
 		borderRadius: "9999px",
 		borderWidth: "0",
 		fontWeight: "500",
 	},
-	flat: {
-		id: "flat",
-		label: "Flat",
-		borderRadius: "0",
-		borderWidth: "0",
-		fontWeight: "600",
-	},
-	outlined: {
-		id: "outlined",
-		label: "Outlined",
-		borderRadius: "0.375rem",
-		borderWidth: "1.5px",
-		fontWeight: "500",
-	},
+	rounded,
 };
 
 export function resolveButtonStyle(

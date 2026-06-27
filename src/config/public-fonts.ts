@@ -1,108 +1,53 @@
-import {
-	Cormorant_Garamond,
-	Inter,
-	Lato,
-	Montserrat,
-	Nunito,
-	Playfair_Display,
-} from "next/font/google";
-
-// Heading fonts — all expose --public-font-heading
-const playfairDisplay = Playfair_Display({
-	subsets: ["latin"],
-	variable: "--public-font-heading",
-	display: "swap",
-});
-
-const cormorantGaramond = Cormorant_Garamond({
-	subsets: ["latin"],
-	weight: ["300", "400", "600"],
-	variable: "--public-font-heading",
-	display: "swap",
-});
-
-const interHeading = Inter({
-	subsets: ["latin"],
-	variable: "--public-font-heading",
-	display: "swap",
-});
-
-const nunitoHeading = Nunito({
-	subsets: ["latin"],
-	variable: "--public-font-heading",
-	display: "swap",
-});
-
-// Body fonts — all expose --public-font-body
-const latoBody = Lato({
-	subsets: ["latin"],
-	weight: ["400", "700"],
-	variable: "--public-font-body",
-	display: "swap",
-});
-
-const montserratBody = Montserrat({
-	subsets: ["latin"],
-	variable: "--public-font-body",
-	display: "swap",
-});
-
-const interBody = Inter({
-	subsets: ["latin"],
-	variable: "--public-font-body",
-	display: "swap",
-});
-
-const nunitoBody = Nunito({
-	subsets: ["latin"],
-	variable: "--public-font-body",
-	display: "swap",
-});
+export type PublicFontPairingId =
+	| "serif-soft"
+	| "sans-modern"
+	| "rounded-friendly";
 
 export type PublicFontPairing = {
-	id: string;
+	id: PublicFontPairingId;
 	label: string;
-	heading: { className: string; variable: string };
-	body: { className: string; variable: string };
+	description: string;
+	dataAttribute: PublicFontPairingId;
 };
 
-const classic: PublicFontPairing = {
-	id: "classic",
-	label: "Classic",
-	heading: playfairDisplay,
-	body: latoBody,
+export const DEFAULT_FONT_PAIRING_ID =
+	"serif-soft" satisfies PublicFontPairingId;
+
+const serifSoft: PublicFontPairing = {
+	id: "serif-soft",
+	label: "Serif suave",
+	description: "Lora para títulos e Inter para lectura cómoda.",
+	dataAttribute: "serif-soft",
 };
 
-const fontPairings: Record<string, PublicFontPairing> = {
-	classic,
-	modern: {
-		id: "modern",
-		label: "Modern",
-		heading: interHeading,
-		body: interBody,
+export const PUBLIC_FONT_PAIRINGS: PublicFontPairing[] = [
+	serifSoft,
+	{
+		id: "sans-modern",
+		label: "Sans moderna",
+		description: "Inter para títulos, cuerpo e interfaz.",
+		dataAttribute: "sans-modern",
 	},
-	romantic: {
-		id: "romantic",
-		label: "Romantic",
-		heading: cormorantGaramond,
-		body: montserratBody,
+	{
+		id: "rounded-friendly",
+		label: "Redonda amable",
+		description: "Nunito para una lectura más cercana y familiar.",
+		dataAttribute: "rounded-friendly",
 	},
-	playful: {
-		id: "playful",
-		label: "Playful",
-		heading: nunitoHeading,
-		body: nunitoBody,
-	},
-};
+];
+
+const pairingsById = new Map(
+	PUBLIC_FONT_PAIRINGS.map((pairing) => [pairing.id, pairing]),
+);
 
 export function resolveFontPairing(
 	id: string | null | undefined,
 ): PublicFontPairing {
-	return fontPairings[id ?? ""] ?? classic;
+	return pairingsById.get(id as PublicFontPairingId) ?? serifSoft;
 }
 
-export type FontPairingOption = { id: string; label: string };
+export type FontPairingOption = Pick<PublicFontPairing, "id" | "label">;
 
 export function getAllFontPairingOptions(): FontPairingOption[] {
-	return Object.values(fontPairings).map(({ id, label }) => ({ id, label }));
+	return PUBLIC_FONT_PAIRINGS.map(({ id, label }) => ({ id, label }));
 }

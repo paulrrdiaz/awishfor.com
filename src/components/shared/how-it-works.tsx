@@ -27,36 +27,17 @@ export function HowItWorks({ showHowItWorks }: Props) {
 
 	return (
 		<section className="mx-auto max-w-3xl px-6 py-12">
-			<h2
-				className="mb-8 text-center font-semibold text-2xl"
-				style={{ color: "var(--public-text)" }}
-			>
+			<h2 className="mb-8 text-center font-heading font-semibold text-2xl">
 				¿Cómo funciona?
 			</h2>
 			<div className="grid gap-8 sm:grid-cols-3">
 				{DEFAULT_STEPS.map((step) => (
 					<div className="text-center" key={step.number}>
-						<div
-							className="mx-auto mb-4 flex size-10 items-center justify-center rounded-full font-bold text-lg"
-							style={{
-								backgroundColor: "var(--public-accent)",
-								color: "var(--public-bg)",
-							}}
-						>
+						<div className="mx-auto mb-4 flex size-10 items-center justify-center rounded-full bg-primary font-bold text-lg text-primary-foreground">
 							{step.number}
 						</div>
-						<h3
-							className="mb-2 font-semibold"
-							style={{ color: "var(--public-text)" }}
-						>
-							{step.title}
-						</h3>
-						<p
-							className="text-sm"
-							style={{ color: "var(--public-text-muted)" }}
-						>
-							{step.description}
-						</p>
+						<h3 className="mb-2 font-semibold">{step.title}</h3>
+						<p className="text-muted-foreground text-sm">{step.description}</p>
 					</div>
 				))}
 			</div>

@@ -76,9 +76,8 @@ export function DesignStep() {
 					<SelectorGrid
 						accentStyle={(t) => ({
 							borderColor:
-								draft.themeId === t.id ? undefined : t.vars["--public-accent"],
-							color:
-								draft.themeId === t.id ? undefined : t.vars["--public-accent"],
+								draft.themeId === t.id ? undefined : t.preview.primary,
+							color: draft.themeId === t.id ? undefined : t.preview.primary,
 						})}
 						label="Tema de color"
 						onSelect={(id) => setField("themeId", id)}

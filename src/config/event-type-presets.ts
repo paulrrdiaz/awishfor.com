@@ -42,8 +42,8 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Cojín de lactancia", price: 60 },
 			{ name: "Bañera plegable", price: 55 },
 		],
-		defaultThemeId: "sky",
-		defaultLayoutId: "grid",
+		defaultThemeId: "cielo-suave",
+		defaultLayoutId: "editorial",
 	},
 	birthday: {
 		eventType: "birthday",
@@ -67,7 +67,7 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Auriculares inalámbricos", price: 80 },
 			{ name: "Experiencia de cocina", price: 70 },
 		],
-		defaultThemeId: "rose",
+		defaultThemeId: "lavanda-fiesta",
 		defaultLayoutId: "grid",
 	},
 	wedding: {
@@ -92,7 +92,7 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Cafetera espresso", price: 150 },
 			{ name: "Noche en hotel boutique", price: 200 },
 		],
-		defaultThemeId: "gold",
+		defaultThemeId: "crema-elegante",
 		defaultLayoutId: "editorial",
 	},
 	housewarming: {
@@ -117,8 +117,8 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Set de herramientas básicas", price: 65 },
 			{ name: "Aspiradora inalámbrica", price: 130 },
 		],
-		defaultThemeId: "sage",
-		defaultLayoutId: "grid",
+		defaultThemeId: "jardin-verde",
+		defaultLayoutId: "minimal",
 	},
 	general: {
 		eventType: "general",
@@ -141,7 +141,7 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Experiencia gastronómica", price: 90 },
 			{ name: "Accesorio favorito", price: 50 },
 		],
-		defaultThemeId: "linen",
+		defaultThemeId: "clasico-minimal",
 		defaultLayoutId: "grid",
 	},
 };
