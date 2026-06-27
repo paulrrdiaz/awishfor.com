@@ -4,17 +4,22 @@ import { GiftVisibilityStatus } from "@/generated/prisma/client";
 import type { createTRPCContext } from "@/server/api/trpc";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { mapDashboardGift } from "@/server/mappers/dashboard-gift.mapper";
-import type { DashboardGiftDatabase } from "@/server/services/gift.service";
+import type {
+	DashboardGiftDatabase,
+	ReorderGiftDatabase,
+} from "@/server/services/gift.service";
 import {
 	getOwnedGift,
 	groupDashboardGifts,
 	listDashboardGifts,
+	reorderGifts,
 	softDeleteGift,
 	updateGift,
 } from "@/server/services/gift.service";
 import {
 	deleteGiftSchema,
 	giftIdSchema,
+	reorderGiftsSchema,
 	updateGiftSchema,
 } from "@/server/validators/gift.schema";
 
@@ -33,6 +38,9 @@ const getLocalUserId = async (ctx: GiftRouterContext) => {
 
 const asDashboardDb = (ctx: GiftRouterContext): DashboardGiftDatabase =>
 	ctx.db as unknown as DashboardGiftDatabase;
+
+const asReorderDb = (ctx: GiftRouterContext): ReorderGiftDatabase =>
+	ctx.db as unknown as ReorderGiftDatabase;
 
 export const giftRouter = createTRPCRouter({
 	list: protectedProcedure
@@ -79,5 +87,12 @@ export const giftRouter = createTRPCRouter({
 			const ownerId = await getLocalUserId(ctx);
 			await getOwnedGift(asDashboardDb(ctx), { ownerId, giftId: input.giftId });
 			return softDeleteGift(ctx.db, input);
+		}),
+
+	reorder: protectedProcedure
+		.input(reorderGiftsSchema)
+		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+			return reorderGifts(asReorderDb(ctx), { ownerId, ...input });
 		}),
 });

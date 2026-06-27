@@ -40,6 +40,15 @@ const getLocalUserId = async (ctx: WishlistRouterContext) => {
 };
 
 export const wishlistRouter = createTRPCRouter({
+	list: protectedProcedure.query(async ({ ctx }) => {
+		const ownerId = await getLocalUserId(ctx);
+		return ctx.db.wishlist.findMany({
+			where: { ownerId, status: { not: "archived" } },
+			select: { id: true, title: true, status: true, eventType: true },
+			orderBy: { createdAt: "desc" },
+		});
+	}),
+
 	checkSlugAvailability: publicProcedure
 		.input(checkSlugAvailabilitySchema)
 		.query(async ({ ctx, input }) => {

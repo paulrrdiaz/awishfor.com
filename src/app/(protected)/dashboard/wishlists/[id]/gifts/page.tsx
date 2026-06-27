@@ -33,17 +33,12 @@ export default async function DashboardWishlistGiftsPage({ params }: Props) {
 					Agrega regalos desde la lista pública o el asistente.
 				</div>
 			) : (
-				<div className="space-y-8">
-					{grouped.available.length > 0 && (
-						<GiftGroup gifts={grouped.available} label="Disponibles" />
-					)}
-					{grouped.purchased.length > 0 && (
-						<GiftGroup gifts={grouped.purchased} label="Comprados" />
-					)}
-					{grouped.hidden.length > 0 && (
-						<GiftGroup gifts={grouped.hidden} label="Ocultos" />
-					)}
-				</div>
+				<GiftGroup
+					available={grouped.available}
+					hidden={grouped.hidden}
+					purchased={grouped.purchased}
+					wishlistId={id}
+				/>
 			)}
 		</div>
 	);

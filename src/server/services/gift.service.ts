@@ -9,6 +9,7 @@ import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import type {
 	CreateGiftInput,
 	DeleteGiftInput,
+	ReorderGiftsInput,
 	UpdateGiftInput,
 } from "@/server/validators/gift.schema";
 
@@ -40,6 +41,15 @@ type WishlistDelegate = {
 export type DashboardGiftDatabase = {
 	gift: DashboardGiftDelegate;
 	wishlist: WishlistDelegate;
+};
+
+export type ReorderGiftDatabase = {
+	gift: {
+		findMany(args: Prisma.GiftFindManyArgs): Promise<{ id: string }[]>;
+		update(args: Prisma.GiftUpdateArgs): Promise<Gift>;
+	};
+	wishlist: WishlistDelegate;
+	$transaction(ops: Promise<unknown>[]): Promise<unknown[]>;
 };
 
 export type GroupedDashboardGifts = {
@@ -166,6 +176,45 @@ export const getOwnedGift = async (
 		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 	}
 	return gift;
+};
+
+export const reorderGifts = async (
+	db: ReorderGiftDatabase,
+	{
+		ownerId,
+		wishlistId,
+		orderedGiftIds,
+	}: { ownerId: number } & ReorderGiftsInput,
+): Promise<void> => {
+	const wishlist = await db.wishlist.findFirst({
+		where: { id: wishlistId, ownerId },
+		select: { id: true },
+	});
+	if (!wishlist) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
+	}
+
+	const existingGifts = await db.gift.findMany({
+		where: { wishlistId, deletedAt: null },
+		select: { id: true },
+	});
+	const existingIds = new Set(existingGifts.map((g) => g.id));
+
+	if (
+		orderedGiftIds.length !== existingIds.size ||
+		orderedGiftIds.some((id) => !existingIds.has(id))
+	) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Gift ids do not match wishlist gifts",
+		});
+	}
+
+	await db.$transaction(
+		orderedGiftIds.map((id, index) =>
+			db.gift.update({ where: { id }, data: { sortOrder: index } }),
+		),
+	);
 };
 
 export const groupDashboardGifts = (

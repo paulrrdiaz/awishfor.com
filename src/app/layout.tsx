@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
@@ -26,8 +27,10 @@ export default function RootLayout({
 			<body>
 				<ClerkProvider>
 					<TRPCReactProvider>
-						{children}
-						<Toaster position="top-center" richColors />
+						<TooltipProvider>
+							{children}
+							<Toaster position="top-center" richColors />
+						</TooltipProvider>
 					</TRPCReactProvider>
 				</ClerkProvider>
 			</body>

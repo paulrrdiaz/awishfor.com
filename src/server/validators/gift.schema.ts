@@ -112,6 +112,12 @@ export const deleteGiftSchema = z.object({
 	giftId: giftIdSchema,
 });
 
+export const reorderGiftsSchema = z.object({
+	wishlistId: wishlistIdSchema,
+	orderedGiftIds: z.array(z.string().min(1)).min(1),
+});
+
 export type CreateGiftInput = z.infer<typeof createGiftSchema>;
 export type UpdateGiftInput = z.infer<typeof updateGiftSchema>;
 export type DeleteGiftInput = z.infer<typeof deleteGiftSchema>;
+export type ReorderGiftsInput = z.infer<typeof reorderGiftsSchema>;

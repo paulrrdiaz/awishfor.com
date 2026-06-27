@@ -11,6 +11,8 @@ import {
 	groupDashboardGifts,
 	listDashboardGifts,
 	listGifts,
+	type ReorderGiftDatabase,
+	reorderGifts,
 	softDeleteGift,
 	updateGift,
 } from "@/server/services/gift.service";
@@ -296,6 +298,133 @@ const makeRow = (
 	createdAt: NOW.toISOString(),
 	updatedAt: NOW.toISOString(),
 	...overrides,
+});
+
+const makeReorderDb = (
+	overrides: Partial<{
+		gift: Partial<ReorderGiftDatabase["gift"]>;
+		wishlist: Partial<ReorderGiftDatabase["wishlist"]>;
+		$transaction: ReorderGiftDatabase["$transaction"];
+	}> = {},
+): ReorderGiftDatabase => ({
+	gift: {
+		findMany: async () => [{ id: "g1" }, { id: "g2" }, { id: "g3" }],
+		update: async ({ data, where }) =>
+			createGiftRecord({
+				id: where.id as string,
+				sortOrder: (data as Partial<Gift>).sortOrder,
+			}),
+		...overrides.gift,
+	},
+	wishlist: {
+		findFirst: async () => ({ id: "wishlist_123" }),
+		...overrides.wishlist,
+	},
+	$transaction: overrides.$transaction ?? (async (ops) => Promise.all(ops)),
+});
+
+describe("reorderGifts", () => {
+	it("updates each gift sortOrder to its index in the submitted list", async () => {
+		const updateCalls: Prisma.GiftUpdateArgs[] = [];
+		const db = makeReorderDb({
+			gift: {
+				update: async (args) => {
+					updateCalls.push(args);
+					return createGiftRecord({
+						id: args.where.id as string,
+						sortOrder: (args.data as Partial<Gift>).sortOrder,
+					});
+				},
+			},
+		});
+
+		await reorderGifts(db, {
+			ownerId: 42,
+			wishlistId: "wishlist_123",
+			orderedGiftIds: ["g2", "g3", "g1"],
+		});
+
+		expect(updateCalls).toHaveLength(3);
+		expect(updateCalls[0]).toMatchObject({
+			where: { id: "g2" },
+			data: { sortOrder: 0 },
+		});
+		expect(updateCalls[1]).toMatchObject({
+			where: { id: "g3" },
+			data: { sortOrder: 1 },
+		});
+		expect(updateCalls[2]).toMatchObject({
+			where: { id: "g1" },
+			data: { sortOrder: 2 },
+		});
+	});
+
+	it("throws NOT_FOUND and makes no writes when wishlist is not owned by user", async () => {
+		const updateCalls: unknown[] = [];
+		const db = makeReorderDb({
+			wishlist: { findFirst: async () => null },
+			gift: {
+				update: async (args) => {
+					updateCalls.push(args);
+					return createGiftRecord();
+				},
+			},
+		});
+
+		await expect(
+			reorderGifts(db, {
+				ownerId: 99,
+				wishlistId: "wishlist_123",
+				orderedGiftIds: ["g1", "g2", "g3"],
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+		expect(updateCalls).toHaveLength(0);
+	});
+
+	it("throws NOT_FOUND and makes no writes when submitted ids omit a non-deleted gift", async () => {
+		const updateCalls: unknown[] = [];
+		const db = makeReorderDb({
+			gift: {
+				update: async (args) => {
+					updateCalls.push(args);
+					return createGiftRecord();
+				},
+			},
+		});
+
+		await expect(
+			reorderGifts(db, {
+				ownerId: 42,
+				wishlistId: "wishlist_123",
+				orderedGiftIds: ["g1", "g2"],
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+		expect(updateCalls).toHaveLength(0);
+	});
+
+	it("throws NOT_FOUND and makes no writes when submitted ids include a foreign gift", async () => {
+		const updateCalls: unknown[] = [];
+		const db = makeReorderDb({
+			gift: {
+				update: async (args) => {
+					updateCalls.push(args);
+					return createGiftRecord();
+				},
+			},
+		});
+
+		await expect(
+			reorderGifts(db, {
+				ownerId: 42,
+				wishlistId: "wishlist_123",
+				orderedGiftIds: ["g1", "g2", "foreign_id"],
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+		expect(updateCalls).toHaveLength(0);
+	});
 });
 
 describe("groupDashboardGifts", () => {
