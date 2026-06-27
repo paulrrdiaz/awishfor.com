@@ -2,10 +2,14 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import type { Gift, Prisma, Purchase } from "@/generated/prisma/client";
 import {
+	createOwnerManualPurchase,
 	createPurchase,
+	deleteOwnerPurchase,
 	deriveGiftPublicStatus,
 	getPurchasedQuantity,
 	getRemainingQuantity,
+	listOwnerGiftPurchases,
+	type OwnerPurchaseDatabase,
 	type PurchaseDatabase,
 	undoPurchase,
 } from "@/server/services/purchase.service";
@@ -258,5 +262,162 @@ describe("undoPurchase", () => {
 		await expect(
 			undoPurchase(db, { purchaseId: "purchase_1", undoToken: "any" }),
 		).rejects.toThrow("Purchase not found");
+	});
+});
+
+const makeOwnerDb = (
+	purchasedSum: number,
+	gift: Gift | null = createGiftRecord(),
+	purchaseOverrides: Partial<OwnerPurchaseDatabase["purchase"]> = {},
+): OwnerPurchaseDatabase => ({
+	gift: {
+		findFirst: async () => gift,
+	},
+	purchase: {
+		create: async ({ data }) =>
+			createPurchaseRecord({
+				guestName:
+					((data as Prisma.PurchaseUncheckedCreateInput).guestName as string) ??
+					"",
+				quantity:
+					((data as Prisma.PurchaseUncheckedCreateInput).quantity as number) ??
+					1,
+				undoTokenHash: null,
+				undoExpiresAt: null,
+			}),
+		delete: async ({ where }) =>
+			createPurchaseRecord({ id: where.id as string }),
+		findFirst: async () => null,
+		findMany: async () => [createPurchaseRecord()],
+		aggregate: async () =>
+			({
+				_sum: { quantity: purchasedSum },
+			}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
+		...purchaseOverrides,
+	},
+});
+
+describe("listOwnerGiftPurchases", () => {
+	it("returns purchase records when owner owns the gift", async () => {
+		const purchase = createPurchaseRecord();
+		const db = makeOwnerDb(1, createGiftRecord(), {
+			findMany: async () => [purchase],
+		});
+		const result = await listOwnerGiftPurchases(db, {
+			ownerId: 1,
+			giftId: "gift_1",
+		});
+		expect(result).toHaveLength(1);
+		expect(result[0]?.id).toBe("purchase_1");
+	});
+
+	it("rejects when gift is not found or not owned", async () => {
+		const db = makeOwnerDb(0, null);
+		await expect(
+			listOwnerGiftPurchases(db, { ownerId: 1, giftId: "gift_1" }),
+		).rejects.toThrow("Gift not found");
+	});
+});
+
+describe("createOwnerManualPurchase", () => {
+	it("creates purchase with default name when guest name is omitted", async () => {
+		let capturedName: string | undefined;
+		const db = makeOwnerDb(0, createGiftRecord(), {
+			create: async ({ data }) => {
+				capturedName = (data as Prisma.PurchaseUncheckedCreateInput)
+					.guestName as string;
+				return createPurchaseRecord({ guestName: capturedName });
+			},
+		});
+		await createOwnerManualPurchase(db, {
+			ownerId: 1,
+			giftId: "gift_1",
+			quantity: 1,
+		});
+		expect(capturedName).toBe("Registrado por el creador");
+	});
+
+	it("uses provided guest name when supplied", async () => {
+		let capturedName: string | undefined;
+		const db = makeOwnerDb(0, createGiftRecord(), {
+			create: async ({ data }) => {
+				capturedName = (data as Prisma.PurchaseUncheckedCreateInput)
+					.guestName as string;
+				return createPurchaseRecord({ guestName: capturedName });
+			},
+		});
+		await createOwnerManualPurchase(db, {
+			ownerId: 1,
+			giftId: "gift_1",
+			guestName: "Ana García",
+			quantity: 1,
+		});
+		expect(capturedName).toBe("Ana García");
+	});
+
+	it("rejects quantity above remaining", async () => {
+		const db = makeOwnerDb(2, createGiftRecord({ quantityNeeded: 3 }));
+		await expect(
+			createOwnerManualPurchase(db, {
+				ownerId: 1,
+				giftId: "gift_1",
+				quantity: 2,
+			}),
+		).rejects.toThrow("Purchase quantity exceeds remaining quantity");
+	});
+
+	it("rejects when gift is not owned", async () => {
+		const db = makeOwnerDb(0, null);
+		await expect(
+			createOwnerManualPurchase(db, {
+				ownerId: 99,
+				giftId: "gift_1",
+				quantity: 1,
+			}),
+		).rejects.toThrow("Gift not found");
+	});
+});
+
+describe("deleteOwnerPurchase", () => {
+	it("deletes purchase when owner owns the gift", async () => {
+		const db = makeOwnerDb(1, createGiftRecord(), {
+			findFirst: async () => createPurchaseRecord(),
+			delete: async ({ where }) =>
+				createPurchaseRecord({ id: where.id as string }),
+		});
+		const result = await deleteOwnerPurchase(db, {
+			ownerId: 1,
+			purchaseId: "purchase_1",
+		});
+		expect(result.id).toBe("purchase_1");
+	});
+
+	it("rejects when purchase does not exist", async () => {
+		const db = makeOwnerDb(0, createGiftRecord(), {
+			findFirst: async () => null,
+		});
+		await expect(
+			deleteOwnerPurchase(db, { ownerId: 1, purchaseId: "purchase_missing" }),
+		).rejects.toThrow("Purchase not found");
+	});
+
+	it("rejects when the gift does not belong to the owner", async () => {
+		let giftFindFirstCalled = 0;
+		const db: OwnerPurchaseDatabase = {
+			gift: {
+				findFirst: async () => {
+					giftFindFirstCalled++;
+					return null;
+				},
+			},
+			purchase: {
+				...makeOwnerDb(0).purchase,
+				findFirst: async () => createPurchaseRecord(),
+			},
+		};
+		await expect(
+			deleteOwnerPurchase(db, { ownerId: 99, purchaseId: "purchase_1" }),
+		).rejects.toThrow("Not authorized");
+		expect(giftFindFirstCalled).toBe(1);
 	});
 });

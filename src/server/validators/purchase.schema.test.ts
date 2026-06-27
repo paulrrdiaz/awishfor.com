@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+	createOwnerManualPurchaseSchema,
 	createPurchaseSchema,
+	deleteOwnerPurchaseSchema,
+	listGiftPurchasesSchema,
 	PURCHASE_GUEST_NAME_MAX_LENGTH,
 	undoPurchaseSchema,
 } from "@/server/validators/purchase.schema";
@@ -89,5 +92,79 @@ describe("purchase validation", () => {
 				undoToken: "",
 			}),
 		).toThrow("Undo token is required");
+	});
+});
+
+describe("listGiftPurchasesSchema", () => {
+	it("accepts a valid giftId", () => {
+		const result = listGiftPurchasesSchema.parse({ giftId: "gift_abc" });
+		expect(result.giftId).toBe("gift_abc");
+	});
+
+	it("rejects an empty giftId", () => {
+		expect(() => listGiftPurchasesSchema.parse({ giftId: "" })).toThrow();
+	});
+});
+
+describe("createOwnerManualPurchaseSchema", () => {
+	it("accepts minimal input with defaults", () => {
+		const result = createOwnerManualPurchaseSchema.parse({
+			giftId: "gift_1",
+		});
+		expect(result.giftId).toBe("gift_1");
+		expect(result.guestName).toBeUndefined();
+		expect(result.quantity).toBe(1);
+	});
+
+	it("accepts explicit guest name", () => {
+		const result = createOwnerManualPurchaseSchema.parse({
+			giftId: "gift_1",
+			guestName: "Ana García",
+		});
+		expect(result.guestName).toBe("Ana García");
+	});
+
+	it("rejects guest name exceeding max length", () => {
+		expect(() =>
+			createOwnerManualPurchaseSchema.parse({
+				giftId: "gift_1",
+				guestName: "a".repeat(PURCHASE_GUEST_NAME_MAX_LENGTH + 1),
+			}),
+		).toThrow(
+			`Guest name must be at most ${PURCHASE_GUEST_NAME_MAX_LENGTH} characters`,
+		);
+	});
+
+	it("rejects quantity below 1", () => {
+		expect(() =>
+			createOwnerManualPurchaseSchema.parse({ giftId: "gift_1", quantity: 0 }),
+		).toThrow("Purchase quantity must be at least 1");
+	});
+
+	it("accepts optional contact fields", () => {
+		const result = createOwnerManualPurchaseSchema.parse({
+			giftId: "gift_1",
+			guestEmail: "owner@example.com",
+			guestPhone: "+51999000000",
+			message: "Una nota",
+		});
+		expect(result.guestEmail).toBe("owner@example.com");
+		expect(result.guestPhone).toBe("+51999000000");
+		expect(result.message).toBe("Una nota");
+	});
+});
+
+describe("deleteOwnerPurchaseSchema", () => {
+	it("accepts a valid purchaseId", () => {
+		const result = deleteOwnerPurchaseSchema.parse({
+			purchaseId: "purchase_1",
+		});
+		expect(result.purchaseId).toBe("purchase_1");
+	});
+
+	it("rejects an empty purchaseId", () => {
+		expect(() => deleteOwnerPurchaseSchema.parse({ purchaseId: "" })).toThrow(
+			"Purchase id is required",
+		);
 	});
 });

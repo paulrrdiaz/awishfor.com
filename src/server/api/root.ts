@@ -1,6 +1,7 @@
 import { categoryRouter } from "@/server/api/routers/category";
 import { giftRouter } from "@/server/api/routers/gift";
 import { importerRouter } from "@/server/api/routers/importer";
+import { purchaseRouter } from "@/server/api/routers/purchase";
 import { wishlistRouter } from "@/server/api/routers/wishlist";
 import {
 	createCallerFactory,
@@ -28,6 +29,7 @@ export const appRouter = createTRPCRouter({
 	category: categoryRouter,
 	gift: giftRouter,
 	importer: importerRouter,
+	purchase: purchaseRouter,
 	wishlist: wishlistRouter,
 	health: publicProcedure.query(() => ({ ok: true, ts: Date.now() })),
 });

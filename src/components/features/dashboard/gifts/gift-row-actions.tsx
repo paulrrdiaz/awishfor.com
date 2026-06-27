@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import { api } from "@/trpc/react";
+import { PurchaseDrawer } from "../purchases/purchase-drawer";
 import { DeleteGiftDialog } from "./delete-gift-dialog";
 import { EditGiftDialog } from "./edit-gift-dialog";
 
@@ -16,6 +17,7 @@ type Props = {
 export function GiftRowActions({ gift, wishlistId }: Props) {
 	const router = useRouter();
 	const [editOpen, setEditOpen] = useState(false);
+	const [purchaseDrawerOpen, setPurchaseDrawerOpen] = useState(false);
 	const isHidden = gift.visibilityStatus === "hidden";
 
 	const setVisibilityMutation = api.gift.setVisibility.useMutation({
@@ -32,6 +34,14 @@ export function GiftRowActions({ gift, wishlistId }: Props) {
 					variant="ghost"
 				>
 					Editar
+				</Button>
+				<Button
+					onClick={() => setPurchaseDrawerOpen(true)}
+					size="sm"
+					type="button"
+					variant="ghost"
+				>
+					Compras
 				</Button>
 				<Button
 					disabled={setVisibilityMutation.isPending}
@@ -58,6 +68,13 @@ export function GiftRowActions({ gift, wishlistId }: Props) {
 				onClose={() => setEditOpen(false)}
 				open={editOpen}
 				wishlistId={wishlistId}
+			/>
+			<PurchaseDrawer
+				giftId={gift.id}
+				giftName={gift.name}
+				onClose={() => setPurchaseDrawerOpen(false)}
+				open={purchaseDrawerOpen}
+				remainingQuantity={gift.remainingQuantity}
 			/>
 		</>
 	);

@@ -43,5 +43,40 @@ export const undoPurchaseSchema = z.object({
 	undoToken: z.string().min(1, "Undo token is required"),
 });
 
+export const listGiftPurchasesSchema = z.object({
+	giftId: giftIdSchema,
+});
+
+export const createOwnerManualPurchaseSchema = z.object({
+	giftId: giftIdSchema,
+	guestName: purchaseGuestNameSchema.optional(),
+	guestEmail: z.email("Guest email must be a valid email address").optional(),
+	guestPhone: z
+		.string()
+		.trim()
+		.max(30, "Guest phone must be at most 30 characters")
+		.optional(),
+	message: z
+		.string()
+		.trim()
+		.max(
+			PURCHASE_MESSAGE_MAX_LENGTH,
+			`Message must be at most ${PURCHASE_MESSAGE_MAX_LENGTH} characters`,
+		)
+		.optional(),
+	quantity: purchaseQuantitySchema.default(1),
+});
+
+export const deleteOwnerPurchaseSchema = z.object({
+	purchaseId: z.string().min(1, "Purchase id is required"),
+});
+
 export type CreatePurchaseInput = z.infer<typeof createPurchaseSchema>;
 export type UndoPurchaseInput = z.infer<typeof undoPurchaseSchema>;
+export type ListGiftPurchasesInput = z.infer<typeof listGiftPurchasesSchema>;
+export type CreateOwnerManualPurchaseInput = z.infer<
+	typeof createOwnerManualPurchaseSchema
+>;
+export type DeleteOwnerPurchaseInput = z.infer<
+	typeof deleteOwnerPurchaseSchema
+>;

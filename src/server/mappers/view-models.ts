@@ -75,6 +75,18 @@ export type DashboardGiftRowViewModel = {
 	updatedAt: string;
 };
 
+export type OwnerPurchaseRecordViewModel = {
+	id: string;
+	giftId: string;
+	guestName: string;
+	guestEmail: string | null;
+	guestPhone: string | null;
+	message: string | null;
+	quantity: number;
+	createdAt: string;
+	updatedAt: string;
+};
+
 export type DashboardWishlistCardViewModel = {
 	id: string;
 	slug: string;

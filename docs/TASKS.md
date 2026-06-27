@@ -1251,15 +1251,15 @@ Owner views and manages purchase records at gift level.
 
 Tasks:
 
-- [ ] Add gift purchase drawer.
-- [ ] Show purchase records.
-- [ ] Show guest name.
-- [ ] Show optional email/phone/message.
-- [ ] Show quantity.
-- [ ] Add owner manual purchase form.
-- [ ] Add owner delete purchase action.
-- [ ] Add confirmation dialog.
-- [ ] Add owner undo toast for manual purchase.
+- [x] Add gift purchase drawer.
+- [x] Show purchase records.
+- [x] Show guest name.
+- [x] Show optional email/phone/message.
+- [x] Show quantity.
+- [x] Add owner manual purchase form.
+- [x] Add owner delete purchase action.
+- [x] Add confirmation dialog.
+- [x] Add owner undo toast for manual purchase.
 
 Acceptance criteria:
 

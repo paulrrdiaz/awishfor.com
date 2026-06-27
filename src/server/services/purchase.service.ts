@@ -1,7 +1,10 @@
 import { createHash, randomBytes } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import type { Gift, Prisma, Purchase } from "@/generated/prisma/client";
-import type { CreatePurchaseInput } from "@/server/validators/purchase.schema";
+import type {
+	CreateOwnerManualPurchaseInput,
+	CreatePurchaseInput,
+} from "@/server/validators/purchase.schema";
 
 const UNDO_TOKEN_EXPIRY_MINUTES = 15;
 
@@ -20,6 +23,13 @@ type GiftDelegate = {
 
 export type PurchaseDatabase = {
 	purchase: PurchaseDelegate;
+	gift: GiftDelegate;
+};
+
+export type OwnerPurchaseDatabase = {
+	purchase: PurchaseDelegate & {
+		findMany(args: Prisma.PurchaseFindManyArgs): Promise<Purchase[]>;
+	};
 	gift: GiftDelegate;
 };
 
@@ -109,6 +119,84 @@ export const createPurchase = async (
 	});
 
 	return { purchase, undoToken: rawToken };
+};
+
+const OWNER_MANUAL_PURCHASE_DEFAULT_NAME = "Registrado por el creador";
+
+export const listOwnerGiftPurchases = async (
+	db: OwnerPurchaseDatabase,
+	{ ownerId, giftId }: { ownerId: number; giftId: string },
+): Promise<Purchase[]> => {
+	const gift = await db.gift.findFirst({
+		where: { id: giftId, deletedAt: null, wishlist: { ownerId } },
+	});
+	if (!gift) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+	return db.purchase.findMany({
+		where: { giftId },
+		orderBy: { createdAt: "desc" },
+	});
+};
+
+export const createOwnerManualPurchase = async (
+	db: OwnerPurchaseDatabase,
+	{
+		ownerId,
+		giftId,
+		guestName,
+		guestEmail,
+		guestPhone,
+		message,
+		quantity,
+	}: { ownerId: number } & CreateOwnerManualPurchaseInput,
+): Promise<Purchase> => {
+	const gift = await db.gift.findFirst({
+		where: { id: giftId, deletedAt: null, wishlist: { ownerId } },
+	});
+	if (!gift) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+
+	const remaining = await getRemainingQuantity(db, gift);
+	if (quantity > remaining) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Purchase quantity exceeds remaining quantity",
+		});
+	}
+
+	return db.purchase.create({
+		data: {
+			gift: { connect: { id: giftId } },
+			guestName: guestName ?? OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
+			guestEmail: guestEmail ?? null,
+			guestPhone: guestPhone ?? null,
+			message: message ?? null,
+			quantity,
+		},
+	});
+};
+
+export const deleteOwnerPurchase = async (
+	db: OwnerPurchaseDatabase,
+	{ ownerId, purchaseId }: { ownerId: number; purchaseId: string },
+): Promise<Purchase> => {
+	const purchase = await db.purchase.findFirst({
+		where: { id: purchaseId },
+	});
+	if (!purchase) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Purchase not found" });
+	}
+
+	const gift = await db.gift.findFirst({
+		where: { id: purchase.giftId, wishlist: { ownerId } },
+	});
+	if (!gift) {
+		throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+	}
+
+	return db.purchase.delete({ where: { id: purchaseId } });
 };
 
 export const undoPurchase = async (
