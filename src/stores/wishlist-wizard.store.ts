@@ -73,6 +73,9 @@ export type WishlistWizardActions = {
 	reset: () => void;
 	dismissRecovery: (discard: boolean) => void;
 	setHasHydrated: () => void;
+	addCategory: (name: string) => void;
+	renameCategory: (oldName: string, newName: string) => void;
+	removeCategory: (name: string) => void;
 	addGift: (gift: Omit<DraftGift, "id" | "sortOrder">) => void;
 	updateGift: (id: string, updates: Partial<DraftGift>) => void;
 	removeGift: (id: string) => void;
@@ -123,6 +126,8 @@ const emptyCopyTouched = (): CopyTouched => ({
 	welcomeMessage: false,
 	thankYouMessage: false,
 });
+
+const normalizeCategoryName = (name: string) => name.trim().toLocaleLowerCase();
 
 export const clearPersistedWishlistWizardDraft = () => {
 	if (typeof window === "undefined") {
@@ -260,6 +265,91 @@ export const createWishlistWizardStore = () =>
 				},
 
 				setHasHydrated: () => set({ _hasHydrated: true }),
+
+				addCategory: (name) => {
+					const trimmedName = name.trim();
+					if (!trimmedName) return;
+
+					set((state) => {
+						const normalizedName = normalizeCategoryName(trimmedName);
+						const exists = state.draft.categories.some(
+							(category) => normalizeCategoryName(category) === normalizedName,
+						);
+
+						if (exists) return state;
+
+						return {
+							draft: {
+								...state.draft,
+								categories: [...state.draft.categories, trimmedName],
+							},
+							publishSuccess: null,
+							updatedAt: Date.now(),
+						};
+					});
+				},
+
+				renameCategory: (oldName, newName) => {
+					const normalizedOldName = normalizeCategoryName(oldName);
+					const trimmedNewName = newName.trim();
+					if (!normalizedOldName || !trimmedNewName) return;
+
+					set((state) => {
+						const normalizedNewName = normalizeCategoryName(trimmedNewName);
+						const oldIndex = state.draft.categories.findIndex(
+							(category) =>
+								normalizeCategoryName(category) === normalizedOldName,
+						);
+
+						if (oldIndex === -1) return state;
+
+						const duplicate = state.draft.categories.some(
+							(category, index) =>
+								index !== oldIndex &&
+								normalizeCategoryName(category) === normalizedNewName,
+						);
+
+						if (duplicate) return state;
+
+						return {
+							draft: {
+								...state.draft,
+								categories: state.draft.categories.map((category, index) =>
+									index === oldIndex ? trimmedNewName : category,
+								),
+								gifts: state.draft.gifts.map((gift) =>
+									normalizeCategoryName(gift.category) === normalizedOldName
+										? { ...gift, category: trimmedNewName }
+										: gift,
+								),
+							},
+							publishSuccess: null,
+							updatedAt: Date.now(),
+						};
+					});
+				},
+
+				removeCategory: (name) => {
+					const normalizedName = normalizeCategoryName(name);
+					if (!normalizedName) return;
+
+					set((state) => ({
+						draft: {
+							...state.draft,
+							categories: state.draft.categories.filter(
+								(category) =>
+									normalizeCategoryName(category) !== normalizedName,
+							),
+							gifts: state.draft.gifts.map((gift) =>
+								normalizeCategoryName(gift.category) === normalizedName
+									? { ...gift, category: "" }
+									: gift,
+							),
+						},
+						publishSuccess: null,
+						updatedAt: Date.now(),
+					}));
+				},
 
 				addGift: (gift) => {
 					set((state) => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	type Category,
 	EventType,
+	type Gift,
 	type Prisma,
 	type Wishlist,
 } from "@/generated/prisma/client";
@@ -9,6 +10,7 @@ import {
 	addCategory,
 	type CategoryDatabase,
 	deleteCategory,
+	getUncategorizedGiftCount,
 	listCategories,
 	renameCategory,
 	reorderCategories,
@@ -54,6 +56,28 @@ const createCategoryRecord = (overrides: Partial<Category> = {}): Category => ({
 	...overrides,
 });
 
+const createGiftRecord = (overrides: Partial<Gift> = {}): Gift => ({
+	id: "gift_1",
+	wishlistId: "wishlist_123",
+	categoryId: null,
+	name: "Batidora",
+	productUrl: null,
+	imageUrl: null,
+	storeName: null,
+	priceAmount: null,
+	priceCurrency: null,
+	quantityNeeded: 1,
+	priority: "medium",
+	visibilityStatus: "available",
+	publicNote: null,
+	internalNote: null,
+	sortOrder: 0,
+	deletedAt: null,
+	createdAt: new Date("2026-06-25T00:00:00.000Z"),
+	updatedAt: new Date("2026-06-25T00:00:00.000Z"),
+	...overrides,
+});
+
 const sortCategories = (categories: Category[]) =>
 	[...categories].sort((left, right) => {
 		if (left.sortOrder !== right.sortOrder) {
@@ -66,13 +90,16 @@ const sortCategories = (categories: Category[]) =>
 const createMockDatabase = ({
 	wishlists = [createWishlistRecord()],
 	categories = [],
+	gifts = [],
 }: {
 	wishlists?: Wishlist[];
 	categories?: Category[];
+	gifts?: Gift[];
 } = {}) => {
 	const state = {
 		wishlists: [...wishlists],
 		categories: [...categories],
+		gifts: [...gifts],
 	};
 
 	let categorySequence = state.categories.length + 1;
@@ -96,12 +123,25 @@ const createMockDatabase = ({
 	const category: CategoryDatabase["category"] = {
 		findMany: async (args: Prisma.CategoryFindManyArgs) => {
 			const wishlistId = args.where?.wishlistId;
-			return sortCategories(
+			const categories = sortCategories(
 				state.categories.filter(
 					(item) =>
 						typeof wishlistId !== "string" || item.wishlistId === wishlistId,
 				),
 			);
+
+			if (args.include && "_count" in args.include) {
+				return categories.map((item) => ({
+					...item,
+					_count: {
+						gifts: state.gifts.filter(
+							(gift) => gift.categoryId === item.id && gift.deletedAt === null,
+						).length,
+					},
+				}));
+			}
+
+			return categories;
 		},
 		findFirst: async (args: Prisma.CategoryFindFirstArgs) => {
 			const categoryId =
@@ -245,17 +285,46 @@ const createMockDatabase = ({
 		},
 	};
 
+	const gift: CategoryDatabase["gift"] = {
+		count: async (args: Prisma.GiftCountArgs) => {
+			const wishlistId = args.where?.wishlistId;
+			const categoryId = args.where?.categoryId;
+			const deletedAt = args.where?.deletedAt;
+
+			return state.gifts.filter((giftItem) => {
+				if (
+					typeof wishlistId === "string" &&
+					giftItem.wishlistId !== wishlistId
+				) {
+					return false;
+				}
+
+				if (categoryId === null && giftItem.categoryId !== null) {
+					return false;
+				}
+
+				if (deletedAt === null && giftItem.deletedAt !== null) {
+					return false;
+				}
+
+				return true;
+			}).length;
+		},
+	};
+
 	const db: CategoryDatabase = {
 		wishlist,
 		category,
+		gift,
 		$transaction: async (callback) => {
 			const wishlistSnapshot = [...state.wishlists];
 			const categorySnapshot = [...state.categories];
+			const giftSnapshot = [...state.gifts];
 			const categorySequenceSnapshot = categorySequence;
 			const createdAtSequenceSnapshot = createdAtSequence;
 
 			try {
-				return await callback({ wishlist, category });
+				return await callback({ wishlist, category, gift });
 			} catch (error) {
 				state.wishlists.splice(0, state.wishlists.length, ...wishlistSnapshot);
 				state.categories.splice(
@@ -263,6 +332,7 @@ const createMockDatabase = ({
 					state.categories.length,
 					...categorySnapshot,
 				);
+				state.gifts.splice(0, state.gifts.length, ...giftSnapshot);
 				categorySequence = categorySequenceSnapshot;
 				createdAtSequence = createdAtSequenceSnapshot;
 				throw error;
@@ -292,6 +362,15 @@ describe("category service", () => {
 			deleteCategory(db, {
 				ownerId: 999,
 				categoryId: "category_1",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+
+		await expect(
+			getUncategorizedGiftCount(db, {
+				ownerId: 999,
+				wishlistId: "wishlist_123",
 			}),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
@@ -332,6 +411,68 @@ describe("category service", () => {
 			"category_2",
 			"category_1",
 		]);
+	});
+
+	it("returns non-deleted gift counts for listed categories", async () => {
+		const { db } = createMockDatabase({
+			categories: [
+				createCategoryRecord({ id: "category_1", name: "Cocina" }),
+				createCategoryRecord({ id: "category_2", name: "Dormitorio" }),
+				createCategoryRecord({ id: "category_3", name: "Sala" }),
+			],
+			gifts: [
+				createGiftRecord({ id: "gift_1", categoryId: "category_1" }),
+				createGiftRecord({ id: "gift_2", categoryId: "category_1" }),
+				createGiftRecord({
+					id: "gift_3",
+					categoryId: "category_1",
+					deletedAt: new Date("2026-06-25T12:00:00.000Z"),
+				}),
+				createGiftRecord({ id: "gift_4", categoryId: "category_2" }),
+				createGiftRecord({ id: "gift_5", categoryId: null }),
+			],
+		});
+
+		const categories = await listCategories(db, {
+			ownerId: 42,
+			wishlistId: "wishlist_123",
+		});
+
+		expect(
+			categories.map((category) => [category.id, category.giftCount]),
+		).toEqual([
+			["category_1", 2],
+			["category_2", 1],
+			["category_3", 0],
+		]);
+	});
+
+	it("counts only non-deleted uncategorized gifts for an owned wishlist", async () => {
+		const { db } = createMockDatabase({
+			categories: [createCategoryRecord({ id: "category_1" })],
+			gifts: [
+				createGiftRecord({ id: "gift_1", categoryId: null }),
+				createGiftRecord({ id: "gift_2", categoryId: null }),
+				createGiftRecord({
+					id: "gift_3",
+					categoryId: null,
+					deletedAt: new Date("2026-06-25T12:00:00.000Z"),
+				}),
+				createGiftRecord({ id: "gift_4", categoryId: "category_1" }),
+				createGiftRecord({
+					id: "gift_5",
+					wishlistId: "wishlist_456",
+					categoryId: null,
+				}),
+			],
+		});
+
+		await expect(
+			getUncategorizedGiftCount(db, {
+				ownerId: 42,
+				wishlistId: "wishlist_123",
+			}),
+		).resolves.toBe(2);
 	});
 
 	it("adds a category using the next deterministic sort order", async () => {

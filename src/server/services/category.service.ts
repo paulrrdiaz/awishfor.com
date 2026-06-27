@@ -7,6 +7,7 @@ import type {
 	RenameCategoryInput,
 	ReorderCategoriesInput,
 	SeedDefaultCategoriesInput,
+	UncategorizedCountInput,
 } from "@/server/validators/category.schema";
 
 const CATEGORY_NAME_CONFLICT_MESSAGE =
@@ -18,8 +19,14 @@ type CategoryDelegate = {
 	create(args: Prisma.CategoryCreateArgs): Promise<Category>;
 	delete(args: Prisma.CategoryDeleteArgs): Promise<Category>;
 	findFirst(args: Prisma.CategoryFindFirstArgs): Promise<Category | null>;
-	findMany(args: Prisma.CategoryFindManyArgs): Promise<Category[]>;
+	findMany(
+		args: Prisma.CategoryFindManyArgs,
+	): Promise<Array<Category | CategoryWithCountPayload>>;
 	update(args: Prisma.CategoryUpdateArgs): Promise<Category>;
+};
+
+type GiftDelegate = {
+	count(args: Prisma.GiftCountArgs): Promise<number>;
 };
 
 type WishlistDelegate = {
@@ -28,6 +35,7 @@ type WishlistDelegate = {
 
 type CategoryTransaction = {
 	category: CategoryDelegate;
+	gift: GiftDelegate;
 	wishlist: WishlistDelegate;
 };
 
@@ -36,6 +44,10 @@ export type CategoryDatabase = CategoryTransaction & {
 		callback: (tx: CategoryTransaction) => Promise<T>,
 	): Promise<T>;
 };
+
+type CategoryWithCountPayload = Category & { _count: { gifts: number } };
+
+export type CategoryWithGiftCount = Category & { giftCount: number };
 
 type CategoryOwnerInput = {
 	ownerId: number;
@@ -183,14 +195,45 @@ const assertValidCategoryReorder = (
 export const listCategories = async (
 	db: CategoryDatabase,
 	input: CategoryOwnerInput & ListCategoriesInput,
-) => {
+): Promise<CategoryWithGiftCount[]> => {
 	await getOwnedWishlist(db, input);
 
-	return db.category.findMany({
+	const categories = (await db.category.findMany({
 		where: {
 			wishlistId: input.wishlistId,
 		},
 		orderBy: orderedCategoryFields,
+		include: {
+			_count: {
+				select: {
+					gifts: {
+						where: {
+							deletedAt: null,
+						},
+					},
+				},
+			},
+		},
+	})) as CategoryWithCountPayload[];
+
+	return categories.map(({ _count, ...category }) => ({
+		...category,
+		giftCount: _count.gifts,
+	}));
+};
+
+export const getUncategorizedGiftCount = async (
+	db: CategoryDatabase,
+	input: CategoryOwnerInput & UncategorizedCountInput,
+) => {
+	await getOwnedWishlist(db, input);
+
+	return db.gift.count({
+		where: {
+			wishlistId: input.wishlistId,
+			categoryId: null,
+			deletedAt: null,
+		},
 	});
 };
 

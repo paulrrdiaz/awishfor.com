@@ -10,9 +10,10 @@ import { EditGiftDialog } from "./edit-gift-dialog";
 
 type Props = {
 	gift: DashboardGiftRowViewModel;
+	wishlistId: string;
 };
 
-export function GiftRowActions({ gift }: Props) {
+export function GiftRowActions({ gift, wishlistId }: Props) {
 	const router = useRouter();
 	const [editOpen, setEditOpen] = useState(false);
 	const isHidden = gift.visibilityStatus === "hidden";
@@ -56,6 +57,7 @@ export function GiftRowActions({ gift }: Props) {
 				gift={gift}
 				onClose={() => setEditOpen(false)}
 				open={editOpen}
+				wishlistId={wishlistId}
 			/>
 		</>
 	);

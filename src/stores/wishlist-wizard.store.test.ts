@@ -343,6 +343,61 @@ describe("wishlist-wizard store", () => {
 		});
 	});
 
+	describe("category actions", () => {
+		it("addCategory trims and deduplicates names case-insensitively", () => {
+			const store = makeStore();
+
+			store.getState().addCategory("  Cocina  ");
+			store.getState().addCategory("cocina");
+
+			expect(store.getState().draft.categories).toEqual(["Cocina"]);
+		});
+
+		it("renameCategory updates categories and assigned draft gifts", () => {
+			const store = makeStore();
+			store.getState().addCategory("Cocina");
+			store.getState().addGift({
+				name: "Batidora",
+				productUrl: null,
+				imageUrl: null,
+				priceAmount: null,
+				category: "cocina",
+				quantityNeeded: 1,
+				priority: "medium",
+				publicNote: "",
+				internalNote: "",
+				hidden: false,
+			});
+
+			store.getState().renameCategory("Cocina", "  Cocina y bar  ");
+
+			expect(store.getState().draft.categories).toEqual(["Cocina y bar"]);
+			expect(store.getState().draft.gifts[0]?.category).toBe("Cocina y bar");
+		});
+
+		it("removeCategory clears matching draft gift categories", () => {
+			const store = makeStore();
+			store.getState().addCategory("Dormitorio");
+			store.getState().addGift({
+				name: "Sábanas",
+				productUrl: null,
+				imageUrl: null,
+				priceAmount: null,
+				category: "dormitorio",
+				quantityNeeded: 1,
+				priority: "medium",
+				publicNote: "",
+				internalNote: "",
+				hidden: false,
+			});
+
+			store.getState().removeCategory("Dormitorio");
+
+			expect(store.getState().draft.categories).toEqual([]);
+			expect(store.getState().draft.gifts[0]?.category).toBe("");
+		});
+	});
+
 	describe("gift actions", () => {
 		it("addGift appends a gift with a unique id and sortOrder", () => {
 			const store = makeStore();

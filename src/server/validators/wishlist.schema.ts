@@ -6,7 +6,7 @@ import {
 	GiftVisibilityStatus,
 	Locale,
 	WishlistStatus,
-} from "@/generated/prisma/client";
+} from "@/generated/prisma/enums";
 
 export const wishlistIdSchema = z.string().min(1, "Wishlist id is required");
 export const wishlistOwnerIdSchema = z

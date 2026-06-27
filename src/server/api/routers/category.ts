@@ -4,6 +4,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
 	addCategory,
 	deleteCategory,
+	getUncategorizedGiftCount,
 	listCategories,
 	renameCategory,
 	reorderCategories,
@@ -16,6 +17,7 @@ import {
 	renameCategorySchema,
 	reorderCategoriesSchema,
 	seedDefaultCategoriesSchema,
+	uncategorizedCountSchema,
 } from "@/server/validators/category.schema";
 
 type CategoryRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
@@ -45,6 +47,12 @@ export const categoryRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
 			return listCategories(ctx.db, { ownerId, ...input });
+		}),
+	uncategorizedCount: protectedProcedure
+		.input(uncategorizedCountSchema)
+		.query(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+			return getUncategorizedGiftCount(ctx.db, { ownerId, ...input });
 		}),
 	add: protectedProcedure
 		.input(addCategorySchema)

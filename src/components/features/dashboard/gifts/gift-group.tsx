@@ -101,7 +101,11 @@ export function GiftGroup({ wishlistId, available, purchased, hidden }: Props) {
 							>
 								<ul className="space-y-2">
 									{gifts.map((gift) => (
-										<SortableGiftRow gift={gift} key={gift.id} />
+										<SortableGiftRow
+											gift={gift}
+											key={gift.id}
+											wishlistId={wishlistId}
+										/>
 									))}
 								</ul>
 							</SortableContext>

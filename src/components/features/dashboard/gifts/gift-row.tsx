@@ -5,9 +5,10 @@ import { GiftStatusBadges } from "./gift-status-badges";
 
 type Props = {
 	gift: DashboardGiftRowViewModel;
+	wishlistId: string;
 };
 
-export function GiftRow({ gift }: Props) {
+export function GiftRow({ gift, wishlistId }: Props) {
 	const isHidden = gift.visibilityStatus === "hidden";
 
 	return (
@@ -48,7 +49,7 @@ export function GiftRow({ gift }: Props) {
 							</span>
 						</div>
 					</div>
-					<GiftRowActions gift={gift} />
+					<GiftRowActions gift={gift} wishlistId={wishlistId} />
 				</div>
 				<div className="mt-2">
 					<GiftStatusBadges

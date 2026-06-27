@@ -10,9 +10,10 @@ type Props = {
 	gift: DashboardGiftRowViewModel;
 	open: boolean;
 	onClose: () => void;
+	wishlistId: string;
 };
 
-export function EditGiftDialog({ gift, open, onClose }: Props) {
+export function EditGiftDialog({ gift, open, onClose, wishlistId }: Props) {
 	const router = useRouter();
 	const [name, setName] = useState(gift.name);
 	const [productUrl, setProductUrl] = useState(gift.productUrl ?? "");
@@ -20,6 +21,11 @@ export function EditGiftDialog({ gift, open, onClose }: Props) {
 	const [quantityNeeded, setQuantityNeeded] = useState(gift.quantityNeeded);
 	const [priority, setPriority] = useState(gift.priority);
 	const [publicNote, setPublicNote] = useState(gift.publicNote ?? "");
+	const [categoryId, setCategoryId] = useState(gift.categoryId ?? "");
+	const categoriesQuery = api.category.list.useQuery(
+		{ wishlistId },
+		{ enabled: open },
+	);
 
 	const updateMutation = api.gift.update.useMutation({
 		onSuccess: () => {
@@ -41,6 +47,7 @@ export function EditGiftDialog({ gift, open, onClose }: Props) {
 			quantityNeeded,
 			priority,
 			publicNote: publicNote.trim() || undefined,
+			categoryId: categoryId || null,
 		});
 	}
 
@@ -120,6 +127,28 @@ export function EditGiftDialog({ gift, open, onClose }: Props) {
 								value={quantityNeeded}
 							/>
 						</div>
+					</div>
+					<div>
+						<label
+							className="mb-1 block font-medium text-gray-700 text-sm"
+							htmlFor="edit-category"
+						>
+							Categoría
+						</label>
+						<select
+							className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
+							disabled={categoriesQuery.isLoading}
+							id="edit-category"
+							onChange={(e) => setCategoryId(e.target.value)}
+							value={categoryId}
+						>
+							<option value="">Sin categoría</option>
+							{categoriesQuery.data?.map((category) => (
+								<option key={category.id} value={category.id}>
+									{category.name}
+								</option>
+							))}
+						</select>
 					</div>
 					<div>
 						<p className="mb-1 block font-medium text-gray-700 text-sm">

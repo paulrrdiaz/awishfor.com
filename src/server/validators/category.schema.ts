@@ -35,6 +35,10 @@ export const listCategoriesSchema = z.object({
 	wishlistId: wishlistIdSchema,
 });
 
+export const uncategorizedCountSchema = z.object({
+	wishlistId: wishlistIdSchema,
+});
+
 export const addCategorySchema = z.object({
 	wishlistId: wishlistIdSchema,
 	name: categoryNameSchema,
@@ -67,3 +71,4 @@ export type ReorderCategoriesInput = z.infer<typeof reorderCategoriesSchema>;
 export type SeedDefaultCategoriesInput = z.infer<
 	typeof seedDefaultCategoriesSchema
 >;
+export type UncategorizedCountInput = z.infer<typeof uncategorizedCountSchema>;

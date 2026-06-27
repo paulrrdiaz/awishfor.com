@@ -1,4 +1,4 @@
-import type { Currency, EventType, Locale } from "@/generated/prisma/client";
+import type { Currency, EventType, Locale } from "@/generated/prisma/enums";
 import { wishlistSlugPattern } from "@/server/validators/wishlist.schema";
 
 export type PublishReadinessInput = {

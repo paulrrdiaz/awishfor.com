@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Currency, Locale } from "@/generated/prisma/client";
+import { Currency, Locale } from "@/generated/prisma/enums";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
 	categoryNameSchema,

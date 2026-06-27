@@ -17,11 +17,18 @@ const PRIORITY_LABELS: Record<string, string> = {
 
 export function GiftsStep() {
 	const draft = useWizardStore((s) => s.draft);
+	const addCategory = useWizardStore((s) => s.addCategory);
+	const renameCategory = useWizardStore((s) => s.renameCategory);
+	const removeCategory = useWizardStore((s) => s.removeCategory);
 	const addGift = useWizardStore((s) => s.addGift);
 	const updateGift = useWizardStore((s) => s.updateGift);
 	const removeGift = useWizardStore((s) => s.removeGift);
 
 	const [editing, setEditing] = useState<EditingState>(null);
+	const [newCategoryName, setNewCategoryName] = useState("");
+	const [editingCategory, setEditingCategory] = useState<string | null>(null);
+	const [editingCategoryName, setEditingCategoryName] = useState("");
+	const [categoryError, setCategoryError] = useState<string | null>(null);
 
 	const visibleGifts = draft.gifts.filter((g) => !g.hidden);
 	const hiddenCount = draft.gifts.length - visibleGifts.length;
@@ -39,6 +46,59 @@ export function GiftsStep() {
 	function getInitialValues(gift: DraftGift): GiftFormValues {
 		const { id: _id, sortOrder: _sortOrder, ...rest } = gift;
 		return rest;
+	}
+
+	function categoryExists(name: string, exceptName?: string) {
+		const normalizedName = name.trim().toLocaleLowerCase();
+		const normalizedExceptName = exceptName?.trim().toLocaleLowerCase();
+		return draft.categories.some((category) => {
+			const normalizedCategory = category.trim().toLocaleLowerCase();
+			return (
+				normalizedCategory === normalizedName &&
+				normalizedCategory !== normalizedExceptName
+			);
+		});
+	}
+
+	function handleAddCategory(event: React.FormEvent) {
+		event.preventDefault();
+		const trimmedName = newCategoryName.trim();
+		if (!trimmedName) {
+			setCategoryError("Ingresa un nombre de categoría.");
+			return;
+		}
+		if (categoryExists(trimmedName)) {
+			setCategoryError("Esa categoría ya existe.");
+			return;
+		}
+
+		addCategory(trimmedName);
+		setNewCategoryName("");
+		setCategoryError(null);
+	}
+
+	function startRenameCategory(name: string) {
+		setEditingCategory(name);
+		setEditingCategoryName(name);
+		setCategoryError(null);
+	}
+
+	function handleRenameCategory(event: React.FormEvent, oldName: string) {
+		event.preventDefault();
+		const trimmedName = editingCategoryName.trim();
+		if (!trimmedName) {
+			setCategoryError("Ingresa un nombre de categoría.");
+			return;
+		}
+		if (categoryExists(trimmedName, oldName)) {
+			setCategoryError("Esa categoría ya existe.");
+			return;
+		}
+
+		renameCategory(oldName, trimmedName);
+		setEditingCategory(null);
+		setEditingCategoryName("");
+		setCategoryError(null);
 	}
 
 	return (
@@ -65,6 +125,95 @@ export function GiftsStep() {
 				>
 					Importar
 				</button>
+			</div>
+
+			<div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4">
+				<div className="mb-4">
+					<h2 className="font-medium text-gray-900 text-sm">Categorías</h2>
+					<p className="text-gray-400 text-xs">
+						Crea opciones para organizar tus regalos antes de publicarlos.
+					</p>
+				</div>
+
+				{draft.categories.length > 0 && (
+					<div className="mb-4 flex flex-wrap gap-2">
+						{draft.categories.map((category) =>
+							editingCategory === category ? (
+								<form
+									className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2"
+									key={category}
+									onSubmit={(event) => handleRenameCategory(event, category)}
+								>
+									<input
+										className="w-28 bg-transparent text-gray-900 text-xs outline-none"
+										maxLength={80}
+										onChange={(event) =>
+											setEditingCategoryName(event.target.value)
+										}
+										value={editingCategoryName}
+									/>
+									<button
+										className="font-medium text-gray-600 text-xs hover:text-gray-900"
+										type="submit"
+									>
+										Guardar
+									</button>
+									<button
+										className="text-gray-400 text-xs hover:text-gray-700"
+										onClick={() => setEditingCategory(null)}
+										type="button"
+									>
+										Cancelar
+									</button>
+								</form>
+							) : (
+								<div
+									className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2"
+									key={category}
+								>
+									<span className="text-gray-700 text-xs">{category}</span>
+									<button
+										className="text-gray-400 text-xs hover:text-gray-700"
+										onClick={() => startRenameCategory(category)}
+										type="button"
+									>
+										Renombrar
+									</button>
+									<button
+										className="text-red-400 text-xs hover:text-red-600"
+										onClick={() => removeCategory(category)}
+										type="button"
+									>
+										Quitar
+									</button>
+								</div>
+							),
+						)}
+					</div>
+				)}
+
+				<form
+					className="flex flex-col gap-2 sm:flex-row"
+					onSubmit={handleAddCategory}
+				>
+					<input
+						className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
+						maxLength={80}
+						onChange={(event) => setNewCategoryName(event.target.value)}
+						placeholder="Nueva categoría"
+						value={newCategoryName}
+					/>
+					<button
+						className="rounded-lg bg-gray-900 px-4 py-2 font-medium text-sm text-white disabled:opacity-40"
+						disabled={!newCategoryName.trim()}
+						type="submit"
+					>
+						Agregar
+					</button>
+				</form>
+				{categoryError && (
+					<p className="mt-2 text-red-600 text-sm">{categoryError}</p>
+				)}
 			</div>
 
 			{/* Gift list */}

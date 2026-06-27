@@ -6,9 +6,12 @@ import { GripVertical } from "lucide-react";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import { GiftRow } from "./gift-row";
 
-type Props = { gift: DashboardGiftRowViewModel };
+type Props = {
+	gift: DashboardGiftRowViewModel;
+	wishlistId: string;
+};
 
-export function SortableGiftRow({ gift }: Props) {
+export function SortableGiftRow({ gift, wishlistId }: Props) {
 	const {
 		attributes,
 		listeners,
@@ -40,7 +43,7 @@ export function SortableGiftRow({ gift }: Props) {
 					<GripVertical className="h-4 w-4" />
 				</button>
 				<div className="min-w-0 flex-1">
-					<GiftRow gift={gift} />
+					<GiftRow gift={gift} wishlistId={wishlistId} />
 				</div>
 			</div>
 		</li>

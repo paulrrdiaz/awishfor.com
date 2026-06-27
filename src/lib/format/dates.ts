@@ -1,4 +1,4 @@
-import type { Locale } from "@/generated/prisma/client";
+import type { Locale } from "@/generated/prisma/enums";
 
 const INTL_LOCALE: Record<Locale, string> = {
 	es: "es-PE",

@@ -3,7 +3,7 @@ import {
 	Currency,
 	GiftPriority,
 	GiftVisibilityStatus,
-} from "@/generated/prisma/client";
+} from "@/generated/prisma/enums";
 import { wishlistIdSchema } from "@/server/validators/wishlist.schema";
 
 export const GIFT_NAME_MAX_LENGTH = 200;
