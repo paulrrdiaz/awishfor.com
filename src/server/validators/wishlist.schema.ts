@@ -274,6 +274,15 @@ export const checkSlugAvailabilitySchema = z.object({
 	excludeWishlistId: wishlistIdSchema.optional(),
 });
 
+export const updateWishlistDesignSchema = z.object({
+	id: wishlistIdSchema,
+	themeId: wishlistThemeIdSchema,
+	layoutId: wishlistLayoutIdSchema,
+	fontPairing: wishlistFontPairingSchema,
+	buttonStyle: wishlistButtonStyleSchema,
+	coverImageUrl: wishlistCoverImageUrlSchema,
+});
+
 export type PublishWishlistInput = z.infer<typeof publishWishlistSchema>;
 export type ArchiveWishlistInput = z.infer<typeof archiveWishlistSchema>;
 export type RestoreWishlistInput = z.infer<typeof restoreWishlistSchema>;
@@ -282,4 +291,7 @@ export type WishlistRestoreTargetStatus = z.infer<
 >;
 export type CheckSlugAvailabilityInput = z.infer<
 	typeof checkSlugAvailabilitySchema
+>;
+export type UpdateWishlistDesignInput = z.infer<
+	typeof updateWishlistDesignSchema
 >;
