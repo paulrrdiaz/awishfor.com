@@ -1,13 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { extractWishlistSlug } from "@/lib/wishlist/slug-extract";
 
 const guestFinderSchema = z.object({
 	query: z
@@ -20,6 +22,9 @@ const guestFinderSchema = z.object({
 type GuestFinderValues = z.infer<typeof guestFinderSchema>;
 
 export function GuestFinder() {
+	const router = useRouter();
+	const [notFoundError, setNotFoundError] = useState(false);
+
 	const {
 		register,
 		handleSubmit,
@@ -30,8 +35,15 @@ export function GuestFinder() {
 	});
 
 	const onSubmit = (values: GuestFinderValues) => {
-		// Search is wired in Milestone 8.2; for now confirm the input is valid.
-		toast.info(`Pronto podrás buscar: "${values.query}" 🔎`);
+		const slug = extractWishlistSlug(values.query);
+
+		if (!slug) {
+			setNotFoundError(true);
+			return;
+		}
+
+		setNotFoundError(false);
+		router.push(`/w/${slug}`);
 	};
 
 	return (
@@ -44,7 +56,7 @@ export function GuestFinder() {
 					¿Buscas la lista de alguien?
 				</h2>
 				<p className="mb-6 text-[15px] text-[var(--mmut)]">
-					Encuentra su wishlist por nombre o por enlace.
+					Pega el enlace o escribe el nombre exacto de la lista.
 				</p>
 				<form
 					className="mx-auto max-w-[520px]"
@@ -54,13 +66,20 @@ export function GuestFinder() {
 					<div className="flex items-start gap-[10px]">
 						<Field className="flex-1">
 							<Input
-								aria-invalid={!!errors.query}
-								aria-label="Nombre del evento o de la pareja"
+								aria-invalid={!!errors.query || notFoundError}
+								aria-label="Enlace o nombre de la lista"
 								className="h-auto rounded-full border-[var(--mline)] bg-white px-5 py-[14px] text-[14px] text-[var(--mink)] placeholder:text-[var(--mmut)] focus-visible:border-[var(--mrose)]"
-								placeholder="Nombre del evento o de la pareja…"
-								{...register("query")}
+								placeholder="Enlace o nombre exacto de la lista…"
+								{...register("query", {
+									onChange: () => setNotFoundError(false),
+								})}
 							/>
 							<FieldError className="px-2 text-left" errors={[errors.query]} />
+							{notFoundError && (
+								<p className="px-2 text-left text-destructive text-sm">
+									No reconocimos ese enlace o nombre de lista.
+								</p>
+							)}
 						</Field>
 						<Button
 							className="m-btn m-btn-pri h-auto"

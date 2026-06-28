@@ -11,7 +11,7 @@ import { OverviewShare } from "./overview-share";
 type Props = {
 	wishlist: Pick<
 		DashboardWishlistOverviewViewModel,
-		"id" | "slug" | "status" | "publicUrlPath" | "readiness"
+		"id" | "slug" | "status" | "publicUrlPath" | "readiness" | "eventType"
 	>;
 };
 
@@ -46,6 +46,7 @@ export function PublishButton({ wishlist }: Props) {
 					</p>
 				</div>
 				<OverviewShare
+					eventType={wishlist.eventType}
 					publicUrlPath={wishlist.publicUrlPath}
 					slug={wishlist.slug}
 				/>

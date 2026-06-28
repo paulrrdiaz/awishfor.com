@@ -146,6 +146,7 @@ export function mapDashboardWishlistOverview(
 		id: wishlist.id,
 		slug: wishlist.slug,
 		title: wishlist.title,
+		eventType: wishlist.eventType,
 		language: wishlist.language,
 		status: wishlist.status,
 		publicUrlPath,

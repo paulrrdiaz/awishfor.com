@@ -1385,7 +1385,7 @@ Tasks:
 - [x] Add available/partial group.
 - [x] Add purchased group.
 - [x] Add hidden group.
-- [ ] Add status badges (reuse `shared/StatusBadge`).
+- [x] Add status badges (reuse `shared/StatusBadge`).
 - [x] Add quantity progress per gift.
 - [x] Add edit action.
 - [x] Add hide/unhide action.
@@ -1762,14 +1762,14 @@ Owner sees wishlists as cards with status/progress and filters.
 
 Tasks:
 
-- [ ] Add wishlist list page.
-- [ ] Add card grid.
-- [ ] Add dashboard wishlist card view model.
-- [ ] Add Activas filter.
-- [ ] Add Borradores filter.
-- [ ] Add Publicadas filter.
-- [ ] Add Archivadas filter.
-- [ ] Add empty states.
+- [x] Add wishlist list page.
+- [x] Add card grid.
+- [x] Add dashboard wishlist card view model.
+- [x] Add Activas filter.
+- [x] Add Borradores filter.
+- [x] Add Publicadas filter.
+- [x] Add Archivadas filter.
+- [x] Add empty states.
 
 Acceptance criteria:
 
@@ -1797,15 +1797,15 @@ Overview shows metrics, link, sharing, readiness, and recent purchases.
 
 Tasks:
 
-- [ ] Add overview page.
-- [ ] Add 4 metric cards (Regalos totales · Disponibles · Comprados · Progreso de compras with bar).
-- [ ] Add public link section.
-- [ ] Add copy link action.
-- [ ] Add WhatsApp share action.
-- [ ] Add QR download action.
-- [ ] Add recent purchases section (avatar + buyer + gift + relative time + status badge).
-- [ ] Add publish readiness checklist.
-- [ ] Add publish action.
+- [x] Add overview page.
+- [x] Add 4 metric cards (Regalos totales · Disponibles · Comprados · Progreso de compras with bar).
+- [x] Add public link section.
+- [x] Add copy link action.
+- [x] Add WhatsApp share action.
+- [x] Add QR download action.
+- [x] Add recent purchases section (avatar + buyer + gift + relative time + status badge).
+- [x] Add publish readiness checklist.
+- [x] Add publish action.
 
 Acceptance criteria:
 
@@ -1833,10 +1833,10 @@ Wishlist detail pages use tabs/dropdown navigation.
 
 Tasks:
 
-- [ ] Add wishlist detail layout.
-- [ ] Add desktop/tablet tabs.
-- [ ] Add mobile select/dropdown (< md).
-- [ ] Add nav items: Resumen, Regalos, Diseño, Configuración.
+- [x] Add wishlist detail layout.
+- [x] Add desktop/tablet tabs.
+- [x] Add mobile select/dropdown (< md).
+- [x] Add nav items: Resumen, Regalos, Diseño, Configuración.
 
 Acceptance criteria:
 
@@ -1863,14 +1863,14 @@ Owner can update design after wishlist creation.
 
 Tasks:
 
-- [ ] Add design page.
-- [ ] Add theme selector (all seven themes).
-- [ ] Add layout selector.
-- [ ] Add font selector.
-- [ ] Add button style selector.
-- [ ] Add cover image upload/remove.
-- [ ] Add embedded preview.
-- [ ] Save design changes.
+- [x] Add design page.
+- [x] Add theme selector (all seven themes).
+- [x] Add layout selector.
+- [x] Add font selector.
+- [x] Add button style selector.
+- [x] Add cover image upload/remove.
+- [x] Add embedded preview.
+- [x] Save design changes.
 
 Acceptance criteria:
 
@@ -2024,8 +2024,8 @@ For's softer editorial language.
 Tasks:
 
 - [x] Add guest list-finder section ("¿Buscas la lista de alguien?" — search by name/link).
-- [ ] Wire finder to slug/name lookup behavior.
-- [ ] Add FAQ accordion (Base UI `Collapsible`).
+- [x] Wire finder to slug/name lookup behavior.
+- [x] Add FAQ accordion (Base UI `Collapsible`).
 
 Acceptance criteria:
 
@@ -2120,7 +2120,7 @@ Tasks:
 - [x] Generate QR from current public URL.
 - [x] Add download PNG action.
 - [x] Use in publish success step.
-- [ ] Use in dashboard share panel.
+- [x] Use in dashboard share panel.
 
 Acceptance criteria:
 
@@ -2151,11 +2151,11 @@ Share messages vary by event type.
 Tasks:
 
 - [x] Add WhatsApp template helper.
-- [ ] Add baby shower template.
-- [ ] Add birthday template.
-- [ ] Add wedding template.
-- [ ] Add housewarming template.
-- [ ] Add general template.
+- [x] Add baby shower template.
+- [x] Add birthday template.
+- [x] Add wedding template.
+- [x] Add housewarming template.
+- [x] Add general template.
 - [x] URL-encode message correctly.
 
 Acceptance criteria:
@@ -2184,13 +2184,13 @@ Add minimal legal pages and report link.
 
 Tasks:
 
-- [ ] Add `/privacy`.
-- [ ] Add `/terms`.
-- [ ] Mention Clerk, PostHog, Sentry, UploadThing, Neon.
-- [ ] Mention guest purchase/contact data.
-- [ ] Add public footer links ("Hecho con cariño en A Wish For").
-- [ ] Add report mailto link.
-- [ ] Add support email `hola@awishfor.com`.
+- [x] Add `/privacy`.
+- [x] Add `/terms`.
+- [x] Mention Clerk, PostHog, Sentry, UploadThing, Neon.
+- [x] Mention guest purchase/contact data.
+- [x] Add public footer links ("Hecho con cariño en A Wish For").
+- [x] Add report mailto link.
+- [x] Add support email `hola@awishfor.com`.
 
 Acceptance criteria:
 

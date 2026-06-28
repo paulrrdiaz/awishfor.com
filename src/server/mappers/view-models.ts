@@ -118,6 +118,7 @@ export type DashboardWishlistOverviewViewModel = {
 	id: string;
 	slug: string;
 	title: string;
+	eventType: string;
 	language: string;
 	status: string;
 	publicUrlPath: string;

@@ -402,7 +402,7 @@ export function PublishStep() {
 						</button>
 						<a
 							className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 text-sm hover:bg-gray-50"
-							href={toWhatsAppShareUrl(publishedUrl)}
+							href={toWhatsAppShareUrl(publishedUrl, draft.eventType)}
 							rel="noreferrer"
 							target="_blank"
 						>

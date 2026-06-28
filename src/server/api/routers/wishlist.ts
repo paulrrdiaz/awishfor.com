@@ -210,7 +210,7 @@ export const wishlistRouter = createTRPCRouter({
 			return mapDashboardWishlistOverview(wishlist, {
 				publicUrlPath,
 				publicUrl,
-				whatsAppUrl: toWhatsAppShareUrl(publicUrl),
+				whatsAppUrl: toWhatsAppShareUrl(publicUrl, wishlist.eventType),
 				readiness,
 				recentPurchases,
 			});

@@ -11,16 +11,25 @@ import {
 type Props = {
 	publicUrlPath: string;
 	slug: string;
+	eventType?: string | null;
 	className?: string;
 };
 
-export function OverviewShare({ publicUrlPath, slug, className }: Props) {
+export function OverviewShare({
+	publicUrlPath,
+	slug,
+	eventType,
+	className,
+}: Props) {
 	const [copied, setCopied] = useState(false);
 	const publicUrl = useMemo(
 		() => toCanonicalWishlistUrl(publicUrlPath),
 		[publicUrlPath],
 	);
-	const whatsAppUrl = useMemo(() => toWhatsAppShareUrl(publicUrl), [publicUrl]);
+	const whatsAppUrl = useMemo(
+		() => toWhatsAppShareUrl(publicUrl, eventType),
+		[publicUrl, eventType],
+	);
 
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(publicUrl);

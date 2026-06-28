@@ -1,6 +1,7 @@
 import { AtSign, Camera, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/config/contact";
 
 const COLUMNS = [
 	{
@@ -24,9 +25,9 @@ const COLUMNS = [
 	{
 		title: "Legal",
 		links: [
-			{ label: "Términos de uso", href: "#" },
-			{ label: "Privacidad", href: "#" },
-			{ label: "Contacto", href: "#" },
+			{ label: "Términos de uso", href: "/terms" },
+			{ label: "Privacidad", href: "/privacy" },
+			{ label: "Contacto", href: `mailto:${SUPPORT_EMAIL}` },
 		],
 	},
 ];
