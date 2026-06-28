@@ -1,11 +1,27 @@
 import { TRPCError } from "@trpc/server";
-import { PublishReadinessError } from "@/lib/wishlist/publish-readiness";
+import { z } from "zod";
+import {
+	evaluatePublishReadiness,
+	PublishReadinessError,
+} from "@/lib/wishlist/publish-readiness";
+import {
+	toCanonicalWishlistUrl,
+	toWhatsAppShareUrl,
+} from "@/lib/wishlist/share";
 import type { createTRPCContext } from "@/server/api/trpc";
 import {
 	createTRPCRouter,
 	protectedProcedure,
 	publicProcedure,
 } from "@/server/api/trpc";
+import {
+	mapDashboardWishlistOverview,
+	mapDashboardWishlistSummary,
+} from "@/server/mappers/dashboard-wishlist.mapper";
+import {
+	listOwnerWishlistRecentPurchases,
+	type WishlistRecentPurchaseDatabase,
+} from "@/server/services/purchase.service";
 import { checkSlugAvailability } from "@/server/services/slug.service";
 import {
 	publishWishlist,
@@ -15,6 +31,7 @@ import {
 import {
 	checkSlugAvailabilitySchema,
 	publishWishlistSchema,
+	wishlistIdSchema,
 } from "@/server/validators/wishlist.schema";
 import { saveDraftWishlistSchema } from "@/server/validators/wishlist-save-draft.schema";
 
@@ -39,6 +56,19 @@ const getLocalUserId = async (ctx: WishlistRouterContext) => {
 	return user.id;
 };
 
+const wishlistWithGiftsInclude = {
+	gifts: {
+		include: {
+			purchases: true,
+		},
+	},
+} as const;
+
+const asWishlistRecentPurchaseDb = (
+	ctx: WishlistRouterContext,
+): WishlistRecentPurchaseDatabase =>
+	ctx.db as unknown as WishlistRecentPurchaseDatabase;
+
 export const wishlistRouter = createTRPCRouter({
 	list: protectedProcedure.query(async ({ ctx }) => {
 		const ownerId = await getLocalUserId(ctx);
@@ -48,6 +78,60 @@ export const wishlistRouter = createTRPCRouter({
 			orderBy: { createdAt: "desc" },
 		});
 	}),
+
+	summaryList: protectedProcedure.query(async ({ ctx }) => {
+		const ownerId = await getLocalUserId(ctx);
+		const wishlists = await ctx.db.wishlist.findMany({
+			where: { ownerId },
+			include: wishlistWithGiftsInclude,
+			orderBy: { createdAt: "desc" },
+		});
+
+		return wishlists.map(mapDashboardWishlistSummary);
+	}),
+
+	overview: protectedProcedure
+		.input(z.object({ wishlistId: wishlistIdSchema }))
+		.query(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+			const wishlist = await ctx.db.wishlist.findFirst({
+				where: { id: input.wishlistId, ownerId },
+				include: wishlistWithGiftsInclude,
+			});
+
+			if (!wishlist) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			const visibleGiftCount = wishlist.gifts.filter(
+				(gift) => gift.deletedAt === null && gift.visibilityStatus !== "hidden",
+			).length;
+			const readiness = evaluatePublishReadiness({
+				title: wishlist.title,
+				eventType: wishlist.eventType,
+				slug: wishlist.slug,
+				language: wishlist.language,
+				currency: wishlist.currency,
+				visibleGiftCount,
+			});
+			const publicUrlPath = `/w/${wishlist.slug}`;
+			const publicUrl = toCanonicalWishlistUrl(publicUrlPath);
+			const recentPurchases = await listOwnerWishlistRecentPurchases(
+				asWishlistRecentPurchaseDb(ctx),
+				{
+					ownerId,
+					wishlistId: input.wishlistId,
+				},
+			);
+
+			return mapDashboardWishlistOverview(wishlist, {
+				publicUrlPath,
+				publicUrl,
+				whatsAppUrl: toWhatsAppShareUrl(publicUrl),
+				readiness,
+				recentPurchases,
+			});
+		}),
 
 	checkSlugAvailability: publicProcedure
 		.input(checkSlugAvailabilitySchema)

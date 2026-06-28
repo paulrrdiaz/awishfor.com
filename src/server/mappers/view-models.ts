@@ -89,6 +89,61 @@ export type OwnerPurchaseRecordViewModel = {
 	updatedAt: string;
 };
 
+export type RecentPurchaseViewModel = {
+	id: string;
+	guestName: string;
+	giftId: string;
+	giftName: string;
+	quantity: number;
+	status: "confirmed" | "pending";
+	createdAt: string;
+};
+
+export type DashboardWishlistSummaryViewModel = {
+	id: string;
+	slug: string;
+	title: string;
+	eventType: string;
+	status: string;
+	eventDate: string | null;
+	coverImageUrl: string | null;
+	totalUnits: number;
+	purchasedUnits: number;
+	availableGiftCount: number;
+	totalGiftCount: number;
+	createdAt: string;
+};
+
+export type DashboardWishlistOverviewViewModel = {
+	id: string;
+	slug: string;
+	title: string;
+	language: string;
+	status: string;
+	publicUrlPath: string;
+	publicUrl: string;
+	whatsAppUrl: string;
+	metrics: {
+		totalGifts: number;
+		availableGifts: number;
+		purchasedGifts: number;
+		totalUnits: number;
+		purchasedUnits: number;
+	};
+	readiness: {
+		ready: boolean;
+		checks: {
+			title: boolean;
+			eventType: boolean;
+			slug: boolean;
+			language: boolean;
+			currency: boolean;
+			visibleGift: boolean;
+		};
+	};
+	recentPurchases: RecentPurchaseViewModel[];
+};
+
 export type DashboardWishlistCardViewModel = {
 	id: string;
 	slug: string;

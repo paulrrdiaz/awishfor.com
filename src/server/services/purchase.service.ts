@@ -39,6 +39,18 @@ export type OwnerPurchaseDatabase = {
 	gift: GiftDelegate;
 };
 
+type WishlistRecentPurchase = Purchase & {
+	gift: Pick<Gift, "id" | "name">;
+};
+
+export type WishlistRecentPurchaseDatabase = {
+	purchase: PurchaseDelegate & {
+		findMany(
+			args: Prisma.PurchaseFindManyArgs,
+		): Promise<WishlistRecentPurchase[]>;
+	};
+};
+
 const hashToken = (raw: string) =>
 	createHash("sha256").update(raw).digest("hex");
 
@@ -144,6 +156,34 @@ export const listOwnerGiftPurchases = async (
 		orderBy: { createdAt: "desc" },
 	});
 };
+
+export const listOwnerWishlistRecentPurchases = async (
+	db: WishlistRecentPurchaseDatabase,
+	{
+		ownerId,
+		wishlistId,
+		take = 5,
+	}: { ownerId: number; wishlistId: string; take?: number },
+): Promise<WishlistRecentPurchase[]> =>
+	db.purchase.findMany({
+		where: {
+			gift: {
+				wishlistId,
+				deletedAt: null,
+				wishlist: { ownerId },
+			},
+		},
+		include: {
+			gift: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
+		},
+		orderBy: { createdAt: "desc" },
+		take,
+	});
 
 export const createOwnerManualPurchase = async (
 	db: OwnerPurchaseDatabase,

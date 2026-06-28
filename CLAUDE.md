@@ -6,6 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `create-t3-app` scaffold: Next.js 16 (App Router, RSC) · React 19 · tRPC v11 · Prisma 7 (Postgres/Neon via the `pg` driver adapter) · Clerk auth · Tailwind CSS v4 · TypeScript. Package manager is **pnpm**; Biome is the linter/formatter.
 
+## Design Reference
+
+The visual source of truth is the Claude Design project file `A Wish For.dc.html`.
+When implementing or reviewing UI, use the `claude_design` MCP to import the project:
+
+- MCP endpoint: `https://api.anthropic.com/v1/design/mcp`
+- Auth flow: `/design-login`
+- Project URL: `https://claude.ai/design/p/10380ffb-0586-4cc7-aa3b-862f4fb0ab17?file=A+Wish+For.dc.html`
+- Target file to implement: `A Wish For.dc.html`
+
+Treat that imported design as authoritative for themes, layout, typography, copy, spacing, and interaction behavior unless a later product decision explicitly supersedes it.
+
 ## Commands
 
 - `pnpm bootstrap` — one-time project setup wizard (`scripts/setup.mjs`, zx): renames the project, scaffolds `.env` from `.env.example`, and runs the first migration

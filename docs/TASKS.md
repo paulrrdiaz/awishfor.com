@@ -1380,17 +1380,17 @@ Owner manages all gifts from dashboard with filters, status badges, and edit/del
 
 Tasks:
 
-- [ ] Add dashboard gifts page.
-- [ ] Add gift row view model usage.
-- [ ] Add available/partial group.
-- [ ] Add purchased group.
-- [ ] Add hidden group.
+- [x] Add dashboard gifts page.
+- [x] Add gift row view model usage.
+- [x] Add available/partial group.
+- [x] Add purchased group.
+- [x] Add hidden group.
 - [ ] Add status badges (reuse `shared/StatusBadge`).
-- [ ] Add quantity progress per gift.
-- [ ] Add edit action.
-- [ ] Add hide/unhide action.
-- [ ] Add soft delete action.
-- [ ] Add delete confirmation.
+- [x] Add quantity progress per gift.
+- [x] Add edit action.
+- [x] Add hide/unhide action.
+- [x] Add soft delete action.
+- [x] Add delete confirmation.
 
 Acceptance criteria:
 
@@ -1418,11 +1418,11 @@ Owner can reorder gifts using drag-and-drop.
 
 Tasks:
 
-- [ ] Add `@dnd-kit` integration.
-- [ ] Add reorder mutation.
-- [ ] Persist shared `sortOrder` per gift.
-- [ ] Support all non-deleted gifts.
-- [ ] Preserve public grouping behavior.
+- [x] Add `@dnd-kit` integration.
+- [x] Add reorder mutation.
+- [x] Persist shared `sortOrder` per gift.
+- [x] Support all non-deleted gifts.
+- [x] Preserve public grouping behavior.
 
 Acceptance criteria:
 
@@ -1450,13 +1450,13 @@ Owner can manage categories in dashboard; wizard remains lightweight.
 
 Tasks:
 
-- [ ] Add dashboard category management panel.
-- [ ] Add category add.
-- [ ] Add category rename.
-- [ ] Add category delete.
-- [ ] Add category reorder.
-- [ ] Show gift counts.
-- [ ] Add wizard lightweight category assignment/editing.
+- [x] Add dashboard category management panel.
+- [x] Add category add.
+- [x] Add category rename.
+- [x] Add category delete.
+- [x] Add category reorder.
+- [x] Show gift counts.
+- [x] Add wizard lightweight category assignment/editing.
 
 Acceptance criteria:
 
@@ -1632,12 +1632,12 @@ Tasks:
 
 - [ ] Add success state copy: "¡Gracias, {nombre}! Tu regalo fue marcado como comprado. Gracias por tu cariño y por ser parte de este momento."
 - [ ] Add `Deshacer` action with live 8s countdown.
-- [ ] Add `Cerrar` action.
-- [ ] Add `purchase.undoRecentPurchase` mutation.
-- [ ] Validate token hash.
-- [ ] Validate token expiry.
-- [ ] Delete purchase record on valid undo.
-- [ ] Update UI after undo.
+- [x] Add `Cerrar` action.
+- [x] Add `purchase.undoRecentPurchase` mutation.
+- [x] Validate token hash.
+- [x] Validate token expiry.
+- [x] Delete purchase record on valid undo.
+- [x] Update UI after undo.
 - [ ] Show "el tiempo para deshacer expiró" on expiry.
 
 Acceptance criteria:
@@ -1667,11 +1667,11 @@ After purchase/undo, public gift status and progress should reflect changes.
 
 Tasks:
 
-- [ ] Refresh public data after purchase.
-- [ ] Refresh public data after undo.
-- [ ] Update gift card quantity progress.
-- [ ] Move fully purchased gifts into purchased group.
-- [ ] Remove CTAs from purchased gift.
+- [x] Refresh public data after purchase.
+- [x] Refresh public data after undo.
+- [x] Update gift card quantity progress.
+- [x] Move fully purchased gifts into purchased group.
+- [x] Remove CTAs from purchased gift.
 
 Acceptance criteria:
 
@@ -2023,7 +2023,7 @@ For's softer editorial language.
 
 Tasks:
 
-- [ ] Add guest list-finder section ("¿Buscas la lista de alguien?" — search by name/link).
+- [x] Add guest list-finder section ("¿Buscas la lista de alguien?" — search by name/link).
 - [ ] Wire finder to slug/name lookup behavior.
 - [ ] Add FAQ accordion (Base UI `Collapsible`).
 
@@ -2087,10 +2087,10 @@ Landing page uses public wishlist components with sample data.
 
 Tasks:
 
-- [ ] Add `src/config/demo-wishlist.ts`.
-- [ ] Add compact public wishlist view model sample.
-- [ ] Render using compact mode (Crema Elegante in brief).
-- [ ] Ensure actions disabled.
+- [x] Add `src/config/demo-wishlist.ts`.
+- [x] Add compact public wishlist view model sample.
+- [x] Render using compact mode (Crema Elegante in brief).
+- [x] Ensure actions disabled.
 
 Acceptance criteria:
 

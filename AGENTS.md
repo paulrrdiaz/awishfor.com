@@ -11,6 +11,18 @@ This is a pnpm-managed Next.js 16 App Router project with TypeScript, tRPC, Pris
 - `prisma/` contains schema and migrations. Prisma generates client files into `src/generated/prisma`; do not edit generated files.
 - `public/` contains static assets.
 
+## Design Reference
+
+The visual source of truth is the Claude Design project file `A Wish For.dc.html`.
+When implementing or reviewing UI, use the `claude_design` MCP to import the project:
+
+- MCP endpoint: `https://api.anthropic.com/v1/design/mcp`
+- Auth flow: `/design-login`
+- Project URL: `https://claude.ai/design/p/10380ffb-0586-4cc7-aa3b-862f4fb0ab17?file=A+Wish+For.dc.html`
+- Target file to implement: `A Wish For.dc.html`
+
+Treat that imported design as authoritative for themes, layout, typography, copy, spacing, and interaction behavior unless a later product decision explicitly supersedes it.
+
 ## Build, Test, and Development Commands
 
 - `pnpm install` installs dependencies and runs `prisma generate`.

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Gift, Purchase, Wishlist } from "@/generated/prisma/client";
-import { mapDashboardWishlist } from "@/server/mappers/dashboard-wishlist.mapper";
+import {
+	mapDashboardWishlist,
+	mapDashboardWishlistOverview,
+	mapDashboardWishlistSummary,
+} from "@/server/mappers/dashboard-wishlist.mapper";
 
 const now = new Date("2026-06-26T12:00:00Z");
 
@@ -146,5 +150,141 @@ describe("mapDashboardWishlist", () => {
 		});
 		expect(result.createdAt).toBe("2026-06-26T12:00:00.000Z");
 		expect(result.updatedAt).toBe("2026-06-26T12:00:00.000Z");
+	});
+});
+
+describe("mapDashboardWishlistSummary", () => {
+	it("returns zero quantity aggregates when there are no visible gifts", () => {
+		const result = mapDashboardWishlistSummary({
+			...makeWishlist(),
+			gifts: [
+				{
+					...makeGift({ id: "hidden", visibilityStatus: "hidden" }),
+					purchases: [],
+				},
+				{ ...makeGift({ id: "deleted", deletedAt: now }), purchases: [] },
+			],
+		});
+
+		expect(result.totalGiftCount).toBe(0);
+		expect(result.availableGiftCount).toBe(0);
+		expect(result.totalUnits).toBe(0);
+		expect(result.purchasedUnits).toBe(0);
+	});
+
+	it("computes partial quantity progress from visible non-deleted gifts", () => {
+		const result = mapDashboardWishlistSummary({
+			...makeWishlist({ status: "published" }),
+			gifts: [
+				{
+					...makeGift({ id: "g1", quantityNeeded: 3 }),
+					purchases: [makePurchase({ id: "p1", giftId: "g1", quantity: 1 })],
+				},
+				{
+					...makeGift({ id: "g2", quantityNeeded: 2 }),
+					purchases: [makePurchase({ id: "p2", giftId: "g2", quantity: 2 })],
+				},
+				{
+					...makeGift({
+						id: "g3",
+						quantityNeeded: 5,
+						visibilityStatus: "hidden",
+					}),
+					purchases: [makePurchase({ id: "p3", giftId: "g3", quantity: 5 })],
+				},
+			],
+		});
+
+		expect(result.status).toBe("published");
+		expect(result.totalGiftCount).toBe(2);
+		expect(result.availableGiftCount).toBe(1);
+		expect(result.totalUnits).toBe(5);
+		expect(result.purchasedUnits).toBe(3);
+	});
+
+	it("caps over-purchased units at quantity needed", () => {
+		const result = mapDashboardWishlistSummary({
+			...makeWishlist(),
+			gifts: [
+				{
+					...makeGift({ id: "g1", quantityNeeded: 2 }),
+					purchases: [makePurchase({ id: "p1", giftId: "g1", quantity: 3 })],
+				},
+			],
+		});
+
+		expect(result.totalGiftCount).toBe(1);
+		expect(result.availableGiftCount).toBe(0);
+		expect(result.totalUnits).toBe(2);
+		expect(result.purchasedUnits).toBe(2);
+	});
+});
+
+describe("mapDashboardWishlistOverview", () => {
+	const readiness = {
+		ready: true,
+		checks: {
+			title: true,
+			eventType: true,
+			slug: true,
+			language: true,
+			currency: true,
+			visibleGift: true,
+		},
+	};
+
+	it("maps overview metrics and recent purchases", () => {
+		const purchase = {
+			...makePurchase({
+				id: "purchase-1",
+				giftId: "g1",
+				quantity: 2,
+				undoTokenHash: null,
+				undoExpiresAt: null,
+			}),
+			gift: { id: "g1", name: "Cafetera" },
+		};
+
+		const result = mapDashboardWishlistOverview(
+			{
+				...makeWishlist({ status: "published" }),
+				gifts: [
+					{
+						...makeGift({ id: "g1", quantityNeeded: 2 }),
+						purchases: [makePurchase({ id: "p1", giftId: "g1", quantity: 2 })],
+					},
+					{
+						...makeGift({ id: "g2", quantityNeeded: 4 }),
+						purchases: [makePurchase({ id: "p2", giftId: "g2", quantity: 1 })],
+					},
+				],
+			},
+			{
+				publicUrlPath: "/w/my-wishlist",
+				publicUrl: "https://awishfor.com/w/my-wishlist",
+				whatsAppUrl: "https://wa.me/?text=hello",
+				readiness,
+				recentPurchases: [purchase],
+			},
+		);
+
+		expect(result.metrics).toEqual({
+			totalGifts: 2,
+			availableGifts: 1,
+			purchasedGifts: 1,
+			totalUnits: 6,
+			purchasedUnits: 3,
+		});
+		expect(result.recentPurchases).toEqual([
+			{
+				id: "purchase-1",
+				guestName: "Guest",
+				giftId: "g1",
+				giftName: "Cafetera",
+				quantity: 2,
+				status: "confirmed",
+				createdAt: "2026-06-26T12:00:00.000Z",
+			},
+		]);
 	});
 });
