@@ -31,6 +31,9 @@ export function PublicWishlistPage({ wishlist, mode }: Props) {
 	return (
 		<PublicThemeProvider
 			buttonStyle={buttonStyle}
+			// Compact is an embedded preview (e.g. the marketing example); it must
+			// not stretch to the full viewport height like a standalone page.
+			className={mode === "compact" ? "min-h-0" : undefined}
 			fontPairing={fontPairing}
 			theme={theme}
 		>

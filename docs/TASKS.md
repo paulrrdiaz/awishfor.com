@@ -483,10 +483,10 @@ language. Tokens largely exist — this is alignment, not a rebuild.
 
 Tasks:
 
-- [ ] Align app `:root` tokens to warm near-white surface `#F7F8F1`, deep-navy ink, lime-chartreuse primary used sparingly.
-- [ ] Confirm `--radius` app scale (`1rem`) and shadow scale match the brief (low-contrast, 1px tinted borders).
-- [ ] Document the app-theme tokens that must stay untouched by public themes.
-- [ ] Verify dark-mode variants remain coherent after alignment.
+- [x] Align app `:root` tokens to warm near-white surface `#F7F8F1`, deep-navy ink, lime-chartreuse primary used sparingly.
+- [x] Confirm `--radius` app scale (`1rem`) and shadow scale match the brief (low-contrast, 1px tinted borders).
+- [x] Document the app-theme tokens that must stay untouched by public themes.
+- [x] Verify dark-mode variants remain coherent after alignment.
 
 Acceptance criteria:
 
@@ -513,11 +513,11 @@ Add Lora serif and the three shippable font pairings as tokens via `next/font`.
 
 Tasks:
 
-- [ ] Load **Lora** via `next/font`; expose `--font-serif`.
-- [ ] Confirm **Inter** body via `--font-sans`.
-- [ ] Replace `--font-serif: Georgia, serif` in `globals.css` with the Lora token.
-- [ ] Add `src/config/public-fonts.ts` with `serif-soft` (default), `sans-modern`, `rounded-friendly` pairings.
-- [ ] Expose font pairing via a wrapper data-attribute, not per-element classes.
+- [x] Load **Lora** via `next/font`; expose `--font-serif`.
+- [x] Confirm **Inter** body via `--font-sans`.
+- [x] Replace `--font-serif: Georgia, serif` in `globals.css` with the Lora token.
+- [x] Add `src/config/public-fonts.ts` with `serif-soft` (default), `sans-modern`, `rounded-friendly` pairings.
+- [x] Expose font pairing via a wrapper data-attribute, not per-element classes.
 
 Acceptance criteria:
 
@@ -546,12 +546,12 @@ page wrapper only.
 
 Tasks:
 
-- [ ] Add `src/config/public-themes.ts` as typed `ThemePreset[]`.
-- [ ] Add all seven presets: `dulce-rosa`, `cielo-suave` (default ★), `cielo-suave-rosa`, `jardin-verde`, `crema-elegante`, `lavanda-fiesta`, `clasico-minimal`.
-- [ ] Add `PublicThemeProvider` that writes preset vars to a `.public-theme` wrapper as inline styles with `data-theme`.
-- [ ] Apply `--radius: 18px` public override on the wrapper.
-- [ ] Confirm Tailwind v4 `@theme inline` maps `--color-*` so semantic utilities resolve per theme.
-- [ ] Ensure dashboard `:root` theme is never affected by public vars.
+- [x] Add `src/config/public-themes.ts` as typed `ThemePreset[]`.
+- [x] Add all seven presets: `dulce-rosa`, `cielo-suave` (default ★), `cielo-suave-rosa`, `jardin-verde`, `crema-elegante`, `lavanda-fiesta`, `clasico-minimal`.
+- [x] Add `PublicThemeProvider` that writes preset vars to a `.public-theme` wrapper as inline styles with `data-theme`.
+- [x] Apply `--radius: 18px` public override on the wrapper.
+- [x] Confirm Tailwind v4 `@theme inline` maps `--color-*` so semantic utilities resolve per theme.
+- [x] Ensure dashboard `:root` theme is never affected by public vars.
 
 Acceptance criteria:
 
@@ -582,12 +582,12 @@ components out of `features/`. Stateful/domain-coupled components stay in `featu
 
 Tasks:
 
-- [ ] Create `src/components/shared/` and keep `@/components/shared/*` alias consistent with `components.json`.
-- [ ] Move presentational components into `shared/`: `gift-card`, `gift-grid`, `gift-list`, `countdown`, `how-it-works`, `progress-summary`, `wishlist-hero`, `wishlist-footer`.
-- [ ] Add new shared DS pieces from the brief inventory: `StatusBadge`, `PriorityBadge`, `MetricCard`, `EmptyState`, `SharePanel`, `StepProgress`.
-- [ ] Update import paths across public layouts, `src/app/w/[slug]/*`, wizard preview, and marketing demo.
-- [ ] Keep stateful/domain components in `features/`: `purchase-gift-modal`, `public-filters`, `gift-form`, `image-upload`, all `wizard/*` steps, all `dashboard/*` tables/drawers, importer UI.
-- [ ] Use `cn()` + `cva` for variant components (e.g. `GiftCard` status variants).
+- [x] Create `src/components/shared/` and keep `@/components/shared/*` alias consistent with `components.json`.
+- [x] Move presentational components into `shared/`: `gift-card`, `gift-grid`, `gift-list`, `countdown`, `how-it-works`, `progress-summary`, `wishlist-hero`, `wishlist-footer`.
+- [x] Add new shared DS pieces from the brief inventory: `StatusBadge`, `PriorityBadge`, `MetricCard`, `EmptyState`, `SharePanel`, `StepProgress`.
+- [x] Update import paths across public layouts, `src/app/w/[slug]/*`, wizard preview, and marketing demo.
+- [x] Keep stateful/domain components in `features/`: `purchase-gift-modal`, `public-filters`, `gift-form`, `image-upload`, all `wizard/*` steps, all `dashboard/*` tables/drawers, importer UI.
+- [x] Use `cn()` + `cva` for variant components (e.g. `GiftCard` status variants).
 
 Acceptance criteria:
 
@@ -617,12 +617,12 @@ Stand up Storybook 9 with the Vite builder for the `shared/` design-system layer
 
 Tasks:
 
-- [ ] Install and configure **Storybook 9 + `@storybook/nextjs-vite`**.
-- [ ] Import `src/styles/globals.css` in `.storybook/preview` so Tailwind v4 tokens load.
-- [ ] Add a public-theme decorator/toolbar to preview components under each `data-theme`.
-- [ ] Add a11y and docs addons.
-- [ ] Add colocated `*.stories.tsx` for every `shared/` component, covering key variants/states.
-- [ ] Add `pnpm storybook` and `pnpm build-storybook` scripts.
+- [x] Install and configure **Storybook 9 + `@storybook/nextjs-vite`**.
+- [x] Import `src/styles/globals.css` in `.storybook/preview` so Tailwind v4 tokens load.
+- [x] Add a public-theme decorator/toolbar to preview components under each `data-theme`.
+- [x] Add a11y and docs addons.
+- [x] Add colocated `*.stories.tsx` for every `shared/` component, covering key variants/states.
+- [x] Add `pnpm storybook` and `pnpm build-storybook` scripts.
 
 Acceptance criteria:
 
@@ -1963,39 +1963,54 @@ Priority: P0
 Details:
 
 Landing page (fresh light-green theme) explains the product and drives users to `/create`.
-Palette: mint `#F1F7EC` bg, forest-green ink `#173E29`, sage muted `#5E7865`, lime pop
-`#BCE25A`, sunshine accent `#F4C84A`. Deep-green serif headlines, lime primary buttons.
+Implemented faithfully from the Claude Design canvas (`A Wish For.dc.html` §5,
+"Marketing / landing · desktop · light green theme"). Source-of-truth palette (canvas
+`.mkt` tokens): bg `#EEF9E6`, forest-green ink `#173E29`, sage muted `#4E6E56`, hairline
+`#CCE8BE`, lime pop `#BCE25A`, sunshine accent `#F4C84A`. Deep-green serif (Lora) headlines,
+lime primary buttons. Tokens scoped to a `.marketing-theme` wrapper — they never touch the
+app `:root` or the seven public wishlist themes. Animations use **GSAP + ScrollTrigger**
+(scroll reveals, floating blobs/emoji, hero bob, headline shimmer, partner marquee, mesh
+gradient, pulse dot, slow spin, button glow), all gated by `prefers-reduced-motion`. Brand
+logo (`public/assets/awishfor-logo.svg`) used in nav (and footer, inverted on the dark band).
 
 Tasks:
 
-- [ ] Add hero section (split: serif headline + CTAs left, rotated public-page card right).
-- [ ] Add ¿Por qué A Wish For? benefits row (4 cards: todo en un lugar · gratis sin comisiones · enlace/QR · listas sugeridas).
-- [ ] Add Cómo funciona section (3 numbered cards).
-- [ ] Add Casos de uso section (5 event pills).
-- [ ] Add Tiendas aliadas partner-logo strip (+ "y cualquier tienda con enlace").
-- [ ] Add theme previews section (gradient swatches for the seven themes).
-- [ ] Add example public wishlist preview (real `PublicWishlistPage` in compact mode).
-- [ ] Add final CTA section (dark-green band).
-- [ ] Add minimal nav.
+- [x] Add hero section (split: serif shimmer headline + CTAs + stats left, bobbing public-page card right).
+- [x] Add ¿Por qué A Wish For? benefits row (4 cards: todo en un lugar · gratis sin comisiones · enlace/QR · listas sugeridas).
+- [x] Add Cómo funciona section (3 numbered cards).
+- [x] Add Casos de uso section (5 event pills).
+- [x] Add Tiendas aliadas partner-logo strip (GSAP marquee + "y cualquier tienda con enlace").
+- [x] Add theme previews section (gradient swatches for the seven themes).
+- [x] Add example public wishlist preview (real `PublicWishlistPage` in compact mode).
+- [x] Add final CTA section (dark-green band).
+- [x] Add minimal nav (uses logo asset).
+- [x] Add GSAP animation engine scoped to the marketing route, with reduced-motion fallback.
+- [x] Add guest list-finder + FAQ sections (folded in from 8.2 since the canvas includes them).
 
 Acceptance criteria:
 
 - CTA `Crear mi wishlist` links to `/create`.
 - Secondary CTA `Ver ejemplo` links to the example block.
 - Signed-out nav shows Iniciar sesión + Crear mi wishlist.
-- Signed-in nav shows Dashboard + Crear mi wishlist (Clerk `<SignedIn>/<SignedOut>`).
+- Signed-in nav shows Dashboard + Crear mi wishlist (server-side `auth()`; this Clerk v7 build does not export `<SignedIn>/<SignedOut>`).
 - Example block reuses the real public components (single source of truth).
+- All animations off and content fully visible under `prefers-reduced-motion` / no-JS.
+- `.marketing-theme` tokens do not leak into app or public themes.
 
 Affected areas:
 
-- `src/app/(marketing)/page.tsx`
+- `src/app/(marketing)/layout.tsx`, `src/app/(marketing)/page.tsx`
 - `src/components/layouts/marketing/*`
+- `src/components/layouts/marketing/marketing-shell.tsx`, `src/lib/gsap/use-marketing-animations.ts`
 - `src/config/demo-wishlist.ts`
+- `src/styles/marketing.css`, `src/app/layout.tsx` (JetBrains Mono font)
 
 Notes/out-of-scope:
 
 - No pricing.
 - No testimonials.
+- Guest-finder search + FAQ accordion are visual (FAQ uses native `<details>`); wiring search is part of 8.2.
+- Desktop-first; mobile stacking is best-effort (responsive polish is a follow-up).
 
 ### 8.2 Add guest list-finder and FAQ
 

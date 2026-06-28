@@ -1,0 +1,176 @@
+/*
+ * Marketing landing styles — scoped to `.marketing-theme`.
+ * Token values come verbatim from the Claude Design canvas
+ * (A Wish For.dc.html §5, "Marketing / landing · desktop · light green theme").
+ * Motion is driven by GSAP (see src/lib/gsap), NOT CSS keyframes — these are
+ * static styles only. Content renders at its final state by default so the page
+ * is fully visible without JS and under prefers-reduced-motion.
+ */
+
+.marketing-theme {
+	--mbg: #eef9e6;
+	--mink: #173e29;
+	--mmut: #4e6e56;
+	--mline: #cce8be;
+	--mrose: #7fb069;
+	--msky: #56a86b;
+	--mlime: #bce25a;
+	--msun: #f4c84a;
+
+	background: var(--mbg);
+	color: var(--mink);
+	font-family: var(--font-sans);
+}
+
+.marketing-theme .m-serif {
+	font-family: var(--font-serif);
+}
+
+.marketing-theme .m-eyebrow {
+	font-family: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	font-size: 12px;
+	color: var(--mmut);
+}
+
+/* ---- buttons ---- */
+.marketing-theme .m-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-weight: 600;
+	font-size: 15px;
+	padding: 14px 26px;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	cursor: pointer;
+	text-decoration: none;
+	white-space: nowrap;
+	transition:
+		transform 0.18s ease,
+		box-shadow 0.18s ease;
+}
+.marketing-theme .m-btn:hover {
+	transform: translateY(-2px);
+}
+.marketing-theme .m-btn-lime {
+	background: var(--mlime);
+	color: #1b3a12;
+	box-shadow: 0 8px 22px rgba(140, 200, 60, 0.4);
+}
+.marketing-theme .m-btn-pri {
+	background: var(--mink);
+	color: #fff;
+}
+.marketing-theme .m-btn-out {
+	background: transparent;
+	color: var(--mink);
+	border-color: var(--mline);
+}
+
+/* ---- cards ---- */
+.marketing-theme .m-card {
+	background: #fff;
+	border: 1px solid var(--mline);
+	border-radius: 18px;
+	box-shadow:
+		0 1px 3px rgba(20, 30, 50, 0.05),
+		0 8px 30px rgba(20, 30, 50, 0.04);
+}
+.marketing-theme .card-lift {
+	transition:
+		transform 0.22s ease,
+		box-shadow 0.22s ease;
+}
+.marketing-theme .card-lift:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 18px 44px rgba(20, 80, 20, 0.11);
+}
+
+/* ---- shimmer headline (GSAP animates background-position) ---- */
+.marketing-theme .m-shimmer {
+	background: linear-gradient(
+		90deg,
+		#173e29 0%,
+		#2f8a57 45%,
+		#7fb069 55%,
+		#173e29 100%
+	);
+	background-size: 220% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+/* ---- ambient float helpers (positioned blobs/emoji; GSAP loops the motion) ---- */
+.marketing-theme .m-blob {
+	position: absolute;
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+/* ---- partner marquee (GSAP translates the track) ---- */
+.marketing-theme .m-marquee-mask {
+	overflow: hidden;
+	-webkit-mask-image: linear-gradient(
+		90deg,
+		transparent,
+		#000 10%,
+		#000 90%,
+		transparent
+	);
+	mask-image: linear-gradient(
+		90deg,
+		transparent,
+		#000 10%,
+		#000 90%,
+		transparent
+	);
+}
+.marketing-theme .m-marquee-track {
+	display: flex;
+	gap: 14px;
+	width: max-content;
+}
+
+/* ---- placeholder tiles (partner logos / theme art) ---- */
+.marketing-theme .m-ph {
+	background-image: repeating-linear-gradient(
+		135deg,
+		rgba(0, 0, 0, 0.045) 0 8px,
+		rgba(0, 0, 0, 0.015) 8px 16px
+	);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+.marketing-theme .m-ph-lbl {
+	font-family: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+	font-size: 10px;
+	letter-spacing: 0.03em;
+	color: rgba(0, 0, 0, 0.42);
+}
+
+/* ---- mini gift-card badges (hero teaser mock only) ---- */
+.marketing-theme .m-badge {
+	display: inline-block;
+	border-radius: 999px;
+	padding: 2px 8px;
+	font-size: 8px;
+	font-weight: 700;
+}
+.marketing-theme .m-badge-avail {
+	background: #e4f3dc;
+	color: #2f7a3e;
+}
+.marketing-theme .m-badge-part {
+	background: #fdf3d6;
+	color: #9a7b1f;
+}
+.marketing-theme .m-badge-done {
+	background: #ececec;
+	color: #6b6b6b;
+}

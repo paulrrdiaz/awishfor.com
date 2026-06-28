@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Inter, Lora, Nunito } from "next/font/google";
+import { Inter, JetBrains_Mono, Lora, Nunito } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,12 +32,18 @@ const nunito = Nunito({
 	display: "swap",
 });
 
+const jetbrainsMono = JetBrains_Mono({
+	subsets: ["latin"],
+	variable: "--font-jetbrains-mono",
+	display: "swap",
+});
+
 export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html
-			className={`${inter.variable} ${lora.variable} ${nunito.variable}`}
+			className={`${inter.variable} ${lora.variable} ${nunito.variable} ${jetbrainsMono.variable}`}
 			lang="en"
 		>
 			<body>
