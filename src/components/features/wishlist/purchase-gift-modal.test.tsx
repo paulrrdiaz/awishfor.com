@@ -8,7 +8,7 @@ import {
 	screen,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PurchaseGiftModal } from "@/components/features/wishlist/purchase-gift-modal";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 
@@ -232,12 +232,30 @@ describe("PurchaseGiftModal", () => {
 			});
 		}
 
-		it("shows success state with thank-you copy after purchase succeeds", () => {
+		it("shows success state with non-personalized fallback copy when no name entered", () => {
 			renderModal();
 			triggerPurchaseSuccess();
 
 			expect(screen.getByText(/regalo confirmado/i)).toBeTruthy();
-			expect(screen.getByText(/tienes 60 segundos/i)).toBeTruthy();
+			expect(
+				screen.getByText(
+					/¡Gracias! Tu regalo fue marcado como comprado\. Gracias por tu cariño y por ser parte de este momento\./i,
+				),
+			).toBeTruthy();
+		});
+
+		it("shows personalized copy with guest name in success state", async () => {
+			const user = userEvent.setup();
+			renderModal();
+
+			await user.type(screen.getByLabelText(/tu nombre/i), "Ana García");
+			triggerPurchaseSuccess();
+
+			expect(
+				screen.getByText(
+					/¡Gracias, Ana García! Tu regalo fue marcado como comprado\. Gracias por tu cariño y por ser parte de este momento\./i,
+				),
+			).toBeTruthy();
 		});
 
 		it("shows Deshacer and Cerrar buttons in success state", () => {
@@ -287,7 +305,9 @@ describe("PurchaseGiftModal", () => {
 			});
 
 			expect(screen.getByText(/undo token has expired/i)).toBeTruthy();
-			expect(screen.getByRole("button", { name: /deshacer/i })).toBeTruthy();
+			expect(
+				screen.getByRole("button", { name: /deshacer \(\d+ s\)/i }),
+			).toBeTruthy();
 		});
 
 		it("Cerrar closes the modal without calling undo mutation", async () => {
@@ -325,6 +345,53 @@ describe("PurchaseGiftModal", () => {
 
 			expect(refreshMock).toHaveBeenCalledTimes(2);
 			expect(onOpenChange).toHaveBeenCalledWith(false);
+		});
+
+		describe("undo countdown", () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it("shows countdown on Deshacer button when success state is entered", () => {
+				renderModal();
+				triggerPurchaseSuccess();
+
+				expect(
+					screen.getByRole("button", { name: /deshacer \(8 s\)/i }),
+				).toBeTruthy();
+			});
+
+			it("decrements the countdown on the Deshacer button each second", () => {
+				renderModal();
+				triggerPurchaseSuccess();
+
+				act(() => {
+					vi.advanceTimersByTime(3000);
+				});
+
+				expect(
+					screen.getByRole("button", { name: /deshacer \(5 s\)/i }),
+				).toBeTruthy();
+			});
+
+			it("replaces Deshacer with expiry message after 8 seconds", () => {
+				renderModal();
+				triggerPurchaseSuccess();
+
+				act(() => {
+					vi.advanceTimersByTime(8000);
+				});
+
+				expect(screen.queryByRole("button", { name: /deshacer/i })).toBeNull();
+				expect(
+					screen.getByText(/el tiempo para deshacer expiró/i),
+				).toBeTruthy();
+				expect(screen.getByRole("button", { name: /cerrar/i })).toBeTruthy();
+			});
 		});
 	});
 });

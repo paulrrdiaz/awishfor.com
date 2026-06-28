@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -19,6 +19,7 @@ import {
 import { api } from "@/trpc/react";
 
 const MESSAGE_MAX_LENGTH = 500;
+const UNDO_WINDOW_SECONDS = 8;
 
 type Props = {
 	gift: PublicGiftViewModel;
@@ -43,6 +44,8 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 	const [purchaseId, setPurchaseId] = useState("");
 	const [undoTokenStored, setUndoTokenStored] = useState("");
 	const [undoError, setUndoError] = useState("");
+	const [undoSecondsLeft, setUndoSecondsLeft] = useState(UNDO_WINDOW_SECONDS);
+	const [undoExpired, setUndoExpired] = useState(false);
 
 	const [guestName, setGuestName] = useState("");
 	const [guestEmail, setGuestEmail] = useState("");
@@ -76,6 +79,24 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 		},
 	});
 
+	useEffect(() => {
+		if (phase !== "success") return;
+		let secondsLeft = UNDO_WINDOW_SECONDS;
+		setUndoSecondsLeft(secondsLeft);
+		setUndoExpired(false);
+		const interval = setInterval(() => {
+			secondsLeft -= 1;
+			if (secondsLeft <= 0) {
+				clearInterval(interval);
+				setUndoSecondsLeft(0);
+				setUndoExpired(true);
+			} else {
+				setUndoSecondsLeft(secondsLeft);
+			}
+		}, 1000);
+		return () => clearInterval(interval);
+	}, [phase]);
+
 	function resetForm() {
 		setGuestName("");
 		setGuestEmail("");
@@ -86,6 +107,8 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 	}
 
 	function resetAll() {
+		setUndoSecondsLeft(UNDO_WINDOW_SECONDS);
+		setUndoExpired(false);
 		setPhase("form");
 		setPurchaseId("");
 		setUndoTokenStored("");
@@ -150,8 +173,9 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 						<DialogHeader className="p-6 pb-2">
 							<DialogTitle>¡Regalo confirmado!</DialogTitle>
 							<DialogDescription>
-								Gracias, tu regalo ha sido registrado. Tienes 60 segundos para
-								deshacerlo si cometiste un error.
+								{guestName.trim()
+									? `¡Gracias, ${guestName.trim()}! Tu regalo fue marcado como comprado. Gracias por tu cariño y por ser parte de este momento.`
+									: "¡Gracias! Tu regalo fue marcado como comprado. Gracias por tu cariño y por ser parte de este momento."}
 							</DialogDescription>
 						</DialogHeader>
 
@@ -160,20 +184,28 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 						)}
 
 						<DialogFooter className="sticky bottom-0 mt-4 min-h-12 bg-popover p-6 pt-2">
-							<Button
-								disabled={undoMutation.isPending}
-								onClick={() =>
-									undoMutation.mutate({
-										purchaseId,
-										undoToken: undoTokenStored,
-									})
-								}
-								size="sm"
-								type="button"
-								variant="outline"
-							>
-								{undoMutation.isPending ? "Deshaciendo…" : "Deshacer"}
-							</Button>
+							{undoExpired ? (
+								<p className="text-muted-foreground text-sm">
+									el tiempo para deshacer expiró
+								</p>
+							) : (
+								<Button
+									disabled={undoMutation.isPending}
+									onClick={() =>
+										undoMutation.mutate({
+											purchaseId,
+											undoToken: undoTokenStored,
+										})
+									}
+									size="sm"
+									type="button"
+									variant="outline"
+								>
+									{undoMutation.isPending
+										? "Deshaciendo…"
+										: `Deshacer (${undoSecondsLeft} s)`}
+								</Button>
+							)}
 							<Button
 								onClick={() => {
 									resetAll();
