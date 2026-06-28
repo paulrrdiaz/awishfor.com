@@ -23,6 +23,7 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	eventDate: "2026-09-14",
 	eventTime: "17:00",
 	eventLocation: "Hacienda San Ángel",
+	dressCode: "Formal",
 	coverImageUrl: null,
 	themeId: "crema-elegante",
 	layoutId: "grid",

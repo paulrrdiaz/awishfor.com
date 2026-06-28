@@ -135,7 +135,7 @@ Tasks:
 - [x] Add `buttonStyle`.
 - [x] Add `fontPairing`.
 - [x] Add `showHowItWorks` default true.
-- [ ] Add `dressCode` optional plain text (powers the "Código de vestimenta" details card).
+- [x] Add `dressCode` optional plain text (powers the "Código de vestimenta" details card).
 
 Acceptance criteria:
 
@@ -800,9 +800,9 @@ Tasks:
 - [x] Add `HowItWorks`.
 - [x] Add `WishlistFooter`.
 - [x] Support `full | preview | compact` render modes.
-- [ ] Add event-details section: 3 cards (Fecha · Lugar · Código de vestimenta), hiding empty cards.
-- [ ] Add countdown states: `Faltan N días` · `Falta 1 día` · `Es hoy` · post-event "Gracias por celebrar con nosotros."
-- [ ] De-emphasize purchased gifts: ~60% opacity + line-through name, sorted below available.
+- [x] Add event-details section: 3 cards (Fecha · Lugar · Código de vestimenta), hiding empty cards.
+- [x] Add countdown states: `Faltan N días` · `Falta 1 día` · `Es hoy` · post-event "Gracias por celebrar con nosotros."
+- [x] De-emphasize purchased gifts: ~60% opacity + line-through name, sorted below available.
 
 Acceptance criteria:
 
@@ -840,8 +840,8 @@ Tasks:
 - [x] Add sort dropdown.
 - [x] Add default recommended order.
 - [x] Add empty filter states.
-- [ ] Render filter chips as a scroll-snap toggle group with `aria-pressed`; selected chip inverted (`bg-foreground text-background`).
-- [ ] Use exact empty-filter copy from brief §11.
+- [x] Render filter chips as a scroll-snap toggle group with `aria-pressed`; selected chip inverted (`bg-foreground text-background`).
+- [x] Use exact empty-filter copy from brief §11.
 
 Acceptance criteria:
 
@@ -941,7 +941,7 @@ Tasks:
 - [x] Add default thank-you message.
 - [x] Add sample gifts.
 - [x] Add default theme/layout IDs.
-- [ ] Align default-by-event-type to brief: Baby Shower → Cielo Suave + Editorial; Birthday → Lavanda Fiesta + Galería; Wedding → Crema Elegante + Editorial; Housewarming → Jardín Verde + Lista Minimal; General → Clásico Minimal + Galería.
+- [x] Align default-by-event-type to brief: Baby Shower → Cielo Suave + Editorial; Birthday → Lavanda Fiesta + Galería; Wedding → Crema Elegante + Editorial; Housewarming → Jardín Verde + Lista Minimal; General → Clásico Minimal + Galería.
 
 Acceptance criteria:
 
@@ -1047,9 +1047,9 @@ Tasks:
 - [x] Add `use-debounce` slug availability check.
 - [x] Add Checking/Available/Taken/Invalid states.
 - [x] Add past date warning.
-- [ ] Add optional dress-code ("Código de vestimenta") field.
-- [ ] Use exact slug-state copy: `◌ Verificando…` · `✓ Disponible` (green ring) · `✕ Ya está en uso` · `✕ Solo letras, números y guiones`.
-- [ ] Use exact past-date copy: "Esta fecha ya pasó. Puedes continuar, pero el contador mostrará un mensaje de cierre."
+- [x] Add optional dress-code ("Código de vestimenta") field.
+- [x] Use exact slug-state copy: `◌ Verificando…` · `✓ Disponible` (green ring) · `✕ Ya está en uso` · `✕ Solo letras, números y guiones`.
+- [x] Use exact past-date copy: "Esta fecha ya pasó. Puedes continuar, pero el contador mostrará un mensaje de cierre."
 
 Acceptance criteria:
 
@@ -1086,8 +1086,8 @@ Tasks:
 - [x] Add embedded public preview.
 - [x] Use sample gifts before real gifts exist.
 - [x] Disable purchase actions in preview mode.
-- [ ] Label the embedded preview "Vista previa con ejemplos".
-- [ ] Show all seven theme swatches including `cielo-suave-rosa`.
+- [x] Label the embedded preview "Vista previa con ejemplos".
+- [x] Show all seven theme swatches including `cielo-suave-rosa`.
 
 Acceptance criteria:
 
@@ -1199,8 +1199,8 @@ Tasks:
 - [x] Add WhatsApp share action.
 - [x] Add QR download action.
 - [x] Clear local draft after successful publish.
-- [ ] Label the final preview "Vista previa de tu wishlist"; auth gate copy "tu progreso ya está guardado".
-- [ ] Publish success copy + actions: Copiar enlace · Compartir por WhatsApp · Descargar QR · Ver lista pública · Gestionar en dashboard.
+- [x] Label the final preview "Vista previa de tu wishlist"; auth gate copy "tu progreso ya está guardado".
+- [x] Publish success copy + actions: Copiar enlace · Compartir por WhatsApp · Descargar QR · Ver lista pública · Gestionar en dashboard.
 
 Acceptance criteria:
 
@@ -1599,8 +1599,8 @@ Tasks:
 - [x] Add consent copy.
 - [x] Add loading/error states.
 - [x] Disable product link for purchased gifts.
-- [ ] Render as bottom sheet on mobile, centered dialog ≥ md; sticky 48px footer actions.
-- [ ] Use exact consent copy: "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."
+- [x] Render as bottom sheet on mobile, centered dialog ≥ md; sticky 48px footer actions.
+- [x] Use exact consent copy: "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."
 
 Acceptance criteria:
 

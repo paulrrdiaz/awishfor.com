@@ -43,6 +43,7 @@ export type PublicWishlistViewModel = {
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string | null;
+	dressCode: string | null;
 	coverImageUrl: string | null;
 	themeId: string | null;
 	layoutId: string | null;
@@ -102,6 +103,7 @@ export type DashboardWishlistCardViewModel = {
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string | null;
+	dressCode: string | null;
 	coverImageUrl: string | null;
 	themeId: string | null;
 	layoutId: string | null;

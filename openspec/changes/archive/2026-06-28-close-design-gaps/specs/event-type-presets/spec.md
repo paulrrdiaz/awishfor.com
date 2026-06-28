@@ -1,8 +1,5 @@
-# event-type-presets Specification
+## MODIFIED Requirements
 
-## Purpose
-Defines the event-type preset catalog used to seed wishlist copy, categories, sample gifts, and default public presentation settings.
-## Requirements
 ### Requirement: Event-type preset catalog
 
 The system SHALL expose a hardcoded preset for every `EventType` enum value (`baby_shower`, `birthday`, `wedding`, `housewarming`, `general`) from `src/config/event-type-presets.ts`. Each preset SHALL include: a Spanish `label`, a `defaultHeroTitleTemplate`, a `defaultWelcomeMessage`, a `defaultThankYouMessage`, a `defaultCategories` string array, a `sampleGifts` array, a `defaultThemeId`, and a `defaultLayoutId`.
@@ -29,22 +26,3 @@ The `defaultThemeId` and `defaultLayoutId` per event type SHALL match the brief'
 
 - **WHEN** each event-type preset's `defaultThemeId` and `defaultLayoutId` are read
 - **THEN** they match the brief default-by-event-type pairing for that event type (e.g. `baby_shower` resolves to `cielo-suave` + `editorial`, `wedding` to `crema-elegante` + `editorial`, `housewarming` to `jardin-verde` + `minimal`)
-
-### Requirement: Spanish labels and default categories match the PRD
-
-The preset `label` and `defaultCategories` values SHALL match the Spanish labels and category lists defined in `docs/PRD.md` (e.g. baby_shower label "Baby shower" with categories Pañales, Ropa, Lactancia, Baño, Dormitorio, Juguetes, Otros).
-
-#### Scenario: Baby shower preset content
-
-- **WHEN** the `baby_shower` preset is read
-- **THEN** its `label` is the PRD Spanish label and its `defaultCategories` are the PRD baby-shower categories in order
-
-### Requirement: Sample gifts for empty-state preview
-
-Each preset SHALL provide at least one `sampleGift` containing the fields needed to render a gift card placeholder (name, and where applicable image/price hints), so the wizard preview can show representative gifts before the user adds real gifts.
-
-#### Scenario: Sample gifts available before real gifts exist
-
-- **WHEN** a draft has selected an event type but has no user-created gifts
-- **THEN** the preset's `sampleGifts` are available to render as preview placeholders
-

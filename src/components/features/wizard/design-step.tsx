@@ -122,7 +122,7 @@ export function DesignStep() {
 				{/* Live preview */}
 				<div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
 					<div className="border-gray-100 border-b bg-gray-50 px-4 py-2">
-						<p className="text-gray-500 text-xs">Vista previa</p>
+						<p className="text-gray-500 text-xs">Vista previa con ejemplos</p>
 					</div>
 					<div className="max-h-[600px] overflow-y-auto">
 						<PublicWishlistPage mode="preview" wishlist={previewViewModel} />

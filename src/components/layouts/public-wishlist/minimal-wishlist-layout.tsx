@@ -1,5 +1,6 @@
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
+import { EventDetails } from "@/components/shared/event-details";
 import { GiftList } from "@/components/shared/gift-list";
 import { HowItWorks } from "@/components/shared/how-it-works";
 import { ProgressSummary } from "@/components/shared/progress-summary";
@@ -29,6 +30,8 @@ export function MinimalWishlistLayout({ wishlist, layout, mode }: Props) {
 					eventLocation: isCompact ? null : wishlist.eventLocation,
 				}}
 			/>
+
+			{!isCompact && <EventDetails wishlist={wishlist} />}
 
 			{!isCompact && wishlist.eventDate && (
 				<Countdown eventDate={wishlist.eventDate} />

@@ -90,6 +90,7 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		eventDate: draft.eventDate,
 		eventTime: draft.eventTime,
 		eventLocation: draft.eventLocation || null,
+		dressCode: draft.dressCode || null,
 		coverImageUrl: draft.coverImageUrl,
 		themeId: draft.themeId,
 		layoutId: draft.layoutId,

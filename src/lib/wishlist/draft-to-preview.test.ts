@@ -12,6 +12,7 @@ function makeDraft(overrides: Partial<WishlistDraft> = {}): WishlistDraft {
 		eventDate: null,
 		eventTime: null,
 		eventLocation: "",
+		dressCode: "",
 		coverImageUrl: null,
 		heroTitle: "¡Bienvenidos al baby shower de Ana!",
 		welcomeMessage: "Gracias por venir",

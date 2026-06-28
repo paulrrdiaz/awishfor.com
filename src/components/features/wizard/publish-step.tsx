@@ -583,8 +583,8 @@ export function PublishStep() {
 
 							{!isSignedIn && (
 								<p className="mt-3 text-gray-500 text-sm">
-									Te pediremos iniciar sesión antes de publicar, sin perder este
-									borrador local.
+									Te pediremos iniciar sesión antes de publicar; tu progreso ya
+									está guardado.
 								</p>
 							)}
 
@@ -599,7 +599,7 @@ export function PublishStep() {
 					<div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 						<div className="border-gray-100 border-b bg-gray-50 px-4 py-3">
 							<p className="font-medium text-gray-900 text-sm">
-								Vista final de tu wishlist
+								Vista previa de tu wishlist
 							</p>
 							<p className="text-gray-500 text-xs">
 								Así se verá tu lista antes de volverse pública.
@@ -614,7 +614,7 @@ export function PublishStep() {
 
 			{showAuthPrompt && (
 				<WizardModal
-					description="Inicia sesión para publicar tu wishlist sin perder lo que ya avanzaste en este navegador."
+					description="Inicia sesión para publicar tu wishlist; tu progreso ya está guardado."
 					title="Publica desde tu cuenta"
 				>
 					<Link

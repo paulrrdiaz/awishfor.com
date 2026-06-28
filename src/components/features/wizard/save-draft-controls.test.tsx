@@ -60,6 +60,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
 	eventLocation: "Barranco",
+	dressCode: "",
 	coverImageUrl: null,
 	heroTitle: "Nuestra boda",
 	welcomeMessage: "Bienvenidos",

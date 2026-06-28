@@ -39,6 +39,7 @@ const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	eventDate: null,
 	eventTime: null,
 	eventLocation: null,
+	dressCode: null,
 	coverImageUrl: null,
 	themeId: null,
 	layoutId: null,
@@ -276,6 +277,7 @@ const createMockDatabase = (
 			eventTime: (args.data.eventTime as string | null | undefined) ?? null,
 			eventLocation:
 				(args.data.eventLocation as string | null | undefined) ?? null,
+			dressCode: (args.data.dressCode as string | null | undefined) ?? null,
 			coverImageUrl:
 				(args.data.coverImageUrl as string | null | undefined) ?? null,
 			themeId: (args.data.themeId as string | null | undefined) ?? null,

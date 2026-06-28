@@ -11,16 +11,24 @@ type SlugStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 function SlugStatusBadge({ status }: { status: SlugStatus }) {
 	if (status === "idle") return null;
 	const configs = {
-		checking: { text: "Comprobando…", className: "text-gray-500" },
-		available: { text: "Disponible", className: "text-green-600" },
-		taken: { text: "No disponible", className: "text-red-600" },
+		checking: { text: "◌ Verificando…", className: "text-gray-500" },
+		available: { text: "✓ Disponible", className: "text-green-600" },
+		taken: { text: "✕ Ya está en uso", className: "text-red-600" },
 		invalid: {
-			text: "Formato inválido (3-60 letras minúsculas, números o guiones)",
+			text: "✕ Solo letras, números y guiones",
 			className: "text-red-600",
 		},
 	} as const;
 	const cfg = configs[status];
-	return <p className={`mt-1 text-sm ${cfg.className}`}>{cfg.text}</p>;
+	return (
+		<p
+			className={`mt-1 rounded-md text-sm ${
+				status === "available" ? "ring-1 ring-green-500" : ""
+			} ${cfg.className}`}
+		>
+			{cfg.text}
+		</p>
+	);
 }
 
 export function DetailsStep() {
@@ -154,8 +162,8 @@ export function DetailsStep() {
 					/>
 					{isPastDate && (
 						<p className="mt-1 text-amber-600 text-sm">
-							Esta fecha ya pasó — puedes seguir, pero verifica que sea
-							correcta.
+							Esta fecha ya pasó. Puedes continuar, pero el contador mostrará un
+							mensaje de cierre.
 						</p>
 					)}
 				</div>
@@ -194,6 +202,25 @@ export function DetailsStep() {
 						placeholder="Ej. Salón Los Jardines, Lima"
 						type="text"
 						value={draft.eventLocation}
+					/>
+				</div>
+
+				{/* Dress Code */}
+				<div>
+					<label
+						className="mb-1 block font-medium text-gray-700 text-sm"
+						htmlFor="dressCode"
+					>
+						Código de vestimenta{" "}
+						<span className="font-normal text-gray-400">(opcional)</span>
+					</label>
+					<input
+						className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
+						id="dressCode"
+						onChange={(e) => setField("dressCode", e.target.value)}
+						placeholder="Ej. Formal, tonos pastel"
+						type="text"
+						value={draft.dressCode}
 					/>
 				</div>
 			</div>

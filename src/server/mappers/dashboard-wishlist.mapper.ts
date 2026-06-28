@@ -28,6 +28,7 @@ export function mapDashboardWishlist(
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
 		eventLocation: wishlist.eventLocation,
+		dressCode: wishlist.dressCode,
 		coverImageUrl: wishlist.coverImageUrl,
 		themeId: wishlist.themeId,
 		layoutId: wishlist.layoutId,

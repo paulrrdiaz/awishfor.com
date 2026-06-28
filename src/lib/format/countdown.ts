@@ -22,5 +22,5 @@ export function formatCountdown(
 	if (diffDays > 1) return `Faltan ${diffDays} días`;
 	if (diffDays === 1) return "Falta 1 día";
 	if (diffDays === 0) return "Es hoy";
-	return "Este evento ya pasó";
+	return "Gracias por celebrar con nosotros.";
 }

@@ -76,6 +76,7 @@ model Wishlist {
   eventDate       DateTime?
   eventTime       String?
   eventLocation   String?
+  dressCode       String?
   coverImageUrl   String?
   themeId         String?
   layoutId        String?

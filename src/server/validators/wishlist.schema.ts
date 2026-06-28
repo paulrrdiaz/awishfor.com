@@ -123,6 +123,10 @@ export const wishlistEventLocationSchema = optionalNullableTrimmedString(
 	"Event location",
 	240,
 );
+export const wishlistDressCodeSchema = optionalNullableTrimmedString(
+	"Dress code",
+	240,
+);
 export const wishlistCoverImageUrlSchema = z.preprocess((value) => {
 	if (value === undefined) {
 		return undefined;
@@ -169,6 +173,7 @@ const wishlistCreateUpdateShape = {
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
+	dressCode: wishlistDressCodeSchema,
 	coverImageUrl: wishlistCoverImageUrlSchema,
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
@@ -197,6 +202,7 @@ export const updateWishlistSchema = z.object({
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
+	dressCode: wishlistDressCodeSchema,
 	coverImageUrl: wishlistCoverImageUrlSchema,
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
@@ -232,6 +238,7 @@ export type CreateWishlistInput = {
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
 	eventLocation?: string | null;
+	dressCode?: string | null;
 	coverImageUrl?: string | null;
 	themeId?: string | null;
 	layoutId?: string | null;
@@ -254,6 +261,7 @@ export type UpdateWishlistInput = {
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
 	eventLocation?: string | null;
+	dressCode?: string | null;
 	coverImageUrl?: string | null;
 	themeId?: string | null;
 	layoutId?: string | null;

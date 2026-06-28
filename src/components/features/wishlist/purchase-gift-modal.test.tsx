@@ -117,7 +117,9 @@ describe("PurchaseGiftModal", () => {
 		it("renders consent copy about name sharing", () => {
 			renderModal();
 			expect(
-				screen.getByText(/autorizas que tu nombre sea compartido/i),
+				screen.getByText(
+					/Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista\./i,
+				),
 			).toBeTruthy();
 		});
 	});

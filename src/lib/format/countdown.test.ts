@@ -23,7 +23,9 @@ describe("formatCountdown", () => {
 	it("returns closed message for past events", () => {
 		const now = new Date("2024-01-10T10:00:00");
 		const event = new Date("2024-01-01T00:00:00");
-		expect(formatCountdown(event, now)).toBe("Este evento ya pasó");
+		expect(formatCountdown(event, now)).toBe(
+			"Gracias por celebrar con nosotros.",
+		);
 	});
 
 	it("accepts a string eventDate", () => {

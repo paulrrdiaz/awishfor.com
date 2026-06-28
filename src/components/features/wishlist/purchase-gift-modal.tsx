@@ -141,10 +141,13 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 
 	return (
 		<Dialog onOpenChange={handleOpenChange} open={open}>
-			<DialogContent showCloseButton>
+			<DialogContent
+				className="top-auto bottom-0 left-0 max-h-[92svh] max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-t-xl rounded-b-none p-0 md:top-1/2 md:bottom-auto md:left-1/2 md:max-w-md md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-xl"
+				showCloseButton
+			>
 				{phase === "success" ? (
-					<>
-						<DialogHeader>
+					<div className="flex max-h-[92svh] flex-col">
+						<DialogHeader className="p-6 pb-2">
 							<DialogTitle>¡Regalo confirmado!</DialogTitle>
 							<DialogDescription>
 								Gracias, tu regalo ha sido registrado. Tienes 60 segundos para
@@ -153,10 +156,10 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 						</DialogHeader>
 
 						{undoError && (
-							<p className="text-destructive text-sm">{undoError}</p>
+							<p className="px-6 text-destructive text-sm">{undoError}</p>
 						)}
 
-						<DialogFooter>
+						<DialogFooter className="sticky bottom-0 mt-4 min-h-12 bg-popover p-6 pt-2">
 							<Button
 								disabled={undoMutation.isPending}
 								onClick={() =>
@@ -182,10 +185,10 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 								Cerrar
 							</Button>
 						</DialogFooter>
-					</>
+					</div>
 				) : (
 					<>
-						<DialogHeader>
+						<DialogHeader className="p-6 pb-2">
 							<DialogTitle>Regalar: {gift.name}</DialogTitle>
 							<DialogDescription>
 								Comparte tu nombre para que el festejado sepa quién lo regaló.
@@ -193,142 +196,158 @@ export function PurchaseGiftModal({ gift, open, onOpenChange }: Props) {
 						</DialogHeader>
 
 						<form
-							className="flex flex-col gap-4"
+							className="flex max-h-[calc(92svh-5rem)] flex-col overflow-y-auto"
 							noValidate
 							onSubmit={handleSubmit}
 						>
-							{/* Name */}
-							<div className="flex flex-col gap-1">
-								<label className="font-medium text-sm" htmlFor="pg-guest-name">
-									Tu nombre <span aria-hidden="true">*</span>
-								</label>
-								<input
-									autoComplete="name"
-									className="rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
-									id="pg-guest-name"
-									maxLength={PURCHASE_GUEST_NAME_MAX_LENGTH}
-									onChange={(e) => setGuestName(e.target.value)}
-									placeholder="Ana García"
-									required
-									type="text"
-									value={guestName}
-								/>
-								{errors.guestName && (
-									<p className="text-destructive text-xs">{errors.guestName}</p>
-								)}
-							</div>
-
-							{/* Email */}
-							<div className="flex flex-col gap-1">
-								<label className="font-medium text-sm" htmlFor="pg-guest-email">
-									Correo electrónico{" "}
-									<span className="font-normal text-muted-foreground text-xs">
-										(opcional)
-									</span>
-								</label>
-								<input
-									autoComplete="email"
-									className="rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
-									id="pg-guest-email"
-									onChange={(e) => setGuestEmail(e.target.value)}
-									placeholder="ana@ejemplo.com"
-									type="email"
-									value={guestEmail}
-								/>
-								{errors.guestEmail && (
-									<p className="text-destructive text-xs">
-										{errors.guestEmail}
-									</p>
-								)}
-							</div>
-
-							{/* Phone */}
-							<div className="flex flex-col gap-1">
-								<label className="font-medium text-sm" htmlFor="pg-guest-phone">
-									Teléfono{" "}
-									<span className="font-normal text-muted-foreground text-xs">
-										(opcional)
-									</span>
-								</label>
-								<input
-									autoComplete="tel"
-									className="rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
-									id="pg-guest-phone"
-									onChange={(e) => setGuestPhone(e.target.value)}
-									placeholder="+51 999 999 999"
-									type="tel"
-									value={guestPhone}
-								/>
-								{errors.guestPhone && (
-									<p className="text-destructive text-xs">
-										{errors.guestPhone}
-									</p>
-								)}
-							</div>
-
-							{/* Message */}
-							<div className="flex flex-col gap-1">
-								<label className="font-medium text-sm" htmlFor="pg-message">
-									Mensaje{" "}
-									<span className="font-normal text-muted-foreground text-xs">
-										(opcional)
-									</span>
-								</label>
-								<textarea
-									className="min-h-[80px] rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
-									id="pg-message"
-									onChange={(e) => setMessage(e.target.value)}
-									placeholder="¡Muchas felicitaciones!"
-									value={message}
-								/>
-								<p className="text-muted-foreground text-xs">
-									{message.length}/{MESSAGE_MAX_LENGTH}
-								</p>
-								{errors.message && (
-									<p className="text-destructive text-xs">{errors.message}</p>
-								)}
-							</div>
-
-							{/* Quantity selector — only when remainingQuantity > 1 */}
-							{showQuantitySelector && (
+							<div className="flex flex-col gap-4 px-6 py-4">
+								{/* Name */}
 								<div className="flex flex-col gap-1">
-									<label className="font-medium text-sm" htmlFor="pg-quantity">
-										Cantidad
+									<label
+										className="font-medium text-sm"
+										htmlFor="pg-guest-name"
+									>
+										Tu nombre <span aria-hidden="true">*</span>
 									</label>
 									<input
-										className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
-										id="pg-quantity"
-										max={gift.remainingQuantity}
-										min={1}
-										onChange={(e) =>
-											setQuantity(
-												Math.max(
-													1,
-													Math.min(
-														gift.remainingQuantity,
-														Number(e.target.value),
-													),
-												),
-											)
-										}
-										type="number"
-										value={quantity}
+										autoComplete="name"
+										className="rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
+										id="pg-guest-name"
+										maxLength={PURCHASE_GUEST_NAME_MAX_LENGTH}
+										onChange={(e) => setGuestName(e.target.value)}
+										placeholder="Ana García"
+										required
+										type="text"
+										value={guestName}
 									/>
+									{errors.guestName && (
+										<p className="text-destructive text-xs">
+											{errors.guestName}
+										</p>
+									)}
 								</div>
-							)}
 
-							{/* Consent copy */}
-							<p className="text-muted-foreground text-xs">
-								Al confirmar, autorizas que tu nombre sea compartido con el
-								dueño de esta lista para que sepa que regalaste este artículo.
-							</p>
+								{/* Email */}
+								<div className="flex flex-col gap-1">
+									<label
+										className="font-medium text-sm"
+										htmlFor="pg-guest-email"
+									>
+										Correo electrónico{" "}
+										<span className="font-normal text-muted-foreground text-xs">
+											(opcional)
+										</span>
+									</label>
+									<input
+										autoComplete="email"
+										className="rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
+										id="pg-guest-email"
+										onChange={(e) => setGuestEmail(e.target.value)}
+										placeholder="ana@ejemplo.com"
+										type="email"
+										value={guestEmail}
+									/>
+									{errors.guestEmail && (
+										<p className="text-destructive text-xs">
+											{errors.guestEmail}
+										</p>
+									)}
+								</div>
 
-							{/* Submit error */}
-							{errors.submit && (
-								<p className="text-destructive text-sm">{errors.submit}</p>
-							)}
+								{/* Phone */}
+								<div className="flex flex-col gap-1">
+									<label
+										className="font-medium text-sm"
+										htmlFor="pg-guest-phone"
+									>
+										Teléfono{" "}
+										<span className="font-normal text-muted-foreground text-xs">
+											(opcional)
+										</span>
+									</label>
+									<input
+										autoComplete="tel"
+										className="rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
+										id="pg-guest-phone"
+										onChange={(e) => setGuestPhone(e.target.value)}
+										placeholder="+51 999 999 999"
+										type="tel"
+										value={guestPhone}
+									/>
+									{errors.guestPhone && (
+										<p className="text-destructive text-xs">
+											{errors.guestPhone}
+										</p>
+									)}
+								</div>
 
-							<DialogFooter>
+								{/* Message */}
+								<div className="flex flex-col gap-1">
+									<label className="font-medium text-sm" htmlFor="pg-message">
+										Mensaje{" "}
+										<span className="font-normal text-muted-foreground text-xs">
+											(opcional)
+										</span>
+									</label>
+									<textarea
+										className="min-h-[80px] rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
+										id="pg-message"
+										onChange={(e) => setMessage(e.target.value)}
+										placeholder="¡Muchas felicitaciones!"
+										value={message}
+									/>
+									<p className="text-muted-foreground text-xs">
+										{message.length}/{MESSAGE_MAX_LENGTH}
+									</p>
+									{errors.message && (
+										<p className="text-destructive text-xs">{errors.message}</p>
+									)}
+								</div>
+
+								{/* Quantity selector — only when remainingQuantity > 1 */}
+								{showQuantitySelector && (
+									<div className="flex flex-col gap-1">
+										<label
+											className="font-medium text-sm"
+											htmlFor="pg-quantity"
+										>
+											Cantidad
+										</label>
+										<input
+											className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
+											id="pg-quantity"
+											max={gift.remainingQuantity}
+											min={1}
+											onChange={(e) =>
+												setQuantity(
+													Math.max(
+														1,
+														Math.min(
+															gift.remainingQuantity,
+															Number(e.target.value),
+														),
+													),
+												)
+											}
+											type="number"
+											value={quantity}
+										/>
+									</div>
+								)}
+
+								{/* Consent copy */}
+								<p className="text-muted-foreground text-xs">
+									Al marcar este regalo como comprado, compartiremos tu nombre y
+									los datos opcionales que ingreses con el creador de la lista.
+								</p>
+
+								{/* Submit error */}
+								{errors.submit && (
+									<p className="text-destructive text-sm">{errors.submit}</p>
+								)}
+							</div>
+
+							<DialogFooter className="sticky bottom-0 min-h-12 bg-popover p-6 pt-2">
 								<Button
 									disabled={purchaseMutation.isPending}
 									size="sm"
