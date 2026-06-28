@@ -26,15 +26,19 @@ import {
 } from "@/server/services/purchase.service";
 import { checkSlugAvailability } from "@/server/services/slug.service";
 import {
+	archiveWishlist,
 	publishWishlist,
 	publishWishlistFromWizard,
+	restoreWishlist,
 	saveWishlistDraft,
 } from "@/server/services/wishlist.service";
 import {
 	checkSlugAvailabilitySchema,
 	publishWishlistSchema,
 	updateWishlistDesignSchema,
+	updateWishlistSettingsSchema,
 	wishlistIdSchema,
+	wishlistRestoreTargetStatusSchema,
 } from "@/server/validators/wishlist.schema";
 import { saveDraftWishlistSchema } from "@/server/validators/wishlist-save-draft.schema";
 
@@ -325,5 +329,104 @@ export const wishlistRouter = createTRPCRouter({
 				...updated,
 				updatedAt: updated.updatedAt.toISOString(),
 			};
+		}),
+
+	updateSettings: protectedProcedure
+		.input(updateWishlistSettingsSchema)
+		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+			const existing = await ctx.db.wishlist.findFirst({
+				where: { id: input.id, ownerId },
+				select: { id: true, slug: true },
+			});
+
+			if (!existing) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			let updated: { id: string; slug: string; updatedAt: Date };
+			try {
+				updated = await ctx.db.wishlist.update({
+					where: { id: existing.id },
+					data: {
+						title: input.title,
+						slug: input.slug,
+						displayName: input.displayName ?? null,
+						eventDate: input.eventDate ?? null,
+						eventTime: input.eventTime ?? null,
+						eventLocation: input.eventLocation ?? null,
+						dressCode: input.dressCode ?? null,
+						heroTitle: input.heroTitle ?? null,
+						welcomeMessage: input.welcomeMessage ?? null,
+						thankYouMessage: input.thankYouMessage ?? null,
+						language: input.language,
+						currency: input.currency,
+						showHowItWorks: input.showHowItWorks,
+					},
+					select: { id: true, slug: true, updatedAt: true },
+				});
+			} catch (error) {
+				if (
+					typeof error === "object" &&
+					error !== null &&
+					"code" in error &&
+					error.code === "P2002"
+				) {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message: "Ese slug ya está en uso por otra lista",
+					});
+				}
+				throw error;
+			}
+
+			revalidatePath(`/w/${updated.slug}`);
+			if (existing.slug !== updated.slug) {
+				revalidatePath(`/w/${existing.slug}`);
+			}
+
+			return { ...updated, updatedAt: updated.updatedAt.toISOString() };
+		}),
+
+	archive: protectedProcedure
+		.input(z.object({ id: wishlistIdSchema }))
+		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+			const existing = await ctx.db.wishlist.findFirst({
+				where: { id: input.id, ownerId },
+				select: { id: true, slug: true },
+			});
+
+			if (!existing) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			await archiveWishlist(ctx.db, { wishlistId: existing.id });
+			revalidatePath(`/w/${existing.slug}`);
+		}),
+
+	restore: protectedProcedure
+		.input(
+			z.object({
+				id: wishlistIdSchema,
+				targetStatus: wishlistRestoreTargetStatusSchema,
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+			const existing = await ctx.db.wishlist.findFirst({
+				where: { id: input.id, ownerId },
+				select: { id: true, slug: true },
+			});
+
+			if (!existing) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			await restoreWishlist(ctx.db, {
+				wishlistId: existing.id,
+				targetStatus: input.targetStatus,
+			});
+			revalidatePath(`/w/${existing.slug}`);
 		}),
 });
