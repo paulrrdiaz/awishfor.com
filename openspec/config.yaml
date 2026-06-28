@@ -28,7 +28,8 @@ rules:
     - Include verification tasks when needed.
     - Prefer CodeGraph for structural repo analysis during apply work.
     - Apply work must run pnpm check, pnpm test, and pnpm typecheck before closing the session.
-    - Mark tasks complete in docs/TASKS.md after the related work is done and required validation has passed, or after any validation failure is explicitly reported.
+    - Mark tasks complete in the change's own tasks.md after the related work is done and required validation has passed, or after any validation failure is explicitly reported.
+    - After marking tasks complete in the change's tasks.md, identify the corresponding milestone items in docs/TASKS.md and mark them [x] to keep the milestone tracker in sync with applied openspec changes.
     - Read all contextFiles in parallel (single batched tool call) at the start of apply work.
     - Skip manual-verify tasks (e.g. "manually verify in browser"); note them as a reminder at session end instead of attempting them.
     - Only invoke the agent-browser skill when the user explicitly requests browser automation or visual verification.

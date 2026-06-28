@@ -1,4 +1,6 @@
-export const PUBLIC_WISHLIST_ORIGIN = "https://awishfor.com";
+import { env } from "@/env";
+
+export const PUBLIC_WISHLIST_ORIGIN = env.NEXT_PUBLIC_APP_URL;
 
 export type WishlistShareMetadata = {
 	wishlistId: string;

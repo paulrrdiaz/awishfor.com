@@ -73,7 +73,7 @@ The system SHALL derive a public gift status of available, partial, or purchased
 - **THEN** the system derives the status as purchased
 
 ### Requirement: Purchase quantity limit
-The system SHALL reject a purchase whose quantity is below one or exceeds the gift's remaining quantity.
+The system SHALL reject a purchase whose quantity is below one or exceeds the gift's remaining quantity. The quantity check and purchase creation SHALL be performed atomically within a single database transaction to prevent concurrent over-purchasing.
 
 #### Scenario: Purchase within remaining quantity
 - **WHEN** a purchase quantity is at least one and does not exceed remaining quantity
@@ -86,6 +86,10 @@ The system SHALL reject a purchase whose quantity is below one or exceeds the gi
 #### Scenario: Purchase quantity is below one
 - **WHEN** a purchase quantity is below one
 - **THEN** the system rejects the purchase
+
+#### Scenario: Concurrent purchases do not over-purchase
+- **WHEN** two simultaneous requests each try to purchase the last available unit of a gift
+- **THEN** exactly one purchase succeeds and the other is rejected with a quantity-exceeded error
 
 ### Requirement: Purchase undo token
 The system SHALL store only a hashed, time-limited undo token for a purchase and SHALL never persist the raw token.
@@ -137,7 +141,7 @@ The system SHALL allow an authenticated wishlist owner to manually create a purc
 - **THEN** the system rejects the request and does not create a purchase record
 
 ### Requirement: Owner purchase deletion
-The system SHALL allow an authenticated wishlist owner to delete a purchase record for a gift they own, restoring that quantity to the gift's remaining quantity without requiring a guest undo token.
+The system SHALL allow an authenticated wishlist owner to delete a purchase record for a gift they own, restoring that quantity to the gift's remaining quantity without requiring a guest undo token. The ownership check and delete SHALL be performed atomically within a single database transaction; a missing purchase at delete time SHALL be surfaced as a NOT_FOUND error.
 
 #### Scenario: Owner deletes a purchase
 - **WHEN** an authenticated owner deletes a purchase record for a gift in their wishlist
@@ -150,6 +154,10 @@ The system SHALL allow an authenticated wishlist owner to delete a purchase reco
 #### Scenario: Non-owner cannot delete a purchase
 - **WHEN** an authenticated user tries to delete a purchase for a gift that belongs to another owner
 - **THEN** the system rejects the request and keeps the purchase record
+
+#### Scenario: Purchase deleted between auth check and delete
+- **WHEN** the target purchase record no longer exists at delete time (concurrent deletion)
+- **THEN** the system returns a NOT_FOUND error rather than an unhandled server error
 
 ### Requirement: Public guest gift purchase eligibility
 

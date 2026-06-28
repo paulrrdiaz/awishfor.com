@@ -36,6 +36,12 @@ describe("importUrlSchema", () => {
 		).toThrow("URL must use http or https scheme");
 	});
 
+	it("rejects a javascript: scheme URL", () => {
+		expect(() => importUrlSchema.parse({ url: "javascript:alert(1)" })).toThrow(
+			"URL must use http or https scheme",
+		);
+	});
+
 	it("rejects a data: scheme URL", () => {
 		expect(() =>
 			importUrlSchema.parse({ url: "data:text/html,<h1>hi</h1>" }),

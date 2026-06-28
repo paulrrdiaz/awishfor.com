@@ -1630,15 +1630,15 @@ Guest sees thank-you state and can undo briefly.
 
 Tasks:
 
-- [ ] Add success state copy: "¡Gracias, {nombre}! Tu regalo fue marcado como comprado. Gracias por tu cariño y por ser parte de este momento."
-- [ ] Add `Deshacer` action with live 8s countdown.
+- [x] Add success state copy: "¡Gracias, {nombre}! Tu regalo fue marcado como comprado. Gracias por tu cariño y por ser parte de este momento."
+- [x] Add `Deshacer` action with live 8s countdown.
 - [x] Add `Cerrar` action.
 - [x] Add `purchase.undoRecentPurchase` mutation.
 - [x] Validate token hash.
 - [x] Validate token expiry.
 - [x] Delete purchase record on valid undo.
 - [x] Update UI after undo.
-- [ ] Show "el tiempo para deshacer expiró" on expiry.
+- [x] Show "el tiempo para deshacer expiró" on expiry.
 
 Acceptance criteria:
 
@@ -1897,16 +1897,16 @@ Owner can edit core wishlist content/settings and archive/restore.
 
 Tasks:
 
-- [ ] Add settings page.
-- [ ] Edit title.
-- [ ] Edit slug.
-- [ ] Edit event details (incl. dress code).
-- [ ] Edit hero/welcome/thank-you copy.
-- [ ] Edit language/currency.
-- [ ] Toggle How it works.
-- [ ] Add slug change warning for published wishlists.
-- [ ] Add archive action.
-- [ ] Add restore dialog for archived wishlist.
+- [x] Add settings page.
+- [x] Edit title.
+- [x] Edit slug.
+- [x] Edit event details (incl. dress code).
+- [x] Edit hero/welcome/thank-you copy.
+- [x] Edit language/currency.
+- [x] Toggle How it works.
+- [x] Add slug change warning for published wishlists.
+- [x] Add archive action.
+- [x] Add restore dialog for archived wishlist.
 
 Acceptance criteria:
 
@@ -2051,15 +2051,15 @@ Subtle celebratory motion, fully static under `prefers-reduced-motion: reduce`.
 
 Tasks:
 
-- [ ] Add `useInView()` hook to fire reveals once on enter.
-- [ ] Add hero mesh-gradient drift + blurred blobs + floating emoji.
-- [ ] Add staggered `rise` entrance + "hermosa" shimmer sweep.
-- [ ] Add hero card `bob` + pulsing status dot.
+- [x] Add `useInView()` hook to fire reveals once on enter (implemented via GSAP ScrollTrigger).
+- [x] Add hero mesh-gradient drift + blurred blobs + floating emoji.
+- [x] Add staggered `rise` entrance + "hermosa" shimmer sweep.
+- [x] Add hero card `bob` + pulsing status dot.
 - [ ] Add stats count-up via IntersectionObserver.
-- [ ] Add allied-stores infinite marquee (edge-masked, pause on hover).
-- [ ] Add card fade-up stagger + hover lift.
-- [ ] Add button hover scale + arrow nudge.
-- [ ] Keep all `@keyframes` in `globals.css`, every animated rule inside the reduced-motion guard.
+- [x] Add allied-stores infinite marquee (edge-masked, pause on hover).
+- [x] Add card fade-up stagger + hover lift.
+- [x] Add button hover scale + arrow nudge.
+- [x] Keep all `@keyframes` in `globals.css`, every animated rule inside the reduced-motion guard (implemented via GSAP with `prefers-reduced-motion` guard).
 
 Acceptance criteria:
 

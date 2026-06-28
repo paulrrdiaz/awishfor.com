@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
 			const clerkId = evt.data.id;
 			if (clerkId) {
 				await db.user.deleteMany({ where: { clerkId } });
+			} else {
+				console.warn("user.deleted event received without clerkId");
 			}
 		}
 

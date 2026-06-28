@@ -1065,6 +1065,7 @@ describe("wishlist service", () => {
 
 		const wishlist = await archiveWishlist(db, {
 			wishlistId: "wishlist_123",
+			ownerId: 42,
 			now,
 		});
 
@@ -1091,6 +1092,7 @@ describe("wishlist service", () => {
 
 		const wishlist = await restoreWishlist(db, {
 			wishlistId: "wishlist_123",
+			ownerId: 42,
 			targetStatus: WishlistStatus.draft,
 		});
 
@@ -1117,6 +1119,7 @@ describe("wishlist service", () => {
 
 		const wishlist = await restoreWishlist(db, {
 			wishlistId: "wishlist_123",
+			ownerId: 42,
 			targetStatus: WishlistStatus.published,
 			now,
 		});

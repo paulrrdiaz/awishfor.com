@@ -1,17 +1,12 @@
 import { createHash, randomBytes } from "node:crypto";
 import { TRPCError } from "@trpc/server";
-import type {
-	Gift,
-	Prisma,
-	Purchase,
-	Wishlist,
-} from "@/generated/prisma/client";
+import type { Gift, Purchase, Wishlist } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import type {
 	CreateOwnerManualPurchaseInput,
 	CreatePurchaseInput,
 } from "@/server/validators/purchase.schema";
 
-const UNDO_TOKEN_EXPIRY_MINUTES = 15;
 export const PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS = 60;
 
 type PurchaseDelegate = {
@@ -32,11 +27,17 @@ export type PurchaseDatabase = {
 	gift: GiftDelegate;
 };
 
-export type OwnerPurchaseDatabase = {
+type OwnerPurchaseClient = {
 	purchase: PurchaseDelegate & {
 		findMany(args: Prisma.PurchaseFindManyArgs): Promise<Purchase[]>;
 	};
 	gift: GiftDelegate;
+};
+
+export type OwnerPurchaseDatabase = OwnerPurchaseClient & {
+	$transaction<T>(
+		callback: (tx: OwnerPurchaseClient) => Promise<T>,
+	): Promise<T>;
 };
 
 type WishlistRecentPurchase = Purchase & {
@@ -87,56 +88,6 @@ export const deriveGiftPublicStatus = (
 export type CreatePurchaseResult = {
 	purchase: Purchase;
 	undoToken: string;
-};
-
-export const createPurchase = async (
-	db: PurchaseDatabase,
-	input: CreatePurchaseInput,
-): Promise<CreatePurchaseResult> => {
-	const gift = await db.gift.findFirst({
-		where: { id: input.giftId, deletedAt: null },
-	});
-
-	if (!gift) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
-	}
-
-	const remaining = await getRemainingQuantity(db, gift);
-
-	if (input.quantity < 1) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "Purchase quantity must be at least 1",
-		});
-	}
-
-	if (input.quantity > remaining) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "Purchase quantity exceeds remaining quantity",
-		});
-	}
-
-	const rawToken = randomBytes(32).toString("hex");
-	const tokenHash = hashToken(rawToken);
-	const expiresAt = new Date(
-		Date.now() + UNDO_TOKEN_EXPIRY_MINUTES * 60 * 1000,
-	);
-
-	const purchase = await db.purchase.create({
-		data: {
-			gift: { connect: { id: input.giftId } },
-			guestName: input.guestName,
-			guestEmail: input.guestEmail ?? null,
-			guestPhone: input.guestPhone ?? null,
-			message: input.message ?? null,
-			quantity: input.quantity,
-			undoTokenHash: tokenHash,
-			undoExpiresAt: expiresAt,
-		},
-	});
-
-	return { purchase, undoToken: rawToken };
 };
 
 const OWNER_MANUAL_PURCHASE_DEFAULT_NAME = "Registrado por el creador";
@@ -204,23 +155,25 @@ export const createOwnerManualPurchase = async (
 		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 	}
 
-	const remaining = await getRemainingQuantity(db, gift);
-	if (quantity > remaining) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "Purchase quantity exceeds remaining quantity",
-		});
-	}
+	return db.$transaction(async (tx) => {
+		const remaining = await getRemainingQuantity(tx, gift);
+		if (quantity > remaining) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "Purchase quantity exceeds remaining quantity",
+			});
+		}
 
-	return db.purchase.create({
-		data: {
-			gift: { connect: { id: giftId } },
-			guestName: guestName ?? OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
-			guestEmail: guestEmail ?? null,
-			guestPhone: guestPhone ?? null,
-			message: message ?? null,
-			quantity,
-		},
+		return tx.purchase.create({
+			data: {
+				gift: { connect: { id: giftId } },
+				guestName: guestName ?? OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
+				guestEmail: guestEmail ?? null,
+				guestPhone: guestPhone ?? null,
+				message: message ?? null,
+				quantity,
+			},
+		});
 	});
 };
 
@@ -228,21 +181,36 @@ export const deleteOwnerPurchase = async (
 	db: OwnerPurchaseDatabase,
 	{ ownerId, purchaseId }: { ownerId: number; purchaseId: string },
 ): Promise<Purchase> => {
-	const purchase = await db.purchase.findFirst({
-		where: { id: purchaseId },
-	});
-	if (!purchase) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Purchase not found" });
-	}
+	return db.$transaction(async (tx) => {
+		const purchase = await tx.purchase.findFirst({
+			where: { id: purchaseId },
+		});
+		if (!purchase) {
+			throw new TRPCError({ code: "NOT_FOUND", message: "Purchase not found" });
+		}
 
-	const gift = await db.gift.findFirst({
-		where: { id: purchase.giftId, wishlist: { ownerId } },
-	});
-	if (!gift) {
-		throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
-	}
+		const gift = await tx.gift.findFirst({
+			where: { id: purchase.giftId, wishlist: { ownerId } },
+		});
+		if (!gift) {
+			throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+		}
 
-	return db.purchase.delete({ where: { id: purchaseId } });
+		try {
+			return await tx.purchase.delete({ where: { id: purchaseId } });
+		} catch (err) {
+			if (
+				err instanceof Prisma.PrismaClientKnownRequestError &&
+				err.code === "P2025"
+			) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Purchase not found",
+				});
+			}
+			throw err;
+		}
+	});
 };
 
 type GiftWithWishlist = Gift & { wishlist: Wishlist };
@@ -251,9 +219,15 @@ type PublicGiftDelegate = {
 	findFirst(args: Prisma.GiftFindFirstArgs): Promise<GiftWithWishlist | null>;
 };
 
-export type PublicPurchaseDatabase = {
+type PublicPurchaseClient = {
 	purchase: PurchaseDelegate;
 	gift: PublicGiftDelegate;
+};
+
+export type PublicPurchaseDatabase = PublicPurchaseClient & {
+	$transaction<T>(
+		callback: (tx: PublicPurchaseClient) => Promise<T>,
+	): Promise<T>;
 };
 
 export const markGiftPurchasedPublic = async (
@@ -287,32 +261,37 @@ export const markGiftPurchasedPublic = async (
 		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 	}
 
-	const remaining = await getRemainingQuantity(db, gift);
-
-	if (input.quantity > remaining) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "Purchase quantity exceeds remaining quantity",
-		});
-	}
-
 	const rawToken = randomBytes(32).toString("hex");
 	const tokenHash = hashToken(rawToken);
 	const expiresAt = new Date(
 		Date.now() + PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS * 1000,
 	);
 
-	const purchase = await db.purchase.create({
-		data: {
-			gift: { connect: { id: input.giftId } },
-			guestName: input.guestName,
-			guestEmail: input.guestEmail ?? null,
-			guestPhone: input.guestPhone ?? null,
-			message: input.message ?? null,
-			quantity: input.quantity,
-			undoTokenHash: tokenHash,
-			undoExpiresAt: expiresAt,
-		},
+	const purchase = await db.$transaction(async (tx) => {
+		const remaining = await getRemainingQuantity(
+			tx as unknown as PurchaseDatabase,
+			gift,
+		);
+
+		if (input.quantity > remaining) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "Purchase quantity exceeds remaining quantity",
+			});
+		}
+
+		return tx.purchase.create({
+			data: {
+				gift: { connect: { id: input.giftId } },
+				guestName: input.guestName,
+				guestEmail: input.guestEmail ?? null,
+				guestPhone: input.guestPhone ?? null,
+				message: input.message ?? null,
+				quantity: input.quantity,
+				undoTokenHash: tokenHash,
+				undoExpiresAt: expiresAt,
+			},
+		});
 	});
 
 	return { purchase, undoToken: rawToken };

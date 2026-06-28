@@ -9,7 +9,6 @@ import type {
 } from "@/generated/prisma/client";
 import {
 	createOwnerManualPurchase,
-	createPurchase,
 	deleteOwnerPurchase,
 	deriveGiftPublicStatus,
 	getPurchasedQuantity,
@@ -148,58 +147,6 @@ describe("deriveGiftPublicStatus", () => {
 	});
 });
 
-describe("createPurchase", () => {
-	it("creates a purchase and returns raw undo token once", async () => {
-		const db = makeDb(0);
-		const { purchase, undoToken } = await createPurchase(db, {
-			giftId: "gift_1",
-			guestName: "Jane",
-			quantity: 1,
-		});
-
-		expect(purchase).toBeDefined();
-		expect(typeof undoToken).toBe("string");
-		expect(undoToken.length).toBeGreaterThan(0);
-		expect(purchase.undoTokenHash).not.toBe(undoToken);
-	});
-
-	it("stores hashed token, not raw token", async () => {
-		let storedHash: string | null = null;
-
-		const db = makeDb(0, createGiftRecord(), {
-			create: async ({ data }) => {
-				storedHash = (data as Prisma.PurchaseUncheckedCreateInput)
-					.undoTokenHash as string;
-				return createPurchaseRecord({ undoTokenHash: storedHash });
-			},
-		});
-
-		const { undoToken } = await createPurchase(db, {
-			giftId: "gift_1",
-			guestName: "Jane",
-			quantity: 1,
-		});
-
-		const expectedHash = createHash("sha256").update(undoToken).digest("hex");
-		expect(storedHash).toBe(expectedHash);
-		expect(storedHash).not.toBe(undoToken);
-	});
-
-	it("rejects when quantity exceeds remaining", async () => {
-		const db = makeDb(2, createGiftRecord({ quantityNeeded: 3 }));
-		await expect(
-			createPurchase(db, { giftId: "gift_1", guestName: "Jane", quantity: 2 }),
-		).rejects.toThrow("Purchase quantity exceeds remaining quantity");
-	});
-
-	it("rejects soft-deleted gifts", async () => {
-		const db = makeDb(0, null);
-		await expect(
-			createPurchase(db, { giftId: "gift_1", guestName: "Jane", quantity: 1 }),
-		).rejects.toThrow("Gift not found");
-	});
-});
-
 describe("undoPurchase", () => {
 	it("deletes purchase when token and expiry are valid", async () => {
 		const rawToken = "valid-token-123";
@@ -278,33 +225,39 @@ const makeOwnerDb = (
 	purchasedSum: number,
 	gift: Gift | null = createGiftRecord(),
 	purchaseOverrides: Partial<OwnerPurchaseDatabase["purchase"]> = {},
-): OwnerPurchaseDatabase => ({
-	gift: {
-		findFirst: async () => gift,
-	},
-	purchase: {
-		create: async ({ data }) =>
-			createPurchaseRecord({
-				guestName:
-					((data as Prisma.PurchaseUncheckedCreateInput).guestName as string) ??
-					"",
-				quantity:
-					((data as Prisma.PurchaseUncheckedCreateInput).quantity as number) ??
-					1,
-				undoTokenHash: null,
-				undoExpiresAt: null,
-			}),
-		delete: async ({ where }) =>
-			createPurchaseRecord({ id: where.id as string }),
-		findFirst: async () => null,
-		findMany: async () => [createPurchaseRecord()],
-		aggregate: async () =>
-			({
-				_sum: { quantity: purchasedSum },
-			}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
-		...purchaseOverrides,
-	},
-});
+): OwnerPurchaseDatabase => {
+	const client = {
+		gift: {
+			findFirst: async () => gift,
+		},
+		purchase: {
+			create: async ({ data }: Prisma.PurchaseCreateArgs) =>
+				createPurchaseRecord({
+					guestName:
+						((data as Prisma.PurchaseUncheckedCreateInput)
+							.guestName as string) ?? "",
+					quantity:
+						((data as Prisma.PurchaseUncheckedCreateInput)
+							.quantity as number) ?? 1,
+					undoTokenHash: null,
+					undoExpiresAt: null,
+				}),
+			delete: async ({ where }: Prisma.PurchaseDeleteArgs) =>
+				createPurchaseRecord({ id: where.id as string }),
+			findFirst: async () => null as Purchase | null,
+			findMany: async () => [createPurchaseRecord()],
+			aggregate: async () =>
+				({
+					_sum: { quantity: purchasedSum },
+				}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
+			...purchaseOverrides,
+		},
+	};
+	return {
+		...client,
+		$transaction: async (callback) => callback(client),
+	};
+};
 
 describe("listOwnerGiftPurchases", () => {
 	it("returns purchase records when owner owns the gift", async () => {
@@ -412,7 +365,7 @@ describe("deleteOwnerPurchase", () => {
 
 	it("rejects when the gift does not belong to the owner", async () => {
 		let giftFindFirstCalled = 0;
-		const db: OwnerPurchaseDatabase = {
+		const client = {
 			gift: {
 				findFirst: async () => {
 					giftFindFirstCalled++;
@@ -423,6 +376,10 @@ describe("deleteOwnerPurchase", () => {
 				...makeOwnerDb(0).purchase,
 				findFirst: async () => createPurchaseRecord(),
 			},
+		};
+		const db: OwnerPurchaseDatabase = {
+			...client,
+			$transaction: async (callback) => callback(client),
 		};
 		await expect(
 			deleteOwnerPurchase(db, { ownerId: 99, purchaseId: "purchase_1" }),
@@ -466,32 +423,38 @@ const makeWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 const makePublicDb = (
 	gift: (Gift & { wishlist: Wishlist }) | null,
 	purchasedQuantity = 0,
-): PublicPurchaseDatabase => ({
-	gift: {
-		findFirst: async () => gift,
-	},
-	purchase: {
-		aggregate: async () =>
-			({
-				_sum: { quantity: purchasedQuantity },
-			}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
-		create: async ({ data }) =>
-			createPurchaseRecord({
-				quantity:
-					((data as Prisma.PurchaseUncheckedCreateInput).quantity as number) ??
-					1,
-				undoTokenHash:
-					((data as Prisma.PurchaseUncheckedCreateInput)
-						.undoTokenHash as string) ?? null,
-				undoExpiresAt:
-					((data as Prisma.PurchaseUncheckedCreateInput)
-						.undoExpiresAt as Date) ?? null,
-			}),
-		delete: async ({ where }) =>
-			createPurchaseRecord({ id: where.id as string }),
-		findFirst: async () => null,
-	},
-});
+): PublicPurchaseDatabase => {
+	const client = {
+		gift: {
+			findFirst: async () => gift,
+		},
+		purchase: {
+			aggregate: async () =>
+				({
+					_sum: { quantity: purchasedQuantity },
+				}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
+			create: async ({ data }: Prisma.PurchaseCreateArgs) =>
+				createPurchaseRecord({
+					quantity:
+						((data as Prisma.PurchaseUncheckedCreateInput)
+							.quantity as number) ?? 1,
+					undoTokenHash:
+						((data as Prisma.PurchaseUncheckedCreateInput)
+							.undoTokenHash as string) ?? null,
+					undoExpiresAt:
+						((data as Prisma.PurchaseUncheckedCreateInput)
+							.undoExpiresAt as Date) ?? null,
+				}),
+			delete: async ({ where }: Prisma.PurchaseDeleteArgs) =>
+				createPurchaseRecord({ id: where.id as string }),
+			findFirst: async () => null as Purchase | null,
+		},
+	};
+	return {
+		...client,
+		$transaction: async (callback) => callback(client),
+	};
+};
 
 const publicInput = {
 	giftId: "gift_1",

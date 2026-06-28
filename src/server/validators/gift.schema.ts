@@ -49,6 +49,17 @@ const optionalUrl = (fieldName: string) =>
 				GIFT_URL_MAX_LENGTH,
 				`${fieldName} must be at most ${GIFT_URL_MAX_LENGTH} characters`,
 			)
+			.refine(
+				(url) => {
+					try {
+						const { protocol } = new URL(url);
+						return protocol === "http:" || protocol === "https:";
+					} catch {
+						return false;
+					}
+				},
+				{ message: `${fieldName} must use http or https scheme` },
+			)
 			.optional(),
 	);
 

@@ -86,6 +86,24 @@ describe("gift validation", () => {
 		expect(result.visibilityStatus).toBe("available");
 	});
 
+	it("rejects javascript: scheme in productUrl", () => {
+		expect(() =>
+			createGiftSchema.parse({
+				...baseCreate,
+				productUrl: "javascript:alert(1)",
+			}),
+		).toThrow("must use http or https scheme");
+	});
+
+	it("rejects data: scheme in imageUrl", () => {
+		expect(() =>
+			createGiftSchema.parse({
+				...baseCreate,
+				imageUrl: "data:text/html,<h1>hi</h1>",
+			}),
+		).toThrow();
+	});
+
 	it("rejects negative price amounts", () => {
 		expect(() =>
 			createGiftSchema.parse({ ...baseCreate, priceAmount: -1 }),

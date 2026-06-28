@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { GiftVisibilityStatus, type Prisma } from "@/generated/prisma/client";
+import {
+	GiftVisibilityStatus,
+	type Prisma,
+	WishlistStatus,
+} from "@/generated/prisma/client";
 import {
 	evaluatePublishReadiness,
 	PublishReadinessError,
@@ -169,7 +173,7 @@ export const wishlistRouter = createTRPCRouter({
 	summaryList: protectedProcedure.query(async ({ ctx }) => {
 		const ownerId = await getLocalUserId(ctx);
 		const wishlists = await ctx.db.wishlist.findMany({
-			where: { ownerId },
+			where: { ownerId, status: { not: WishlistStatus.archived } },
 			include: wishlistWithGiftsInclude,
 			orderBy: { createdAt: "desc" },
 		});
@@ -401,7 +405,7 @@ export const wishlistRouter = createTRPCRouter({
 				throw new TRPCError({ code: "NOT_FOUND" });
 			}
 
-			await archiveWishlist(ctx.db, { wishlistId: existing.id });
+			await archiveWishlist(ctx.db, { wishlistId: existing.id, ownerId });
 			revalidatePath(`/w/${existing.slug}`);
 		}),
 
@@ -425,6 +429,7 @@ export const wishlistRouter = createTRPCRouter({
 
 			await restoreWishlist(ctx.db, {
 				wishlistId: existing.id,
+				ownerId,
 				targetStatus: input.targetStatus,
 			});
 			revalidatePath(`/w/${existing.slug}`);

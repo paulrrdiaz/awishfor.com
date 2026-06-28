@@ -532,28 +532,48 @@ export const publishWishlistFromWizard = async (
 
 export const archiveWishlist = async (
 	db: WishlistDatabase,
-	{ wishlistId, now = new Date() }: { wishlistId: string; now?: Date },
-) =>
-	db.wishlist.update({
+	{
+		wishlistId,
+		ownerId,
+		now = new Date(),
+	}: { wishlistId: string; ownerId: number; now?: Date },
+) => {
+	const owned = await db.wishlist.findFirst({
+		where: { id: wishlistId, ownerId },
+	});
+	if (!owned) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+	return db.wishlist.update({
 		where: { id: wishlistId },
 		data: {
 			status: WishlistStatus.archived,
 			archivedAt: now,
 		},
 	});
+};
 
 export const restoreWishlist = async (
 	db: WishlistDatabase,
 	{
 		wishlistId,
+		ownerId,
 		targetStatus,
 		now = new Date(),
 	}: {
 		wishlistId: string;
+		ownerId: number;
 		targetStatus: WishlistRestoreTargetStatus;
 		now?: Date;
 	},
 ) => {
+	const owned = await db.wishlist.findFirst({
+		where: { id: wishlistId, ownerId },
+	});
+	if (!owned) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+
 	const existingWishlist = (await db.wishlist.findUniqueOrThrow({
 		where: { id: wishlistId },
 		select: { publishedAt: true },
