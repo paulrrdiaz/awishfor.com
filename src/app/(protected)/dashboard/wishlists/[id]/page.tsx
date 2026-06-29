@@ -20,23 +20,7 @@ export default async function DashboardWishlistOverviewPage({ params }: Props) {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-6xl px-4 py-8">
-			<div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-				<div>
-					<p className="text-muted-foreground text-sm">Resumen de wishlist</p>
-					<h1 className="mt-1 font-heading font-semibold text-3xl">
-						{wishlist.title}
-					</h1>
-				</div>
-				<div className="rounded-full bg-muted px-3 py-1 font-medium text-muted-foreground text-sm">
-					{wishlist.status === "published"
-						? "Publicada"
-						: wishlist.status === "archived"
-							? "Archivada"
-							: "Borrador"}
-				</div>
-			</div>
-
+		<div className="w-full px-6 py-5">
 			<div className="space-y-6">
 				<MetricCards metrics={wishlist.metrics} />
 				<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.7fr)]">

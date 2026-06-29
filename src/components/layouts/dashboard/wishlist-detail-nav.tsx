@@ -1,8 +1,10 @@
 "use client";
 
+import { MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { startTransition } from "react";
+import { startTransition, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	Select,
 	SelectContent,
@@ -24,7 +26,35 @@ type NavItem = (typeof NAV_ITEMS)[number];
 
 type Props = {
 	wishlistId: string;
+	title: string;
+	slug: string;
+	status: string;
+	publicUrlPath: string;
 };
+
+const STATUS_META: Record<string, { label: string; className: string }> = {
+	published: {
+		label: "Publicada",
+		className: "bg-[#dff4df] text-[#3f7c44]",
+	},
+	draft: {
+		label: "Borrador",
+		className: "bg-[#eeeeeb] text-[#73736b]",
+	},
+	archived: {
+		label: "Archivada",
+		className: "bg-[#f5e2d8] text-[#9a5d48]",
+	},
+};
+
+function getStatusMeta(status: string) {
+	return (
+		STATUS_META[status.toLowerCase()] ?? {
+			label: status,
+			className: "bg-[#eeeeeb] text-[#73736b]",
+		}
+	);
+}
 
 function hrefFor(wishlistId: string, segment: NavItem["segment"]) {
 	const base = `/dashboard/wishlists/${wishlistId}`;
@@ -49,20 +79,108 @@ function activeSegmentFromPathname(pathname: string, wishlistId: string) {
 type WishlistDetailNavViewProps = {
 	activeSegment: NavItem["segment"];
 	onSegmentChange: (segment: NavItem["segment"]) => void;
+	publicUrlPath: string;
+	slug: string;
+	status: string;
+	title: string;
 	wishlistId: string;
 };
 
 export function WishlistDetailNavView({
 	activeSegment,
 	onSegmentChange,
+	publicUrlPath,
+	slug,
+	status,
+	title,
 	wishlistId,
 }: WishlistDetailNavViewProps) {
+	const statusMeta = getStatusMeta(status);
+	const [copyLabel, setCopyLabel] = useState("copiar");
+
+	const handleCopy = async () => {
+		const origin =
+			typeof window === "undefined"
+				? "https://awishfor.com"
+				: window.location.origin;
+		try {
+			await navigator.clipboard.writeText(`${origin}${publicUrlPath}`);
+			setCopyLabel("copiado");
+		} catch {
+			setCopyLabel("error");
+		}
+	};
+
 	return (
 		<nav
 			aria-label="Secciones de la wishlist"
-			className="border-border border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70"
+			className="border-[#e9e9e2] border-b bg-[#fbfbf8]"
 		>
-			<div className="mx-auto w-full max-w-6xl px-4 py-3">
+			<div className="border-[#e9e9e2] border-b px-6 py-3">
+				<div className="flex items-center justify-between gap-4">
+					<p className="min-w-0 truncate text-[#566174] text-xs">
+						Mis wishlists /{" "}
+						<span className="font-semibold text-[#17213a]">{title}</span>
+					</p>
+					<Button
+						className="h-9 rounded-full px-5 font-semibold"
+						render={<Link href="/create" />}
+					>
+						<Plus />
+						Crear wishlist
+					</Button>
+				</div>
+			</div>
+
+			<div className="px-6 py-7 pb-0">
+				<div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+					<div className="min-w-0">
+						<div className="flex flex-wrap items-center gap-3">
+							<h1 className="font-heading font-semibold text-3xl text-[#17213a] tracking-tight">
+								{title}
+							</h1>
+							<span
+								className={cn(
+									"inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-semibold text-xs",
+									statusMeta.className,
+								)}
+							>
+								<span className="size-2 rounded-full bg-current" />
+								{statusMeta.label}
+							</span>
+						</div>
+						<div className="mt-5 flex flex-wrap items-center gap-2 text-[#566174] text-sm">
+							<span>awishfor.com/w/{slug}</span>
+							<button
+								className="rounded-md bg-[#ecefea] px-2 py-0.5 font-mono text-[#667085] text-[10px]"
+								onClick={handleCopy}
+								type="button"
+							>
+								{copyLabel}
+							</button>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-2">
+						<Button
+							className="h-10 rounded-full border-[#e4e4df] bg-white px-5 font-semibold"
+							render={<Link href={publicUrlPath} target="_blank" />}
+							variant="outline"
+						>
+							Ver pública
+						</Button>
+						<Button
+							aria-label="Más acciones"
+							className="size-10 rounded-full border-[#e4e4df] bg-white"
+							size="icon"
+							type="button"
+							variant="outline"
+						>
+							<MoreHorizontal />
+						</Button>
+					</div>
+				</div>
+
 				<div className="hidden md:block">
 					<Tabs
 						onValueChange={(value) =>
@@ -70,15 +188,14 @@ export function WishlistDetailNavView({
 						}
 						value={activeSegment}
 					>
-						<TabsList>
+						<TabsList className="h-auto gap-8 rounded-none bg-transparent p-0">
 							{NAV_ITEMS.map((item) => {
 								const isActive = activeSegment === item.segment;
 								return (
 									<TabsTrigger
 										className={cn(
-											isActive
-												? "bg-background text-foreground shadow-sm"
-												: undefined,
+											"rounded-none border-transparent border-b-2 bg-transparent px-0 pb-3 font-medium text-[#566174] shadow-none hover:text-[#17213a] data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+											isActive && "border-[#17213a] text-[#17213a]",
 										)}
 										key={item.segment || "summary"}
 										render={<Link href={hrefFor(wishlistId, item.segment)} />}
@@ -92,7 +209,7 @@ export function WishlistDetailNavView({
 					</Tabs>
 				</div>
 
-				<div className="md:hidden">
+				<div className="pb-4 md:hidden">
 					<label
 						className="mb-1.5 block font-medium text-muted-foreground text-xs"
 						htmlFor="wishlist-section"
@@ -125,7 +242,13 @@ export function WishlistDetailNavView({
 	);
 }
 
-export function WishlistDetailNav({ wishlistId }: Props) {
+export function WishlistDetailNav({
+	publicUrlPath,
+	slug,
+	status,
+	title,
+	wishlistId,
+}: Props) {
 	const pathname = usePathname();
 	const router = useRouter();
 	const activeSegment = activeSegmentFromPathname(pathname, wishlistId);
@@ -138,6 +261,10 @@ export function WishlistDetailNav({ wishlistId }: Props) {
 					router.push(hrefFor(wishlistId, nextSegment));
 				});
 			}}
+			publicUrlPath={publicUrlPath}
+			slug={slug}
+			status={status}
+			title={title}
 			wishlistId={wishlistId}
 		/>
 	);

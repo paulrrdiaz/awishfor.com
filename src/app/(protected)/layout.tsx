@@ -1,10 +1,5 @@
 import { AppSidebar } from "@/components/features/dashboard/app-sidebar";
-import { Separator } from "@/components/ui/separator";
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { api } from "@/trpc/server";
 
 export default async function ProtectedLayout({
@@ -25,15 +20,11 @@ export default async function ProtectedLayout({
 	}
 
 	return (
-		<SidebarProvider>
-			<AppSidebar wishlists={wishlists} />
-			<SidebarInset>
-				<header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
-					<SidebarTrigger className="-ml-1" />
-					<Separator className="h-4" orientation="vertical" />
-				</header>
-				{children}
-			</SidebarInset>
-		</SidebarProvider>
+		<div className="min-h-svh bg-[#efeee9] p-2 md:p-4">
+			<SidebarProvider className="min-h-[calc(100svh-1rem)] overflow-hidden rounded-xl border border-[#deded8] bg-[#fbfbf8] shadow-sm md:min-h-[calc(100svh-2rem)]">
+				<AppSidebar wishlists={wishlists} />
+				<SidebarInset className="bg-[#fbfbf8]">{children}</SidebarInset>
+			</SidebarProvider>
+		</div>
 	);
 }

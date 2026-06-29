@@ -24,6 +24,10 @@ export const TabsToSelectNav: Story = {
 		<WishlistDetailNavView
 			activeSegment="settings"
 			onSegmentChange={() => undefined}
+			publicUrlPath="/w/esperando-a-mateo"
+			slug="esperando-a-mateo"
+			status="published"
+			title="Esperando a Mateo"
 			wishlistId="wishlist-1"
 		/>
 	),
