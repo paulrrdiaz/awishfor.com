@@ -21,9 +21,11 @@ const WizardStoreContext = createContext<WishlistWizardStoreInstance | null>(
 export function WizardProvider({
 	children,
 	store,
+	rehydrate = true,
 }: {
 	children: ReactNode;
 	store?: WishlistWizardStoreInstance;
+	rehydrate?: boolean;
 }) {
 	const storeRef = useRef<WishlistWizardStoreInstance>(null);
 	if (!storeRef.current) {
@@ -31,8 +33,10 @@ export function WizardProvider({
 	}
 
 	useEffect(() => {
-		storeRef.current?.persist.rehydrate();
-	}, []);
+		if (rehydrate) {
+			storeRef.current?.persist.rehydrate();
+		}
+	}, [rehydrate]);
 
 	return (
 		<WizardStoreContext value={storeRef.current}>{children}</WizardStoreContext>

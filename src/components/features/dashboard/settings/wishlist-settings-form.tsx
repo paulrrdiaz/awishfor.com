@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Currency, Locale } from "@/generated/prisma/enums";
 import { isValidSlug } from "@/lib/slug";
 import { api, type RouterOutputs } from "@/trpc/react";
@@ -59,6 +61,72 @@ function SlugStatusIndicator({ status }: { status: SlugStatus }) {
 	} as const;
 	const cfg = map[status];
 	return <p className={`text-xs ${cfg.className}`}>{cfg.text}</p>;
+}
+
+export function PublishedSlugWarning({
+	acknowledged,
+	onAcknowledgedChange,
+}: {
+	acknowledged: boolean;
+	onAcknowledgedChange: (next: boolean) => void;
+}) {
+	const inputId = "published-slug-warning-ack";
+
+	return (
+		<div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+			<p className="font-medium">Atención: tu lista está publicada</p>
+			<p className="mt-1">
+				Cambiar el enlace público hará que el enlace anterior y los QR ya
+				compartidos dejen de funcionar. También deberás descargar y compartir un
+				nuevo QR.
+			</p>
+			<div className="mt-2 flex items-start gap-2">
+				<Checkbox
+					checked={acknowledged}
+					id={inputId}
+					onCheckedChange={(next) => onAcknowledgedChange(Boolean(next))}
+				/>
+				<Label className="cursor-pointer leading-snug" htmlFor={inputId}>
+					Entiendo que los enlaces existentes dejarán de funcionar
+				</Label>
+			</div>
+		</div>
+	);
+}
+
+export function RestoreWishlistDialogContent({
+	disabled = false,
+	onRestoreDraft,
+	onRestorePublished,
+}: {
+	disabled?: boolean;
+	onRestoreDraft: () => void;
+	onRestorePublished: () => void;
+}) {
+	return (
+		<>
+			<DialogHeader>
+				<DialogTitle>¿Restaurar esta wishlist?</DialogTitle>
+				<DialogDescription>
+					Puedes restaurarla como borrador para editarla antes de compartirla, o
+					publicarla nuevamente con el mismo enlace.
+				</DialogDescription>
+			</DialogHeader>
+			<DialogFooter className="flex-col gap-2 sm:flex-row">
+				<Button
+					disabled={disabled}
+					onClick={onRestoreDraft}
+					type="button"
+					variant="outline"
+				>
+					Restaurar como borrador
+				</Button>
+				<Button disabled={disabled} onClick={onRestorePublished} type="button">
+					Restaurar publicada
+				</Button>
+			</DialogFooter>
+		</>
+	);
 }
 
 export function WishlistSettingsForm({ wishlist }: Props) {
@@ -246,26 +314,10 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 						<SlugStatusIndicator status={slugStatus} />
 
 						{showPublishedSlugWarning && (
-							<div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-								<p className="font-medium">
-									⚠️ Atención: tu lista está publicada
-								</p>
-								<p className="mt-1">
-									Si cambias la URL, los enlaces y códigos QR que ya compartiste
-									dejarán de funcionar. Esta acción no tiene vuelta atrás.
-								</p>
-								<label className="mt-2 flex cursor-pointer items-center gap-2">
-									<input
-										checked={slugWarningAck}
-										className="rounded"
-										onChange={(e) => setSlugWarningAck(e.target.checked)}
-										type="checkbox"
-									/>
-									<span>
-										Entiendo que los enlaces existentes dejarán de funcionar
-									</span>
-								</label>
-							</div>
+							<PublishedSlugWarning
+								acknowledged={slugWarningAck}
+								onAcknowledgedChange={setSlugWarningAck}
+							/>
 						)}
 					</div>
 				</section>
@@ -394,12 +446,10 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					</div>
 
 					<div className="flex items-center gap-3">
-						<input
+						<Switch
 							checked={showHowItWorks}
-							className="h-4 w-4 rounded border-input"
 							id="showHowItWorks"
-							onChange={(e) => setShowHowItWorks(e.target.checked)}
-							type="checkbox"
+							onCheckedChange={(next) => setShowHowItWorks(Boolean(next))}
 						/>
 						<div>
 							<Label className="cursor-pointer" htmlFor="showHowItWorks">
@@ -447,39 +497,21 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 								}
 							/>
 							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>Restaurar lista</DialogTitle>
-									<DialogDescription>
-										¿Cómo quieres restaurar esta lista?
-									</DialogDescription>
-								</DialogHeader>
-								<DialogFooter className="flex-col gap-2 sm:flex-row">
-									<Button
-										disabled={restoreMutation.isPending}
-										onClick={() =>
-											restoreMutation.mutate({
-												id: wishlist.id,
-												targetStatus: "draft",
-											})
-										}
-										type="button"
-										variant="outline"
-									>
-										Restaurar como borrador
-									</Button>
-									<Button
-										disabled={restoreMutation.isPending}
-										onClick={() =>
-											restoreMutation.mutate({
-												id: wishlist.id,
-												targetStatus: "published",
-											})
-										}
-										type="button"
-									>
-										Restaurar publicada
-									</Button>
-								</DialogFooter>
+								<RestoreWishlistDialogContent
+									disabled={restoreMutation.isPending}
+									onRestoreDraft={() =>
+										restoreMutation.mutate({
+											id: wishlist.id,
+											targetStatus: "draft",
+										})
+									}
+									onRestorePublished={() =>
+										restoreMutation.mutate({
+											id: wishlist.id,
+											targetStatus: "published",
+										})
+									}
+								/>
 							</DialogContent>
 						</Dialog>
 					</div>

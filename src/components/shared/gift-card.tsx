@@ -2,6 +2,8 @@
 
 import { cva } from "class-variance-authority";
 import Image from "next/image";
+import { useRef } from "react";
+import { useHoverLift } from "@/lib/gsap/use-hover-lift";
 import { cn } from "@/lib/utils";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 import { PriorityBadge } from "./priority-badge";
@@ -106,14 +108,23 @@ export function GiftCard({
 	status = gift.status,
 	onGiftAction,
 }: Props) {
+	const cardRef = useRef<HTMLElement>(null);
 	const isPurchased = status === "purchased";
 	const isPartial = status === "partial";
 	const isHidden = status === "hidden";
 	const showAction = actionsEnabled && !isPurchased && !isHidden;
 
+	useHoverLift(cardRef, {
+		scale: cardStyle === "card" ? 1.01 : 1.005,
+		y: cardStyle === "card" ? -8 : -4,
+	});
+
 	if (cardStyle === "row" || cardStyle === "minimal") {
 		return (
-			<article className={cn(giftCardVariants({ cardStyle, status }))}>
+			<article
+				className={cn(giftCardVariants({ cardStyle, status }))}
+				ref={cardRef}
+			>
 				{gift.imageUrl && (
 					<div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
 						<Image
@@ -157,7 +168,10 @@ export function GiftCard({
 	}
 
 	return (
-		<article className={cn(giftCardVariants({ cardStyle, status }))}>
+		<article
+			className={cn(giftCardVariants({ cardStyle, status }))}
+			ref={cardRef}
+		>
 			{gift.imageUrl && (
 				<div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
 					<Image

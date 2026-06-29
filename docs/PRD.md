@@ -1311,6 +1311,40 @@ Avoid:
 - corporate SaaS dashboard feel on public pages
 - too many freeform controls
 
+### Component authoring priority
+
+Build UI in this order:
+
+1. **ShadCN / Base UI primitive** (generated into `src/components/ui/`) — first choice for
+   anything a primitive covers (dialog, drawer, select, tabs, popover, calendar, progress,
+   toggle group, toast).
+2. **TailwindCSS** — fallback only when no primitive fits.
+3. **GSAP** — motion / "good vibes" layer on top of the above.
+
+All motion is reduced-motion-guarded (`prefers-reduced-motion: reduce` renders the final
+static state, transform/opacity only, no layout shift). The full canvas component
+inventory is brought into the design system under Milestone 10
+(`design-system-component-completion`).
+
+### Component states and motion
+
+The design system documents the full state matrix of each stateful product component, as
+defined by the Claude Design canvas:
+
+- **GiftCard / giftcard variants (§9):** `available · partial · purchased · hidden`
+  (purchased de-emphasized; `hidden` shows `Oculto` + owner `Mostrar`/`Editar`).
+- **PurchaseGiftModal (6 states):** `form · loading · success · undo-available ·
+  undo-expired · purchase-error` — all derived from the existing `markGiftPurchased`
+  mutation lifecycle and undo countdown (no new mutations).
+- **Creation wizard (§4):** `event · details · design · gifts · publish` + pre-publish
+  auth gate, indicated via shared `StepProgress`.
+- **Dashboard states:** wishlist-list empty state; responsive `Tabs → Select` detail nav
+  (tabs ≥ md, `Select` below md); settings slug-change warning callout (published);
+  share copy `success` / `error`; archive/restore confirmation dialog.
+
+Each state is covered by a Storybook story, previewable under all seven themes, with
+stubbed handlers (no real network calls).
+
 ### Theme strategy
 
 Themes are hardcoded presets.

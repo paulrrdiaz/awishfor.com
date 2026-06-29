@@ -2430,3 +2430,149 @@ Do not defer:
 - Rate-limit verification.
 - Manual launch QA.
 - Public/private data leak checks.
+
+---
+
+## Milestone 10 — Design system component completion & motion
+
+### Goal
+
+Bring the full Claude Design canvas component inventory into the design system as
+documented, ShadCN-first, animated, Storybook-covered artifacts. Milestone 2 shipped the
+foundation (shared components, seven themes, Lora type system, Storybook for `shared/`);
+this milestone closes the gap between that foundation and the richer component **states**
+the canvas defines (canvas §7 themes, §9 GiftCard variants, the PurchaseGiftModal 6-state
+machine, §4 creation-wizard steps, and the dashboard states).
+
+Authoring priority for this milestone (and going forward): **ShadCN/Base UI primitive
+first, raw TailwindCSS as fallback, GSAP for motion / "good vibes"** — all motion
+reduced-motion-guarded.
+
+### Dependencies
+
+- Milestone 2 design-system foundation (`shared/`, themes, Storybook, Lora).
+- Milestone 3–7 product components (purchase modal, wizard, dashboard).
+- Existing `@base-ui/react`, `gsap`, `sonner`.
+- OpenSpec change: `design-system-component-completion`.
+
+### 10.1 Add canvas-required ShadCN primitives
+
+Priority: P1
+
+Tasks:
+
+- [ ] Generate missing Base UI primitives into `src/components/ui/` via shadcn CLI: `select`, `tabs`, `progress`, `popover`, `calendar`, `toggle-group`, `drawer`, `checkbox`, `switch`, `textarea`.
+- [ ] Mount a Sonner `Toaster` at the app root themed to app tokens (if not already).
+- [ ] For any primitive the registry lacks directly, provide the closest primitive or a thin documented Tailwind wrapper.
+
+Acceptance criteria:
+
+- Canvas-required primitives import from `@/components/ui/*`, typecheck, and use `cn()`/`cva`.
+- Missing-registry substitutes are documented.
+
+Affected areas:
+
+- `src/components/ui/*`
+- `src/app/layout.tsx`
+
+### 10.2 Add GSAP product motion layer
+
+Priority: P1
+
+Tasks:
+
+- [ ] Add `src/lib/gsap/` product motion helpers (reuse marketing reduced-motion guard): success-check draw-in, undo countdown ring, toast slide/lift, modal/sheet ease, copy-success pop, card hover lift, theme-swatch hover.
+- [ ] Guard every helper with `prefers-reduced-motion: reduce`; degrade to final static state (transform/opacity only, no layout shift).
+
+Acceptance criteria:
+
+- Motion plays only when allowed; reduced-motion renders final state with no animation.
+- No layout shift from any micro-interaction.
+
+Affected areas:
+
+- `src/lib/gsap/*`
+- Consuming product components.
+
+### 10.3 Complete the PurchaseGiftModal state machine
+
+Priority: P0
+
+Tasks:
+
+- [ ] Expand `Phase` to `form | loading | success | undo-available | undo-expired | purchase-error`.
+- [ ] Wire `loading` to mutation `isPending`; `purchase-error` to `onError` + retry (no new mutations).
+- [ ] Wire `undo-available` countdown ring + `undo-expired` copy; surface undo toast via Sonner; success-check motion on `success`.
+- [ ] Keep `purchase-gift-modal.test.tsx` green; extend for new transitions.
+
+Acceptance criteria:
+
+- Modal renders all six canvas states from the existing mutation lifecycle.
+- No new server contract.
+
+Affected areas:
+
+- `src/components/features/wishlist/purchase-gift-modal.tsx`
+
+### 10.4 Confirm GiftCard + dashboard state coverage
+
+Priority: P1
+
+Tasks:
+
+- [ ] Align `GiftCard` `available | partial | purchased | hidden` cva variants with canvas (`Oculto` + `Mostrar`/`Editar` on dashboard).
+- [ ] Confirm responsive `Tabs → Select` wishlist detail nav (tabs ≥ md, `Select` below md).
+- [ ] Confirm settings slug-change warning callout for published wishlists.
+- [ ] Confirm share copy `success` / `error` states with copy-success motion.
+- [ ] Confirm archive/restore `AlertDialog` (`Restaurar publicada` / `Restaurar como borrador`).
+
+Acceptance criteria:
+
+- Each dashboard state matches the canvas and uses the new primitives.
+
+Affected areas:
+
+- `src/components/features/dashboard/*`
+- `src/components/shared/gift-card.tsx`
+
+### 10.5 Storybook coverage for stateful components
+
+Priority: P1
+
+Tasks:
+
+- [ ] Add `PurchaseGiftModal` stories covering all six states with stubbed handlers.
+- [ ] Add creation-wizard step stories (`event · details · design · gifts · publish`) + auth gate.
+- [ ] Add dashboard-state stories: empty state, `Tabs → Select` nav, slug warning, share copy success/error, archive/restore dialog.
+- [ ] Verify stories render under the seven-theme toolbar with no real network calls.
+
+Acceptance criteria:
+
+- Every canvas component state has a story; `pnpm build-storybook` succeeds.
+
+Affected areas:
+
+- `src/components/features/**/*.stories.tsx`
+
+### 10.6 Docs sync
+
+Priority: P1
+
+Tasks:
+
+- [ ] Update `docs/PRD.md` §13 with authoring priority + component state matrices.
+- [ ] Keep this milestone in sync with the `design-system-component-completion` OpenSpec change.
+
+### Cut line
+
+If scope gets tight, defer:
+
+- Stories for lower-traffic dashboard states.
+- Secondary micro-interactions (theme-swatch hover, card hover lift).
+- Calendar/drawer registry-substitute polish.
+
+Do not defer:
+
+- PurchaseGiftModal six-state machine.
+- Canvas-required primitives used by shipped flows.
+- Reduced-motion guards on all motion.

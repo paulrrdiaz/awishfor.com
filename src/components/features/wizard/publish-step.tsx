@@ -131,6 +131,29 @@ function getSlugDescription({
 	return "El slug debe estar listo antes de publicar.";
 }
 
+export function PublishAuthGate({ onDismiss }: { onDismiss?: () => void }) {
+	return (
+		<WizardModal
+			description="Inicia sesión para publicar tu wishlist; tu progreso ya está guardado."
+			title="Publica desde tu cuenta"
+		>
+			<Link
+				className="rounded-lg bg-gray-900 px-4 py-2 text-center text-sm text-white hover:bg-gray-800"
+				href={SIGN_IN_HREF}
+			>
+				Iniciar sesión
+			</Link>
+			<button
+				className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 text-sm hover:bg-gray-50"
+				onClick={onDismiss}
+				type="button"
+			>
+				Seguir editando
+			</button>
+		</WizardModal>
+	);
+}
+
 export function PublishStep() {
 	const draft = useWizardStore((state) => state.draft);
 	const savedWishlistId = useWizardStore((state) => state.savedWishlistId);
@@ -613,24 +636,7 @@ export function PublishStep() {
 			</div>
 
 			{showAuthPrompt && (
-				<WizardModal
-					description="Inicia sesión para publicar tu wishlist; tu progreso ya está guardado."
-					title="Publica desde tu cuenta"
-				>
-					<Link
-						className="rounded-lg bg-gray-900 px-4 py-2 text-center text-sm text-white hover:bg-gray-800"
-						href={SIGN_IN_HREF}
-					>
-						Iniciar sesión
-					</Link>
-					<button
-						className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 text-sm hover:bg-gray-50"
-						onClick={() => setShowAuthPrompt(false)}
-						type="button"
-					>
-						Seguir editando
-					</button>
-				</WizardModal>
+				<PublishAuthGate onDismiss={() => setShowAuthPrompt(false)} />
 			)}
 
 			{conflictDraft && (
