@@ -15,8 +15,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { downloadQrCodePng } from "@/lib/qr";
 import { isValidSlug } from "@/lib/slug";
+import { cn } from "@/lib/utils";
 import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
 import {
 	draftToSaveDraftInput,
@@ -63,13 +67,13 @@ function ChecklistItem({
 			<Icon
 				className={
 					ready
-						? "mt-0.5 size-4 text-green-600"
-						: "mt-0.5 size-4 text-amber-600"
+						? "mt-0.5 size-4 text-primary"
+						: "mt-0.5 size-4 text-destructive"
 				}
 			/>
 			<div>
-				<p className="font-medium text-gray-900 text-sm">{label}</p>
-				<p className="text-gray-500 text-sm">{description}</p>
+				<p className="font-medium text-foreground text-sm">{label}</p>
+				<p className="text-muted-foreground text-sm">{description}</p>
 			</div>
 		</li>
 	);
@@ -92,6 +96,11 @@ const isPreconditionError = (error: unknown) =>
 	error.data !== null &&
 	"code" in error.data &&
 	error.data.code === "PRECONDITION_FAILED";
+
+const getErrorMessage = (error: unknown) =>
+	error instanceof Error && error.message
+		? error.message
+		: "No se pudo publicar tu wishlist. Revisa los datos y vuelve a intentarlo.";
 
 function getSlugDescription({
 	status,
@@ -137,19 +146,12 @@ export function PublishAuthGate({ onDismiss }: { onDismiss?: () => void }) {
 			description="Inicia sesión para publicar tu wishlist; tu progreso ya está guardado."
 			title="Publica desde tu cuenta"
 		>
-			<Link
-				className="rounded-lg bg-gray-900 px-4 py-2 text-center text-sm text-white hover:bg-gray-800"
-				href={SIGN_IN_HREF}
-			>
+			<Link className={cn(buttonVariants(), "text-center")} href={SIGN_IN_HREF}>
 				Iniciar sesión
 			</Link>
-			<button
-				className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 text-sm hover:bg-gray-50"
-				onClick={onDismiss}
-				type="button"
-			>
+			<Button onClick={onDismiss} type="button" variant="outline">
 				Seguir editando
-			</button>
+			</Button>
 		</WizardModal>
 	);
 }
@@ -300,9 +302,7 @@ export function PublishStep() {
 				return;
 			}
 
-			setErrorMessage(
-				"No se pudo publicar tu wishlist. Revisa los datos y vuelve a intentarlo.",
-			);
+			setErrorMessage(getErrorMessage(error));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -391,90 +391,102 @@ export function PublishStep() {
 
 	if (publishSuccess && publishedUrl) {
 		return (
-			<div className="mx-auto w-full max-w-4xl px-4 py-8">
-				<div className="rounded-2xl border border-green-200 bg-green-50 p-6">
-					<div className="flex items-start gap-3">
-						<CheckCircle2 className="mt-0.5 size-6 text-green-600" />
-						<div>
-							<h1 className="font-semibold text-2xl text-gray-900">
-								¡Tu wishlist está publicada!
-							</h1>
-							<p className="mt-2 text-gray-600 text-sm">
-								Comparte tu enlace con tus invitados desde aquí mismo.
-							</p>
+			<div className="mx-auto w-full max-w-4xl">
+				<Card className="border-primary/30 bg-primary/10">
+					<CardContent className="p-6">
+						<div className="flex items-start gap-3">
+							<CheckCircle2 className="mt-0.5 size-6 text-primary" />
+							<div>
+								<h1 className="font-semibold text-2xl text-foreground">
+									¡Tu wishlist está publicada!
+								</h1>
+								<p className="mt-2 text-muted-foreground text-sm">
+									Comparte tu enlace con tus invitados desde aquí mismo.
+								</p>
+							</div>
 						</div>
-					</div>
 
-					<div className="mt-6 rounded-xl border border-green-200 bg-white p-4">
-						<p className="text-gray-500 text-xs uppercase tracking-wide">
-							Enlace público
-						</p>
-						<p className="mt-2 break-all font-medium text-gray-900 text-sm">
-							{publishedUrl}
-						</p>
-					</div>
+						<Card className="mt-6 border-primary/30">
+							<CardContent className="p-4">
+								<p className="text-muted-foreground text-xs uppercase tracking-wide">
+									Enlace público
+								</p>
+								<p className="mt-2 break-all font-medium text-foreground text-sm">
+									{publishedUrl}
+								</p>
+							</CardContent>
+						</Card>
 
-					<div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-						<button
-							className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 text-sm hover:bg-gray-50"
-							onClick={handleCopyLink}
-							type="button"
-						>
-							<Copy className="size-4" />
-							Copiar enlace
-						</button>
-						<a
-							className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 text-sm hover:bg-gray-50"
-							href={toWhatsAppShareUrl(publishedUrl, draft.eventType)}
-							rel="noreferrer"
-							target="_blank"
-						>
-							<MessageCircle className="size-4" />
-							Compartir por WhatsApp
-						</a>
-						<button
-							className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 text-sm hover:bg-gray-50"
-							disabled={isDownloadingQr}
-							onClick={handleDownloadQr}
-							type="button"
-						>
-							{isDownloadingQr ? (
-								<LoaderCircle className="size-4 animate-spin" />
-							) : (
-								<QrCode className="size-4" />
-							)}
-							Descargar QR
-						</button>
-						<a
-							className="flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-3 text-sm text-white hover:bg-gray-800"
-							href={publishedUrl}
-							rel="noreferrer"
-							target="_blank"
-						>
-							<ExternalLink className="size-4" />
-							Ver lista pública
-						</a>
-						<Link
-							className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-700 text-sm hover:bg-gray-50"
-							href={publishSuccess.dashboardUrlPath}
-						>
-							<ShieldCheck className="size-4" />
-							Gestionar en dashboard
-						</Link>
-					</div>
-				</div>
+						<div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+							<Button
+								className="min-h-11"
+								onClick={handleCopyLink}
+								type="button"
+								variant="outline"
+							>
+								<Copy className="size-4" />
+								Copiar enlace
+							</Button>
+							<a
+								className={cn(
+									buttonVariants({ variant: "outline" }),
+									"min-h-11",
+								)}
+								href={toWhatsAppShareUrl(publishedUrl, draft.eventType)}
+								rel="noreferrer"
+								target="_blank"
+							>
+								<MessageCircle className="size-4" />
+								Compartir por WhatsApp
+							</a>
+							<Button
+								className="min-h-11"
+								disabled={isDownloadingQr}
+								onClick={handleDownloadQr}
+								type="button"
+								variant="outline"
+							>
+								{isDownloadingQr ? (
+									<LoaderCircle className="size-4 animate-spin" />
+								) : (
+									<QrCode className="size-4" />
+								)}
+								Descargar QR
+							</Button>
+							<a
+								className={cn(buttonVariants(), "min-h-11")}
+								href={publishedUrl}
+								rel="noreferrer"
+								target="_blank"
+							>
+								<ExternalLink className="size-4" />
+								Ver lista pública
+							</a>
+							<Link
+								className={cn(
+									buttonVariants({ variant: "outline" }),
+									"min-h-11",
+								)}
+								href={publishSuccess.dashboardUrlPath}
+							>
+								<ShieldCheck className="size-4" />
+								Gestionar en dashboard
+							</Link>
+						</div>
+					</CardContent>
+				</Card>
 			</div>
 		);
 	}
 
 	return (
 		<>
-			<div className="mx-auto w-full max-w-6xl px-4 py-8">
+			<div className="mx-auto w-full max-w-6xl">
 				<div className="mb-8 text-center">
-					<h1 className="font-semibold text-2xl text-gray-900">
+					<h1 className="font-semibold text-2xl text-foreground">
 						Revisa y publica tu wishlist
 					</h1>
-					<p className="mt-2 text-gray-500 text-sm">
+					<p className="mt-2 text-muted-foreground text-sm">
 						Valida lo importante, mira la vista final y publícala cuando esté
 						lista.
 					</p>
@@ -482,156 +494,156 @@ export function PublishStep() {
 
 				<div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
 					<div className="space-y-6">
-						<section className="rounded-2xl border border-gray-200 bg-white p-5">
-							<div className="flex items-center justify-between gap-3">
-								<div>
-									<h2 className="font-semibold text-base text-gray-900">
-										Checklist de publicación
-									</h2>
-									<p className="mt-1 text-gray-500 text-sm">
-										La lista solo se publica cuando todo está listo.
-									</p>
-								</div>
-								<span
-									className={[
-										"rounded-full px-3 py-1 font-medium text-xs",
-										isReadyToPublish
-											? "bg-green-100 text-green-700"
-											: "bg-amber-100 text-amber-700",
-									].join(" ")}
-								>
-									{isReadyToPublish ? "Lista" : "Pendiente"}
-								</span>
-							</div>
-
-							<ul className="mt-5 space-y-4">
-								<ChecklistItem
-									description={
-										readiness.title
-											? draft.title
-											: "Agrega un titulo visible para tu wishlist."
-									}
-									label="Título"
-									ready={readiness.title}
-								/>
-								<ChecklistItem
-									description={
-										readiness.eventType
-											? "Ya elegiste una ocasión para la wishlist."
-											: "Selecciona la ocasión de la wishlist."
-									}
-									label="Tipo de evento"
-									ready={readiness.eventType}
-								/>
-								<ChecklistItem
-									description={getSlugDescription({
-										status: slugStatus,
-										draft,
-										savedWishlistId,
-										savedSlug,
-									})}
-									label="Slug y URL"
-									ready={readiness.slug}
-								/>
-								<ChecklistItem
-									description="La publicación usa Español por defecto."
-									label="Idioma"
-									ready={readiness.language}
-								/>
-								<ChecklistItem
-									description="La publicación usa PEN por defecto."
-									label="Moneda"
-									ready={readiness.currency}
-								/>
-								<ChecklistItem
-									description={
-										readiness.visibleGift
-											? `${readiness.visibleGiftCount} regalo(s) visible(s) listo(s) para invitados.`
-											: "Necesitas al menos un regalo visible."
-									}
-									label="Regalos visibles"
-									ready={readiness.visibleGift}
-								/>
-							</ul>
-						</section>
-
-						<section className="rounded-2xl border border-gray-200 bg-white p-5">
-							<h2 className="font-semibold text-base text-gray-900">
-								Acciones finales
-							</h2>
-							<p className="mt-1 text-gray-500 text-sm">
-								Puedes abrir la vista completa del borrador guardado antes de
-								publicar.
-							</p>
-
-							<div className="mt-5 space-y-3">
-								{ownerPreviewHref ? (
-									<a
-										className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-3 text-gray-700 text-sm hover:bg-gray-50"
-										href={ownerPreviewHref}
-										rel="noreferrer"
-										target="_blank"
-									>
-										<ExternalLink className="size-4" />
-										Abrir vista completa
-									</a>
-								) : (
-									<div className="rounded-lg border border-gray-200 border-dashed px-4 py-3 text-gray-500 text-sm">
-										Guarda un borrador si quieres abrir la vista completa en una
-										pestaña aparte.
+						<Card>
+							<CardContent className="p-5">
+								<div className="flex items-center justify-between gap-3">
+									<div>
+										<h2 className="font-semibold text-base text-foreground">
+											Checklist de publicación
+										</h2>
+										<p className="mt-1 text-muted-foreground text-sm">
+											La lista solo se publica cuando todo está listo.
+										</p>
 									</div>
+									<Badge variant={isReadyToPublish ? "default" : "destructive"}>
+										{isReadyToPublish ? "Lista" : "Pendiente"}
+									</Badge>
+								</div>
+
+								<ul className="mt-5 space-y-4">
+									<ChecklistItem
+										description={
+											readiness.title
+												? draft.title
+												: "Agrega un titulo visible para tu wishlist."
+										}
+										label="Título"
+										ready={readiness.title}
+									/>
+									<ChecklistItem
+										description={
+											readiness.eventType
+												? "Ya elegiste una ocasión para la wishlist."
+												: "Selecciona la ocasión de la wishlist."
+										}
+										label="Tipo de evento"
+										ready={readiness.eventType}
+									/>
+									<ChecklistItem
+										description={getSlugDescription({
+											status: slugStatus,
+											draft,
+											savedWishlistId,
+											savedSlug,
+										})}
+										label="Slug y URL"
+										ready={readiness.slug}
+									/>
+									<ChecklistItem
+										description="La publicación usa Español por defecto."
+										label="Idioma"
+										ready={readiness.language}
+									/>
+									<ChecklistItem
+										description="La publicación usa PEN por defecto."
+										label="Moneda"
+										ready={readiness.currency}
+									/>
+									<ChecklistItem
+										description={
+											readiness.visibleGift
+												? `${readiness.visibleGiftCount} regalo(s) visible(s) listo(s) para invitados.`
+												: "Necesitas al menos un regalo visible."
+										}
+										label="Regalos visibles"
+										ready={readiness.visibleGift}
+									/>
+								</ul>
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardContent className="p-5">
+								<h2 className="font-semibold text-base text-foreground">
+									Acciones finales
+								</h2>
+								<p className="mt-1 text-muted-foreground text-sm">
+									Puedes abrir la vista completa del borrador guardado antes de
+									publicar.
+								</p>
+
+								<div className="mt-5 space-y-3">
+									{ownerPreviewHref ? (
+										<a
+											className={cn(
+												buttonVariants({ variant: "outline" }),
+												"min-h-11 w-full",
+											)}
+											href={ownerPreviewHref}
+											rel="noreferrer"
+											target="_blank"
+										>
+											<ExternalLink className="size-4" />
+											Abrir vista completa
+										</a>
+									) : (
+										<div className="rounded-lg border border-border border-dashed px-4 py-3 text-muted-foreground text-sm">
+											Guarda un borrador si quieres abrir la vista completa en
+											una pestaña aparte.
+										</div>
+									)}
+
+									<Button
+										className="min-h-11 w-full"
+										disabled={isSubmitting}
+										onClick={handlePublishClick}
+										type="button"
+										variant={
+											isReadyToPublish && !isSubmitting
+												? "default"
+												: "secondary"
+										}
+									>
+										{isSubmitting ? (
+											<LoaderCircle className="size-4 animate-spin" />
+										) : (
+											<ShieldCheck className="size-4" />
+										)}
+										{isSignedIn
+											? "Publicar wishlist"
+											: "Inicia sesión para publicar"}
+									</Button>
+								</div>
+
+								{!isSignedIn && (
+									<p className="mt-3 text-muted-foreground text-sm">
+										Te pediremos iniciar sesión antes de publicar; tu progreso
+										ya está guardado.
+									</p>
 								)}
 
-								<button
-									className={[
-										"flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm transition-colors",
-										isReadyToPublish && !isSubmitting
-											? "bg-gray-900 text-white hover:bg-gray-800"
-											: "cursor-not-allowed bg-gray-100 text-gray-400",
-									].join(" ")}
-									disabled={isSubmitting}
-									onClick={handlePublishClick}
-									type="button"
-								>
-									{isSubmitting ? (
-										<LoaderCircle className="size-4 animate-spin" />
-									) : (
-										<ShieldCheck className="size-4" />
-									)}
-									{isSignedIn
-										? "Publicar wishlist"
-										: "Inicia sesión para publicar"}
-								</button>
-							</div>
-
-							{!isSignedIn && (
-								<p className="mt-3 text-gray-500 text-sm">
-									Te pediremos iniciar sesión antes de publicar; tu progreso ya
-									está guardado.
-								</p>
-							)}
-
-							{errorMessage && (
-								<div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 text-sm">
-									{errorMessage}
-								</div>
-							)}
-						</section>
+								{errorMessage && (
+									<div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+										{errorMessage}
+									</div>
+								)}
+							</CardContent>
+						</Card>
 					</div>
 
-					<div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-						<div className="border-gray-100 border-b bg-gray-50 px-4 py-3">
-							<p className="font-medium text-gray-900 text-sm">
+					<Card className="overflow-hidden">
+						<CardHeader className="border-border border-b bg-muted/40 px-4 py-3">
+							<CardTitle className="text-sm">
 								Vista previa de tu wishlist
-							</p>
-							<p className="text-gray-500 text-xs">
+							</CardTitle>
+							<p className="text-muted-foreground text-xs">
 								Así se verá tu lista antes de volverse pública.
 							</p>
-						</div>
-						<div className="max-h-[780px] overflow-y-auto">
+						</CardHeader>
+						<CardContent className="max-h-[780px] overflow-y-auto p-0">
 							<PublicWishlistPage mode="preview" wishlist={previewViewModel} />
-						</div>
-					</div>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 
@@ -644,21 +656,17 @@ export function PublishStep() {
 					description="Este borrador fue actualizado desde el dashboard después de tu último guardado."
 					title="Hay una versión más reciente"
 				>
-					<button
-						className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
-						onClick={handleUseServerVersion}
-						type="button"
-					>
+					<Button onClick={handleUseServerVersion} type="button">
 						Usar versión del dashboard
-					</button>
-					<button
-						className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 text-sm hover:bg-gray-50"
+					</Button>
+					<Button
 						disabled={isSubmitting}
 						onClick={handleOverwrite}
 						type="button"
+						variant="outline"
 					>
 						Continuar con este borrador local
-					</button>
+					</Button>
 				</WizardModal>
 			)}
 		</>

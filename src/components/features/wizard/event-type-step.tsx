@@ -1,7 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import { EventType } from "@/generated/prisma/enums";
+import { cn } from "@/lib/utils";
 import { useWizardStore } from "./wizard-provider";
 
 const EVENT_TYPES = Object.values(EventType) as EventType[];
@@ -20,11 +22,11 @@ export function EventTypeStep() {
 	const regenerateCopy = useWizardStore((s) => s.regenerateCopy);
 
 	return (
-		<div className="mx-auto w-full max-w-2xl px-4 py-8">
-			<h1 className="mb-2 text-center font-semibold text-2xl text-gray-900">
+		<div className="mx-auto w-full max-w-2xl">
+			<h1 className="mb-2 text-center font-semibold text-2xl text-foreground">
 				¿Cuál es la ocasión?
 			</h1>
-			<p className="mb-8 text-center text-gray-500 text-sm">
+			<p className="mb-8 text-center text-muted-foreground text-sm">
 				Elige el tipo de evento para tu wishlist
 			</p>
 
@@ -35,12 +37,12 @@ export function EventTypeStep() {
 
 					return (
 						<button
-							className={[
-								"flex flex-col items-center gap-2 rounded-2xl border-2 px-4 py-5 text-center transition-all",
+							className={cn(
+								"flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border-2 px-4 py-5 text-center transition-all focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
 								isSelected
-									? "border-gray-900 bg-gray-900 text-white"
-									: "border-gray-200 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50",
-							].join(" ")}
+									? "border-primary bg-primary text-primary-foreground shadow-sm"
+									: "border-border bg-card text-card-foreground hover:border-primary/50 hover:bg-accent",
+							)}
 							key={type}
 							onClick={() => setEventType(type)}
 							type="button"
@@ -56,13 +58,9 @@ export function EventTypeStep() {
 
 			{selectedType && (
 				<div className="mt-6 text-center">
-					<button
-						className="text-gray-500 text-sm underline underline-offset-4 hover:text-gray-700"
-						onClick={regenerateCopy}
-						type="button"
-					>
+					<Button onClick={regenerateCopy} type="button" variant="link">
 						Regenerar sugerencias de texto
-					</button>
+					</Button>
 				</div>
 			)}
 		</div>

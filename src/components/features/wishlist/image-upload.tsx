@@ -25,6 +25,7 @@ function friendlyError(message: string): string {
 
 export function ImageUpload({ value, onChange, endpoint }: Props) {
 	const [error, setError] = useState<string | null>(null);
+	const [isHandlingUpload, setIsHandlingUpload] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const { startUpload, isUploading } = useUploadThing(endpoint, {
@@ -34,18 +35,36 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 				onChange(url);
 				setError(null);
 			}
+			setIsHandlingUpload(false);
 		},
 		onUploadError: (err) => {
 			setError(friendlyError(err.message));
+			setIsHandlingUpload(false);
 		},
 	});
+	const isBusy = isUploading || isHandlingUpload;
 
 	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[0];
 		if (!file) return;
 		setError(null);
-		await startUpload([file]);
-		e.target.value = "";
+		setIsHandlingUpload(true);
+		try {
+			const res = await startUpload([file]);
+			const url = res?.[0]?.ufsUrl ?? res?.[0]?.url;
+			if (url) {
+				onChange(url);
+				setError(null);
+				return;
+			}
+			setError("No se recibió la URL de la imagen. Inténtalo de nuevo.");
+		} catch (err) {
+			const message = err instanceof Error ? err.message : "Upload failed";
+			setError(friendlyError(message));
+		} finally {
+			setIsHandlingUpload(false);
+			e.target.value = "";
+		}
 	}
 
 	if (value) {
@@ -74,12 +93,12 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 		<div className="space-y-2">
 			<button
 				className="flex w-full cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 border-dashed bg-gray-50 px-4 py-8 transition-colors hover:border-gray-300 hover:bg-gray-100"
-				disabled={isUploading}
+				disabled={isBusy}
 				onClick={() => inputRef.current?.click()}
 				type="button"
 			>
 				<div className="text-center">
-					{isUploading ? (
+					{isBusy ? (
 						<p className="text-gray-500 text-sm">Subiendo...</p>
 					) : (
 						<>
@@ -94,7 +113,7 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 			<input
 				accept="image/jpeg,image/png,image/webp"
 				className="hidden"
-				disabled={isUploading}
+				disabled={isBusy}
 				onChange={handleFileChange}
 				ref={inputRef}
 				type="file"

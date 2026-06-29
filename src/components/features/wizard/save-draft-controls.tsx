@@ -4,6 +4,8 @@ import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
 	draftToSaveDraftInput,
 	serverDraftToLocalDraft,
@@ -26,6 +28,11 @@ const isNotFoundError = (error: unknown) =>
 	error.data !== null &&
 	"code" in error.data &&
 	error.data.code === "NOT_FOUND";
+
+const getErrorMessage = (error: unknown) =>
+	error instanceof Error && error.message
+		? error.message
+		: "No se pudo guardar el borrador";
 
 export function SaveDraftControls() {
 	const draft = useWizardStore((state) => state.draft);
@@ -88,7 +95,7 @@ export function SaveDraftControls() {
 				return;
 			}
 
-			toast.error("No se pudo guardar el borrador");
+			toast.error(getErrorMessage(error));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -135,23 +142,18 @@ export function SaveDraftControls() {
 	return (
 		<>
 			<div className="flex items-center gap-3">
-				<button
-					className={[
-						"rounded-lg border px-4 py-2 text-sm transition-colors",
-						isSubmitting
-							? "cursor-wait border-gray-200 bg-gray-100 text-gray-400"
-							: "border-gray-200 text-gray-700 hover:bg-gray-50",
-					].join(" ")}
+				<Button
 					disabled={isSubmitting}
 					onClick={handleSaveClick}
 					type="button"
+					variant="outline"
 				>
 					{isSubmitting ? "Guardando…" : "Guardar borrador"}
-				</button>
+				</Button>
 
 				{savedWishlistId && (
 					<Link
-						className="text-gray-600 text-sm underline underline-offset-4 hover:text-gray-900"
+						className="text-muted-foreground text-sm underline underline-offset-4 hover:text-foreground"
 						href="/dashboard"
 					>
 						Ver en dashboard
@@ -165,18 +167,18 @@ export function SaveDraftControls() {
 					title="Guarda tu borrador en tu cuenta"
 				>
 					<Link
-						className="rounded-lg bg-gray-900 px-4 py-2 text-center text-sm text-white hover:bg-gray-800"
+						className={cn(buttonVariants(), "text-center")}
 						href={SIGN_IN_HREF}
 					>
 						Iniciar sesión
 					</Link>
-					<button
-						className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 text-sm hover:bg-gray-50"
+					<Button
 						onClick={() => setShowAuthPrompt(false)}
 						type="button"
+						variant="outline"
 					>
 						Seguir editando
-					</button>
+					</Button>
 				</WizardModal>
 			)}
 
@@ -185,21 +187,17 @@ export function SaveDraftControls() {
 					description="Este borrador fue actualizado desde el dashboard después de tu último guardado."
 					title="Hay una versión más reciente"
 				>
-					<button
-						className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
-						onClick={handleUseServerVersion}
-						type="button"
-					>
+					<Button onClick={handleUseServerVersion} type="button">
 						Usar versión del dashboard
-					</button>
-					<button
-						className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 text-sm hover:bg-gray-50"
+					</Button>
+					<Button
 						disabled={isSubmitting}
 						onClick={handleOverwrite}
 						type="button"
+						variant="outline"
 					>
 						Continuar con este borrador local
-					</button>
+					</Button>
 				</WizardModal>
 			)}
 
@@ -208,21 +206,20 @@ export function SaveDraftControls() {
 					description="El ID guardado en este navegador ya no existe para tu cuenta actual. Puedes guardar este contenido como un borrador nuevo."
 					title="Guarda este borrador como nuevo"
 				>
-					<button
-						className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
+					<Button
 						disabled={isSubmitting}
 						onClick={handleSaveAsNew}
 						type="button"
 					>
 						Guardar como nuevo
-					</button>
-					<button
-						className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 text-sm hover:bg-gray-50"
+					</Button>
+					<Button
 						onClick={() => setSaveAsNewInput(null)}
 						type="button"
+						variant="outline"
 					>
 						Cancelar
-					</button>
+					</Button>
 				</WizardModal>
 			)}
 		</>

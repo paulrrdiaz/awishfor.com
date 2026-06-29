@@ -2,10 +2,13 @@
 
 import { ImageUpload } from "@/components/features/wishlist/image-upload";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getAllButtonStyles } from "@/config/public-button-styles";
 import { getAllFontPairingOptions } from "@/config/public-fonts";
 import { getAllLayouts } from "@/config/public-layouts";
 import { getAllThemes } from "@/config/public-themes";
+import { cn } from "@/lib/utils";
 import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
 import { useWizardStore } from "./wizard-provider";
 
@@ -29,25 +32,26 @@ function SelectorGrid<T extends { id: string; label: string }>({
 }) {
 	return (
 		<div>
-			<p className="mb-2 font-medium text-gray-700 text-sm">{label}</p>
+			<p className="mb-2 font-medium text-foreground text-sm">{label}</p>
 			<div className="flex flex-wrap gap-2">
 				{options.map((option) => {
 					const isSelected = selected === option.id;
 					return (
-						<button
-							className={[
-								"rounded-lg border-2 px-3 py-2 text-sm transition-all",
+						<Button
+							className={cn(
+								"min-h-11 border-2 px-3",
 								isSelected
-									? "border-gray-900 bg-gray-900 text-white"
-									: "border-gray-200 bg-white text-gray-700 hover:border-gray-400",
-							].join(" ")}
+									? "border-primary bg-primary text-primary-foreground hover:bg-primary/80"
+									: "border-border bg-card text-card-foreground hover:border-primary/50 hover:bg-accent",
+							)}
 							key={option.id}
 							onClick={() => onSelect(option.id)}
 							style={accentStyle?.(option)}
 							type="button"
+							variant="outline"
 						>
 							{option.label}
-						</button>
+						</Button>
 					);
 				})}
 			</div>
@@ -62,11 +66,11 @@ export function DesignStep() {
 	const previewViewModel = draftToPreview(draft);
 
 	return (
-		<div className="mx-auto w-full max-w-5xl px-4 py-8">
-			<h1 className="mb-2 text-center font-semibold text-2xl text-gray-900">
+		<div className="mx-auto w-full max-w-5xl">
+			<h1 className="mb-2 text-center font-semibold text-2xl text-foreground">
 				Diseño y vista previa
 			</h1>
-			<p className="mb-8 text-center text-gray-500 text-sm">
+			<p className="mb-8 text-center text-muted-foreground text-sm">
 				Personaliza el aspecto de tu lista
 			</p>
 
@@ -108,7 +112,7 @@ export function DesignStep() {
 
 					{/* Cover image upload */}
 					<div>
-						<p className="mb-2 font-medium text-gray-700 text-sm">
+						<p className="mb-2 font-medium text-foreground text-sm">
 							Imagen de portada
 						</p>
 						<ImageUpload
@@ -120,14 +124,16 @@ export function DesignStep() {
 				</div>
 
 				{/* Live preview */}
-				<div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-					<div className="border-gray-100 border-b bg-gray-50 px-4 py-2">
-						<p className="text-gray-500 text-xs">Vista previa con ejemplos</p>
-					</div>
-					<div className="max-h-[600px] overflow-y-auto">
+				<Card className="overflow-hidden">
+					<CardHeader className="border-border border-b bg-muted/40 px-4 py-3">
+						<p className="text-muted-foreground text-xs">
+							Vista previa con ejemplos
+						</p>
+					</CardHeader>
+					<CardContent className="max-h-[600px] overflow-y-auto p-0">
 						<PublicWishlistPage mode="preview" wishlist={previewViewModel} />
-					</div>
-				</div>
+					</CardContent>
+				</Card>
 			</div>
 		</div>
 	);

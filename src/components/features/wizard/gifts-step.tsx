@@ -1,8 +1,15 @@
 "use client";
 
+import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { GiftForm } from "@/components/features/wishlist/gift-form";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import type { DraftGift } from "@/stores/wishlist-wizard.store";
+import { api } from "@/trpc/react";
 import { useWizardStore } from "./wizard-provider";
 
 type GiftFormValues = Omit<DraftGift, "id" | "sortOrder">;
@@ -13,6 +20,16 @@ const PRIORITY_LABELS: Record<string, string> = {
 	high: "Alta",
 	medium: "Media",
 	low: "Baja",
+};
+
+const IMPORT_ERROR_MESSAGES: Record<string, string> = {
+	timeout: "La tienda tardó demasiado en responder.",
+	network:
+		"No pudimos leer esa página. Revisa el enlace o intenta otra tienda.",
+	blocked_host: "Ese enlace no se puede importar por seguridad.",
+	too_many_redirects: "Ese enlace redirige demasiadas veces.",
+	oversized: "La página es demasiado grande para importarla.",
+	invalid_url: "Ingresa un enlace válido que empiece con http o https.",
 };
 
 export function GiftsStep() {
@@ -29,6 +46,9 @@ export function GiftsStep() {
 	const [editingCategory, setEditingCategory] = useState<string | null>(null);
 	const [editingCategoryName, setEditingCategoryName] = useState("");
 	const [categoryError, setCategoryError] = useState<string | null>(null);
+	const [importUrl, setImportUrl] = useState("");
+	const [importError, setImportError] = useState<string | null>(null);
+	const importMutation = api.importer.importFromUrl.useMutation();
 
 	const visibleGifts = draft.gifts.filter((g) => !g.hidden);
 	const hiddenCount = draft.gifts.length - visibleGifts.length;
@@ -41,6 +61,51 @@ export function GiftsStep() {
 	function handleUpdate(id: string, values: GiftFormValues) {
 		updateGift(id, values);
 		setEditing(null);
+	}
+
+	async function handleImport(event: React.FormEvent) {
+		event.preventDefault();
+		const url = importUrl.trim();
+		if (!url || importMutation.isPending) return;
+
+		setImportError(null);
+
+		try {
+			const result = await importMutation.mutateAsync({ url });
+
+			if (!result.ok) {
+				setImportError(
+					IMPORT_ERROR_MESSAGES[result.error.kind] ??
+						"No pudimos importar ese enlace.",
+				);
+				return;
+			}
+
+			addGift({
+				name: result.draft.name?.trim() || "Regalo importado",
+				productUrl: result.draft.productUrl,
+				imageUrl: result.draft.imageUrl ?? null,
+				priceAmount: result.draft.priceAmount ?? null,
+				category: "",
+				quantityNeeded: 1,
+				priority: "medium",
+				publicNote: "",
+				internalNote: "",
+				hidden: false,
+			});
+			setImportUrl("");
+			setEditing(null);
+		} catch (error) {
+			const message =
+				error instanceof Error && error.message
+					? error.message
+					: "No pudimos importar ese enlace.";
+			setImportError(
+				message.toLowerCase().includes("unauthorized")
+					? "Inicia sesión para importar regalos desde una URL."
+					: message,
+			);
+		}
 	}
 
 	function getInitialValues(gift: DraftGift): GiftFormValues {
@@ -102,119 +167,146 @@ export function GiftsStep() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-2xl px-4 py-8">
-			<h1 className="mb-2 text-center font-semibold text-2xl text-gray-900">
+		<div className="mx-auto w-full max-w-2xl">
+			<h1 className="mb-2 text-center font-semibold text-2xl text-foreground">
 				Regalos
 			</h1>
-			<p className="mb-8 text-center text-gray-500 text-sm">
+			<p className="mb-8 text-center text-muted-foreground text-sm">
 				Agrega los regalos que deseas recibir
 			</p>
 
-			{/* URL import placeholder */}
-			<div className="mb-6 flex items-center justify-between rounded-lg border border-gray-200 border-dashed bg-gray-50 px-4 py-3">
-				<div>
-					<p className="font-medium text-gray-700 text-sm">
-						Importar desde URL
-					</p>
-					<p className="text-gray-400 text-xs">Disponible próximamente</p>
-				</div>
-				<button
-					className="cursor-not-allowed rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-gray-400 text-sm opacity-50"
-					disabled
-					type="button"
-				>
-					Importar
-				</button>
-			</div>
+			<Card className="mb-6 border-dashed bg-muted/30">
+				<CardContent className="p-4">
+					<div className="mb-3">
+						<p className="font-medium text-foreground text-sm">
+							Importar desde URL
+						</p>
+						<p className="text-muted-foreground text-xs">
+							Pega un enlace de producto para prellenar el regalo.
+						</p>
+					</div>
+					<form
+						className="flex flex-col gap-2 sm:flex-row"
+						onSubmit={handleImport}
+					>
+						<Input
+							className="min-h-11 min-w-0 flex-1"
+							onChange={(event) => setImportUrl(event.target.value)}
+							placeholder="https://tienda.com/producto"
+							type="url"
+							value={importUrl}
+						/>
+						<Button
+							className="min-h-11"
+							disabled={!importUrl.trim() || importMutation.isPending}
+							type="submit"
+							variant="outline"
+						>
+							{importMutation.isPending ? (
+								<LoaderCircle className="size-4 animate-spin" />
+							) : null}
+							Importar
+						</Button>
+					</form>
+					{importError && (
+						<p className="mt-2 text-destructive text-sm">{importError}</p>
+					)}
+				</CardContent>
+			</Card>
 
-			<div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4">
-				<div className="mb-4">
-					<h2 className="font-medium text-gray-900 text-sm">Categorías</h2>
-					<p className="text-gray-400 text-xs">
+			<Card className="mb-6">
+				<CardHeader>
+					<CardTitle className="text-sm">Categorías</CardTitle>
+					<p className="text-muted-foreground text-xs">
 						Crea opciones para organizar tus regalos antes de publicarlos.
 					</p>
-				</div>
+				</CardHeader>
+				<CardContent>
+					{draft.categories.length > 0 && (
+						<div className="mb-4 flex flex-wrap gap-2">
+							{draft.categories.map((category) =>
+								editingCategory === category ? (
+									<form
+										className="flex flex-wrap items-center gap-2 rounded-full border border-border bg-muted px-3 py-2"
+										key={category}
+										onSubmit={(event) => handleRenameCategory(event, category)}
+									>
+										<Input
+											className="h-7 w-28 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
+											maxLength={80}
+											onChange={(event) =>
+												setEditingCategoryName(event.target.value)
+											}
+											value={editingCategoryName}
+										/>
+										<Button
+											className="h-7 px-2 text-xs"
+											type="submit"
+											variant="ghost"
+										>
+											Guardar
+										</Button>
+										<Button
+											className="h-7 px-2 text-xs"
+											onClick={() => setEditingCategory(null)}
+											type="button"
+											variant="ghost"
+										>
+											Cancelar
+										</Button>
+									</form>
+								) : (
+									<div
+										className="flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-2"
+										key={category}
+									>
+										<span className="text-foreground text-xs">{category}</span>
+										<Button
+											className="h-6 px-1.5 text-xs"
+											onClick={() => startRenameCategory(category)}
+											type="button"
+											variant="ghost"
+										>
+											Renombrar
+										</Button>
+										<Button
+											className="h-6 px-1.5 text-xs"
+											onClick={() => removeCategory(category)}
+											type="button"
+											variant="destructive"
+										>
+											Quitar
+										</Button>
+									</div>
+								),
+							)}
+						</div>
+					)}
 
-				{draft.categories.length > 0 && (
-					<div className="mb-4 flex flex-wrap gap-2">
-						{draft.categories.map((category) =>
-							editingCategory === category ? (
-								<form
-									className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2"
-									key={category}
-									onSubmit={(event) => handleRenameCategory(event, category)}
-								>
-									<input
-										className="w-28 bg-transparent text-gray-900 text-xs outline-none"
-										maxLength={80}
-										onChange={(event) =>
-											setEditingCategoryName(event.target.value)
-										}
-										value={editingCategoryName}
-									/>
-									<button
-										className="font-medium text-gray-600 text-xs hover:text-gray-900"
-										type="submit"
-									>
-										Guardar
-									</button>
-									<button
-										className="text-gray-400 text-xs hover:text-gray-700"
-										onClick={() => setEditingCategory(null)}
-										type="button"
-									>
-										Cancelar
-									</button>
-								</form>
-							) : (
-								<div
-									className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2"
-									key={category}
-								>
-									<span className="text-gray-700 text-xs">{category}</span>
-									<button
-										className="text-gray-400 text-xs hover:text-gray-700"
-										onClick={() => startRenameCategory(category)}
-										type="button"
-									>
-										Renombrar
-									</button>
-									<button
-										className="text-red-400 text-xs hover:text-red-600"
-										onClick={() => removeCategory(category)}
-										type="button"
-									>
-										Quitar
-									</button>
-								</div>
-							),
-						)}
-					</div>
-				)}
-
-				<form
-					className="flex flex-col gap-2 sm:flex-row"
-					onSubmit={handleAddCategory}
-				>
-					<input
-						className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-						maxLength={80}
-						onChange={(event) => setNewCategoryName(event.target.value)}
-						placeholder="Nueva categoría"
-						value={newCategoryName}
-					/>
-					<button
-						className="rounded-lg bg-gray-900 px-4 py-2 font-medium text-sm text-white disabled:opacity-40"
-						disabled={!newCategoryName.trim()}
-						type="submit"
+					<form
+						className="flex flex-col gap-2 sm:flex-row"
+						onSubmit={handleAddCategory}
 					>
-						Agregar
-					</button>
-				</form>
-				{categoryError && (
-					<p className="mt-2 text-red-600 text-sm">{categoryError}</p>
-				)}
-			</div>
+						<Input
+							className="min-h-11 min-w-0 flex-1"
+							maxLength={80}
+							onChange={(event) => setNewCategoryName(event.target.value)}
+							placeholder="Nueva categoría"
+							value={newCategoryName}
+						/>
+						<Button
+							className="min-h-11"
+							disabled={!newCategoryName.trim()}
+							type="submit"
+						>
+							Agregar
+						</Button>
+					</form>
+					{categoryError && (
+						<p className="mt-2 text-destructive text-sm">{categoryError}</p>
+					)}
+				</CardContent>
+			</Card>
 
 			{/* Gift list */}
 			{draft.gifts.length > 0 && (
@@ -222,87 +314,90 @@ export function GiftsStep() {
 					{draft.gifts.map((gift) => {
 						if (editing?.type === "editing" && editing.id === gift.id) {
 							return (
-								<div
-									className="rounded-2xl border border-gray-200 bg-white p-4"
-									key={gift.id}
-								>
-									<p className="mb-4 font-medium text-gray-900 text-sm">
-										Editar regalo
-									</p>
-									<GiftForm
-										categories={draft.categories}
-										initialValues={getInitialValues(gift)}
-										onCancel={() => setEditing(null)}
-										onSubmit={(values) => handleUpdate(gift.id, values)}
-										submitLabel="Actualizar regalo"
-									/>
-								</div>
+								<Card key={gift.id}>
+									<CardContent className="p-4">
+										<p className="mb-4 font-medium text-foreground text-sm">
+											Editar regalo
+										</p>
+										<GiftForm
+											categories={draft.categories}
+											initialValues={getInitialValues(gift)}
+											onCancel={() => setEditing(null)}
+											onSubmit={(values) => handleUpdate(gift.id, values)}
+											submitLabel="Actualizar regalo"
+										/>
+									</CardContent>
+								</Card>
 							);
 						}
 
 						return (
-							<div
-								className={[
-									"flex items-start gap-3 rounded-2xl border p-4",
+							<Card
+								className={cn(
+									"p-0",
 									gift.hidden
-										? "border-gray-100 bg-gray-50 opacity-60"
-										: "border-gray-200 bg-white",
-								].join(" ")}
+										? "border-border bg-muted/50 opacity-60"
+										: "border-border bg-card",
+								)}
 								key={gift.id}
 							>
-								<div className="min-w-0 flex-1">
-									<div className="flex items-center gap-2">
-										<p
-											className={[
-												"font-medium text-sm",
-												gift.hidden ? "text-gray-400" : "text-gray-900",
-											].join(" ")}
-										>
-											{gift.name}
-										</p>
-										{gift.hidden && (
-											<span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-500 text-xs">
-												Oculto
+								<CardContent className="flex items-start gap-3 p-4">
+									<div className="min-w-0 flex-1">
+										<div className="flex items-center gap-2">
+											<p
+												className={cn(
+													"font-medium text-sm",
+													gift.hidden
+														? "text-muted-foreground"
+														: "text-foreground",
+												)}
+											>
+												{gift.name}
+											</p>
+											{gift.hidden && <Badge variant="secondary">Oculto</Badge>}
+										</div>
+										<div className="mt-1 flex flex-wrap gap-2 text-muted-foreground text-xs">
+											{gift.category && <span>{gift.category}</span>}
+											{gift.priceAmount != null && (
+												<span>S/ {gift.priceAmount}</span>
+											)}
+											{gift.quantityNeeded > 1 && (
+												<span>×{gift.quantityNeeded}</span>
+											)}
+											<span>
+												{PRIORITY_LABELS[gift.priority] ?? gift.priority}
 											</span>
-										)}
+										</div>
 									</div>
-									<div className="mt-1 flex flex-wrap gap-2 text-gray-400 text-xs">
-										{gift.category && <span>{gift.category}</span>}
-										{gift.priceAmount != null && (
-											<span>S/ {gift.priceAmount}</span>
-										)}
-										{gift.quantityNeeded > 1 && (
-											<span>×{gift.quantityNeeded}</span>
-										)}
-										<span>
-											{PRIORITY_LABELS[gift.priority] ?? gift.priority}
-										</span>
+									<div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+										<Button
+											className="h-7 px-2 text-xs"
+											onClick={() =>
+												setEditing({ type: "editing", id: gift.id })
+											}
+											type="button"
+											variant="ghost"
+										>
+											Editar
+										</Button>
+										<Button
+											className="h-7 px-2 text-xs"
+											onClick={() => removeGift(gift.id)}
+											type="button"
+											variant="destructive"
+										>
+											Eliminar
+										</Button>
 									</div>
-								</div>
-								<div className="flex shrink-0 gap-2">
-									<button
-										className="text-gray-400 text-xs hover:text-gray-700"
-										onClick={() => setEditing({ type: "editing", id: gift.id })}
-										type="button"
-									>
-										Editar
-									</button>
-									<button
-										className="text-red-400 text-xs hover:text-red-600"
-										onClick={() => removeGift(gift.id)}
-										type="button"
-									>
-										Eliminar
-									</button>
-								</div>
-							</div>
+								</CardContent>
+							</Card>
 						);
 					})}
 				</div>
 			)}
 
 			{hiddenCount > 0 && (
-				<p className="mb-4 text-center text-gray-400 text-xs">
+				<p className="mb-4 text-center text-muted-foreground text-xs">
 					{hiddenCount}{" "}
 					{hiddenCount === 1 ? "regalo oculto" : "regalos ocultos"} (no aparecen
 					en la vista pública)
@@ -311,26 +406,31 @@ export function GiftsStep() {
 
 			{/* Add gift form or button */}
 			{editing?.type === "adding" ? (
-				<div className="rounded-2xl border border-gray-200 bg-white p-4">
-					<p className="mb-4 font-medium text-gray-900 text-sm">Nuevo regalo</p>
-					<GiftForm
-						categories={draft.categories}
-						onCancel={() => setEditing(null)}
-						onSubmit={handleAdd}
-					/>
-				</div>
+				<Card>
+					<CardContent className="p-4">
+						<p className="mb-4 font-medium text-foreground text-sm">
+							Nuevo regalo
+						</p>
+						<GiftForm
+							categories={draft.categories}
+							onCancel={() => setEditing(null)}
+							onSubmit={handleAdd}
+						/>
+					</CardContent>
+				</Card>
 			) : (
-				<button
-					className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-gray-200 border-dashed py-4 text-gray-500 text-sm transition-colors hover:border-gray-400 hover:text-gray-700"
+				<Button
+					className="flex min-h-14 w-full items-center justify-center gap-2 border-2 border-dashed"
 					onClick={() => setEditing({ type: "adding" })}
 					type="button"
+					variant="outline"
 				>
 					<span aria-hidden>+</span> Agregar regalo
-				</button>
+				</Button>
 			)}
 
 			{visibleGifts.length === 0 && draft.gifts.length === 0 && (
-				<p className="mt-6 text-center text-gray-400 text-sm">
+				<p className="mt-6 text-center text-muted-foreground text-sm">
 					Todavía no tienes regalos. La vista previa mostrará ejemplos hasta que
 					agregues el primero.
 				</p>

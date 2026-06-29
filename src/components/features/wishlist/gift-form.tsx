@@ -1,7 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Field,
+	FieldContent,
+	FieldDescription,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import type { GiftPriority } from "@/generated/prisma/enums";
+import { cn } from "@/lib/utils";
 import type { DraftGift } from "@/stores/wishlist-wizard.store";
 import { ImageUpload } from "./image-upload";
 
@@ -66,214 +86,193 @@ export function GiftForm({
 
 	return (
 		<form className="space-y-4" onSubmit={handleSubmit}>
-			{/* Name */}
-			<div>
-				<label
-					className="mb-1 block font-medium text-gray-700 text-sm"
-					htmlFor="gift-name"
-				>
-					Nombre del regalo <span className="text-red-500">*</span>
-				</label>
-				<input
-					className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-					id="gift-name"
-					onChange={(e) => set("name", e.target.value)}
-					placeholder="Ej. Cuna de madera"
-					required
-					type="text"
-					value={values.name}
-				/>
-			</div>
-
-			{/* Product URL */}
-			<div>
-				<label
-					className="mb-1 block font-medium text-gray-700 text-sm"
-					htmlFor="gift-url"
-				>
-					Enlace del producto{" "}
-					<span className="font-normal text-gray-400">(opcional)</span>
-				</label>
-				<input
-					className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-					id="gift-url"
-					onChange={(e) => set("productUrl", e.target.value || null)}
-					placeholder="https://..."
-					type="url"
-					value={values.productUrl ?? ""}
-				/>
-			</div>
-
-			{/* Gift image upload */}
-			<div>
-				<p className="mb-1 block font-medium text-gray-700 text-sm">
-					Imagen del regalo{" "}
-					<span className="font-normal text-gray-400">(opcional)</span>
-				</p>
-				<ImageUpload
-					endpoint="giftImage"
-					onChange={(url) => set("imageUrl", url)}
-					value={values.imageUrl}
-				/>
-			</div>
-
-			{/* Price & Quantity row */}
-			<div className="grid grid-cols-2 gap-4">
-				<div>
-					<label
-						className="mb-1 block font-medium text-gray-700 text-sm"
-						htmlFor="gift-price"
-					>
-						Precio <span className="font-normal text-gray-400">(opcional)</span>
-					</label>
-					<input
-						className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-						id="gift-price"
-						min="0"
-						onChange={(e) =>
-							set("priceAmount", e.target.value ? Number(e.target.value) : null)
-						}
-						placeholder="0.00"
-						step="0.01"
-						type="number"
-						value={values.priceAmount ?? ""}
+			<FieldGroup className="gap-4">
+				<Field>
+					<FieldLabel htmlFor="gift-name">
+						Nombre del regalo <span className="text-destructive">*</span>
+					</FieldLabel>
+					<Input
+						className="min-h-11"
+						id="gift-name"
+						onChange={(e) => set("name", e.target.value)}
+						placeholder="Ej. Cuna de madera"
+						required
+						type="text"
+						value={values.name}
 					/>
-				</div>
-				<div>
-					<label
-						className="mb-1 block font-medium text-gray-700 text-sm"
-						htmlFor="gift-quantity"
-					>
-						Cantidad
-					</label>
-					<input
-						className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-						id="gift-quantity"
-						min="1"
-						onChange={(e) =>
-							set("quantityNeeded", Math.max(1, Number(e.target.value)))
-						}
-						type="number"
-						value={values.quantityNeeded}
+				</Field>
+
+				<Field>
+					<FieldLabel htmlFor="gift-url">
+						Enlace del producto{" "}
+						<span className="font-normal text-muted-foreground">
+							(opcional)
+						</span>
+					</FieldLabel>
+					<Input
+						className="min-h-11"
+						id="gift-url"
+						onChange={(e) => set("productUrl", e.target.value || null)}
+						placeholder="https://..."
+						type="url"
+						value={values.productUrl ?? ""}
 					/>
+				</Field>
+
+				<Field>
+					<FieldLabel>
+						Imagen del regalo{" "}
+						<span className="font-normal text-muted-foreground">
+							(opcional)
+						</span>
+					</FieldLabel>
+					<ImageUpload
+						endpoint="giftImage"
+						onChange={(url) => set("imageUrl", url)}
+						value={values.imageUrl}
+					/>
+				</Field>
+
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					<Field>
+						<FieldLabel htmlFor="gift-price">
+							Precio{" "}
+							<span className="font-normal text-muted-foreground">
+								(opcional)
+							</span>
+						</FieldLabel>
+						<Input
+							className="min-h-11"
+							id="gift-price"
+							min="0"
+							onChange={(e) =>
+								set(
+									"priceAmount",
+									e.target.value ? Number(e.target.value) : null,
+								)
+							}
+							placeholder="0.00"
+							step="0.01"
+							type="number"
+							value={values.priceAmount ?? ""}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel htmlFor="gift-quantity">Cantidad</FieldLabel>
+						<Input
+							className="min-h-11"
+							id="gift-quantity"
+							min="1"
+							onChange={(e) =>
+								set("quantityNeeded", Math.max(1, Number(e.target.value)))
+							}
+							type="number"
+							value={values.quantityNeeded}
+						/>
+					</Field>
 				</div>
-			</div>
 
-			{/* Category */}
-			<div>
-				<label
-					className="mb-1 block font-medium text-gray-700 text-sm"
-					htmlFor="gift-category"
-				>
-					Categoría
-				</label>
-				<select
-					className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-					id="gift-category"
-					onChange={(e) => set("category", e.target.value)}
-					value={values.category}
-				>
-					<option value="">Sin categoría</option>
-					{categories.map((cat) => (
-						<option key={cat} value={cat}>
-							{cat}
-						</option>
-					))}
-				</select>
-			</div>
+				<Field>
+					<FieldLabel htmlFor="gift-category">Categoría</FieldLabel>
+					<Select
+						onValueChange={(value) => set("category", value ?? "")}
+						value={values.category}
+					>
+						<SelectTrigger className="min-h-11" id="gift-category">
+							<SelectValue placeholder="Sin categoría" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="">Sin categoría</SelectItem>
+							{categories.map((cat) => (
+								<SelectItem key={cat} value={cat}>
+									{cat}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</Field>
 
-			{/* Priority */}
-			<div>
-				<p className="mb-1 block font-medium text-gray-700 text-sm">
-					Prioridad
-				</p>
-				<div className="flex gap-2">
-					{PRIORITY_OPTIONS.map((opt) => (
-						<button
-							className={[
-								"flex-1 rounded-lg border-2 py-2 text-sm transition-all",
-								values.priority === opt.value
-									? "border-gray-900 bg-gray-900 text-white"
-									: "border-gray-200 bg-white text-gray-700 hover:border-gray-400",
-							].join(" ")}
-							key={opt.value}
-							onClick={() => set("priority", opt.value)}
-							type="button"
-						>
-							{opt.label}
-						</button>
-					))}
-				</div>
-			</div>
+				<Field>
+					<FieldLabel>Prioridad</FieldLabel>
+					<div className="flex gap-2">
+						{PRIORITY_OPTIONS.map((opt) => {
+							const isSelected = values.priority === opt.value;
+							return (
+								<Button
+									className={cn(
+										"min-h-11 flex-1 border-2",
+										isSelected
+											? "border-primary bg-primary text-primary-foreground hover:bg-primary/80"
+											: "border-border bg-card text-card-foreground hover:border-primary/50 hover:bg-accent",
+									)}
+									key={opt.value}
+									onClick={() => set("priority", opt.value)}
+									type="button"
+									variant="outline"
+								>
+									{opt.label}
+								</Button>
+							);
+						})}
+					</div>
+				</Field>
 
-			{/* Public note */}
-			<div>
-				<label
-					className="mb-1 block font-medium text-gray-700 text-sm"
-					htmlFor="gift-public-note"
-				>
-					Nota pública{" "}
-					<span className="font-normal text-gray-400">(opcional)</span>
-				</label>
-				<textarea
-					className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-					id="gift-public-note"
-					onChange={(e) => set("publicNote", e.target.value)}
-					placeholder="Visible para los invitados"
-					rows={2}
-					value={values.publicNote}
-				/>
-			</div>
+				<Field>
+					<FieldLabel htmlFor="gift-public-note">
+						Nota pública{" "}
+						<span className="font-normal text-muted-foreground">
+							(opcional)
+						</span>
+					</FieldLabel>
+					<Textarea
+						id="gift-public-note"
+						onChange={(e) => set("publicNote", e.target.value)}
+						placeholder="Visible para los invitados"
+						rows={2}
+						value={values.publicNote}
+					/>
+				</Field>
 
-			{/* Internal note */}
-			<div>
-				<label
-					className="mb-1 block font-medium text-gray-700 text-sm"
-					htmlFor="gift-internal-note"
-				>
-					Nota interna{" "}
-					<span className="font-normal text-gray-400">(solo tú la ves)</span>
-				</label>
-				<textarea
-					className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm focus:border-gray-400 focus:outline-none"
-					id="gift-internal-note"
-					onChange={(e) => set("internalNote", e.target.value)}
-					placeholder="Solo visible para ti"
-					rows={2}
-					value={values.internalNote}
-				/>
-			</div>
+				<Field>
+					<FieldLabel htmlFor="gift-internal-note">
+						Nota interna{" "}
+						<span className="font-normal text-muted-foreground">
+							(solo tú la ves)
+						</span>
+					</FieldLabel>
+					<Textarea
+						id="gift-internal-note"
+						onChange={(e) => set("internalNote", e.target.value)}
+						placeholder="Solo visible para ti"
+						rows={2}
+						value={values.internalNote}
+					/>
+				</Field>
 
-			{/* Hidden toggle */}
-			<div className="flex items-center gap-3">
-				<input
-					checked={values.hidden}
-					className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-					id="gift-hidden"
-					onChange={(e) => set("hidden", e.target.checked)}
-					type="checkbox"
-				/>
-				<label className="text-gray-700 text-sm" htmlFor="gift-hidden">
-					Ocultar este regalo (no aparecerá en la lista pública)
-				</label>
-			</div>
+				<Field orientation="horizontal">
+					<Checkbox
+						checked={values.hidden}
+						id="gift-hidden"
+						onCheckedChange={(next) => set("hidden", Boolean(next))}
+					/>
+					<FieldContent>
+						<Label className="cursor-pointer" htmlFor="gift-hidden">
+							Ocultar este regalo
+						</Label>
+						<FieldDescription className="text-xs">
+							No aparecerá en la lista pública.
+						</FieldDescription>
+					</FieldContent>
+				</Field>
+			</FieldGroup>
 
-			{/* Actions */}
 			<div className="flex justify-end gap-3 pt-2">
-				<button
-					className="rounded-lg border border-gray-200 px-4 py-2 text-gray-600 text-sm hover:bg-gray-50"
-					onClick={onCancel}
-					type="button"
-				>
+				<Button onClick={onCancel} type="button" variant="outline">
 					Cancelar
-				</button>
-				<button
-					className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800 disabled:opacity-50"
-					disabled={!values.name.trim()}
-					type="submit"
-				>
+				</Button>
+				<Button disabled={!values.name.trim()} type="submit">
 					{submitLabel}
-				</button>
+				</Button>
 			</div>
 		</form>
 	);
