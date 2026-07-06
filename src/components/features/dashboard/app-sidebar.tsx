@@ -8,12 +8,13 @@ import {
 	CircleHelp,
 	Heart,
 	Home,
+	MoreHorizontal,
 	Plus,
 	Settings,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BrandMark } from "@/components/features/dashboard/brand-logo";
 import {
 	Sidebar,
 	SidebarContent,
@@ -69,24 +70,37 @@ export function AppSidebar({ wishlists }: Props) {
 	const isWishlistRoute = pathname.startsWith("/dashboard/wishlists/");
 	const displayName = user?.fullName ?? user?.firstName ?? "Mi cuenta";
 	const email = user?.primaryEmailAddress?.emailAddress ?? "";
+	const avatarUrl = user?.imageUrl;
+	const fallbackInitial = displayName.trim().charAt(0).toUpperCase() || "M";
 
 	return (
 		<Sidebar className="border-[#e4e4df] border-r bg-white" collapsible="icon">
-			<SidebarHeader className="border-[#ecece6] border-b p-3">
+			<SidebarHeader className="border-[#ecece6] border-b p-3 group-data-[collapsible=icon]:p-2">
 				<SidebarMenu>
-					<SidebarMenuItem className="flex items-center gap-2">
+					<SidebarMenuItem className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1">
 						<SidebarMenuButton
-							className="h-8 flex-1 px-1 font-heading font-semibold text-[#17213a] text-lg hover:bg-transparent group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+							className="h-40 flex-1 items-center justify-center p-0 px-1 hover:bg-transparent group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
 							render={<Link href="/dashboard" />}
 							size="lg"
 							tooltip="A Wish For"
 						>
-							<span className="group-data-[collapsible=icon]:hidden">
-								A Wish For
-							</span>
-							<BrandMark className="hidden group-data-[collapsible=icon]:block" />
+							<Image
+								alt="A Wish For"
+								className="h-40 w-auto group-data-[collapsible=icon]:hidden"
+								height={32}
+								priority
+								src="/assets/logo.svg"
+								width={320}
+							/>
+							<Image
+								alt="A Wish For"
+								className="hidden size-6 object-contain group-data-[collapsible=icon]:block"
+								height={32}
+								priority
+								src="/assets/isotype.svg"
+								width={32}
+							/>
 						</SidebarMenuButton>
-						<SidebarTrigger className="size-6 rounded-md border border-[#e4e4df] text-[#667085] group-data-[collapsible=icon]:hidden" />
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarHeader>
@@ -103,7 +117,9 @@ export function AppSidebar({ wishlists }: Props) {
 									tooltip="Inicio"
 								>
 									<Home />
-									<span>Inicio</span>
+									<span className="group-data-[collapsible=icon]:hidden">
+										Inicio
+									</span>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 						</SidebarMenu>
@@ -120,7 +136,9 @@ export function AppSidebar({ wishlists }: Props) {
 									tooltip="Mis wishlists"
 								>
 									<Heart />
-									<span>Mis wishlists</span>
+									<span className="group-data-[collapsible=icon]:hidden">
+										Mis wishlists
+									</span>
 									<ChevronDown className="ml-auto size-3 text-[#7c8494] group-data-[collapsible=icon]:hidden" />
 								</SidebarMenuButton>
 							</SidebarMenuItem>
@@ -151,7 +169,9 @@ export function AppSidebar({ wishlists }: Props) {
 													isActive && "fill-[#438b52] text-[#438b52]",
 												)}
 											/>
-											<span className="truncate">{wishlist.title}</span>
+											<span className="truncate group-data-[collapsible=icon]:hidden">
+												{wishlist.title}
+											</span>
 											<span
 												className={cn(
 													"ml-auto rounded-full px-1.5 py-0.5 font-medium text-[9px] group-data-[collapsible=icon]:hidden",
@@ -171,7 +191,9 @@ export function AppSidebar({ wishlists }: Props) {
 									tooltip="Nueva wishlist"
 								>
 									<Plus />
-									<span>Nueva wishlist</span>
+									<span className="group-data-[collapsible=icon]:hidden">
+										Nueva wishlist
+									</span>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 						</SidebarMenu>
@@ -187,7 +209,9 @@ export function AppSidebar({ wishlists }: Props) {
 									tooltip="Analíticas"
 								>
 									<BarChart3 />
-									<span>Analíticas</span>
+									<span className="group-data-[collapsible=icon]:hidden">
+										Analíticas
+									</span>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 							<SidebarMenuItem>
@@ -196,7 +220,9 @@ export function AppSidebar({ wishlists }: Props) {
 									tooltip="Configuración"
 								>
 									<Settings />
-									<span>Configuración</span>
+									<span className="group-data-[collapsible=icon]:hidden">
+										Configuración
+									</span>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 							<SidebarMenuItem>
@@ -205,7 +231,25 @@ export function AppSidebar({ wishlists }: Props) {
 									tooltip="Ayuda y soporte"
 								>
 									<CircleHelp />
-									<span>Ayuda y soporte</span>
+									<span className="group-data-[collapsible=icon]:hidden">
+										Ayuda y soporte
+									</span>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</SidebarGroup>
+
+				<div className="flex-1" />
+				<SidebarGroup className="p-0">
+					<SidebarGroupContent>
+						<SidebarMenu className="inline-flex w-a">
+							<SidebarMenuItem>
+								<SidebarMenuButton
+									className="px-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
+									tooltip="Expandir"
+								>
+									<SidebarTrigger className="size-6 rounded-md border border-[#e4e4df] text-[#667085]" />
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 						</SidebarMenu>
@@ -216,23 +260,48 @@ export function AppSidebar({ wishlists }: Props) {
 			<SidebarFooter className="border-[#ecece6] border-t bg-white p-3">
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<div className="flex h-9 items-center gap-2 group-data-[collapsible=icon]:justify-center">
-							<UserButton />
+						<div className="relative flex min-h-10 items-center gap-2 rounded-md px-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+							<div
+								aria-hidden
+								className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#edf7e9] font-semibold text-[#3c6743] text-xs group-data-[collapsible=icon]:hidden"
+								style={
+									avatarUrl
+										? {
+												backgroundImage: `url(${avatarUrl})`,
+												backgroundPosition: "center",
+												backgroundSize: "cover",
+											}
+										: undefined
+								}
+							>
+								{avatarUrl ? null : fallbackInitial}
+							</div>
 							<div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
 								<p className="truncate font-semibold text-[#17213a] text-xs">
 									{displayName}
 								</p>
-								{email ? (
-									<p className="truncate text-[#6b7280] text-[11px]">{email}</p>
-								) : (
-									<p className="truncate text-[#6b7280] text-[11px]">
-										Mi cuenta
-									</p>
-								)}
+								<p className="truncate text-[#6b7280] text-[11px]">
+									{email || "Mi cuenta"}
+								</p>
 							</div>
-							<span className="text-[#6b7280] text-lg leading-none group-data-[collapsible=icon]:hidden">
-								...
-							</span>
+							<div className="pointer-events-none flex size-7 shrink-0 items-center justify-center rounded-md text-[#6b7280] group-data-[collapsible=icon]:hidden">
+								<MoreHorizontal aria-hidden className="size-4" />
+							</div>
+							<div className="absolute inset-y-0 right-0 flex items-center group-data-[collapsible=icon]:static">
+								<UserButton
+									appearance={{
+										elements: {
+											rootBox: "size-8",
+											userButtonBox: "size-8",
+											userButtonTrigger:
+												"size-8 rounded-md opacity-0 transition-colors hover:bg-[#f7f7f2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9ecb69]/50 group-data-[collapsible=icon]:opacity-100",
+											userButtonAvatarBox:
+												"hidden size-8 group-data-[collapsible=icon]:block",
+										},
+									}}
+									userProfileMode="modal"
+								/>
+							</div>
 						</div>
 					</SidebarMenuItem>
 				</SidebarMenu>

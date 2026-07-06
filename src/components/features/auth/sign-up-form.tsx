@@ -3,7 +3,7 @@
 import { useSignUp } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -19,10 +19,20 @@ import {
 
 export function SignUpForm() {
 	const router = useRouter();
-	const { signUp, fetchStatus } = useSignUp();
+	const { signUp, errors: clerkSignalErrors, fetchStatus } = useSignUp();
 	const [verifying, setVerifying] = useState(false);
 	const [clerkError, setClerkError] = useState<string | null>(null);
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+	useEffect(() => {
+		if (!isGoogleLoading) return;
+		const globalErrors = clerkSignalErrors?.global;
+		if (!globalErrors?.length) return;
+		const msg =
+			globalErrors[0]?.longMessage ?? "Something went wrong. Please try again.";
+		setClerkError(msg);
+		setIsGoogleLoading(false);
+	}, [clerkSignalErrors, isGoogleLoading]);
 
 	const signUpForm = useForm<SignUpValues>({
 		resolver: zodResolver(signUpSchema),
@@ -71,15 +81,21 @@ export function SignUpForm() {
 
 	async function handleGoogleSignUp() {
 		setIsGoogleLoading(true);
-		const { error } = await signUp.sso({
-			strategy: "oauth_google",
-			redirectUrl: "/sso-callback",
-			redirectCallbackUrl: "/dashboard",
-		});
-		if (error) {
-			setClerkError(
-				error.longMessage ?? "Something went wrong. Please try again.",
-			);
+		setClerkError(null);
+		try {
+			const { error } = await signUp.sso({
+				strategy: "oauth_google",
+				redirectUrl: "/dashboard",
+				redirectCallbackUrl: "/sso-callback",
+			});
+			if (error) {
+				setClerkError(
+					error.longMessage ?? "Something went wrong. Please try again.",
+				);
+				setIsGoogleLoading(false);
+			}
+		} catch {
+			setClerkError("Something went wrong. Please try again.");
 			setIsGoogleLoading(false);
 		}
 	}

@@ -43,6 +43,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# codegraph index (generated, contains daemon.sock which confuses Turbopack)
+.codegraph/
+
 # idea files
 .idea
 /src/generated/
