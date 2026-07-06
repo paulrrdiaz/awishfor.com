@@ -79,27 +79,29 @@ export function AppSidebar({ wishlists }: Props) {
 				<SidebarMenu>
 					<SidebarMenuItem className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1">
 						<SidebarMenuButton
+							asChild
 							className="h-40 flex-1 items-center justify-center p-0 px-1 hover:bg-transparent group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-							render={<Link href="/dashboard" />}
 							size="lg"
 							tooltip="A Wish For"
 						>
-							<Image
-								alt="A Wish For"
-								className="h-40 w-auto group-data-[collapsible=icon]:hidden"
-								height={32}
-								priority
-								src="/assets/logo.svg"
-								width={320}
-							/>
-							<Image
-								alt="A Wish For"
-								className="hidden size-6 object-contain group-data-[collapsible=icon]:block"
-								height={32}
-								priority
-								src="/assets/isotype.svg"
-								width={32}
-							/>
+							<Link href="/dashboard">
+								<Image
+									alt="A Wish For"
+									className="h-40 w-auto group-data-[collapsible=icon]:hidden"
+									height={32}
+									priority
+									src="/assets/logo.svg"
+									width={320}
+								/>
+								<Image
+									alt="A Wish For"
+									className="hidden size-6 object-contain group-data-[collapsible=icon]:block"
+									height={32}
+									priority
+									src="/assets/isotype.svg"
+									width={32}
+								/>
+							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
@@ -111,15 +113,17 @@ export function AppSidebar({ wishlists }: Props) {
 						<SidebarMenu className="gap-1">
 							<SidebarMenuItem>
 								<SidebarMenuButton
+									asChild
 									className="h-8 rounded-lg px-3 font-medium text-[#5f687a] hover:bg-[#f7f7f2] data-active:bg-[#f7f7f2] data-active:text-[#16213a] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
 									isActive={pathname === "/dashboard"}
-									render={<Link href="/dashboard" />}
 									tooltip="Inicio"
 								>
-									<Home />
-									<span className="group-data-[collapsible=icon]:hidden">
-										Inicio
-									</span>
+									<Link href="/dashboard">
+										<Home />
+										<span className="group-data-[collapsible=icon]:hidden">
+											Inicio
+										</span>
+									</Link>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 						</SidebarMenu>
@@ -158,42 +162,46 @@ export function AppSidebar({ wishlists }: Props) {
 								return (
 									<SidebarMenuItem key={wishlist.id}>
 										<SidebarMenuButton
+											asChild
 											className="h-7 rounded-md px-3 pl-8 text-[#596273] text-xs hover:bg-[#f7f7f2] data-active:bg-[#edf7e9] data-active:font-semibold data-active:text-[#17213a] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
 											isActive={isActive}
-											render={<Link href={href} />}
 											tooltip={wishlist.title}
 										>
-											<Circle
-												className={cn(
-													"size-1.5 fill-[#a9afb8] text-[#a9afb8]",
-													isActive && "fill-[#438b52] text-[#438b52]",
-												)}
-											/>
-											<span className="truncate group-data-[collapsible=icon]:hidden">
-												{wishlist.title}
-											</span>
-											<span
-												className={cn(
-													"ml-auto rounded-full px-1.5 py-0.5 font-medium text-[9px] group-data-[collapsible=icon]:hidden",
-													status.className,
-												)}
-											>
-												{status.label}
-											</span>
+											<Link href={href}>
+												<Circle
+													className={cn(
+														"size-1.5 fill-[#a9afb8] text-[#a9afb8]",
+														isActive && "fill-[#438b52] text-[#438b52]",
+													)}
+												/>
+												<span className="truncate group-data-[collapsible=icon]:hidden">
+													{wishlist.title}
+												</span>
+												<span
+													className={cn(
+														"ml-auto rounded-full px-1.5 py-0.5 font-medium text-[9px] group-data-[collapsible=icon]:hidden",
+														status.className,
+													)}
+												>
+													{status.label}
+												</span>
+											</Link>
 										</SidebarMenuButton>
 									</SidebarMenuItem>
 								);
 							})}
 							<SidebarMenuItem>
 								<SidebarMenuButton
+									asChild
 									className="h-8 rounded-lg px-3 pl-8 font-medium text-[#3c6743] text-xs hover:bg-[#f3f6ec] hover:text-[#2f5d37] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
-									render={<Link href="/create" />}
 									tooltip="Nueva wishlist"
 								>
-									<Plus />
-									<span className="group-data-[collapsible=icon]:hidden">
-										Nueva wishlist
-									</span>
+									<Link href="/create">
+										<Plus />
+										<span className="group-data-[collapsible=icon]:hidden">
+											Nueva wishlist
+										</span>
+									</Link>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 						</SidebarMenu>

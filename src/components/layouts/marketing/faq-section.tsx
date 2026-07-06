@@ -44,9 +44,10 @@ export function FaqSection() {
 			</div>
 			<Accordion
 				className="mx-auto flex max-w-[720px] flex-col gap-[10px]"
+				collapsible
 				data-reveal-stagger
-				defaultValue={["faq-0"]}
-				multiple={false}
+				defaultValue="faq-0"
+				type="single"
 			>
 				{FAQS.map((f, i) => (
 					<AccordionItem

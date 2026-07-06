@@ -1,6 +1,7 @@
 "use client";
 
-import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
+import * as ProgressPrimitive from "@radix-ui/react-progress";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 function Progress({
@@ -9,7 +10,7 @@ function Progress({
 	value = 0,
 	max = 100,
 	...props
-}: ProgressPrimitive.Root.Props & {
+}: React.ComponentProps<typeof ProgressPrimitive.Root> & {
 	indicatorClassName?: string;
 }) {
 	const numericValue = value ?? 0;
@@ -18,25 +19,23 @@ function Progress({
 
 	return (
 		<ProgressPrimitive.Root
-			className={cn("w-full", className)}
+			className={cn(
+				"h-2 w-full overflow-hidden rounded-full bg-muted",
+				className,
+			)}
 			data-slot="progress"
 			max={max}
 			value={numericValue}
 			{...props}
 		>
-			<ProgressPrimitive.Track
-				className="h-2 w-full overflow-hidden rounded-full bg-muted"
-				data-slot="progress-track"
-			>
-				<ProgressPrimitive.Indicator
-					className={cn(
-						"h-full rounded-full bg-primary transition-[width]",
-						indicatorClassName,
-					)}
-					data-slot="progress-indicator"
-					style={{ width: `${percentage}%` }}
-				/>
-			</ProgressPrimitive.Track>
+			<ProgressPrimitive.Indicator
+				className={cn(
+					"h-full rounded-full bg-primary transition-[width]",
+					indicatorClassName,
+				)}
+				data-slot="progress-indicator"
+				style={{ width: `${percentage}%` }}
+			/>
 		</ProgressPrimitive.Root>
 	);
 }

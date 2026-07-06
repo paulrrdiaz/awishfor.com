@@ -1,20 +1,26 @@
 "use client";
 
-import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
 import { XIcon } from "lucide-react";
 import type * as React from "react";
+import { Drawer as DrawerPrimitive } from "vaul";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function Drawer({ ...props }: DrawerPrimitive.Root.Props) {
+function Drawer({
+	...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) {
 	return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
-function DrawerTrigger({ ...props }: DrawerPrimitive.Trigger.Props) {
+function DrawerTrigger({
+	...props
+}: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
 	return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 
-function DrawerClose({ ...props }: DrawerPrimitive.Close.Props) {
+function DrawerClose({
+	...props
+}: React.ComponentProps<typeof DrawerPrimitive.Close>) {
 	return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
@@ -23,47 +29,44 @@ function DrawerContent({
 	children,
 	showCloseButton = true,
 	...props
-}: DrawerPrimitive.Popup.Props & {
+}: React.ComponentProps<typeof DrawerPrimitive.Content> & {
 	showCloseButton?: boolean;
 }) {
 	return (
 		<DrawerPrimitive.Portal>
-			<DrawerPrimitive.Backdrop
-				className="fixed inset-0 z-50 bg-black/10 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-xs"
+			<DrawerPrimitive.Overlay
+				className="fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
 				data-slot="drawer-overlay"
 			/>
-			<DrawerPrimitive.Viewport
+			<div
 				className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92svh] items-end"
 				data-slot="drawer-viewport"
 			>
-				<DrawerPrimitive.Popup
+				<DrawerPrimitive.Content
 					className={cn(
-						"relative w-full rounded-t-2xl border bg-popover text-popover-foreground shadow-lg outline-none data-ending-style:translate-y-10 data-starting-style:translate-y-10 data-ending-style:opacity-0 data-starting-style:opacity-0",
+						"relative w-full rounded-t-2xl border bg-popover text-popover-foreground shadow-lg outline-none",
 						className,
 					)}
 					data-slot="drawer-content"
 					{...props}
 				>
-					<DrawerPrimitive.Content className="relative" data-slot="drawer-body">
+					<div className="relative" data-slot="drawer-body">
 						{children}
 						{showCloseButton && (
-							<DrawerPrimitive.Close
-								data-slot="drawer-close"
-								render={
-									<Button
-										className="absolute top-3 right-3"
-										size="icon-sm"
-										variant="ghost"
-									/>
-								}
-							>
-								<XIcon />
-								<span className="sr-only">Cerrar</span>
+							<DrawerPrimitive.Close asChild data-slot="drawer-close">
+								<Button
+									className="absolute top-3 right-3"
+									size="icon-sm"
+									variant="ghost"
+								>
+									<XIcon />
+									<span className="sr-only">Cerrar</span>
+								</Button>
 							</DrawerPrimitive.Close>
 						)}
-					</DrawerPrimitive.Content>
-				</DrawerPrimitive.Popup>
-			</DrawerPrimitive.Viewport>
+					</div>
+				</DrawerPrimitive.Content>
+			</div>
 		</DrawerPrimitive.Portal>
 	);
 }
@@ -88,7 +91,10 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props) {
+function DrawerTitle({
+	className,
+	...props
+}: React.ComponentProps<typeof DrawerPrimitive.Title>) {
 	return (
 		<DrawerPrimitive.Title
 			className={cn("font-heading font-medium text-base", className)}
@@ -101,7 +107,7 @@ function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props) {
 function DrawerDescription({
 	className,
 	...props
-}: DrawerPrimitive.Description.Props) {
+}: React.ComponentProps<typeof DrawerPrimitive.Description>) {
 	return (
 		<DrawerPrimitive.Description
 			className={cn("text-muted-foreground text-sm", className)}

@@ -1,13 +1,17 @@
 "use client";
 
-import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-function Tabs({ ...props }: TabsPrimitive.Root.Props) {
+function Tabs({ ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
 	return <TabsPrimitive.Root data-slot="tabs" {...props} />;
 }
 
-function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
+function TabsList({
+	className,
+	...props
+}: React.ComponentProps<typeof TabsPrimitive.List>) {
 	return (
 		<TabsPrimitive.List
 			className={cn(
@@ -20,11 +24,14 @@ function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
 	);
 }
 
-function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
+function TabsTrigger({
+	className,
+	...props
+}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
 	return (
-		<TabsPrimitive.Tab
+		<TabsPrimitive.Trigger
 			className={cn(
-				"rounded-full px-4 py-2 font-medium text-muted-foreground text-sm outline-none transition-colors hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-selected:bg-background data-selected:text-foreground data-selected:shadow-sm",
+				"rounded-full px-4 py-2 font-medium text-muted-foreground text-sm outline-none transition-colors hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
 				className,
 			)}
 			data-slot="tabs-trigger"
@@ -33,9 +40,12 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
 	);
 }
 
-function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
+function TabsContent({
+	className,
+	...props
+}: React.ComponentProps<typeof TabsPrimitive.Content>) {
 	return (
-		<TabsPrimitive.Panel
+		<TabsPrimitive.Content
 			className={cn("outline-none", className)}
 			data-slot="tabs-content"
 			{...props}

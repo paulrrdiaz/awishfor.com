@@ -40,13 +40,11 @@ export function DeleteGiftDialog({
 
 	return (
 		<AlertDialog onOpenChange={setOpen} open={open}>
-			<AlertDialogTrigger
-				render={
-					<Button size="sm" variant="ghost">
-						Eliminar
-					</Button>
-				}
-			/>
+			<AlertDialogTrigger asChild>
+				<Button size="sm" variant="ghost">
+					Eliminar
+				</Button>
+			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>

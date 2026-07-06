@@ -486,16 +486,11 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							borrador.
 						</p>
 						<Dialog>
-							<DialogTrigger
-								render={
-									<Button
-										disabled={restoreMutation.isPending}
-										variant="outline"
-									>
-										Restaurar lista
-									</Button>
-								}
-							/>
+							<DialogTrigger asChild>
+								<Button disabled={restoreMutation.isPending} variant="outline">
+									Restaurar lista
+								</Button>
+							</DialogTrigger>
 							<DialogContent>
 								<RestoreWishlistDialogContent
 									disabled={restoreMutation.isPending}
@@ -522,17 +517,15 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							cualquier momento.
 						</p>
 						<AlertDialog>
-							<AlertDialogTrigger
-								render={
-									<Button
-										className="border-destructive/50 text-destructive hover:bg-destructive/10"
-										disabled={archiveMutation.isPending}
-										variant="outline"
-									>
-										Archivar lista
-									</Button>
-								}
-							/>
+							<AlertDialogTrigger asChild>
+								<Button
+									className="border-destructive/50 text-destructive hover:bg-destructive/10"
+									disabled={archiveMutation.isPending}
+									variant="outline"
+								>
+									Archivar lista
+								</Button>
+							</AlertDialogTrigger>
 							<AlertDialogContent>
 								<AlertDialogHeader>
 									<AlertDialogTitle>¿Archivar esta lista?</AlertDialogTitle>

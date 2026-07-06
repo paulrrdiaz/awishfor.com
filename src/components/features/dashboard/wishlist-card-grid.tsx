@@ -41,9 +41,11 @@ export function WishlistCardGrid({ wishlists }: Props) {
 		return (
 			<EmptyState
 				action={
-					<Button render={<Link href="/create" />}>
-						<Plus />
-						Crear wishlist
+					<Button asChild>
+						<Link href="/create">
+							<Plus />
+							Crear wishlist
+						</Link>
 					</Button>
 				}
 				className="rounded-xl border border-border border-dashed bg-card px-6"

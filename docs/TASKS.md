@@ -14,7 +14,7 @@ Do not add foundational setup tasks for:
 - Clerk
 - Clerk webhook sync
 - Tailwind
-- Shadcn/Base UI
+- Shadcn/Radix UI
 - Biome
 - Vitest
 - Lefthook
@@ -2444,15 +2444,23 @@ this milestone closes the gap between that foundation and the richer component *
 the canvas defines (canvas §7 themes, §9 GiftCard variants, the PurchaseGiftModal 6-state
 machine, §4 creation-wizard steps, and the dashboard states).
 
-Authoring priority for this milestone (and going forward): **ShadCN/Base UI primitive
+Authoring priority for this milestone (and going forward): **ShadCN/Radix UI primitive
 first, raw TailwindCSS as fallback, GSAP for motion / "good vibes"** — all motion
 reduced-motion-guarded.
+
+**Base UI → Radix UI decision:** the headless primitive engine behind `src/components/ui/*`
+was migrated from `@base-ui/react` to Radix UI (OpenSpec change `migrate-base-ui-to-radix`).
+Radix is the primitive library the upstream shadcn/ui registry, docs, and ecosystem target
+by default, so staying on Base UI forced hand-translating every shadcn example and blocked
+`shadcn add` from producing drop-in components. `components.json` `style` is now
+`new-york` (was `base-nova`); polymorphic composition uses the `asChild`/`Slot` contract
+instead of Base UI's `render` prop.
 
 ### Dependencies
 
 - Milestone 2 design-system foundation (`shared/`, themes, Storybook, Lora).
 - Milestone 3–7 product components (purchase modal, wizard, dashboard).
-- Existing `@base-ui/react`, `gsap`, `sonner`.
+- Existing Radix UI (`@radix-ui/react-*`), `vaul`, `gsap`, `sonner`.
 - OpenSpec change: `design-system-component-completion`.
 
 ### 10.1 Add canvas-required ShadCN primitives
@@ -2461,7 +2469,7 @@ Priority: P1
 
 Tasks:
 
-- [ ] Generate missing Base UI primitives into `src/components/ui/` via shadcn CLI: `select`, `tabs`, `progress`, `popover`, `calendar`, `toggle-group`, `drawer`, `checkbox`, `switch`, `textarea`.
+- [ ] Generate missing Radix UI primitives into `src/components/ui/` via shadcn CLI: `select`, `tabs`, `progress`, `popover`, `calendar`, `toggle-group`, `drawer`, `checkbox`, `switch`, `textarea`.
 - [ ] Mount a Sonner `Toaster` at the app root themed to app tokens (if not already).
 - [ ] For any primitive the registry lacks directly, provide the closest primitive or a thin documented Tailwind wrapper.
 

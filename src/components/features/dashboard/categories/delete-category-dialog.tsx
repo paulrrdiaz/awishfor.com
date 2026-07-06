@@ -42,13 +42,11 @@ export function DeleteCategoryDialog({
 
 	return (
 		<AlertDialog onOpenChange={setOpen} open={open}>
-			<AlertDialogTrigger
-				render={
-					<Button size="sm" type="button" variant="ghost">
-						Eliminar
-					</Button>
-				}
-			/>
+			<AlertDialogTrigger asChild>
+				<Button size="sm" type="button" variant="ghost">
+					Eliminar
+				</Button>
+			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>

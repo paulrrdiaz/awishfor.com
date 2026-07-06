@@ -122,12 +122,11 @@ export function WishlistDetailNavView({
 						Mis wishlists /{" "}
 						<span className="font-semibold text-[#17213a]">{title}</span>
 					</p>
-					<Button
-						className="h-9 rounded-full px-5 font-semibold"
-						render={<Link href="/create" />}
-					>
-						<Plus />
-						Crear wishlist
+					<Button asChild className="h-9 rounded-full px-5 font-semibold">
+						<Link href="/create">
+							<Plus />
+							Crear wishlist
+						</Link>
 					</Button>
 				</div>
 			</div>
@@ -163,11 +162,13 @@ export function WishlistDetailNavView({
 
 					<div className="flex items-center gap-2">
 						<Button
+							asChild
 							className="h-10 rounded-full border-[#e4e4df] bg-white px-5 font-semibold"
-							render={<Link href={publicUrlPath} target="_blank" />}
 							variant="outline"
 						>
-							Ver pública
+							<Link href={publicUrlPath} target="_blank">
+								Ver pública
+							</Link>
 						</Button>
 						<Button
 							aria-label="Más acciones"
@@ -193,15 +194,17 @@ export function WishlistDetailNavView({
 								const isActive = activeSegment === item.segment;
 								return (
 									<TabsTrigger
+										asChild
 										className={cn(
 											"rounded-none border-transparent border-b-2 bg-transparent px-0 pb-3 font-medium text-[#566174] shadow-none hover:text-[#17213a] data-[state=active]:bg-transparent data-[state=active]:shadow-none",
 											isActive && "border-[#17213a] text-[#17213a]",
 										)}
 										key={item.segment || "summary"}
-										render={<Link href={hrefFor(wishlistId, item.segment)} />}
 										value={item.segment}
 									>
-										{item.label}
+										<Link href={hrefFor(wishlistId, item.segment)}>
+											{item.label}
+										</Link>
 									</TabsTrigger>
 								);
 							})}

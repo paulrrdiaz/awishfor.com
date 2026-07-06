@@ -1315,7 +1315,7 @@ Avoid:
 
 Build UI in this order:
 
-1. **ShadCN / Base UI primitive** (generated into `src/components/ui/`) — first choice for
+1. **ShadCN / Radix UI primitive** (generated into `src/components/ui/`) — first choice for
    anything a primitive covers (dialog, drawer, select, tabs, popover, calendar, progress,
    toggle group, toast).
 2. **TailwindCSS** — fallback only when no primitive fits.
@@ -1650,7 +1650,7 @@ Do not add foundational setup tasks for:
 - Clerk
 - Clerk webhook sync
 - Tailwind
-- Shadcn/Base UI
+- Shadcn/Radix UI
 - Biome
 - Vitest
 - Lefthook
@@ -1666,7 +1666,7 @@ Expected base stack:
 - Neon
 - Clerk custom UI
 - Tailwind v4
-- Shadcn/Base UI
+- Shadcn/Radix UI
 - pnpm
 - Biome
 - Vitest
