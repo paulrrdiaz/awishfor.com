@@ -1,23 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Field,
 	FieldDescription,
+	FieldError,
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { isValidSlug } from "@/lib/slug";
-import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { useWizardStore } from "./wizard-provider";
 
-type SlugStatus = "idle" | "checking" | "available" | "taken" | "invalid";
+type SlugStatus =
+	| "idle"
+	| "checking"
+	| "available"
+	| "taken"
+	| "invalid"
+	| "error";
 
 function SlugStatusBadge({ status }: { status: SlugStatus }) {
-	if (status === "idle") return null;
+	if (status === "idle" || status === "error") return null;
 	const configs = {
 		checking: { text: "◌ Verificando…", className: "text-muted-foreground" },
 		available: { text: "✓ Disponible", className: "text-primary" },
@@ -29,23 +38,21 @@ function SlugStatusBadge({ status }: { status: SlugStatus }) {
 	} as const;
 	const cfg = configs[status];
 	return (
-		<p
-			className={cn(
-				"mt-1 w-fit rounded-md px-2 py-1 text-sm",
-				status === "available" && "ring-1 ring-ring",
-				cfg.className,
-			)}
-		>
+		<Badge className={cfg.className} variant="secondary">
 			{cfg.text}
-		</p>
+		</Badge>
 	);
 }
 
 export function DetailsStep() {
 	const draft = useWizardStore((s) => s.draft);
 	const slugTouched = useWizardStore((s) => s.slugTouched);
+	const copyTouched = useWizardStore((s) => s.copyTouched);
 	const setField = useWizardStore((s) => s.setField);
+	const regenerateCopy = useWizardStore((s) => s.regenerateCopy);
 	const utils = api.useUtils();
+	const hasCopyEdits =
+		copyTouched.welcomeMessage || copyTouched.thankYouMessage;
 
 	const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
 
@@ -58,8 +65,9 @@ export function DetailsStep() {
 		try {
 			const result = await utils.wishlist.checkSlugAvailability.fetch({ slug });
 			setSlugStatus(result.available ? "available" : "taken");
-		} catch {
-			setSlugStatus("idle");
+		} catch (error) {
+			console.error("checkSlugAvailability failed", error);
+			setSlugStatus("error");
 		}
 	}, 400);
 
@@ -70,6 +78,15 @@ export function DetailsStep() {
 		}
 		debouncedCheckSlug(draft.slug);
 	}, [draft.slug, debouncedCheckSlug]);
+
+	const hasPrefilledTitle = useRef(false);
+	useEffect(() => {
+		if (hasPrefilledTitle.current) return;
+		hasPrefilledTitle.current = true;
+		if (!draft.title && draft.heroTitle) {
+			setField("title", draft.heroTitle);
+		}
+	}, [draft.title, draft.heroTitle, setField]);
 
 	const isPastDate = draft.eventDate
 		? new Date(`${draft.eventDate}T00:00:00`) <
@@ -98,6 +115,10 @@ export function DetailsStep() {
 						type="text"
 						value={draft.title}
 					/>
+					<FieldDescription className="text-xs">
+						Uso interno: así identificas esta lista en tu panel. No se muestra a
+						tus invitados.
+					</FieldDescription>
 				</Field>
 
 				<Field>
@@ -130,12 +151,20 @@ export function DetailsStep() {
 							value={draft.slug}
 						/>
 					</div>
-					{!slugTouched && draft.title && (
-						<FieldDescription className="text-xs">
-							Generado automáticamente desde el título
-						</FieldDescription>
+
+					<div className="flex items-center gap-2">
+						{!slugTouched && draft.title && (
+							<FieldDescription className="!mt-0 text-xs">
+								Generado automáticamente desde el título
+							</FieldDescription>
+						)}
+						<SlugStatusBadge status={slugStatus} />
+					</div>
+					{slugStatus === "error" && (
+						<FieldError>
+							No pudimos verificar la disponibilidad del slug. Intenta de nuevo.
+						</FieldError>
 					)}
-					<SlugStatusBadge status={slugStatus} />
 				</Field>
 
 				<Field>
@@ -208,6 +237,45 @@ export function DetailsStep() {
 						type="text"
 						value={draft.dressCode}
 					/>
+				</Field>
+
+				<Field>
+					<div className="flex items-center justify-between gap-2">
+						<FieldLabel htmlFor="welcomeMessage">
+							Mensaje de bienvenida
+						</FieldLabel>
+						{hasCopyEdits && (
+							<Button
+								className="h-auto p-0 text-xs"
+								onClick={regenerateCopy}
+								type="button"
+								variant="link"
+							>
+								Restablecer sugerencias
+							</Button>
+						)}
+					</div>
+					<Textarea
+						id="welcomeMessage"
+						onChange={(e) => setField("welcomeMessage", e.target.value)}
+						placeholder="Escribe un mensaje para tus invitados"
+						value={draft.welcomeMessage}
+					/>
+				</Field>
+
+				<Field>
+					<FieldLabel htmlFor="thankYouMessage">
+						Mensaje de agradecimiento
+					</FieldLabel>
+					<Textarea
+						id="thankYouMessage"
+						onChange={(e) => setField("thankYouMessage", e.target.value)}
+						placeholder="Escribe un mensaje de agradecimiento"
+						value={draft.thankYouMessage}
+					/>
+					<FieldDescription className="text-xs">
+						Se muestra después de que un invitado reserva un regalo
+					</FieldDescription>
 				</Field>
 			</FieldGroup>
 		</div>

@@ -256,6 +256,7 @@ export function AppSidebar({ wishlists }: Props) {
 								<SidebarMenuButton
 									className="px-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
 									tooltip="Expandir"
+									asChild
 								>
 									<SidebarTrigger className="size-6 rounded-md border border-[#e4e4df] text-[#667085]" />
 								</SidebarMenuButton>

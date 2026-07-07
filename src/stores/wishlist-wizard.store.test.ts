@@ -24,9 +24,33 @@ describe("wishlist-wizard store", () => {
 			store.getState().setEventType("birthday");
 			const { draft } = store.getState();
 			const preset = EVENT_TYPE_PRESETS.birthday;
-			expect(draft.heroTitle).toBe(preset.defaultHeroTitleTemplate);
+			expect(draft.heroTitle).toBe("Wishlist de cumpleaños");
 			expect(draft.welcomeMessage).toBe(preset.defaultWelcomeMessage);
 			expect(draft.thankYouMessage).toBe(preset.defaultThankYouMessage);
+		});
+
+		it("interpolates displayName into the hero title template", () => {
+			const store = makeStore();
+			store.getState().setField("displayName", "María");
+			store.getState().setEventType("birthday");
+			const { draft } = store.getState();
+			expect(draft.heroTitle).toBe("Wishlist de cumpleaños de María");
+		});
+
+		it("keeps hero title in sync as displayName changes, until touched", () => {
+			const store = makeStore();
+			store.getState().setEventType("birthday");
+			store.getState().setField("displayName", "María");
+			expect(store.getState().draft.heroTitle).toBe(
+				"Wishlist de cumpleaños de María",
+			);
+			store.getState().setField("displayName", "María García");
+			expect(store.getState().draft.heroTitle).toBe(
+				"Wishlist de cumpleaños de María García",
+			);
+			store.getState().setField("heroTitle", "Título personalizado");
+			store.getState().setField("displayName", "Otro nombre");
+			expect(store.getState().draft.heroTitle).toBe("Título personalizado");
 		});
 
 		it("preserves edited copy when event type changes", () => {
@@ -37,8 +61,8 @@ describe("wishlist-wizard store", () => {
 			store.getState().setEventType("wedding");
 			const { draft } = store.getState();
 			expect(draft.welcomeMessage).toBe(editedWelcome);
+			expect(draft.heroTitle).toBe("Wishlist de boda");
 			const weddingPreset = EVENT_TYPE_PRESETS.wedding;
-			expect(draft.heroTitle).toBe(weddingPreset.defaultHeroTitleTemplate);
 			expect(draft.thankYouMessage).toBe(weddingPreset.defaultThankYouMessage);
 		});
 
@@ -68,7 +92,7 @@ describe("wishlist-wizard store", () => {
 			store.getState().regenerateCopy();
 			const { draft, copyTouched } = store.getState();
 			const preset = EVENT_TYPE_PRESETS.wedding;
-			expect(draft.heroTitle).toBe(preset.defaultHeroTitleTemplate);
+			expect(draft.heroTitle).toBe("Wishlist de boda");
 			expect(draft.welcomeMessage).toBe(preset.defaultWelcomeMessage);
 			expect(draft.thankYouMessage).toBe(preset.defaultThankYouMessage);
 			expect(copyTouched.heroTitle).toBe(false);

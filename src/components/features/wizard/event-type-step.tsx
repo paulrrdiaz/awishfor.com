@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import { EventType } from "@/generated/prisma/enums";
 import { cn } from "@/lib/utils";
@@ -19,6 +21,9 @@ const EVENT_TYPE_ICONS: Record<EventType, string> = {
 export function EventTypeStep() {
 	const selectedType = useWizardStore((s) => s.draft.eventType);
 	const setEventType = useWizardStore((s) => s.setEventType);
+	const heroTitle = useWizardStore((s) => s.draft.heroTitle);
+	const heroTitleTouched = useWizardStore((s) => s.copyTouched.heroTitle);
+	const setField = useWizardStore((s) => s.setField);
 	const regenerateCopy = useWizardStore((s) => s.regenerateCopy);
 
 	return (
@@ -57,11 +62,33 @@ export function EventTypeStep() {
 			</div>
 
 			{selectedType && (
-				<div className="mt-6 text-center">
-					<Button onClick={regenerateCopy} type="button" variant="link">
-						Regenerar sugerencias de texto
-					</Button>
-				</div>
+				<Field className="mt-6">
+					<div className="flex items-center justify-between gap-2">
+						<FieldLabel htmlFor="heroTitle">Título de la wishlist</FieldLabel>
+						{heroTitleTouched && (
+							<Button
+								className="h-auto p-0 text-xs"
+								onClick={regenerateCopy}
+								type="button"
+								variant="link"
+							>
+								Restablecer sugerencia
+							</Button>
+						)}
+					</div>
+					<Input
+						className="min-h-11"
+						id="heroTitle"
+						onChange={(e) => setField("heroTitle", e.target.value)}
+						placeholder="Ej. Baby shower de María"
+						type="text"
+						value={heroTitle}
+					/>
+					<FieldDescription className="text-xs">
+						Encabezado principal de tu página pública. Se sugiere
+						automáticamente según la ocasión.
+					</FieldDescription>
+				</Field>
 			)}
 		</div>
 	);

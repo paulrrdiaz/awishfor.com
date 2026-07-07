@@ -3,7 +3,7 @@
 import { useSignIn } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -14,19 +14,9 @@ import { type SignInValues, signInSchema } from "./schemas";
 
 export function SignInForm() {
 	const router = useRouter();
-	const { signIn, errors: clerkSignalErrors, fetchStatus } = useSignIn();
+	const { signIn, fetchStatus } = useSignIn();
 	const [clerkError, setClerkError] = useState<string | null>(null);
-	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
-	useEffect(() => {
-		if (!isGoogleLoading) return;
-		const globalErrors = clerkSignalErrors?.global;
-		if (!globalErrors?.length) return;
-		const msg =
-			globalErrors[0]?.longMessage ?? "Something went wrong. Please try again.";
-		setClerkError(msg);
-		setIsGoogleLoading(false);
-	}, [clerkSignalErrors, isGoogleLoading]);
+	const [isPending, startTransition] = useTransition();
 
 	const {
 		register,
@@ -38,41 +28,52 @@ export function SignInForm() {
 
 	async function onSubmit(values: SignInValues) {
 		setClerkError(null);
-		const { error } = await signIn.password({
-			emailAddress: values.email,
-			password: values.password,
-		});
-		if (error) {
-			setClerkError(
-				error.longMessage ?? "Something went wrong. Please try again.",
-			);
-			return;
-		}
-		if (signIn.status === "complete") {
-			await signIn.finalize();
-			router.push("/dashboard");
+		try {
+			const { error } = await signIn.password({
+				emailAddress: values.email,
+				password: values.password,
+			});
+			if (error) {
+				if (error.code === "session_exists") {
+					router.replace("/dashboard");
+					return;
+				}
+				setClerkError(
+					error.longMessage ?? "Something went wrong. Please try again.",
+				);
+				return;
+			}
+			if (signIn.status === "complete") {
+				await signIn.finalize();
+				router.push("/dashboard");
+			}
+		} catch {
+			setClerkError("Something went wrong. Please try again.");
 		}
 	}
 
 	async function handleGoogleSignIn() {
-		setIsGoogleLoading(true);
 		setClerkError(null);
-		try {
-			const { error } = await signIn.sso({
-				strategy: "oauth_google",
-				redirectUrl: "/dashboard",
-				redirectCallbackUrl: "/sso-callback",
-			});
-			if (error) {
-				setClerkError(
-					error.longMessage ?? "Something went wrong. Please try again.",
-				);
-				setIsGoogleLoading(false);
+		startTransition(async () => {
+			try {
+				const { error } = await signIn.sso({
+					strategy: "oauth_google",
+					redirectUrl: "/dashboard",
+					redirectCallbackUrl: "/sso-callback",
+				});
+				if (error) {
+					if (error.code === "session_exists") {
+						router.replace("/dashboard");
+						return;
+					}
+					setClerkError(
+						error.longMessage ?? "Something went wrong. Please try again.",
+					);
+				}
+			} catch {
+				setClerkError("Something went wrong. Please try again.");
 			}
-		} catch {
-			setClerkError("Something went wrong. Please try again.");
-			setIsGoogleLoading(false);
-		}
+		});
 	}
 
 	const isBusy = fetchStatus === "fetching" || isSubmitting;
@@ -126,7 +127,7 @@ export function SignInForm() {
 				or
 			</div>
 
-			<GoogleButton isLoading={isGoogleLoading} onClick={handleGoogleSignIn} />
+			<GoogleButton isLoading={isPending} onClick={handleGoogleSignIn} />
 		</div>
 	);
 }

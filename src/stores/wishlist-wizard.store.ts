@@ -8,6 +8,16 @@ import type { WishlistShareMetadata } from "@/lib/wishlist/share";
 const STALE_DAYS = 30;
 export const WISHLIST_WIZARD_STORAGE_KEY = "wishlist-wizard-draft";
 
+const NAME_PLACEHOLDER = "{name}";
+
+const resolveHeroTitle = (template: string, displayName: string): string => {
+	const trimmedName = displayName.trim();
+	if (trimmedName) {
+		return template.replaceAll(NAME_PLACEHOLDER, trimmedName);
+	}
+	return template.replace(/\s*de\s*\{name\}\s*$/, "");
+};
+
 type CopyTouched = {
 	heroTitle: boolean;
 	welcomeMessage: boolean;
@@ -179,6 +189,17 @@ export const createWishlistWizardStore = () =>
 						if (key === "slug") {
 							nextSlugTouched = true;
 						}
+						if (
+							key === "displayName" &&
+							!state.copyTouched.heroTitle &&
+							state.draft.eventType
+						) {
+							const preset = EVENT_TYPE_PRESETS[state.draft.eventType];
+							nextDraft.heroTitle = resolveHeroTitle(
+								preset.defaultHeroTitleTemplate,
+								value as string,
+							);
+						}
 
 						return {
 							draft: nextDraft,
@@ -204,7 +225,10 @@ export const createWishlistWizardStore = () =>
 							layoutId: preset.defaultLayoutId,
 							heroTitle: copyTouched.heroTitle
 								? state.draft.heroTitle
-								: preset.defaultHeroTitleTemplate,
+								: resolveHeroTitle(
+										preset.defaultHeroTitleTemplate,
+										state.draft.displayName,
+									),
 							welcomeMessage: copyTouched.welcomeMessage
 								? state.draft.welcomeMessage
 								: preset.defaultWelcomeMessage,
@@ -224,7 +248,10 @@ export const createWishlistWizardStore = () =>
 					set({
 						draft: {
 							...draft,
-							heroTitle: preset.defaultHeroTitleTemplate,
+							heroTitle: resolveHeroTitle(
+								preset.defaultHeroTitleTemplate,
+								draft.displayName,
+							),
 							welcomeMessage: preset.defaultWelcomeMessage,
 							thankYouMessage: preset.defaultThankYouMessage,
 						},
