@@ -1,12 +1,25 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Button } from "@/components/ui/button";
 import { EventType } from "@/generated/prisma/enums";
-import { createWishlistWizardStore } from "@/stores/wishlist-wizard.store";
+import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
+import {
+	createWishlistWizardStore,
+	type WishlistDraft,
+} from "@/stores/wishlist-wizard.store";
 import { TRPCReactProvider } from "@/trpc/react";
 import { DesignStep } from "./design-step";
 import { DetailsStep } from "./details-step";
 import { EventTypeStep } from "./event-type-step";
 import { GiftsStep } from "./gifts-step";
-import { PublishAuthGate } from "./publish-step";
+import {
+	PublishActionsCard,
+	PublishAuthGate,
+	PublishPreviewPane,
+	PublishReadinessCard,
+	PublishSuccessPanel,
+	type Readiness,
+} from "./publish-step";
+import { WizardModal } from "./wizard-modal";
 import { WizardProvider } from "./wizard-provider";
 
 function WizardStepFrame({
@@ -123,10 +136,179 @@ export const Gifts: Story = {
 	),
 };
 
-export const Publish: Story = {
-	render: () => <PublishAuthGate onDismiss={() => undefined} />,
+const READY_DRAFT: WishlistDraft = {
+	eventType: EventType.baby_shower,
+	title: "Baby shower de Emilia",
+	slug: "baby-shower-emilia",
+	displayName: "Ana y Paulo",
+	eventDate: "2026-09-12",
+	eventTime: "16:00",
+	eventLocation: "Miraflores, Lima",
+	dressCode: "",
+	coverImageUrl: null,
+	heroTitle: "Baby shower de Emilia",
+	welcomeMessage: "Nos emociona celebrar contigo.",
+	thankYouMessage: "Gracias por acompañarnos en este momento.",
+	categories: ["Dormitorio", "Baño"],
+	themeId: "dulce-rosa",
+	layoutId: "editorial",
+	buttonStyle: "pill",
+	fontPairing: "serif-soft",
+	showHowItWorks: true,
+	gifts: [
+		{
+			id: "gift-1",
+			name: "Cuna colecho",
+			productUrl: "https://example.com/cuna",
+			imageUrl: null,
+			priceAmount: 649,
+			category: "Dormitorio",
+			quantityNeeded: 1,
+			priority: "high",
+			publicNote: "Madera clara",
+			internalNote: "",
+			hidden: false,
+			sortOrder: 0,
+		},
+	],
 };
 
-export const AuthGate: Story = {
-	render: () => <PublishAuthGate onDismiss={() => undefined} />,
+const BLOCKED_DRAFT: WishlistDraft = {
+	...READY_DRAFT,
+	title: "",
+	slug: "",
+	gifts: [],
+};
+
+const READY_READINESS: Readiness = {
+	title: true,
+	eventType: true,
+	slug: true,
+	language: true,
+	currency: true,
+	visibleGift: true,
+	visibleGiftCount: 1,
+};
+
+const BLOCKED_READINESS: Readiness = {
+	title: false,
+	eventType: true,
+	slug: false,
+	language: true,
+	currency: true,
+	visibleGift: false,
+	visibleGiftCount: 0,
+};
+
+function PublishDraftFrame({
+	draft,
+	readiness,
+	isReadyToPublish,
+	isSignedIn,
+	errorMessage,
+}: {
+	draft: WishlistDraft;
+	readiness: Readiness;
+	isReadyToPublish: boolean;
+	isSignedIn: boolean;
+	errorMessage?: string;
+}) {
+	return (
+		<div className="mx-auto w-full max-w-5xl lg:flex lg:max-w-none">
+			<div className="lg:w-[480px] lg:shrink-0 lg:border-border lg:border-r lg:px-8 lg:py-7">
+				<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
+					Paso 5 de 5
+				</p>
+				<h1 className="mb-2 text-center font-semibold text-2xl text-foreground lg:text-left lg:font-serif lg:text-3xl">
+					Revisa y publica tu wishlist
+				</h1>
+				<p className="mb-8 text-center text-muted-foreground text-sm lg:text-left">
+					Valida lo importante, mira la vista final y publícala cuando esté
+					lista.
+				</p>
+
+				<div className="space-y-6">
+					<PublishReadinessCard
+						draft={draft}
+						isReadyToPublish={isReadyToPublish}
+						readiness={readiness}
+						savedSlug={null}
+						savedWishlistId={null}
+						slugStatus={readiness.slug ? "available" : "idle"}
+					/>
+
+					<PublishActionsCard
+						errorMessage={errorMessage ?? null}
+						isReadyToPublish={isReadyToPublish}
+						isSignedIn={isSignedIn}
+						isSubmitting={false}
+						onPublish={() => undefined}
+						ownerPreviewHref={null}
+					/>
+				</div>
+			</div>
+
+			<PublishPreviewPane preview={draftToPreview(draft)} />
+		</div>
+	);
+}
+
+export const PublishBlockedDraft: Story = {
+	render: () => (
+		<PublishDraftFrame
+			draft={BLOCKED_DRAFT}
+			errorMessage="Completa la checklist antes de publicar."
+			isReadyToPublish={false}
+			isSignedIn
+			readiness={BLOCKED_READINESS}
+		/>
+	),
+};
+
+export const PublishReadyDraft: Story = {
+	render: () => (
+		<PublishDraftFrame
+			draft={READY_DRAFT}
+			isReadyToPublish
+			isSignedIn
+			readiness={READY_READINESS}
+		/>
+	),
+};
+
+export const PublishAuthGateState: Story = {
+	render: () => (
+		<PublishAuthGate draft={READY_DRAFT} onDismiss={() => undefined} />
+	),
+};
+
+export const PublishConflict: Story = {
+	render: () => (
+		<WizardModal
+			description="Este borrador fue actualizado desde el dashboard después de tu último guardado."
+			title="Hay una versión más reciente"
+		>
+			<Button onClick={() => undefined} type="button">
+				Usar versión del dashboard
+			</Button>
+			<Button onClick={() => undefined} type="button" variant="outline">
+				Continuar con este borrador local
+			</Button>
+		</WizardModal>
+	),
+};
+
+export const PublishSuccess: Story = {
+	render: () => (
+		<div className="mx-auto flex w-full max-w-4xl items-center justify-center px-4 py-10">
+			<PublishSuccessPanel
+				dashboardUrlPath="/dashboard"
+				isDownloadingQr={false}
+				onCopyLink={() => undefined}
+				onDownloadQr={() => undefined}
+				publishedUrl="https://awishfor.com/w/baby-shower-emilia"
+				whatsAppUrl="https://wa.me/?text=Mira%20mi%20wishlist"
+			/>
+		</div>
+	),
 };
