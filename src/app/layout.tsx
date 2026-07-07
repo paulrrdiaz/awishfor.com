@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Lora, Nunito } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -48,12 +49,14 @@ export default function RootLayout({
 		>
 			<body>
 				<ClerkProvider>
-					<TRPCReactProvider>
-						<TooltipProvider>
-							{children}
-							<Toaster position="top-center" richColors />
-						</TooltipProvider>
-					</TRPCReactProvider>
+					<NuqsAdapter>
+						<TRPCReactProvider>
+							<TooltipProvider>
+								{children}
+								<Toaster position="top-center" richColors />
+							</TooltipProvider>
+						</TRPCReactProvider>
+					</NuqsAdapter>
 				</ClerkProvider>
 			</body>
 		</html>
