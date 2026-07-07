@@ -13,9 +13,12 @@ import {
 import {
 	HTML_EMPTY,
 	HTML_WITH_JSON_LD,
+	HTML_WITH_JSON_LD_AGGREGATE_OFFER,
 	HTML_WITH_JSON_LD_GRAPH,
+	HTML_WITH_JSON_LD_PRODUCT_GROUP,
 	HTML_WITH_MIXED_META_ORDER,
 	HTML_WITH_OG_ONLY,
+	HTML_WITH_OG_PRICE,
 	HTML_WITH_TITLE_ONLY,
 	HTML_WITH_TWITTER_ONLY,
 } from "@/test/fixtures/importer-html-fixtures";
@@ -124,6 +127,42 @@ describe("extractJsonLd", () => {
 	it("returns empty object when no JSON-LD is present", () => {
 		expect(extractJsonLd(HTML_WITH_OG_ONLY)).toEqual({});
 	});
+
+	it("resolves the matching variant price when a variant query param is passed", () => {
+		const result = extractJsonLd(
+			HTML_WITH_JSON_LD_PRODUCT_GROUP,
+			"https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=50394283770156",
+		);
+		expect(result).toMatchObject({
+			name: "Feed High Chair Pink",
+			imageUrl: "https://cdn.example.com/feed-chair.jpg",
+			priceAmount: 279.2,
+			priceCurrency: "PEN",
+		});
+	});
+
+	it("falls back to the first priced variant when no variant matches", () => {
+		const result = extractJsonLd(
+			HTML_WITH_JSON_LD_PRODUCT_GROUP,
+			"https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=99999999999999",
+		);
+		expect(result).toMatchObject({
+			name: "Feed High Chair Blue",
+			imageUrl: "https://cdn.example.com/feed-chair.jpg",
+			priceAmount: 244.3,
+			priceCurrency: "PEN",
+		});
+	});
+
+	it("reads AggregateOffer lowPrice when no single Offer price exists", () => {
+		const result = extractJsonLd(HTML_WITH_JSON_LD_AGGREGATE_OFFER);
+		expect(result).toMatchObject({
+			name: "Bundle Pack",
+			imageUrl: "https://cdn.example.com/bundle.jpg",
+			priceAmount: 18.5,
+			priceCurrency: "USD",
+		});
+	});
 });
 
 describe("extractOpenGraph", () => {
@@ -149,6 +188,16 @@ describe("extractOpenGraph", () => {
 
 	it("returns empty object when no OG tags present", () => {
 		expect(extractOpenGraph(HTML_WITH_TITLE_ONLY)).toEqual({});
+	});
+
+	it("extracts og:price:amount and og:price:currency", () => {
+		const result = extractOpenGraph(HTML_WITH_OG_PRICE);
+		expect(result).toMatchObject({
+			name: "Price Tag Item",
+			imageUrl: "https://cdn.example.com/price-tag.jpg",
+			priceAmount: 49.5,
+			priceCurrency: "USD",
+		});
 	});
 });
 
@@ -239,6 +288,22 @@ describe("importGiftFromUrl metadata priority chain", () => {
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
 		expect(result.draft.storeName).toBe("example.com");
+	});
+
+	it("uses the URL-selected ProductGroup variant price end to end", async () => {
+		const result = await importGiftFromUrl(
+			{ fetch: makeOkFetch(HTML_WITH_JSON_LD_PRODUCT_GROUP) },
+			{
+				url: "https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=50394283770156",
+			},
+		);
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.draft.productUrl).toBe(
+			"https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=50394283770156",
+		);
+		expect(result.draft.priceAmount).toBe(279.2);
+		expect(result.draft.priceCurrency).toBe("PEN");
 	});
 });
 

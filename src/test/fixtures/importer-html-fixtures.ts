@@ -84,3 +84,73 @@ export const HTML_WITH_MIXED_META_ORDER = `<!DOCTYPE html>
 </head>
 <body></body>
 </html>`;
+
+export const HTML_WITH_JSON_LD_PRODUCT_GROUP = `<!DOCTYPE html>
+<html>
+<head>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProductGroup",
+    "name": "Feed High Chair",
+    "image": "https://cdn.example.com/feed-chair.jpg",
+    "hasVariant": [
+      {
+        "@type": "Product",
+        "@id": "https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=46836689895724#variant",
+        "name": "Feed High Chair Blue",
+        "offers": {
+          "@type": "Offer",
+          "price": "244.30",
+          "priceCurrency": "PEN",
+          "url": "https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=46836689895724"
+        }
+      },
+      {
+        "@type": "Product",
+        "@id": "https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=50394283770156#variant",
+        "name": "Feed High Chair Pink",
+        "offers": {
+          "@type": "Offer",
+          "price": "279.20",
+          "priceCurrency": "PEN",
+          "url": "https://infanti.com.pe/products/b-005s-silla-de-comer-feed?variant=50394283770156"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body></body>
+</html>`;
+
+export const HTML_WITH_JSON_LD_AGGREGATE_OFFER = `<!DOCTYPE html>
+<html>
+<head>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Bundle Pack",
+    "image": "https://cdn.example.com/bundle.jpg",
+    "offers": {
+      "@type": "AggregateOffer",
+      "lowPrice": "18.50",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+</head>
+<body></body>
+</html>`;
+
+export const HTML_WITH_OG_PRICE = `<!DOCTYPE html>
+<html>
+<head>
+  <meta property="og:title" content="Price Tag Item" />
+  <meta property="og:image" content="https://cdn.example.com/price-tag.jpg" />
+  <meta property="og:price:amount" content="49.5" />
+  <meta property="og:price:currency" content="USD" />
+</head>
+<body></body>
+</html>`;

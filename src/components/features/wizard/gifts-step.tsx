@@ -538,16 +538,16 @@ export function GiftsStep() {
 				}}
 				open={Boolean(editingGift)}
 			>
-				<DrawerContent className="ml-auto max-h-[92svh] overflow-y-auto lg:mr-6 lg:mb-6 lg:max-w-[640px] lg:rounded-2xl">
+				<DrawerContent className="ml-auto max-h-[92svh] w-full lg:mr-6 lg:mb-6 lg:max-w-[640px] lg:rounded-2xl">
 					{editingGift ? (
-						<>
+						<div className="flex max-h-[92svh] min-h-0 flex-col">
 							<DrawerHeader className="pr-12">
 								<DrawerTitle>Editar regalo</DrawerTitle>
 								<DrawerDescription>
 									Ajusta los detalles sin salir de la vista previa.
 								</DrawerDescription>
 							</DrawerHeader>
-							<div className="px-4 pb-4">
+							<div className="min-h-0 overflow-y-auto px-4 pb-4">
 								<GiftForm
 									categories={draft.categories}
 									initialValues={getInitialValues(editingGift)}
@@ -557,7 +557,7 @@ export function GiftsStep() {
 									submitLabel="Actualizar regalo"
 								/>
 							</div>
-						</>
+						</div>
 					) : null}
 				</DrawerContent>
 			</Drawer>

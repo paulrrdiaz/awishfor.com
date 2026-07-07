@@ -44,13 +44,16 @@ function DrawerContent({
 			>
 				<DrawerPrimitive.Content
 					className={cn(
-						"relative w-full rounded-t-2xl border bg-popover text-popover-foreground shadow-lg outline-none",
+						"relative max-h-[inherit] w-full rounded-t-2xl border bg-popover text-popover-foreground shadow-lg outline-none",
 						className,
 					)}
 					data-slot="drawer-content"
 					{...props}
 				>
-					<div className="relative" data-slot="drawer-body">
+					<div
+						className="relative flex max-h-[inherit] flex-col overflow-hidden"
+						data-slot="drawer-body"
+					>
 						{children}
 						{showCloseButton && (
 							<DrawerPrimitive.Close asChild data-slot="drawer-close">

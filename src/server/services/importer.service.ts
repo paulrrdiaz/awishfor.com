@@ -178,6 +178,8 @@ type MetadataFields = {
 	priceCurrency?: string;
 };
 
+type JsonLdProductCandidate = Record<string, unknown>;
+
 function extractJsonLdImageUrl(image: unknown): string | undefined {
 	if (typeof image === "string") return image;
 	if (Array.isArray(image)) {
@@ -193,53 +195,155 @@ function extractJsonLdImageUrl(image: unknown): string | undefined {
 	return undefined;
 }
 
-function findJsonLdProducts(data: unknown): unknown[] {
+function hasJsonLdType(
+	value: unknown,
+	expected: "Product" | "ProductGroup" | "AggregateOffer",
+): boolean {
+	if (typeof value === "string") return value === expected;
+	if (Array.isArray(value)) return value.includes(expected);
+	return false;
+}
+
+function withInheritedProductGroupFields(
+	group: Record<string, unknown>,
+	variant: unknown,
+): JsonLdProductCandidate[] {
+	if (!variant || typeof variant !== "object") return [];
+	const variantObj = variant as Record<string, unknown>;
+	return [
+		{
+			...group,
+			...variantObj,
+			name: variantObj.name ?? group.name,
+			image: variantObj.image ?? group.image,
+		},
+	];
+}
+
+function findJsonLdProducts(data: unknown): JsonLdProductCandidate[] {
 	if (!data || typeof data !== "object") return [];
 	if (Array.isArray(data)) {
 		return data.flatMap(findJsonLdProducts);
 	}
 	const obj = data as Record<string, unknown>;
-	if (obj["@type"] === "Product") return [obj];
+	if (hasJsonLdType(obj["@type"], "Product")) return [obj];
+	if (
+		hasJsonLdType(obj["@type"], "ProductGroup") &&
+		Array.isArray(obj.hasVariant)
+	) {
+		return obj.hasVariant.flatMap((variant) =>
+			withInheritedProductGroupFields(obj, variant),
+		);
+	}
 	if (Array.isArray(obj["@graph"])) {
 		return obj["@graph"].flatMap(findJsonLdProducts);
 	}
 	return [];
 }
 
-export function extractJsonLd(html: string): MetadataFields {
+function selectPrimaryOffer(
+	offers: unknown,
+): Record<string, unknown> | undefined {
+	const first = Array.isArray(offers) ? offers[0] : offers;
+	return first && typeof first === "object"
+		? (first as Record<string, unknown>)
+		: undefined;
+}
+
+function parseOfferPrice(offerObj: Record<string, unknown> | undefined): {
+	priceAmount?: number;
+	priceCurrency?: string;
+} {
+	if (!offerObj) return {};
+	const rawPrice = hasJsonLdType(offerObj["@type"], "AggregateOffer")
+		? (offerObj.price ?? offerObj.lowPrice)
+		: offerObj.price;
+	const priceAmount = rawPrice !== undefined ? Number(rawPrice) : undefined;
+	return {
+		priceAmount:
+			priceAmount !== undefined && !Number.isNaN(priceAmount)
+				? priceAmount
+				: undefined,
+		priceCurrency:
+			typeof offerObj.priceCurrency === "string"
+				? offerObj.priceCurrency
+				: undefined,
+	};
+}
+
+function urlMatchesVariantId(value: unknown, variantId: string): boolean {
+	if (typeof value !== "string") return false;
+	try {
+		return new URL(value).searchParams.get("variant") === variantId;
+	} catch {
+		return value.includes(`variant=${variantId}`);
+	}
+}
+
+function findMatchingVariantProduct(
+	products: JsonLdProductCandidate[],
+	variantId: string | null,
+): JsonLdProductCandidate | undefined {
+	if (!variantId) return undefined;
+	return products.find((product) => {
+		const offerObj = selectPrimaryOffer(product.offers);
+		return (
+			urlMatchesVariantId(product["@id"], variantId) ||
+			urlMatchesVariantId(offerObj?.url, variantId)
+		);
+	});
+}
+
+function mapJsonLdProduct(product: JsonLdProductCandidate): MetadataFields {
+	const name =
+		typeof product.name === "string"
+			? product.name.trim() || undefined
+			: undefined;
+	const imageUrl = extractJsonLdImageUrl(product.image);
+	const { priceAmount, priceCurrency } = parseOfferPrice(
+		selectPrimaryOffer(product.offers),
+	);
+	return {
+		name,
+		imageUrl,
+		priceAmount,
+		priceCurrency,
+	};
+}
+
+export function extractJsonLd(
+	html: string,
+	sourceUrl?: string,
+): MetadataFields {
 	const scriptRe =
 		/<script[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+	const selectedVariantId = sourceUrl
+		? new URL(sourceUrl).searchParams.get("variant")
+		: null;
 	for (const match of html.matchAll(scriptRe)) {
 		try {
 			const data: unknown = JSON.parse(match[1] ?? "");
 			const products = findJsonLdProducts(data);
-			for (const product of products) {
-				const p = product as Record<string, unknown>;
-				const name =
-					typeof p.name === "string" ? p.name.trim() || undefined : undefined;
-				const imageUrl = extractJsonLdImageUrl(p.image);
-				const offers = Array.isArray(p.offers) ? p.offers[0] : p.offers;
-				const offerObj =
-					offers && typeof offers === "object"
-						? (offers as Record<string, unknown>)
-						: undefined;
-				const priceRaw = offerObj?.price;
-				const priceAmount =
-					priceRaw !== undefined ? Number(priceRaw) : undefined;
-				const priceCurrency =
-					typeof offerObj?.priceCurrency === "string"
-						? offerObj.priceCurrency
-						: undefined;
-				if (name || imageUrl || priceAmount !== undefined) {
-					return {
-						name,
-						imageUrl,
-						priceAmount:
-							priceAmount !== undefined && !Number.isNaN(priceAmount)
-								? priceAmount
-								: undefined,
-						priceCurrency,
-					};
+			const prioritizedProducts = [
+				findMatchingVariantProduct(products, selectedVariantId),
+				...products.filter((product) => {
+					const { priceAmount } = parseOfferPrice(
+						selectPrimaryOffer(product.offers),
+					);
+					return priceAmount !== undefined;
+				}),
+				...products,
+			].filter((product): product is JsonLdProductCandidate =>
+				Boolean(product),
+			);
+			for (const product of prioritizedProducts) {
+				const metadata = mapJsonLdProduct(product);
+				if (
+					metadata.name ||
+					metadata.imageUrl ||
+					metadata.priceAmount !== undefined
+				) {
+					return metadata;
 				}
 			}
 		} catch {
@@ -269,6 +373,15 @@ export function extractOpenGraph(html: string): MetadataFields {
 		if (property === "og:image" && !result.imageUrl) result.imageUrl = content;
 		if (property === "og:site_name" && !result.storeName)
 			result.storeName = content;
+		if (property === "og:price:amount" && result.priceAmount === undefined) {
+			const priceAmount = Number(content);
+			if (!Number.isNaN(priceAmount)) {
+				result.priceAmount = priceAmount;
+			}
+		}
+		if (property === "og:price:currency" && !result.priceCurrency) {
+			result.priceCurrency = content;
+		}
 	}
 	return result;
 }
@@ -327,7 +440,7 @@ export async function importGiftFromUrl(
 	try {
 		const { html, finalUrl } = await safeFetch(input.url, fetchFn);
 
-		const jsonLd = extractJsonLd(html);
+		const jsonLd = extractJsonLd(html, finalUrl);
 		const og = extractOpenGraph(html);
 		const twitter = extractTwitterCard(html);
 		const title = extractTitle(html);
