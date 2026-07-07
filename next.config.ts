@@ -20,7 +20,11 @@ const config: NextConfig = {
 			{
 				protocol: "https",
 				hostname: "infanti.com.pe",
-			}
+			},
+			{
+				protocol: "http",
+				hostname: "infanti.com.pe",
+			},
 		],
 	},
 	async headers() {

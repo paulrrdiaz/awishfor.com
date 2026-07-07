@@ -1,6 +1,5 @@
 import { Check } from "lucide-react";
 
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 type WizardStepperStep<TStep extends string> = {
@@ -27,25 +26,49 @@ export function WizardStepper<TStep extends string>({
 		0,
 		steps.findIndex((step) => step.id === currentStep),
 	);
-	const current = steps[currentIndex];
-	const progressValue =
-		steps.length > 1 ? (currentIndex / (steps.length - 1)) * 100 : 100;
 
 	return (
 		<nav aria-label="Progreso de creación" className={cn("w-full", className)}>
-			<div className="space-y-2 lg:hidden">
-				<div className="flex items-center justify-between gap-4">
-					<p className="font-medium text-sm">
-						Paso {currentIndex + 1} de {steps.length}
-					</p>
-					<p className="truncate text-muted-foreground text-sm">
-						{current?.label}
-					</p>
-				</div>
-				<Progress aria-label="Progreso de creación" value={progressValue} />
+			<div className="flex gap-2 border-border border-b bg-card px-4 py-3.5 lg:hidden">
+				{steps.map((step, index) => {
+					const isFilled =
+						index <= currentIndex || completedSteps.includes(step.id);
+					const canSelect =
+						completedSteps.includes(step.id) &&
+						step.id !== currentStep &&
+						!!onSelectStep;
+
+					if (canSelect) {
+						return (
+							<button
+								aria-label={`Ir a ${step.label}`}
+								className={cn(
+									"h-1 flex-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+									isFilled ? "bg-primary" : "bg-border",
+								)}
+								key={step.id}
+								onClick={() => onSelectStep(step.id)}
+								type="button"
+							/>
+						);
+					}
+
+					return (
+						<div
+							aria-current={step.id === currentStep ? "step" : undefined}
+							aria-label={step.label}
+							className={cn(
+								"h-1 flex-1 rounded-full",
+								isFilled ? "bg-primary" : "bg-border",
+							)}
+							key={step.id}
+							role="presentation"
+						/>
+					);
+				})}
 			</div>
 
-			<ol className="hidden items-center justify-between gap-3 lg:flex">
+			<ol className="hidden items-center justify-center border-border border-b bg-card px-10 py-[18px] lg:flex">
 				{steps.map((step, index) => {
 					const isActive = step.id === currentStep;
 					const isDone = completedSteps.includes(step.id);
@@ -55,22 +78,22 @@ export function WizardStepper<TStep extends string>({
 						<>
 							<span
 								className={cn(
-									"flex size-8 shrink-0 items-center justify-center rounded-full border text-xs transition-colors",
+									"flex size-[26px] shrink-0 items-center justify-center rounded-full border-2 text-xs transition-colors",
 									state === "active" &&
 										"border-primary bg-primary text-primary-foreground",
 									state === "done" &&
-										"border-primary/40 bg-primary/15 text-primary",
+										"border-[#2E7D4F] bg-[#EAF6EE] text-[#2E7D4F]",
 									state === "upcoming" &&
-										"border-border bg-muted text-muted-foreground",
+										"border-border bg-card text-muted-foreground",
 								)}
 							>
-								{isDone ? <Check className="size-3.5" /> : index + 1}
+								{isDone ? <Check className="size-3.5 stroke-[3]" /> : index + 1}
 							</span>
 							<span
 								className={cn(
-									"truncate text-sm",
-									state === "active" && "font-semibold text-foreground",
-									state === "done" && "text-foreground",
+									"truncate text-xs",
+									state === "active" && "font-bold text-foreground",
+									state === "done" && "font-semibold text-[#2E7D4F]",
 									state === "upcoming" && "text-muted-foreground",
 								)}
 							>
@@ -80,10 +103,10 @@ export function WizardStepper<TStep extends string>({
 					);
 
 					return (
-						<li className="min-w-0 flex-1" key={step.id}>
+						<li className="flex items-center" key={step.id}>
 							{canSelect ? (
 								<button
-									className="flex min-h-11 w-full items-center gap-2 rounded-lg px-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+									className="flex min-h-[26px] items-center gap-2 rounded-md text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 									onClick={() => onSelectStep(step.id)}
 									type="button"
 								>
@@ -92,10 +115,19 @@ export function WizardStepper<TStep extends string>({
 							) : (
 								<div
 									aria-current={isActive ? "step" : undefined}
-									className="flex min-h-11 w-full items-center gap-2 rounded-lg px-2"
+									className="flex min-h-[26px] items-center gap-2 rounded-md"
 								>
 									{content}
 								</div>
+							)}
+							{index < steps.length - 1 && (
+								<span
+									aria-hidden
+									className={cn(
+										"mx-3 h-0.5 w-14 rounded-full",
+										isDone ? "bg-[#C3E63E]" : "bg-border",
+									)}
+								/>
 							)}
 						</li>
 					);

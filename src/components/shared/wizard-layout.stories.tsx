@@ -42,7 +42,11 @@ export const Desktop: Story = {
 					saveDraftSlot={<Button variant="outline">Guardar borrador</Button>}
 				/>
 			}
-			contentClassName="max-w-3xl"
+			desktopActions={
+				<Button className="h-8 px-[18px] text-[13px]" variant="outline">
+					Guardar borrador
+				</Button>
+			}
 			stepper={
 				<WizardStepper
 					completedSteps={["event-type", "details"]}
@@ -51,14 +55,24 @@ export const Desktop: Story = {
 				/>
 			}
 		>
-			<Card>
-				<CardHeader>
-					<CardTitle>Diseño y vista previa</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="h-64 rounded-lg bg-muted" />
-				</CardContent>
-			</Card>
+			<div className="flex h-[calc(100dvh-184px)]">
+				<div className="w-[420px] border-border border-r px-8 py-7">
+					<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
+						Paso 3 de 5
+					</p>
+					<Card>
+						<CardHeader>
+							<CardTitle>Diseña tu página</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="h-48 rounded-lg bg-muted" />
+						</CardContent>
+					</Card>
+				</div>
+				<div className="flex-1 bg-[#E6EBF0] p-7">
+					<div className="h-full rounded-[18px] border border-border bg-card" />
+				</div>
+			</div>
 		</WizardLayout>
 	),
 };

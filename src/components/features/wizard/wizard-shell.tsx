@@ -88,6 +88,7 @@ export function WizardShell() {
 					saveDraftSlot={!publishSuccess && <SaveDraftControls />}
 				/>
 			}
+			desktopActions={!publishSuccess && <SaveDraftControls />}
 			stepper={
 				<WizardStepper
 					completedSteps={completedSteps}

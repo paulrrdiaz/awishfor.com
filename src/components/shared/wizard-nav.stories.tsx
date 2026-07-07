@@ -28,6 +28,15 @@ export const FirstStep: Story = {
 	},
 };
 
+export const InCardFooter: Story = {
+	args: MiddleStep.args,
+	parameters: {
+		viewport: {
+			defaultViewport: "desktop",
+		},
+	},
+};
+
 export const LastStep: Story = {
 	args: {
 		...MiddleStep.args,

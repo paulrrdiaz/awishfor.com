@@ -66,28 +66,51 @@ export function DesignStep() {
 	const previewViewModel = draftToPreview(draft);
 
 	return (
-		<div className="mx-auto w-full max-w-5xl">
-			<h1 className="mb-2 text-center font-semibold text-2xl text-foreground">
-				Diseño y vista previa
-			</h1>
-			<p className="mb-8 text-center text-muted-foreground text-sm">
-				Personaliza el aspecto de tu lista
-			</p>
+		<div className="mx-auto w-full max-w-5xl lg:flex lg:h-full lg:max-w-none">
+			<div className="lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:border-border lg:border-r lg:px-8 lg:py-7">
+				<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
+					Paso 3 de 5
+				</p>
+				<h1 className="mb-2 text-center font-semibold text-2xl text-foreground lg:text-left lg:font-serif lg:text-3xl">
+					Diseña tu página
+				</h1>
+				<p className="mb-8 text-center text-muted-foreground text-sm lg:text-left">
+					Personaliza el aspecto de tu lista
+				</p>
 
-			<div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
-				{/* Selectors panel */}
 				<div className="space-y-6">
-					<SelectorGrid
-						accentStyle={(t) => ({
-							borderColor:
-								draft.themeId === t.id ? undefined : t.preview.primary,
-							color: draft.themeId === t.id ? undefined : t.preview.primary,
-						})}
-						label="Tema de color"
-						onSelect={(id) => setField("themeId", id)}
-						options={THEMES}
-						selected={draft.themeId}
-					/>
+					<div>
+						<p className="mb-2 font-medium text-foreground text-sm">
+							Tema de color
+						</p>
+						<div className="flex flex-wrap gap-2">
+							{THEMES.map((theme) => {
+								const isSelected = draft.themeId === theme.id;
+								return (
+									<Button
+										aria-label={theme.label}
+										className={cn(
+											"size-11 rounded-full border-2 p-1 hover:border-primary/50",
+											isSelected
+												? "border-primary shadow-[0_0_0_2px_var(--primary)]"
+												: "border-border",
+										)}
+										key={theme.id}
+										onClick={() => setField("themeId", theme.id)}
+										style={{ backgroundColor: theme.preview.background }}
+										type="button"
+										variant="outline"
+									>
+										<span
+											aria-hidden
+											className="block size-full rounded-full"
+											style={{ backgroundColor: theme.preview.primary }}
+										/>
+									</Button>
+								);
+							})}
+						</div>
+					</div>
 
 					<SelectorGrid
 						label="Disposición"
@@ -110,7 +133,6 @@ export function DesignStep() {
 						selected={draft.buttonStyle}
 					/>
 
-					{/* Cover image upload */}
 					<div>
 						<p className="mb-2 font-medium text-foreground text-sm">
 							Imagen de portada
@@ -122,15 +144,24 @@ export function DesignStep() {
 						/>
 					</div>
 				</div>
+			</div>
 
-				{/* Live preview */}
-				<Card className="overflow-hidden">
+			<div className="mt-8 lg:mt-0 lg:flex lg:flex-1 lg:flex-col lg:bg-[#E6EBF0] lg:px-7 lg:py-6">
+				<div className="hidden items-center justify-between lg:mb-4 lg:flex">
+					<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+						Vista previa en vivo
+					</p>
+					<span className="rounded-full bg-card px-3 py-1 font-medium text-foreground text-xs">
+						en vivo
+					</span>
+				</div>
+				<Card className="overflow-hidden lg:min-h-0 lg:flex-1">
 					<CardHeader className="border-border border-b bg-muted/40 px-4 py-3">
 						<p className="text-muted-foreground text-xs">
 							Vista previa con ejemplos
 						</p>
 					</CardHeader>
-					<CardContent className="max-h-[600px] overflow-y-auto p-0">
+					<CardContent className="max-h-[600px] overflow-y-auto p-0 lg:h-full lg:max-h-none">
 						<PublicWishlistPage mode="preview" wishlist={previewViewModel} />
 					</CardContent>
 				</Card>

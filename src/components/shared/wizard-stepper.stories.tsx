@@ -27,6 +27,15 @@ export const MixedStates: Story = {
 	},
 };
 
+export const DesktopNodeStates: Story = {
+	args: MixedStates.args,
+	parameters: {
+		viewport: {
+			defaultViewport: "desktop",
+		},
+	},
+};
+
 export const Mobile: Story = {
 	args: MixedStates.args,
 	parameters: {
@@ -34,4 +43,13 @@ export const Mobile: Story = {
 			defaultViewport: "mobile1",
 		},
 	},
+};
+
+export const MobileSegmentedBar: Story = {
+	args: {
+		...MixedStates.args,
+		completedSteps: ["event-type"],
+		currentStep: "details",
+	},
+	parameters: Mobile.parameters,
 };

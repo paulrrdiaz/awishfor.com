@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useUploadThing } from "@/lib/uploadthing/client";
 
 type Props = {
@@ -70,7 +71,7 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 	if (value) {
 		return (
 			<div className="space-y-2">
-				<div className="relative h-48 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 sm:h-64">
+				<div className="relative h-48 overflow-hidden rounded-lg border border-border bg-muted sm:h-64">
 					<Image
 						alt="Imagen subida"
 						className="object-contain"
@@ -79,38 +80,42 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 						unoptimized
 					/>
 				</div>
-				<button
-					className="text-gray-500 text-xs underline hover:text-gray-700"
+				<Button
+					className="h-auto p-0 text-xs"
 					onClick={() => onChange(null)}
 					type="button"
+					variant="link"
 				>
 					Eliminar imagen
-				</button>
+				</Button>
 			</div>
 		);
 	}
 
 	return (
 		<div className="space-y-2">
-			<button
-				className="flex w-full cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 border-dashed bg-gray-50 px-4 py-8 transition-colors hover:border-gray-300 hover:bg-gray-100"
+			<Button
+				className="flex h-auto min-h-32 w-full cursor-pointer items-center justify-center whitespace-normal rounded-lg border-2 border-border border-dashed bg-muted/50 px-4 py-8 text-center hover:border-primary/50 hover:bg-accent"
 				disabled={isBusy}
 				onClick={() => inputRef.current?.click()}
 				type="button"
+				variant="outline"
 			>
 				<div className="text-center">
 					{isBusy ? (
-						<p className="text-gray-500 text-sm">Subiendo...</p>
+						<p className="text-muted-foreground text-sm">Subiendo...</p>
 					) : (
 						<>
-							<p className="text-gray-500 text-sm">
+							<p className="text-muted-foreground text-sm">
 								Haz clic para seleccionar una imagen
 							</p>
-							<p className="mt-1 text-gray-400 text-xs">JPG, PNG o WEBP</p>
+							<p className="mt-1 text-muted-foreground/70 text-xs">
+								JPG, PNG o WEBP
+							</p>
 						</>
 					)}
 				</div>
-			</button>
+			</Button>
 			<input
 				accept="image/jpeg,image/png,image/webp"
 				className="hidden"
@@ -119,7 +124,7 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 				ref={inputRef}
 				type="file"
 			/>
-			{error && <p className="text-red-500 text-xs">{error}</p>}
+			{error && <p className="text-destructive text-xs">{error}</p>}
 		</div>
 	);
 }

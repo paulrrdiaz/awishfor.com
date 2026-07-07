@@ -391,7 +391,7 @@ export function PublishStep() {
 
 	if (publishSuccess && publishedUrl) {
 		return (
-			<div className="mx-auto w-full max-w-4xl">
+			<div className="mx-auto w-full max-w-4xl lg:flex lg:h-full lg:items-center lg:justify-center lg:bg-background lg:px-10">
 				<Card className="border-primary/30 bg-primary/10">
 					<CardContent className="p-6">
 						<div className="flex items-start gap-3">
@@ -481,8 +481,11 @@ export function PublishStep() {
 
 	return (
 		<>
-			<div className="mx-auto w-full max-w-6xl">
+			<div className="mx-auto w-full max-w-6xl lg:h-full lg:overflow-y-auto lg:bg-background lg:px-10 lg:py-8">
 				<div className="mb-8 text-center">
+					<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
+						Paso 5 de 5
+					</p>
 					<h1 className="font-semibold text-2xl text-foreground">
 						Revisa y publica tu wishlist
 					</h1>
@@ -492,7 +495,7 @@ export function PublishStep() {
 					</p>
 				</div>
 
-				<div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
+				<div className="mx-auto grid max-w-[760px] grid-cols-1 gap-6">
 					<div className="space-y-6">
 						<Card>
 							<CardContent className="p-5">
