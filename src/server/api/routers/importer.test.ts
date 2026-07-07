@@ -2,12 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { importerRouter } from "@/server/api/routers/importer";
 import { createCallerFactory } from "@/server/api/trpc";
 
-const authMock = vi.hoisted(() => vi.fn());
 const importGiftFromUrlMock = vi.hoisted(() => vi.fn());
-
-vi.mock("@clerk/nextjs/server", () => ({
-	auth: authMock,
-}));
 
 vi.mock("@/server/db", () => ({
 	db: {},
@@ -30,17 +25,19 @@ describe("importerRouter.importFromUrl", () => {
 		vi.clearAllMocks();
 	});
 
-	it("rejects a signed-out caller with UNAUTHORIZED", async () => {
-		authMock.mockResolvedValue({ userId: null });
+	it("allows a signed-out caller", async () => {
+		importGiftFromUrlMock.mockResolvedValue({
+			ok: true,
+			draft: { productUrl: "https://example.com/product" },
+		});
 		const caller = createCaller(makeCtx());
 		await expect(
 			caller.importFromUrl({ url: "https://example.com/product" }),
-		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
-		expect(importGiftFromUrlMock).not.toHaveBeenCalled();
+		).resolves.toMatchObject({ ok: true });
+		expect(importGiftFromUrlMock).toHaveBeenCalled();
 	});
 
 	it("rejects an invalid URL with a validation error", async () => {
-		authMock.mockResolvedValue({ userId: "clerk_user_1" });
 		const caller = createCaller(makeCtx());
 		await expect(
 			caller.importFromUrl({ url: "not-a-url" }),
@@ -49,7 +46,6 @@ describe("importerRouter.importFromUrl", () => {
 	});
 
 	it("rejects a non-http(s) scheme with a validation error", async () => {
-		authMock.mockResolvedValue({ userId: "clerk_user_1" });
 		const caller = createCaller(makeCtx());
 		await expect(
 			caller.importFromUrl({ url: "ftp://example.com/file" }),
@@ -57,7 +53,6 @@ describe("importerRouter.importFromUrl", () => {
 	});
 
 	it("returns the draft from the service on a valid request", async () => {
-		authMock.mockResolvedValue({ userId: "clerk_user_1" });
 		const draft = {
 			name: "Cool Widget",
 			productUrl: "https://example.com/widget",
@@ -81,7 +76,6 @@ describe("importerRouter.importFromUrl", () => {
 	});
 
 	it("returns a friendly error result when the service returns an error", async () => {
-		authMock.mockResolvedValue({ userId: "clerk_user_1" });
 		importGiftFromUrlMock.mockResolvedValue({
 			ok: false,
 			error: { kind: "timeout" },

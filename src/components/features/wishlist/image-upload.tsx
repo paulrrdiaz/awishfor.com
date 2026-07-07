@@ -70,12 +70,13 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 	if (value) {
 		return (
 			<div className="space-y-2">
-				<div className="relative h-32 overflow-hidden rounded-lg border border-gray-200">
+				<div className="relative h-48 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 sm:h-64">
 					<Image
 						alt="Imagen subida"
-						className="object-cover"
+						className="object-contain"
 						fill
 						src={value}
+						unoptimized
 					/>
 				</div>
 				<button

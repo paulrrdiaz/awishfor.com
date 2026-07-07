@@ -1,6 +1,7 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { GiftForm } from "@/components/features/wishlist/gift-form";
 import { Badge } from "@/components/ui/badge";
@@ -95,16 +96,8 @@ export function GiftsStep() {
 			});
 			setImportUrl("");
 			setEditing(null);
-		} catch (error) {
-			const message =
-				error instanceof Error && error.message
-					? error.message
-					: "No pudimos importar ese enlace.";
-			setImportError(
-				message.toLowerCase().includes("unauthorized")
-					? "Inicia sesión para importar regalos desde una URL."
-					: message,
-			);
+		} catch {
+			setImportError("No pudimos importar ese enlace.");
 		}
 	}
 
@@ -342,6 +335,17 @@ export function GiftsStep() {
 								key={gift.id}
 							>
 								<CardContent className="flex items-start gap-3 p-4">
+									{gift.imageUrl && (
+										<div className="relative size-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+											<Image
+												alt=""
+												className="object-cover"
+												fill
+												src={gift.imageUrl}
+												unoptimized
+											/>
+										</div>
+									)}
 									<div className="min-w-0 flex-1">
 										<div className="flex items-center gap-2">
 											<p

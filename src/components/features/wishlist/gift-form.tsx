@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -9,6 +15,7 @@ import {
 	FieldDescription,
 	FieldGroup,
 	FieldLabel,
+	FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,8 +91,12 @@ export function GiftForm({
 		});
 	}
 
+	const hasNotesOrHidden = Boolean(
+		values.publicNote || values.internalNote || values.hidden,
+	);
+
 	return (
-		<form className="space-y-4" onSubmit={handleSubmit}>
+		<form className="space-y-5" onSubmit={handleSubmit}>
 			<FieldGroup className="gap-4">
 				<Field>
 					<FieldLabel htmlFor="gift-name">
@@ -132,7 +143,11 @@ export function GiftForm({
 						value={values.imageUrl}
 					/>
 				</Field>
+			</FieldGroup>
 
+			<FieldSeparator>Detalles</FieldSeparator>
+
+			<FieldGroup className="gap-4">
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					<Field>
 						<FieldLabel htmlFor="gift-price">
@@ -172,99 +187,117 @@ export function GiftForm({
 					</Field>
 				</div>
 
-				<Field>
-					<FieldLabel htmlFor="gift-category">Categoría</FieldLabel>
-					<Select
-						onValueChange={(value) => set("category", value ?? "")}
-						value={values.category}
-					>
-						<SelectTrigger className="min-h-11" id="gift-category">
-							<SelectValue placeholder="Sin categoría" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="">Sin categoría</SelectItem>
-							{categories.map((cat) => (
-								<SelectItem key={cat} value={cat}>
-									{cat}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</Field>
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					<Field>
+						<FieldLabel htmlFor="gift-category">Categoría</FieldLabel>
+						<Select
+							onValueChange={(value) => set("category", value ?? "")}
+							value={values.category}
+						>
+							<SelectTrigger className="min-h-11" id="gift-category">
+								<SelectValue placeholder="Sin categoría" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="">Sin categoría</SelectItem>
+								{categories.map((cat) => (
+									<SelectItem key={cat} value={cat}>
+										{cat}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</Field>
 
-				<Field>
-					<FieldLabel>Prioridad</FieldLabel>
-					<div className="flex gap-2">
-						{PRIORITY_OPTIONS.map((opt) => {
-							const isSelected = values.priority === opt.value;
-							return (
-								<Button
-									className={cn(
-										"min-h-11 flex-1 border-2",
-										isSelected
-											? "border-primary bg-primary text-primary-foreground hover:bg-primary/80"
-											: "border-border bg-card text-card-foreground hover:border-primary/50 hover:bg-accent",
-									)}
-									key={opt.value}
-									onClick={() => set("priority", opt.value)}
-									type="button"
-									variant="outline"
-								>
-									{opt.label}
-								</Button>
-							);
-						})}
-					</div>
-				</Field>
-
-				<Field>
-					<FieldLabel htmlFor="gift-public-note">
-						Nota pública{" "}
-						<span className="font-normal text-muted-foreground">
-							(opcional)
-						</span>
-					</FieldLabel>
-					<Textarea
-						id="gift-public-note"
-						onChange={(e) => set("publicNote", e.target.value)}
-						placeholder="Visible para los invitados"
-						rows={2}
-						value={values.publicNote}
-					/>
-				</Field>
-
-				<Field>
-					<FieldLabel htmlFor="gift-internal-note">
-						Nota interna{" "}
-						<span className="font-normal text-muted-foreground">
-							(solo tú la ves)
-						</span>
-					</FieldLabel>
-					<Textarea
-						id="gift-internal-note"
-						onChange={(e) => set("internalNote", e.target.value)}
-						placeholder="Solo visible para ti"
-						rows={2}
-						value={values.internalNote}
-					/>
-				</Field>
-
-				<Field orientation="horizontal">
-					<Checkbox
-						checked={values.hidden}
-						id="gift-hidden"
-						onCheckedChange={(next) => set("hidden", Boolean(next))}
-					/>
-					<FieldContent>
-						<Label className="cursor-pointer" htmlFor="gift-hidden">
-							Ocultar este regalo
-						</Label>
-						<FieldDescription className="text-xs">
-							No aparecerá en la lista pública.
-						</FieldDescription>
-					</FieldContent>
-				</Field>
+					<Field>
+						<FieldLabel>Prioridad</FieldLabel>
+						<div className="flex gap-2">
+							{PRIORITY_OPTIONS.map((opt) => {
+								const isSelected = values.priority === opt.value;
+								return (
+									<Button
+										className={cn(
+											"min-h-11 flex-1 border-2 px-2",
+											isSelected
+												? "border-primary bg-primary text-primary-foreground hover:bg-primary/80"
+												: "border-border bg-card text-card-foreground hover:border-primary/50 hover:bg-accent",
+										)}
+										key={opt.value}
+										onClick={() => set("priority", opt.value)}
+										type="button"
+										variant="outline"
+									>
+										{opt.label}
+									</Button>
+								);
+							})}
+						</div>
+					</Field>
+				</div>
 			</FieldGroup>
+
+			<Accordion
+				collapsible
+				defaultValue={hasNotesOrHidden ? "notes" : undefined}
+				type="single"
+			>
+				<AccordionItem value="notes">
+					<AccordionTrigger className="text-muted-foreground text-sm hover:no-underline">
+						Notas y visibilidad{" "}
+						<span className="font-normal">(opcional)</span>
+					</AccordionTrigger>
+					<AccordionContent>
+						<FieldGroup className="gap-4">
+							<Field>
+								<FieldLabel htmlFor="gift-public-note">
+									Nota pública{" "}
+									<span className="font-normal text-muted-foreground">
+										(opcional)
+									</span>
+								</FieldLabel>
+								<Textarea
+									id="gift-public-note"
+									onChange={(e) => set("publicNote", e.target.value)}
+									placeholder="Visible para los invitados"
+									rows={2}
+									value={values.publicNote}
+								/>
+							</Field>
+
+							<Field>
+								<FieldLabel htmlFor="gift-internal-note">
+									Nota interna{" "}
+									<span className="font-normal text-muted-foreground">
+										(solo tú la ves)
+									</span>
+								</FieldLabel>
+								<Textarea
+									id="gift-internal-note"
+									onChange={(e) => set("internalNote", e.target.value)}
+									placeholder="Solo visible para ti"
+									rows={2}
+									value={values.internalNote}
+								/>
+							</Field>
+
+							<Field orientation="horizontal">
+								<Checkbox
+									checked={values.hidden}
+									id="gift-hidden"
+									onCheckedChange={(next) => set("hidden", Boolean(next))}
+								/>
+								<FieldContent>
+									<Label className="cursor-pointer" htmlFor="gift-hidden">
+										Ocultar este regalo
+									</Label>
+									<FieldDescription className="text-xs">
+										No aparecerá en la lista pública.
+									</FieldDescription>
+								</FieldContent>
+							</Field>
+						</FieldGroup>
+					</AccordionContent>
+				</AccordionItem>
+			</Accordion>
 
 			<div className="flex justify-end gap-3 pt-2">
 				<Button onClick={onCancel} type="button" variant="outline">

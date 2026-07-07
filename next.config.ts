@@ -17,6 +17,10 @@ const config: NextConfig = {
 				protocol: "https",
 				hostname: "**.ufs.sh",
 			},
+			{
+				protocol: "https",
+				hostname: "infanti.com.pe",
+			}
 		],
 	},
 	async headers() {
