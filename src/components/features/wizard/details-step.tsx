@@ -1,9 +1,11 @@
 "use client";
 
+import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
 	Field,
 	FieldDescription,
@@ -16,6 +18,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { isValidSlug } from "@/lib/slug";
 import { api } from "@/trpc/react";
 import { useWizardStore } from "./wizard-provider";
+
+function dateStrToDate(value: string | null): Date | null {
+	return value ? new Date(`${value}T00:00:00`) : null;
+}
+
+function dateToDateStr(date: Date | null): string | null {
+	return date ? format(date, "yyyy-MM-dd") : null;
+}
 
 type SlugStatus =
 	| "idle"
@@ -173,18 +183,20 @@ export function DetailsStep() {
 					</Field>
 
 					<Field>
-						<FieldLabel htmlFor="eventDate">
-							Fecha del evento{" "}
+						<FieldLabel htmlFor="eventDateTime">
+							Fecha y hora del evento{" "}
 							<span className="font-normal text-muted-foreground">
 								(opcional)
 							</span>
 						</FieldLabel>
-						<Input
-							className="min-h-11"
-							id="eventDate"
-							onChange={(e) => setField("eventDate", e.target.value || null)}
-							type="date"
-							value={draft.eventDate ?? ""}
+						<DateTimePicker
+							date={dateStrToDate(draft.eventDate)}
+							id="eventDateTime"
+							onDateChange={(date) =>
+								setField("eventDate", dateToDateStr(date))
+							}
+							onTimeChange={(time) => setField("eventTime", time)}
+							time={draft.eventTime}
 						/>
 						{isPastDate && (
 							<p className="mt-2 rounded-lg border border-[#F0DBA8] bg-[#FBF1DC] px-3 py-2 text-[#8A6512] text-sm">
@@ -192,22 +204,6 @@ export function DetailsStep() {
 								un mensaje de cierre.
 							</p>
 						)}
-					</Field>
-
-					<Field>
-						<FieldLabel htmlFor="eventTime">
-							Hora del evento{" "}
-							<span className="font-normal text-muted-foreground">
-								(opcional)
-							</span>
-						</FieldLabel>
-						<Input
-							className="min-h-11"
-							id="eventTime"
-							onChange={(e) => setField("eventTime", e.target.value || null)}
-							type="time"
-							value={draft.eventTime ?? ""}
-						/>
 					</Field>
 
 					<Field>

@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -326,26 +328,17 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 				<section className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm">
 					<h2 className="font-medium text-base">Detalles del evento</h2>
 
-					<div className="grid gap-5 sm:grid-cols-2">
-						<div className="space-y-1.5">
-							<Label htmlFor="eventDate">Fecha del evento</Label>
-							<Input
-								id="eventDate"
-								onChange={(e) => setEventDate(e.target.value)}
-								type="date"
-								value={eventDate}
-							/>
-						</div>
-
-						<div className="space-y-1.5">
-							<Label htmlFor="eventTime">Hora del evento</Label>
-							<Input
-								id="eventTime"
-								onChange={(e) => setEventTime(e.target.value)}
-								type="time"
-								value={eventTime}
-							/>
-						</div>
+					<div className="space-y-1.5">
+						<Label htmlFor="eventDateTime">Fecha y hora del evento</Label>
+						<DateTimePicker
+							date={eventDate ? new Date(`${eventDate}T00:00:00`) : null}
+							id="eventDateTime"
+							onDateChange={(date) =>
+								setEventDate(date ? format(date, "yyyy-MM-dd") : "")
+							}
+							onTimeChange={(time) => setEventTime(time ?? "")}
+							time={eventTime || null}
+						/>
 					</div>
 
 					<div className="space-y-1.5">
