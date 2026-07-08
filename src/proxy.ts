@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 
 const isPublicRoute = createRouteMatcher([
 	"/",
@@ -19,7 +20,10 @@ export default clerkMiddleware(async (auth, req) => {
 	const { userId } = await auth();
 
 	if (isAuthRoute(req) && userId) {
-		return NextResponse.redirect(new URL("/dashboard", req.url));
+		const redirectPath = resolveRedirectPath(
+			req.nextUrl.searchParams.get("redirect_url"),
+		);
+		return NextResponse.redirect(new URL(redirectPath, req.url));
 	}
 
 	if (!isPublicRoute(req)) {

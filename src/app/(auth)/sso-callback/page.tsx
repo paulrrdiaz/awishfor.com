@@ -1,14 +1,17 @@
 "use client";
 
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 
 export default function SSOCallbackPage() {
 	const clerk = useClerk();
 	const { signIn } = useSignIn();
 	const { signUp } = useSignUp();
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const redirectPath = resolveRedirectPath(searchParams.get("redirect_url"));
 	const hasRun = useRef(false);
 
 	useEffect(() => {
@@ -24,12 +27,11 @@ export default function SSOCallbackPage() {
 				decorateUrl: (url: string) => string;
 			}) => {
 				if (session?.currentTask) return;
-				const url = decorateUrl("/dashboard");
-				if (url.startsWith("http")) {
-					window.location.href = url;
-				} else {
-					router.push(url);
-				}
+				const url = decorateUrl(redirectPath);
+				// Hard navigation (not router.push) so the destination is a fresh
+				// request that picks up the session cookie Clerk just set — a
+				// client-side transition can race ahead of that cookie landing.
+				window.location.href = url;
 			};
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,7 +80,7 @@ export default function SSOCallbackPage() {
 
 			router.push("/sign-in");
 		})();
-	}, [clerk, signIn, signUp, router]);
+	}, [clerk, signIn, signUp, router, redirectPath]);
 
 	return <div id="clerk-captcha" />;
 }

@@ -46,6 +46,7 @@ export function WizardNav({
 						Siguiente
 					</Button>
 				)}
+				{isLast && <div id="publish-cta-slot-mobile" />}
 			</div>
 
 			<div
@@ -75,6 +76,7 @@ export function WizardNav({
 						Continuar →
 					</Button>
 				)}
+				{isLast && <div id="publish-cta-slot-desktop" />}
 			</div>
 		</>
 	);

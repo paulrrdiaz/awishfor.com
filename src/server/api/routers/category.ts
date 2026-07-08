@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import type { createTRPCContext } from "@/server/api/trpc";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
@@ -10,6 +9,7 @@ import {
 	reorderCategories,
 	seedDefaultCategories,
 } from "@/server/services/category.service";
+import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
 	addCategorySchema,
 	deleteCategorySchema,
@@ -24,22 +24,8 @@ type CategoryRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
 	userId: string;
 };
 
-const getLocalUserId = async (ctx: CategoryRouterContext) => {
-	const user = await ctx.db.user.findUnique({
-		where: {
-			clerkId: ctx.userId,
-		},
-		select: {
-			id: true,
-		},
-	});
-
-	if (!user) {
-		throw new TRPCError({ code: "UNAUTHORIZED" });
-	}
-
-	return user.id;
-};
+const getLocalUserId = (ctx: CategoryRouterContext) =>
+	getOrCreateLocalUserId(ctx);
 
 export const categoryRouter = createTRPCRouter({
 	list: protectedProcedure

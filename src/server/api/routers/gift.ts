@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { GiftVisibilityStatus } from "@/generated/prisma/client";
 import type { createTRPCContext } from "@/server/api/trpc";
@@ -16,6 +15,7 @@ import {
 	softDeleteGift,
 	updateGift,
 } from "@/server/services/gift.service";
+import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
 	deleteGiftSchema,
 	giftIdSchema,
@@ -27,14 +27,7 @@ type GiftRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
 	userId: string;
 };
 
-const getLocalUserId = async (ctx: GiftRouterContext) => {
-	const user = await ctx.db.user.findUnique({
-		where: { clerkId: ctx.userId },
-		select: { id: true },
-	});
-	if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
-	return user.id;
-};
+const getLocalUserId = (ctx: GiftRouterContext) => getOrCreateLocalUserId(ctx);
 
 const asDashboardDb = (ctx: GiftRouterContext): DashboardGiftDatabase =>
 	ctx.db as unknown as DashboardGiftDatabase;

@@ -5,6 +5,7 @@ import { createCallerFactory } from "@/server/api/trpc";
 import type { SaveDraftWishlistInput } from "@/server/validators/wishlist-save-draft.schema";
 
 const authMock = vi.hoisted(() => vi.fn());
+const currentUserMock = vi.hoisted(() => vi.fn());
 const publishWishlistMock = vi.hoisted(() => vi.fn());
 const publishWishlistFromWizardMock = vi.hoisted(() => vi.fn());
 const saveWishlistDraftMock = vi.hoisted(() => vi.fn());
@@ -12,6 +13,7 @@ const revalidatePathMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@clerk/nextjs/server", () => ({
 	auth: authMock,
+	currentUser: currentUserMock,
 }));
 
 vi.mock("@/server/services/wishlist.service", () => ({
@@ -204,6 +206,7 @@ describe("wishlistRouter.saveDraft", () => {
 
 	it("rejects authenticated users that do not resolve to a local owner", async () => {
 		authMock.mockResolvedValue({ userId: "clerk_missing" });
+		currentUserMock.mockResolvedValue(null);
 		const caller = createCaller({
 			db: {
 				user: {
@@ -216,6 +219,50 @@ describe("wishlistRouter.saveDraft", () => {
 		await expect(caller.saveDraft(makeInput())).rejects.toMatchObject({
 			code: "UNAUTHORIZED",
 		});
+	});
+
+	it("provisions a local owner on demand when the webhook hasn't synced it yet", async () => {
+		authMock.mockResolvedValue({ userId: "clerk_new" });
+		currentUserMock.mockResolvedValue({
+			id: "clerk_new",
+			emailAddresses: [{ id: "email_1", emailAddress: "new@example.com" }],
+			primaryEmailAddressId: "email_1",
+			firstName: "New",
+			lastName: "User",
+			imageUrl: "https://example.com/avatar.png",
+		});
+		saveWishlistDraftMock.mockResolvedValue({
+			status: "saved",
+			wishlistId: "wishlist_123",
+			lastSavedAt: 123456,
+		});
+		const userUpsert = vi.fn().mockResolvedValue({ id: 99 });
+		const caller = createCaller({
+			db: {
+				user: {
+					findUnique: vi.fn().mockResolvedValue(null),
+					upsert: userUpsert,
+				},
+			},
+			headers: new Headers(),
+		} as never);
+
+		await caller.saveDraft(makeInput());
+
+		expect(userUpsert).toHaveBeenCalledWith({
+			where: { clerkId: "clerk_new" },
+			create: {
+				clerkId: "clerk_new",
+				email: "new@example.com",
+				name: "New User",
+				imageUrl: "https://example.com/avatar.png",
+			},
+			update: {},
+		});
+		expect(saveWishlistDraftMock).toHaveBeenCalledWith(
+			expect.objectContaining({ user: expect.any(Object) }),
+			expect.objectContaining({ ownerId: 99 }),
+		);
 	});
 
 	it("passes through non-disclosing not-found errors from the service", async () => {

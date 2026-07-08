@@ -24,6 +24,7 @@ import {
 	mapDashboardWishlistOverview,
 	mapDashboardWishlistSummary,
 } from "@/server/mappers/dashboard-wishlist.mapper";
+import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
 	listOwnerWishlistRecentPurchases,
 	type WishlistRecentPurchaseDatabase,
@@ -50,22 +51,8 @@ type WishlistRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
 	userId: string;
 };
 
-const getLocalUserId = async (ctx: WishlistRouterContext) => {
-	const user = await ctx.db.user.findUnique({
-		where: {
-			clerkId: ctx.userId,
-		},
-		select: {
-			id: true,
-		},
-	});
-
-	if (!user) {
-		throw new TRPCError({ code: "UNAUTHORIZED" });
-	}
-
-	return user.id;
-};
+const getLocalUserId = (ctx: WishlistRouterContext) =>
+	getOrCreateLocalUserId(ctx);
 
 const wishlistWithGiftsInclude = {
 	gifts: {

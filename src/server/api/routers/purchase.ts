@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import type { createTRPCContext } from "@/server/api/trpc";
 import {
 	createTRPCRouter,
@@ -6,6 +5,7 @@ import {
 	publicProcedure,
 } from "@/server/api/trpc";
 import { mapOwnerPurchaseRecord } from "@/server/mappers/owner-purchase.mapper";
+import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import type {
 	OwnerPurchaseDatabase,
 	PublicPurchaseDatabase,
@@ -29,14 +29,8 @@ type PurchaseRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
 	userId: string;
 };
 
-const getLocalUserId = async (ctx: PurchaseRouterContext) => {
-	const user = await ctx.db.user.findUnique({
-		where: { clerkId: ctx.userId },
-		select: { id: true },
-	});
-	if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
-	return user.id;
-};
+const getLocalUserId = (ctx: PurchaseRouterContext) =>
+	getOrCreateLocalUserId(ctx);
 
 const asOwnerPurchaseDb = (ctx: PurchaseRouterContext): OwnerPurchaseDatabase =>
 	ctx.db as unknown as OwnerPurchaseDatabase;

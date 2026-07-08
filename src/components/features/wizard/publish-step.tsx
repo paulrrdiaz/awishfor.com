@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { Badge } from "@/components/ui/badge";
@@ -417,23 +418,23 @@ export function PublishSuccessPanel({
 }) {
 	return (
 		<div className="mx-auto w-full max-w-md text-center">
-			<div className="mx-auto flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-				<PartyPopper className="size-6" />
+			<div className="mx-auto flex size-[60px] items-center justify-center rounded-full bg-accent text-accent-foreground">
+				<PartyPopper className="size-[30px]" />
 			</div>
-			<h1 className="mt-4 font-semibold font-serif text-2xl text-foreground">
+			<h1 className="mt-4 font-semibold font-serif text-[26px] text-foreground">
 				¡Tu wishlist está publicada!
 			</h1>
-			<p className="mt-2 text-muted-foreground text-sm">
+			<p className="mt-1.5 text-[13.5px] text-muted-foreground">
 				Comparte tu enlace con tus invitados:
 			</p>
 
-			<div className="mt-6 flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-left">
-				<span className="min-w-0 flex-1 truncate font-mono text-muted-foreground text-xs">
+			<div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-left">
+				<span className="min-w-0 flex-1 truncate font-mono font-semibold text-[12.5px] text-foreground">
 					{publishedUrl}
 				</span>
 			</div>
 
-			<div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+			<div className="mt-3.5 grid grid-cols-1 gap-[9px] sm:grid-cols-2">
 				<Button
 					className="min-h-11 whitespace-normal"
 					onClick={onCopyLink}
@@ -454,14 +455,14 @@ export function PublishSuccessPanel({
 				</a>
 			</div>
 
-			<Card className="mt-4 text-left">
-				<CardContent className="flex items-center gap-4 p-4">
-					<div className="flex size-[72px] shrink-0 items-center justify-center rounded-lg bg-muted">
+			<Card className="mt-3.5 text-left">
+				<CardContent className="flex items-center gap-3.5 p-4">
+					<div className="flex size-[78px] shrink-0 items-center justify-center rounded-[10px] bg-muted">
 						<QrCode className="size-8 text-muted-foreground" />
 					</div>
 					<div className="min-w-0 flex-1">
-						<p className="font-medium text-foreground text-sm">Código QR</p>
-						<p className="mt-1 text-muted-foreground text-xs leading-relaxed">
+						<p className="font-medium text-[13px] text-foreground">Código QR</p>
+						<p className="mt-[3px] text-[11.5px] text-muted-foreground leading-relaxed">
 							Imprímelo en invitaciones físicas.
 						</p>
 						<Button
@@ -483,7 +484,7 @@ export function PublishSuccessPanel({
 				</CardContent>
 			</Card>
 
-			<div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+			<div className="mt-4 flex flex-col gap-2 sm:flex-row">
 				<a
 					className={cn(buttonVariants(), "min-h-11 flex-1")}
 					href={publishedUrl}
@@ -532,6 +533,15 @@ export function PublishStep() {
 		localInput: SaveDraftWishlistInput;
 		serverDraft: SaveDraftServerDraft;
 	} | null>(null);
+	const [mobileCtaSlot, setMobileCtaSlot] = useState<HTMLElement | null>(null);
+	const [desktopCtaSlot, setDesktopCtaSlot] = useState<HTMLElement | null>(
+		null,
+	);
+
+	useEffect(() => {
+		setMobileCtaSlot(document.getElementById("publish-cta-slot-mobile"));
+		setDesktopCtaSlot(document.getElementById("publish-cta-slot-desktop"));
+	}, []);
 
 	useEffect(() => {
 		if (publishSuccess) {
@@ -741,6 +751,23 @@ export function PublishStep() {
 		}
 	};
 
+	const publishButtonNode = (
+		<Button
+			className="min-h-11 px-8 py-[13px]"
+			disabled={isSubmitting}
+			onClick={handlePublishClick}
+			type="button"
+			variant={isReadyToPublish && !isSubmitting ? "default" : "secondary"}
+		>
+			{isSubmitting ? (
+				<LoaderCircle className="size-4 animate-spin" />
+			) : (
+				<ShieldCheck className="size-4" />
+			)}
+			{isSignedIn ? "Publicar wishlist" : "Inicia sesión para publicar"}
+		</Button>
+	);
+
 	if (publishSuccess && publishedUrl) {
 		return (
 			<div className="mx-auto flex w-full max-w-4xl items-center justify-center px-4 py-10 lg:h-full lg:bg-background lg:px-10">
@@ -791,6 +818,9 @@ export function PublishStep() {
 						/>
 					</div>
 				</div>
+
+				{mobileCtaSlot && createPortal(publishButtonNode, mobileCtaSlot)}
+				{desktopCtaSlot && createPortal(publishButtonNode, desktopCtaSlot)}
 
 				<PublishPreviewPane preview={previewViewModel} />
 			</div>

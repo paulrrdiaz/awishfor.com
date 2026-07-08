@@ -2,18 +2,21 @@
 
 import { useSignIn } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 import { GoogleButton } from "./google-button";
 import { type SignInValues, signInSchema } from "./schemas";
 
 export function SignInForm() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const redirectPath = resolveRedirectPath(searchParams.get("redirect_url"));
 	const { signIn, fetchStatus } = useSignIn();
 	const [clerkError, setClerkError] = useState<string | null>(null);
 	const [isPending, startTransition] = useTransition();
@@ -35,7 +38,7 @@ export function SignInForm() {
 			});
 			if (error) {
 				if (error.code === "session_exists") {
-					router.replace("/dashboard");
+					router.replace(redirectPath);
 					return;
 				}
 				setClerkError(
@@ -45,7 +48,7 @@ export function SignInForm() {
 			}
 			if (signIn.status === "complete") {
 				await signIn.finalize();
-				router.push("/dashboard");
+				router.push(redirectPath);
 			}
 		} catch {
 			setClerkError("Something went wrong. Please try again.");
@@ -58,12 +61,12 @@ export function SignInForm() {
 			try {
 				const { error } = await signIn.sso({
 					strategy: "oauth_google",
-					redirectUrl: "/dashboard",
-					redirectCallbackUrl: "/sso-callback",
+					redirectUrl: redirectPath,
+					redirectCallbackUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectPath)}`,
 				});
 				if (error) {
 					if (error.code === "session_exists") {
-						router.replace("/dashboard");
+						router.replace(redirectPath);
 						return;
 					}
 					setClerkError(

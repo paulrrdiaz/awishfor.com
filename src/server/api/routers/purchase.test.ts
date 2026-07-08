@@ -3,6 +3,7 @@ import { purchaseRouter } from "@/server/api/routers/purchase";
 import { createCallerFactory } from "@/server/api/trpc";
 
 const authMock = vi.hoisted(() => vi.fn());
+const currentUserMock = vi.hoisted(() => vi.fn());
 const listOwnerGiftPurchasesMock = vi.hoisted(() => vi.fn());
 const createOwnerManualPurchaseMock = vi.hoisted(() => vi.fn());
 const deleteOwnerPurchaseMock = vi.hoisted(() => vi.fn());
@@ -13,6 +14,7 @@ vi.mock("@/server/db", () => ({ db: {} }));
 
 vi.mock("@clerk/nextjs/server", () => ({
 	auth: authMock,
+	currentUser: currentUserMock,
 }));
 
 vi.mock("@/server/services/purchase.service", () => ({
@@ -130,6 +132,7 @@ describe("purchaseRouter — owner authorization", () => {
 
 	it("rejects when clerk user has no local owner for createManual", async () => {
 		authMock.mockResolvedValue({ userId: "clerk_missing" });
+		currentUserMock.mockResolvedValue(null);
 		const db = makeDb(null);
 		const caller = createCaller(db as never);
 
