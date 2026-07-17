@@ -66,7 +66,7 @@ export function DesignStep() {
 	const previewViewModel = draftToPreview(draft);
 
 	return (
-		<div className="mx-auto w-full max-w-5xl lg:flex lg:h-full lg:max-w-none">
+		<div className="mx-auto w-full max-w-5xl lg:flex lg:h-full lg:max-w-none lg:min-h-0">
 			<div className="lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:border-border lg:border-r lg:px-8 lg:py-7">
 				<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
 					Paso 3 de 5
@@ -146,7 +146,7 @@ export function DesignStep() {
 				</div>
 			</div>
 
-			<div className="mt-8 lg:mt-0 lg:flex lg:flex-1 lg:flex-col lg:bg-[#E6EBF0] lg:px-7 lg:py-6">
+			<div className="mt-8 lg:mt-0 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:bg-[#E6EBF0] lg:px-7 lg:py-6">
 				<div className="hidden items-center justify-between lg:mb-4 lg:flex">
 					<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
 						Vista previa en vivo
@@ -161,7 +161,7 @@ export function DesignStep() {
 							Vista previa con ejemplos
 						</p>
 					</CardHeader>
-					<CardContent className="max-h-[600px] overflow-y-auto p-0 lg:h-full lg:max-h-none">
+					<CardContent className="max-h-[600px] overflow-y-auto p-0 lg:h-full">
 						<PublicWishlistPage mode="preview" wishlist={previewViewModel} />
 					</CardContent>
 				</Card>
