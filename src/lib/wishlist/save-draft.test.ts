@@ -16,6 +16,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	eventLocation: "",
 	dressCode: "",
 	coverImageUrl: null,
+	coverImageUrls: [],
 	heroTitle: "Nuestra boda",
 	welcomeMessage: "Bienvenidos",
 	thankYouMessage: "Gracias",
@@ -24,6 +25,8 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	layoutId: "editorial",
 	buttonStyle: "pill",
 	fontPairing: "serif-soft",
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	gifts: [
 		{
@@ -75,10 +78,13 @@ const makeServerDraft = (
 	eventLocation: null,
 	dressCode: null,
 	coverImageUrl: null,
+	coverImageUrls: [],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
 	fontPairing: "serif-soft",
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	categories: ["Hogar"],
 	gifts: [

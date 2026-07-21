@@ -42,6 +42,23 @@ describe("EVENT_TYPE_PRESETS", () => {
 		expect(layout.id).toBe(preset.defaultLayoutId);
 	});
 
+	it("default layouts match the design-exploration table and avoid deprecated presets", () => {
+		const expected: Record<string, string> = {
+			baby_shower: "collage-staggered",
+			birthday: "arch-split",
+			wedding: "hero-cinematic",
+			housewarming: "split-image-right",
+			general: "magazine-editorial",
+		};
+		const deprecatedIds = new Set(["grid", "editorial", "minimal"]);
+
+		for (const type of ALL_EVENT_TYPES) {
+			const preset = EVENT_TYPE_PRESETS[type];
+			expect(preset.defaultLayoutId).toBe(expected[type]);
+			expect(deprecatedIds.has(preset.defaultLayoutId)).toBe(false);
+		}
+	});
+
 	it("baby_shower has correct Spanish label and PRD categories", () => {
 		const preset = EVENT_TYPE_PRESETS.baby_shower;
 		expect(preset.label).toBe("Baby shower");

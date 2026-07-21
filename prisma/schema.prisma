@@ -78,10 +78,13 @@ model Wishlist {
   eventLocation   String?
   dressCode       String?
   coverImageUrl   String?
+  coverImageUrls  String[]       @default([])
   themeId         String?
   layoutId        String?
   buttonStyle     String?
   fontPairing     String?
+  headingFont     String?
+  bodyFont        String?
   showHowItWorks  Boolean        @default(true)
   status          WishlistStatus @default(draft)
   publishedAt     DateTime?

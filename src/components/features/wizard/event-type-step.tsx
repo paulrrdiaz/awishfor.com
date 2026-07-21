@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,18 @@ export function EventTypeStep() {
 	const heroTitleTouched = useWizardStore((s) => s.copyTouched.heroTitle);
 	const setField = useWizardStore((s) => s.setField);
 	const regenerateCopy = useWizardStore((s) => s.regenerateCopy);
+	const searchParams = useSearchParams();
+
+	useEffect(() => {
+		const typeParam = searchParams.get("type");
+		if (
+			!selectedType &&
+			typeParam &&
+			EVENT_TYPES.includes(typeParam as EventType)
+		) {
+			setEventType(typeParam as EventType);
+		}
+	}, [searchParams, selectedType, setEventType]);
 
 	return (
 		<div className="mx-auto w-full max-w-2xl lg:flex lg:h-full lg:max-w-none">

@@ -24,11 +24,15 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	eventTime: "17:00",
 	eventLocation: "Hacienda San Ángel",
 	dressCode: "Formal",
-	coverImageUrl: null,
+	coverImageUrl:
+		"https://images.unsplash.com/photo-1780542900375-0cf459e38fbb?w=1200&h=480&fit=crop&auto=format",
+	coverImageUrls: [],
 	themeId: "crema-elegante",
 	layoutId: "grid",
 	buttonStyle: "pill",
 	fontPairing: "serif-soft",
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	categories: [
 		{ id: "cat-cocina", name: "Cocina", sortOrder: 0 },
@@ -39,7 +43,8 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 			id: "g-copas",
 			name: "Copas de cristal",
 			productUrl: null,
-			imageUrl: null,
+			imageUrl:
+				"https://images.unsplash.com/photo-1546567379-1af2e0d527e8?w=480&h=360&fit=crop&auto=format",
 			storeName: "Crate & Barrel",
 			priceAmount: "320.00",
 			priceCurrency: "PEN",
@@ -55,7 +60,8 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 			id: "g-vajilla",
 			name: "Vajilla 12 piezas",
 			productUrl: null,
-			imageUrl: null,
+			imageUrl:
+				"https://images.unsplash.com/photo-1737681707230-04eebda96529?w=480&h=360&fit=crop&auto=format",
 			storeName: "Liverpool",
 			priceAmount: "890.00",
 			priceCurrency: "PEN",
@@ -71,7 +77,8 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 			id: "g-mantel",
 			name: "Mantel de lino",
 			productUrl: null,
-			imageUrl: null,
+			imageUrl:
+				"https://images.unsplash.com/photo-1665607438186-7755c7f4dd30?w=480&h=360&fit=crop&auto=format",
 			storeName: "Zara Home",
 			priceAmount: "240.00",
 			priceCurrency: "PEN",

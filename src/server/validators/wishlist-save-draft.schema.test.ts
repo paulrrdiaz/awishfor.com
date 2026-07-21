@@ -20,10 +20,13 @@ const makeInput = (
 	eventTime: "18:30",
 	eventLocation: "Barranco",
 	coverImageUrl: "https://example.com/cover.jpg",
+	coverImageUrls: ["https://example.com/cover.jpg"],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
 	fontPairing: "serif-soft",
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	categories: ["Hogar", "Viaje"],
 	gifts: [

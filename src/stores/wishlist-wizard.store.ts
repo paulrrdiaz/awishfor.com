@@ -49,6 +49,7 @@ export type WishlistDraft = {
 	eventLocation: string;
 	dressCode: string;
 	coverImageUrl: string | null;
+	coverImageUrls: string[];
 	heroTitle: string;
 	welcomeMessage: string;
 	thankYouMessage: string;
@@ -57,6 +58,8 @@ export type WishlistDraft = {
 	layoutId: string | null;
 	buttonStyle: string | null;
 	fontPairing: string | null;
+	headingFont: string | null;
+	bodyFont: string | null;
 	showHowItWorks: boolean;
 	gifts: DraftGift[];
 };
@@ -121,6 +124,7 @@ const emptyDraft = (): WishlistDraft => ({
 	eventLocation: "",
 	dressCode: "",
 	coverImageUrl: null,
+	coverImageUrls: [],
 	heroTitle: "",
 	welcomeMessage: "",
 	thankYouMessage: "",
@@ -129,6 +133,8 @@ const emptyDraft = (): WishlistDraft => ({
 	layoutId: null,
 	buttonStyle: null,
 	fontPairing: null,
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	gifts: [],
 });
@@ -153,6 +159,57 @@ const isStale = (updatedAt: number | null): boolean => {
 	if (updatedAt === null) return false;
 	const cutoff = Date.now() - STALE_DAYS * 24 * 60 * 60 * 1000;
 	return updatedAt < cutoff;
+};
+
+export const WISHLIST_WIZARD_STORE_VERSION = 1;
+
+const LEGACY_FONT_PAIRING_TO_FONTS: Record<
+	string,
+	{ headingFont: string; bodyFont: string }
+> = {
+	"serif-soft": { headingFont: "lora", bodyFont: "inter" },
+	"sans-modern": { headingFont: "inter", bodyFont: "inter" },
+	"rounded-friendly": { headingFont: "nunito", bodyFont: "nunito" },
+};
+
+type LegacyPersistedDraft = Partial<WishlistDraft> & {
+	coverImageUrl?: string | null;
+	fontPairing?: string | null;
+};
+
+type LegacyPersistedWishlistWizardState = {
+	draft?: LegacyPersistedDraft;
+	[key: string]: unknown;
+};
+
+export const migratePersistedWishlistWizardState = (
+	persistedState: unknown,
+	version: number,
+): WishlistWizardState => {
+	const state = persistedState as LegacyPersistedWishlistWizardState;
+
+	if (version < 1 && state?.draft) {
+		const legacyCoverImageUrl = state.draft.coverImageUrl ?? null;
+		const legacyFontPairing = state.draft.fontPairing ?? null;
+		const fontsFromPairing = legacyFontPairing
+			? LEGACY_FONT_PAIRING_TO_FONTS[legacyFontPairing]
+			: undefined;
+
+		return {
+			...state,
+			draft: {
+				...state.draft,
+				coverImageUrls:
+					state.draft.coverImageUrls ??
+					(legacyCoverImageUrl ? [legacyCoverImageUrl] : []),
+				headingFont:
+					state.draft.headingFont ?? fontsFromPairing?.headingFont ?? null,
+				bodyFont: state.draft.bodyFont ?? fontsFromPairing?.bodyFont ?? null,
+			},
+		} as WishlistWizardState;
+	}
+
+	return state as WishlistWizardState;
 };
 
 export const createWishlistWizardStore = () =>
@@ -497,6 +554,7 @@ export const createWishlistWizardStore = () =>
 			}),
 			{
 				name: WISHLIST_WIZARD_STORAGE_KEY,
+				version: WISHLIST_WIZARD_STORE_VERSION,
 				storage: createJSONStorage(() => {
 					if (typeof window === "undefined") {
 						return {
@@ -516,6 +574,8 @@ export const createWishlistWizardStore = () =>
 					savedSlug: state.savedSlug,
 					lastSavedAt: state.lastSavedAt,
 				}),
+				migrate: (persistedState, version) =>
+					migratePersistedWishlistWizardState(persistedState, version),
 				onRehydrateStorage: () => (state) => {
 					if (!state) return;
 					if (isStale(state.updatedAt) && state.updatedAt !== null) {

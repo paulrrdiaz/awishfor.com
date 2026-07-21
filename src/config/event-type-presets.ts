@@ -43,7 +43,7 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Bañera plegable", price: 55 },
 		],
 		defaultThemeId: "cielo-suave",
-		defaultLayoutId: "editorial",
+		defaultLayoutId: "collage-staggered",
 	},
 	birthday: {
 		eventType: "birthday",
@@ -68,7 +68,7 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Experiencia de cocina", price: 70 },
 		],
 		defaultThemeId: "lavanda-fiesta",
-		defaultLayoutId: "grid",
+		defaultLayoutId: "arch-split",
 	},
 	wedding: {
 		eventType: "wedding",
@@ -93,7 +93,7 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Noche en hotel boutique", price: 200 },
 		],
 		defaultThemeId: "crema-elegante",
-		defaultLayoutId: "editorial",
+		defaultLayoutId: "hero-cinematic",
 	},
 	housewarming: {
 		eventType: "housewarming",
@@ -118,7 +118,7 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Aspiradora inalámbrica", price: 130 },
 		],
 		defaultThemeId: "jardin-verde",
-		defaultLayoutId: "minimal",
+		defaultLayoutId: "split-image-right",
 	},
 	general: {
 		eventType: "general",
@@ -142,6 +142,6 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			{ name: "Accesorio favorito", price: 50 },
 		],
 		defaultThemeId: "clasico-minimal",
-		defaultLayoutId: "grid",
+		defaultLayoutId: "magazine-editorial",
 	},
 };

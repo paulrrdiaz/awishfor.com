@@ -15,6 +15,7 @@ function makePersistedWishlist(
 		eventLocation: "Barranco",
 		dressCode: "Formal",
 		coverImageUrl: "https://example.com/cover.jpg",
+		coverImageUrls: ["https://example.com/cover.jpg"],
 		heroTitle: "Nuestra boda",
 		welcomeMessage: "Gracias por acompañarnos",
 		thankYouMessage: "Con cariño",
@@ -23,6 +24,8 @@ function makePersistedWishlist(
 		layoutId: "grid",
 		buttonStyle: "rounded",
 		fontPairing: "serif-soft",
+		headingFont: null,
+		bodyFont: null,
 		showHowItWorks: true,
 		gifts: [
 			{

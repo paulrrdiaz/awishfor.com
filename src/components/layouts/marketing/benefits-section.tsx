@@ -4,7 +4,7 @@ const BENEFITS = [
 		border: "#BCE25A",
 		grad: "linear-gradient(135deg,#DFFAC4,#C5ECA0)",
 		title: "Todo en un lugar",
-		body: "Regalos de cualquier tienda en una sola página hermosa.",
+		body: "Regalos de cualquier tienda en una sola página hermosa. Sin límites.",
 	},
 	{
 		icon: "🎁",
@@ -18,14 +18,14 @@ const BENEFITS = [
 		border: "#56A86B",
 		grad: "linear-gradient(135deg,#D8F5DF,#AADFC0)",
 		title: "Enlace y QR gratis",
-		body: "Enlace único y código QR para WhatsApp o invitaciones físicas.",
+		body: "Un enlace único y código QR para WhatsApp o invitaciones físicas.",
 	},
 	{
 		icon: "✨",
-		border: "#9CC4A0",
-		grad: "linear-gradient(135deg,#E6F7EA,#C2E5CA)",
+		border: "#F4C84A",
+		grad: "linear-gradient(135deg,#FBEFC8,#F4DC94)",
 		title: "Listas sugeridas",
-		body: "Empieza con una lista de esenciales curada para tu ocasión.",
+		body: "¿Sin ideas? Empieza con regalos sugeridos para tu ocasión y ajústalos.",
 	},
 ];
 

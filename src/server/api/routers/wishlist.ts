@@ -6,6 +6,7 @@ import {
 	type Prisma,
 	WishlistStatus,
 } from "@/generated/prisma/client";
+import { withCoverImageUrlMirror } from "@/lib/wishlist/cover-images";
 import {
 	evaluatePublishReadiness,
 	PublishReadinessError,
@@ -123,10 +124,13 @@ export const wishlistRouter = createTRPCRouter({
 				eventLocation: wishlist.eventLocation,
 				dressCode: wishlist.dressCode,
 				coverImageUrl: wishlist.coverImageUrl,
+				coverImageUrls: wishlist.coverImageUrls,
 				themeId: wishlist.themeId,
 				layoutId: wishlist.layoutId,
 				buttonStyle: wishlist.buttonStyle,
 				fontPairing: wishlist.fontPairing,
+				headingFont: wishlist.headingFont,
+				bodyFont: wishlist.bodyFont,
 				showHowItWorks: wishlist.showHowItWorks,
 				status: wishlist.status,
 				categories: wishlist.categories.map((category) => ({
@@ -299,8 +303,10 @@ export const wishlistRouter = createTRPCRouter({
 					themeId: input.themeId ?? null,
 					layoutId: input.layoutId ?? null,
 					fontPairing: input.fontPairing ?? null,
+					headingFont: input.headingFont ?? null,
+					bodyFont: input.bodyFont ?? null,
 					buttonStyle: input.buttonStyle ?? null,
-					coverImageUrl: input.coverImageUrl ?? null,
+					...withCoverImageUrlMirror({ coverImageUrls: input.coverImageUrls }),
 				},
 				select: {
 					id: true,
@@ -308,8 +314,11 @@ export const wishlistRouter = createTRPCRouter({
 					themeId: true,
 					layoutId: true,
 					fontPairing: true,
+					headingFont: true,
+					bodyFont: true,
 					buttonStyle: true,
 					coverImageUrl: true,
+					coverImageUrls: true,
 					updatedAt: true,
 				},
 			});

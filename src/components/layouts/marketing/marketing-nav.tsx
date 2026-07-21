@@ -20,6 +20,12 @@ export async function MarketingNav() {
 			<div className="flex items-center gap-[22px]">
 				<a
 					className="cursor-pointer font-medium text-[14px] text-[var(--mmut)] hover:text-[var(--mink)]"
+					href="#ocasiones"
+				>
+					Ocasiones
+				</a>
+				<a
+					className="cursor-pointer font-medium text-[14px] text-[var(--mmut)] hover:text-[var(--mink)]"
 					href="#como-funciona"
 				>
 					Cómo funciona

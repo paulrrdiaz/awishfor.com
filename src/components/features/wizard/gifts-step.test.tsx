@@ -134,6 +134,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	eventLocation: "Barranco",
 	dressCode: "",
 	coverImageUrl: null,
+	coverImageUrls: [],
 	heroTitle: "Nuestra boda",
 	welcomeMessage: "Bienvenidos",
 	thankYouMessage: "Gracias",
@@ -142,6 +143,8 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	layoutId: "minimal",
 	buttonStyle: "pill",
 	fontPairing: "serif-soft",
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	gifts: [
 		{

@@ -208,7 +208,7 @@ export function PublicGiftFilters({
 					action={
 						!isAllFilter && (
 							<button
-								className="rounded-full border border-primary px-4 py-2 font-medium text-primary text-sm transition-colors hover:bg-primary/10"
+								className="public-btn border border-primary px-4 py-2 text-primary text-sm transition-colors hover:bg-primary/10"
 								onClick={() => setActiveFilter(emptyState.resetTo)}
 								type="button"
 							>

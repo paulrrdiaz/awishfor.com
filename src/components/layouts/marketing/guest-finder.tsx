@@ -56,7 +56,7 @@ export function GuestFinder() {
 					¿Buscas la lista de alguien?
 				</h2>
 				<p className="mb-6 text-[15px] text-[var(--mmut)]">
-					Pega el enlace o escribe el nombre exacto de la lista.
+					Encuentra su wishlist por nombre o por enlace.
 				</p>
 				<form
 					className="mx-auto max-w-[520px]"

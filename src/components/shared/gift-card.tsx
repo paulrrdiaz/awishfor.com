@@ -155,9 +155,8 @@ export function GiftCard({
 				</div>
 				{showAction && (
 					<button
-						className="shrink-0 rounded-[var(--public-btn-radius,0.75rem)] bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+						className="public-btn shrink-0 bg-primary px-4 py-2 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
 						onClick={() => onGiftAction?.(gift)}
-						style={{ fontWeight: "var(--public-btn-weight, 500)" }}
 						type="button"
 					>
 						Regalar
@@ -207,9 +206,8 @@ export function GiftCard({
 					)}
 					{showAction && (
 						<button
-							className="ml-auto rounded-[var(--public-btn-radius,0.75rem)] bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+							className="public-btn ml-auto bg-primary px-4 py-2 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
 							onClick={() => onGiftAction?.(gift)}
-							style={{ fontWeight: "var(--public-btn-weight, 500)" }}
 							type="button"
 						>
 							Regalar

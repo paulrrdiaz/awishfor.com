@@ -344,6 +344,7 @@ export function PurchaseGiftModal({
 										</span>
 									</div>
 									<Button
+										className="public-btn"
 										disabled={undoMutation.isPending || isDebug}
 										onClick={() =>
 											undoMutation.mutate({
@@ -362,6 +363,7 @@ export function PurchaseGiftModal({
 								</div>
 							)}
 							<Button
+								className="public-btn"
 								onClick={() => {
 									resetAll();
 									onOpenChange(false);
@@ -548,6 +550,7 @@ export function PurchaseGiftModal({
 
 							<DialogFooter className="sticky bottom-0 min-h-12 bg-popover p-6 pt-2">
 								<Button
+									className="public-btn"
 									disabled={
 										purchaseMutation.isPending || renderedPhase === "loading"
 									}

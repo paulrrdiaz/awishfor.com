@@ -9,6 +9,7 @@ import { HowItWorksSection } from "@/components/layouts/marketing/how-it-works-s
 import { MarketingFooter } from "@/components/layouts/marketing/marketing-footer";
 import { MarketingHero } from "@/components/layouts/marketing/marketing-hero";
 import { MarketingNav } from "@/components/layouts/marketing/marketing-nav";
+import { OccasionPickerSection } from "@/components/layouts/marketing/occasion-picker-section";
 import { PartnersMarquee } from "@/components/layouts/marketing/partners-marquee";
 import { ThemePreviews } from "@/components/layouts/marketing/theme-previews";
 import { UseCasesSection } from "@/components/layouts/marketing/use-cases-section";
@@ -24,6 +25,7 @@ export default function MarketingLandingPage() {
 		<>
 			<MarketingNav />
 			<MarketingHero />
+			<OccasionPickerSection />
 			<BenefitsSection />
 			<HowItWorksSection />
 			<UseCasesSection />

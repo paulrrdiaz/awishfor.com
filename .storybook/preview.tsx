@@ -2,7 +2,10 @@ import type { Preview } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
 import { PublicThemeProvider } from "../src/components/layouts/public-wishlist/public-theme-provider";
 import { resolveButtonStyle } from "../src/config/public-button-styles";
-import { resolveFontPairing } from "../src/config/public-fonts";
+import {
+	resolveBodyFont,
+	resolveHeadingFont,
+} from "../src/config/public-fonts";
 import {
 	DEFAULT_THEME_ID,
 	getAllThemes,
@@ -47,9 +50,10 @@ const preview: Preview = {
 
 			return (
 				<PublicThemeProvider
+					bodyFont={resolveBodyFont(null)}
 					buttonStyle={resolveButtonStyle("pill")}
 					className="min-h-screen p-6"
-					fontPairing={resolveFontPairing("serif-soft")}
+					headingFont={resolveHeadingFont(null)}
 					theme={resolveTheme(themeId)}
 				>
 					<div className="mx-auto max-w-5xl">

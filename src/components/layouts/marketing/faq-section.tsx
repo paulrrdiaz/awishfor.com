@@ -28,6 +28,10 @@ const FAQS = [
 		q: "¿Cómo comparto mi lista?",
 		a: "Con un enlace único, por WhatsApp o con un código QR para tus invitaciones físicas.",
 	},
+	{
+		q: "¿Necesito crear una cuenta?",
+		a: "No, puedes armar tu wishlist sin registrarte. Solo te pediremos iniciar sesión al publicarla, para que puedas guardarla y editarla después.",
+	},
 ];
 
 export function FaqSection() {

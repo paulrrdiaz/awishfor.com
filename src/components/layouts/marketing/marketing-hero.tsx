@@ -5,89 +5,46 @@ import { HeroCardCarousel } from "./hero-card-carousel";
 export function MarketingHero() {
 	return (
 		<section
-			className="relative overflow-hidden px-11 pt-[76px] pb-[88px]"
+			className="relative m-mesh overflow-hidden px-11 pt-[76px] pb-[88px]"
 			data-mesh
-			style={{
-				background:
-					"linear-gradient(150deg,#D6F2C0 0%,#EEF9E6 38%,#E2F7D8 65%,#D0EDBC 100%)",
-				backgroundSize: "200% 200%",
-			}}
 		>
 			{/* ambient blobs */}
 			<div
-				className="m-blob"
+				className="-top-[160px] -left-[100px] m-blob h-[440px] w-[440px] bg-[#BCE25A] opacity-20 blur-[110px]"
 				data-float
-				style={{
-					width: 440,
-					height: 440,
-					background: "#BCE25A",
-					filter: "blur(110px)",
-					opacity: 0.2,
-					top: -160,
-					left: -100,
-				}}
 			/>
 			<div
-				className="m-blob"
+				className="-right-[20px] -bottom-[100px] m-blob h-[320px] w-[320px] bg-[#7FB069] opacity-[0.18] blur-[90px]"
 				data-float-rev
-				style={{
-					width: 320,
-					height: 320,
-					background: "#7FB069",
-					filter: "blur(90px)",
-					opacity: 0.18,
-					bottom: -100,
-					right: -20,
-				}}
 			/>
 			<div
-				className="m-blob"
+				className="top-[30%] left-[43%] m-blob h-[180px] w-[180px] bg-[#BCE25A] opacity-[0.16] blur-[60px]"
 				data-float-3
-				style={{
-					width: 180,
-					height: 180,
-					background: "#BCE25A",
-					filter: "blur(60px)",
-					opacity: 0.16,
-					top: "30%",
-					left: "43%",
-				}}
 			/>
 			{/* dot grid */}
-			<div
-				className="pointer-events-none absolute inset-0"
-				style={{
-					backgroundImage:
-						"radial-gradient(circle,rgba(23,62,41,.055) 1.5px,transparent 1.5px)",
-					backgroundSize: "28px 28px",
-				}}
-			/>
+			<div className="pointer-events-none absolute inset-0 m-dot-grid" />
 			{/* floating emoji */}
 			<div
-				className="pointer-events-none absolute text-[34px]"
+				className="pointer-events-none absolute top-[44px] right-[29%] text-[34px]"
 				data-float
-				style={{ top: 44, right: "29%" }}
 			>
 				🎁
 			</div>
 			<div
-				className="pointer-events-none absolute text-[30px]"
+				className="pointer-events-none absolute bottom-[60px] left-[4%] text-[30px]"
 				data-float-rev
-				style={{ bottom: 60, left: "4%" }}
 			>
 				🌿
 			</div>
 			<div
-				className="pointer-events-none absolute text-[22px]"
+				className="pointer-events-none absolute top-[110px] left-[44%] text-[22px]"
 				data-float-3
-				style={{ top: 110, left: "44%" }}
 			>
 				✨
 			</div>
 			<div
-				className="pointer-events-none absolute text-[24px] opacity-80"
+				className="pointer-events-none absolute right-[11%] bottom-[90px] text-[24px] opacity-80"
 				data-float
-				style={{ bottom: 90, right: "11%" }}
 			>
 				🎉
 			</div>
@@ -95,10 +52,7 @@ export function MarketingHero() {
 			<div className="relative mx-auto grid max-w-[1152px] grid-cols-1 items-center gap-[52px] lg:grid-cols-[1.1fr_0.9fr]">
 				{/* left column */}
 				<div data-reveal>
-					<div
-						className="mb-[26px] inline-flex items-center gap-2 rounded-full border border-[rgba(94,190,90,0.3)] bg-white px-4 py-[7px] font-semibold text-[12px]"
-						style={{ boxShadow: "0 4px 14px rgba(60,140,60,.12)" }}
-					>
+					<div className="mb-[26px] inline-flex items-center gap-2 rounded-full border border-[rgba(94,190,90,0.3)] bg-white px-4 py-[7px] font-semibold text-[12px] shadow-[0_4px_14px_rgba(60,140,60,0.12)]">
 						<span
 							className="inline-block h-2 w-2 rounded-full bg-[#56A86B]"
 							data-pulse
@@ -113,8 +67,9 @@ export function MarketingHero() {
 						para tus momentos especiales.
 					</h1>
 					<p className="mb-8 max-w-[480px] text-[17px] text-[var(--mmut)] leading-[1.65]">
-						Agrega regalos de cualquier tienda, personaliza tu página y
-						compártela con tus invitados por enlace, WhatsApp o QR.
+						Agrega regalos de cualquier tienda, personaliza tu página con temas
+						hermosos y compártela con tus invitados por enlace, WhatsApp o QR.
+						Ellos marcan lo que compran para no repetir.
 					</p>
 					<div className="mb-9 flex items-center gap-3">
 						<Link className="m-btn m-btn-lime" data-glow href="/create">
@@ -155,38 +110,18 @@ export function MarketingHero() {
 				{/* right column — teaser card */}
 				<div className="relative" data-reveal>
 					<div
-						className="absolute z-10 flex h-[54px] w-[54px] items-center justify-center rounded-[16px] text-[24px]"
+						className="absolute -top-[22px] right-[6%] z-10 flex h-[54px] w-[54px] items-center justify-center rounded-[16px] bg-[var(--msun)] text-[24px] shadow-[0_8px_20px_rgba(244,200,74,0.45)]"
 						data-spin
-						style={{
-							background: "var(--msun)",
-							top: -22,
-							right: "6%",
-							boxShadow: "0 8px 20px rgba(244,200,74,.45)",
-						}}
 					>
 						🎉
 					</div>
-					<div
-						className="absolute"
-						style={{
-							inset: -14,
-							borderRadius: 32,
-							background:
-								"linear-gradient(135deg,rgba(188,226,90,.22),rgba(86,168,107,.14))",
-							filter: "blur(20px)",
-						}}
-					/>
+					<div className="absolute -inset-[14px] rounded-[32px] bg-[linear-gradient(135deg,rgba(188,226,90,0.22),rgba(86,168,107,0.14))] blur-[20px]" />
 					<div data-bob>
 						<HeroCardCarousel />
 					</div>
 					<div
-						className="absolute z-20 flex items-center gap-[10px] rounded-[16px] border border-[rgba(23,62,41,0.1)] bg-white px-4 py-[10px]"
+						className="absolute -bottom-[18px] -left-[22px] z-20 flex items-center gap-[10px] rounded-[16px] border border-[rgba(23,62,41,0.1)] bg-white px-4 py-[10px] shadow-[0_8px_24px_rgba(23,62,41,0.1)]"
 						data-float
-						style={{
-							bottom: -18,
-							left: -22,
-							boxShadow: "0 8px 24px rgba(23,62,41,.1)",
-						}}
 					>
 						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E4F3DC] text-[15px]">
 							🎁

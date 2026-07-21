@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { PublicButtonStylePreset } from "@/config/public-button-styles";
-import type { PublicFontPairing } from "@/config/public-fonts";
+import type { PublicFontOption } from "@/config/public-fonts";
 import type { ThemePreset } from "@/config/public-themes";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +9,8 @@ type PublicThemeStyle = CSSProperties & Record<`--${string}`, string>;
 type Props = {
 	children: ReactNode;
 	theme: ThemePreset;
-	fontPairing: PublicFontPairing;
+	headingFont: PublicFontOption;
+	bodyFont: PublicFontOption;
 	buttonStyle: PublicButtonStylePreset;
 	className?: string;
 };
@@ -17,13 +18,16 @@ type Props = {
 export function PublicThemeProvider({
 	children,
 	theme,
-	fontPairing,
+	headingFont,
+	bodyFont,
 	buttonStyle,
 	className,
 }: Props) {
 	const style: PublicThemeStyle = {
 		...theme.vars,
 		"--radius": "18px",
+		"--public-font-heading": `var(${headingFont.cssVariable}), ${headingFont.fallback}`,
+		"--public-font-body": `var(${bodyFont.cssVariable}), ${bodyFont.fallback}`,
 		"--public-btn-radius": buttonStyle.borderRadius,
 		"--public-btn-border-width": buttonStyle.borderWidth,
 		"--public-btn-weight": buttonStyle.fontWeight,
@@ -35,7 +39,7 @@ export function PublicThemeProvider({
 				"public-theme min-h-svh bg-background text-foreground",
 				className,
 			)}
-			data-font-pairing={fontPairing.dataAttribute}
+			data-btn-variant={buttonStyle.variant}
 			data-theme={theme.id}
 			style={style}
 		>

@@ -146,6 +146,7 @@ const READY_DRAFT: WishlistDraft = {
 	eventLocation: "Miraflores, Lima",
 	dressCode: "",
 	coverImageUrl: null,
+	coverImageUrls: [],
 	heroTitle: "Baby shower de Emilia",
 	welcomeMessage: "Nos emociona celebrar contigo.",
 	thankYouMessage: "Gracias por acompañarnos en este momento.",
@@ -154,6 +155,8 @@ const READY_DRAFT: WishlistDraft = {
 	layoutId: "editorial",
 	buttonStyle: "pill",
 	fontPairing: "serif-soft",
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	gifts: [
 		{

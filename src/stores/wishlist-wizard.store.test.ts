@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
-import { createWishlistWizardStore } from "./wishlist-wizard.store";
+import {
+	createWishlistWizardStore,
+	migratePersistedWishlistWizardState,
+} from "./wishlist-wizard.store";
 
 function makeStore() {
 	return createWishlistWizardStore();
@@ -228,6 +231,7 @@ describe("wishlist-wizard store", () => {
 					eventLocation: "Barranco",
 					dressCode: "",
 					coverImageUrl: null,
+					coverImageUrls: [],
 					heroTitle: "Nuestra boda",
 					welcomeMessage: "Bienvenidos",
 					thankYouMessage: "Gracias",
@@ -236,6 +240,8 @@ describe("wishlist-wizard store", () => {
 					layoutId: "editorial",
 					buttonStyle: "pill",
 					fontPairing: "serif-soft",
+					headingFont: null,
+					bodyFont: null,
 					showHowItWorks: true,
 					gifts: [
 						{
@@ -617,6 +623,60 @@ describe("wishlist-wizard store", () => {
 			expect(draft.displayName).toBe("");
 			expect(draft.eventDate).toBeNull();
 			expect(draft.gifts).toEqual([]);
+		});
+	});
+
+	describe("migratePersistedWishlistWizardState", () => {
+		it("seeds coverImageUrls and fonts from legacy fields on a v0 draft", () => {
+			const legacyState = {
+				draft: {
+					title: "Lista de boda",
+					coverImageUrl: "https://example.com/cover.jpg",
+					fontPairing: "rounded-friendly",
+				},
+				updatedAt: 123,
+			};
+
+			const migrated = migratePersistedWishlistWizardState(legacyState, 0);
+
+			expect(migrated.draft.coverImageUrls).toEqual([
+				"https://example.com/cover.jpg",
+			]);
+			expect(migrated.draft.headingFont).toBe("nunito");
+			expect(migrated.draft.bodyFont).toBe("nunito");
+		});
+
+		it("defaults to an empty gallery and null fonts when legacy fields are absent", () => {
+			const legacyState = {
+				draft: {
+					title: "Lista general",
+					coverImageUrl: null,
+					fontPairing: null,
+				},
+				updatedAt: null,
+			};
+
+			const migrated = migratePersistedWishlistWizardState(legacyState, 0);
+
+			expect(migrated.draft.coverImageUrls).toEqual([]);
+			expect(migrated.draft.headingFont).toBeNull();
+			expect(migrated.draft.bodyFont).toBeNull();
+		});
+
+		it("passes through state unchanged when already at the current version", () => {
+			const currentState = {
+				draft: {
+					title: "Lista actual",
+					coverImageUrls: ["https://example.com/a.jpg"],
+					headingFont: "lora",
+					bodyFont: "inter",
+				},
+				updatedAt: 456,
+			};
+
+			const migrated = migratePersistedWishlistWizardState(currentState, 1);
+
+			expect(migrated).toBe(currentState);
 		});
 	});
 });

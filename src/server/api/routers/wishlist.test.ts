@@ -44,10 +44,13 @@ const makeInput = (
 	eventTime: "18:30",
 	eventLocation: "Barranco",
 	coverImageUrl: "https://example.com/cover.jpg",
+	coverImageUrls: ["https://example.com/cover.jpg"],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
 	fontPairing: "serif-soft",
+	headingFont: null,
+	bodyFont: null,
 	showHowItWorks: true,
 	categories: ["Hogar"],
 	gifts: [],
@@ -379,6 +382,7 @@ describe("wishlistRouter.updateDesign", () => {
 			fontPairing: "sans-modern",
 			buttonStyle: "pill",
 			coverImageUrl: null,
+			coverImageUrls: [],
 			updatedAt: now,
 		});
 		const db = makeWishlistDb({ wishlistFindFirst, wishlistUpdate });
@@ -391,6 +395,7 @@ describe("wishlistRouter.updateDesign", () => {
 			fontPairing: "sans-modern",
 			buttonStyle: "pill",
 			coverImageUrl: null,
+			coverImageUrls: [],
 		});
 
 		expect(wishlistFindFirst).toHaveBeenCalledWith({
@@ -411,8 +416,11 @@ describe("wishlistRouter.updateDesign", () => {
 				themeId: "crema-elegante",
 				layoutId: "editorial",
 				fontPairing: "sans-modern",
+				headingFont: null,
+				bodyFont: null,
 				buttonStyle: "pill",
 				coverImageUrl: null,
+				coverImageUrls: [],
 			},
 			select: {
 				id: true,
@@ -420,8 +428,11 @@ describe("wishlistRouter.updateDesign", () => {
 				themeId: true,
 				layoutId: true,
 				fontPairing: true,
+				headingFont: true,
+				bodyFont: true,
 				buttonStyle: true,
 				coverImageUrl: true,
+				coverImageUrls: true,
 				updatedAt: true,
 			},
 		});

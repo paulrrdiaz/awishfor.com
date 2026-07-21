@@ -2,69 +2,34 @@ import Link from "next/link";
 
 export function FinalCta() {
 	return (
-		<section
-			className="relative overflow-hidden px-11 py-[92px] text-center"
-			style={{
-				background: "linear-gradient(150deg,#1B4A30,#0F3320 60%,#0A2218)",
-			}}
-		>
+		<section className="relative m-cta-bg overflow-hidden px-11 py-[92px] text-center">
 			<div
-				className="m-blob"
+				className="-top-[100px] right-[20%] m-blob h-[320px] w-[320px] bg-[#3A8A54] opacity-[0.38] blur-[90px]"
 				data-float
-				style={{
-					width: 320,
-					height: 320,
-					background: "#3A8A54",
-					filter: "blur(90px)",
-					opacity: 0.38,
-					top: -100,
-					right: "20%",
-				}}
 			/>
 			<div
-				className="m-blob"
+				className="-bottom-[60px] left-[12%] m-blob h-[220px] w-[220px] bg-[#BCE25A] opacity-20 blur-[70px]"
 				data-float-rev
-				style={{
-					width: 220,
-					height: 220,
-					background: "#BCE25A",
-					filter: "blur(70px)",
-					opacity: 0.2,
-					bottom: -60,
-					left: "12%",
-				}}
 			/>
 			<div
-				className="m-blob"
+				className="top-[20%] left-[5%] m-blob h-[140px] w-[140px] bg-[#7FB069] opacity-25 blur-[50px]"
 				data-float-3
-				style={{
-					width: 140,
-					height: 140,
-					background: "#7FB069",
-					filter: "blur(50px)",
-					opacity: 0.25,
-					top: "20%",
-					left: "5%",
-				}}
 			/>
 			<div
-				className="pointer-events-none absolute text-[28px] opacity-70"
+				className="pointer-events-none absolute top-[32px] left-[11%] text-[28px] opacity-70"
 				data-float
-				style={{ top: 32, left: "11%" }}
 			>
 				🎁
 			</div>
 			<div
-				className="pointer-events-none absolute text-[26px] opacity-70"
+				className="pointer-events-none absolute right-[13%] bottom-[36px] text-[26px] opacity-70"
 				data-float-rev
-				style={{ bottom: 36, right: "13%" }}
 			>
 				🌿
 			</div>
 			<div
-				className="pointer-events-none absolute text-[20px] opacity-60"
+				className="pointer-events-none absolute top-[64px] right-[7%] text-[20px] opacity-60"
 				data-float-3
-				style={{ top: 64, right: "7%" }}
 			>
 				✨
 			</div>

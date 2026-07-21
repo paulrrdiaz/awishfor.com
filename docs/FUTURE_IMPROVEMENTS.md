@@ -143,4 +143,6 @@ Future ideas stay out of MVP tasks unless required for launch.
 - E2E tests.
 - Visual regression tests.
 - Accessibility audit.
+- Remove the legacy `grid`, `editorial`, and `minimal` public layouts (and their components) before PROD launch, migrating any wishlists still referencing them to a design-exploration layout.
+- Drop the deprecated `Wishlist.coverImageUrl` and `Wishlist.fontPairing` columns once all reads go through `coverImageUrls`/`headingFont`/`bodyFont`, including a data migration for any rows relying on the legacy fallback.
 - Load testing for public pages.

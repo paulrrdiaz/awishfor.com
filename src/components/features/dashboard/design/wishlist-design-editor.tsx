@@ -1,16 +1,24 @@
 "use client";
 
-import { type CSSProperties, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { ImageUpload } from "@/components/features/wishlist/image-upload";
+import { ButtonStyleChips } from "@/components/features/wishlist/button-style-chips";
+import { FontSelect } from "@/components/features/wishlist/font-select";
+import { LayoutPicker } from "@/components/features/wishlist/layout-picker";
+import { MultiImageUpload } from "@/components/features/wishlist/multi-image-upload";
+import { ThemeSwatchPicker } from "@/components/features/wishlist/theme-swatch-picker";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAllButtonStyles } from "@/config/public-button-styles";
-import { getAllFontPairingOptions } from "@/config/public-fonts";
-import { getAllLayouts } from "@/config/public-layouts";
+import {
+	DEFAULT_BODY_FONT_ID,
+	DEFAULT_HEADING_FONT_ID,
+	getAllBodyFontOptions,
+	getAllHeadingFontOptions,
+} from "@/config/public-fonts";
+import { getAllLayouts, resolveLayout } from "@/config/public-layouts";
 import { getAllThemes } from "@/config/public-themes";
-import { cn } from "@/lib/utils";
 import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
 import {
 	type PersistedWishlistDesign,
@@ -26,57 +34,9 @@ type Props = {
 
 const THEMES = getAllThemes();
 const LAYOUTS = getAllLayouts();
-const FONT_PAIRINGS = getAllFontPairingOptions();
+const HEADING_FONTS = getAllHeadingFontOptions();
+const BODY_FONTS = getAllBodyFontOptions();
 const BUTTON_STYLES = getAllButtonStyles();
-
-function SelectorGrid<
-	T extends { id: string; label: string; description?: string },
->({
-	label,
-	options,
-	selected,
-	onSelect,
-	accentStyle,
-}: {
-	label: string;
-	options: T[];
-	selected: string | null;
-	onSelect: (id: string) => void;
-	accentStyle?: (option: T) => CSSProperties;
-}) {
-	return (
-		<div className="space-y-3">
-			<p className="font-medium text-foreground text-sm">{label}</p>
-			<div className="grid gap-2 sm:grid-cols-2">
-				{options.map((option) => {
-					const isSelected = selected === option.id;
-					return (
-						<button
-							aria-pressed={isSelected}
-							className={cn(
-								"rounded-xl border bg-background p-3 text-left transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-								isSelected
-									? "border-foreground shadow-sm ring-1 ring-foreground/10"
-									: "border-border",
-							)}
-							key={option.id}
-							onClick={() => onSelect(option.id)}
-							style={accentStyle?.(option)}
-							type="button"
-						>
-							<span className="block font-medium text-sm">{option.label}</span>
-							{"description" in option && option.description ? (
-								<span className="mt-1 block text-muted-foreground text-xs leading-snug">
-									{option.description}
-								</span>
-							) : null}
-						</button>
-					);
-				})}
-			</div>
-		</div>
-	);
-}
 
 function statusLabel(status: string) {
 	if (status === "published") {
@@ -93,8 +53,11 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 		themeId: wishlist.themeId,
 		layoutId: wishlist.layoutId,
 		fontPairing: wishlist.fontPairing,
+		headingFont: wishlist.headingFont,
+		bodyFont: wishlist.bodyFont,
 		buttonStyle: wishlist.buttonStyle,
 		coverImageUrl: wishlist.coverImageUrl,
+		coverImageUrls: wishlist.coverImageUrls,
 	});
 
 	const updateDesign = api.wishlist.updateDesign.useMutation({
@@ -109,13 +72,15 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 	const hasChanges =
 		design.themeId !== wishlist.themeId ||
 		design.layoutId !== wishlist.layoutId ||
-		design.fontPairing !== wishlist.fontPairing ||
+		design.headingFont !== wishlist.headingFont ||
+		design.bodyFont !== wishlist.bodyFont ||
 		design.buttonStyle !== wishlist.buttonStyle ||
 		design.coverImageUrl !== wishlist.coverImageUrl;
 
 	const previewViewModel = draftToPreview(
 		persistedWishlistToPreviewDraft(wishlist, design),
 	);
+	const selectedLayout = resolveLayout(design.layoutId);
 
 	const setDesignField = <Key extends keyof PersistedWishlistDesign>(
 		key: Key,
@@ -169,46 +134,63 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 
 			<div className="grid gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
 				<section className="space-y-6 rounded-2xl border bg-card p-5 shadow-sm">
-					<SelectorGrid
-						accentStyle={(theme) => ({
-							borderColor:
-								design.themeId === theme.id ? theme.preview.primary : undefined,
-						})}
-						label="Tema de color"
-						onSelect={(id) => setDesignField("themeId", id)}
-						options={THEMES}
-						selected={design.themeId}
+					<div className="space-y-3">
+						<p className="font-medium text-foreground text-sm">Tema de color</p>
+						<ThemeSwatchPicker
+							onSelect={(id) => setDesignField("themeId", id)}
+							options={THEMES}
+							selected={design.themeId}
+						/>
+					</div>
+
+					<div className="space-y-3">
+						<p className="font-medium text-foreground text-sm">Disposición</p>
+						<LayoutPicker
+							onSelect={(id) => setDesignField("layoutId", id)}
+							options={LAYOUTS}
+							selected={design.layoutId}
+						/>
+					</div>
+
+					<FontSelect
+						defaultId={DEFAULT_HEADING_FONT_ID}
+						label="Tipografía · Títulos"
+						onSelect={(id) => setDesignField("headingFont", id)}
+						options={HEADING_FONTS}
+						selected={design.headingFont}
 					/>
 
-					<SelectorGrid
-						label="Disposición"
-						onSelect={(id) => setDesignField("layoutId", id)}
-						options={LAYOUTS}
-						selected={design.layoutId}
-					/>
-
-					<SelectorGrid
-						label="Tipografía"
-						onSelect={(id) => setDesignField("fontPairing", id)}
-						options={FONT_PAIRINGS}
-						selected={design.fontPairing}
-					/>
-
-					<SelectorGrid
-						label="Botones"
-						onSelect={(id) => setDesignField("buttonStyle", id)}
-						options={BUTTON_STYLES}
-						selected={design.buttonStyle}
+					<FontSelect
+						defaultId={DEFAULT_BODY_FONT_ID}
+						label="Tipografía · Texto"
+						onSelect={(id) => setDesignField("bodyFont", id)}
+						options={BODY_FONTS}
+						selected={design.bodyFont}
 					/>
 
 					<div className="space-y-3">
 						<p className="font-medium text-foreground text-sm">
-							Imagen de portada
+							Estilo de botón
 						</p>
-						<ImageUpload
+						<ButtonStyleChips
+							onSelect={(id) => setDesignField("buttonStyle", id)}
+							options={BUTTON_STYLES}
+							selected={design.buttonStyle}
+						/>
+					</div>
+
+					<div className="space-y-3">
+						<p className="font-medium text-foreground text-sm">
+							Imágenes de portada
+						</p>
+						<MultiImageUpload
 							endpoint="coverImage"
-							onChange={(url) => setDesignField("coverImageUrl", url)}
-							value={design.coverImageUrl}
+							hint={`Este diseño muestra ${selectedLayout.heroImageSlots} ${selectedLayout.heroImageSlots === 1 ? "foto" : "fotos"}`}
+							onChange={(urls) => {
+								setDesignField("coverImageUrls", urls);
+								setDesignField("coverImageUrl", urls[0] ?? null);
+							}}
+							value={design.coverImageUrls}
 						/>
 					</div>
 				</section>

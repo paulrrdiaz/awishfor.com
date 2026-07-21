@@ -143,6 +143,13 @@ export const wishlistCoverImageUrlSchema = z.preprocess((value) => {
 
 	return value;
 }, z.url("Cover image URL must be a valid URL").nullable().optional());
+export const WISHLIST_MAX_COVER_IMAGES = 6;
+export const wishlistCoverImageUrlsSchema = z
+	.array(z.url("Cover image URL must be a valid URL"))
+	.max(
+		WISHLIST_MAX_COVER_IMAGES,
+		`You can add at most ${WISHLIST_MAX_COVER_IMAGES} cover images`,
+	);
 export const wishlistThemeIdSchema = optionalNullableTrimmedString(
 	"Theme id",
 	64,
@@ -157,6 +164,14 @@ export const wishlistButtonStyleSchema = optionalNullableTrimmedString(
 );
 export const wishlistFontPairingSchema = optionalNullableTrimmedString(
 	"Font pairing",
+	64,
+);
+export const wishlistHeadingFontSchema = optionalNullableTrimmedString(
+	"Heading font",
+	64,
+);
+export const wishlistBodyFontSchema = optionalNullableTrimmedString(
+	"Body font",
 	64,
 );
 
@@ -175,10 +190,13 @@ const wishlistCreateUpdateShape = {
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
 	coverImageUrl: wishlistCoverImageUrlSchema,
+	coverImageUrls: wishlistCoverImageUrlsSchema.default([]),
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
 	buttonStyle: wishlistButtonStyleSchema,
 	fontPairing: wishlistFontPairingSchema,
+	headingFont: wishlistHeadingFontSchema,
+	bodyFont: wishlistBodyFontSchema,
 	showHowItWorks: z.boolean().default(true),
 } satisfies z.ZodRawShape;
 
@@ -204,10 +222,13 @@ export const updateWishlistSchema = z.object({
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
 	coverImageUrl: wishlistCoverImageUrlSchema,
+	coverImageUrls: wishlistCoverImageUrlsSchema.optional(),
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
 	buttonStyle: wishlistButtonStyleSchema,
 	fontPairing: wishlistFontPairingSchema,
+	headingFont: wishlistHeadingFontSchema,
+	bodyFont: wishlistBodyFontSchema,
 	showHowItWorks: z.boolean().optional(),
 });
 
@@ -240,10 +261,13 @@ export type CreateWishlistInput = {
 	eventLocation?: string | null;
 	dressCode?: string | null;
 	coverImageUrl?: string | null;
+	coverImageUrls?: string[];
 	themeId?: string | null;
 	layoutId?: string | null;
 	buttonStyle?: string | null;
 	fontPairing?: string | null;
+	headingFont?: string | null;
+	bodyFont?: string | null;
 	showHowItWorks?: boolean;
 };
 export type UpdateWishlistInput = {
@@ -263,10 +287,13 @@ export type UpdateWishlistInput = {
 	eventLocation?: string | null;
 	dressCode?: string | null;
 	coverImageUrl?: string | null;
+	coverImageUrls?: string[];
 	themeId?: string | null;
 	layoutId?: string | null;
 	buttonStyle?: string | null;
 	fontPairing?: string | null;
+	headingFont?: string | null;
+	bodyFont?: string | null;
 	showHowItWorks?: boolean;
 };
 export const checkSlugAvailabilitySchema = z.object({
@@ -296,8 +323,11 @@ export const updateWishlistDesignSchema = z.object({
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
 	fontPairing: wishlistFontPairingSchema,
+	headingFont: wishlistHeadingFontSchema,
+	bodyFont: wishlistBodyFontSchema,
 	buttonStyle: wishlistButtonStyleSchema,
 	coverImageUrl: wishlistCoverImageUrlSchema,
+	coverImageUrls: wishlistCoverImageUrlsSchema.default([]),
 });
 
 export type PublishWishlistInput = z.infer<typeof publishWishlistSchema>;

@@ -6,6 +6,7 @@ const STORES = [
 	"sears",
 	"etsy",
 	"palacio de hierro",
+	"ripley",
 ];
 
 export function PartnersMarquee() {
@@ -34,7 +35,7 @@ export function PartnersMarquee() {
 				</div>
 			</div>
 			<p className="mt-5 text-[14px] text-[var(--mmut)]">
-				y cualquier tienda con enlace web
+				Y de cualquier tienda con enlace — funciona en todo el mundo.
 			</p>
 		</section>
 	);

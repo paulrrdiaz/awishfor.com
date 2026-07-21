@@ -17,9 +17,8 @@ export function ExamplePreview() {
 				</p>
 			</div>
 			<div
-				className="m-card mx-auto max-w-[820px] overflow-hidden text-left"
+				className="m-card mx-auto max-w-[820px] overflow-hidden text-left shadow-[0_20px_60px_rgba(60,40,20,0.1)]"
 				data-reveal
-				style={{ boxShadow: "0 20px 60px rgba(60,40,20,.1)" }}
 			>
 				<PublicWishlistPage mode="compact" wishlist={DEMO_WISHLIST} />
 			</div>

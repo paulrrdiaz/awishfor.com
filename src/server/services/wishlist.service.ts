@@ -6,6 +6,7 @@ import {
 	Locale,
 	WishlistStatus,
 } from "@/generated/prisma/client";
+import { withCoverImageUrlMirror } from "@/lib/wishlist/cover-images";
 import {
 	evaluatePublishReadiness,
 	PublishReadinessError,
@@ -139,27 +140,30 @@ const sortDraftGifts = (gifts: SaveDraftGiftInput[]) =>
 		.sort((a, b) => a.gift.sortOrder - b.gift.sortOrder || a.index - b.index)
 		.map(({ gift }) => gift);
 
-const wishlistDraftToData = (input: SaveDraftDraftContent) => ({
-	title: input.title,
-	slug: input.slug,
-	eventType: input.eventType,
-	language: input.language ?? Locale.es,
-	currency: input.currency ?? Currency.PEN,
-	heroTitle: input.heroTitle ?? null,
-	welcomeMessage: input.welcomeMessage ?? null,
-	thankYouMessage: input.thankYouMessage ?? null,
-	displayName: input.displayName ?? null,
-	eventDate: toDraftDate(input.eventDate ?? null),
-	eventTime: input.eventTime ?? null,
-	eventLocation: input.eventLocation ?? null,
-	dressCode: input.dressCode ?? null,
-	coverImageUrl: input.coverImageUrl ?? null,
-	themeId: input.themeId ?? null,
-	layoutId: input.layoutId ?? null,
-	buttonStyle: input.buttonStyle ?? null,
-	fontPairing: input.fontPairing ?? null,
-	showHowItWorks: input.showHowItWorks ?? true,
-});
+const wishlistDraftToData = (input: SaveDraftDraftContent) =>
+	withCoverImageUrlMirror({
+		title: input.title,
+		slug: input.slug,
+		eventType: input.eventType,
+		language: input.language ?? Locale.es,
+		currency: input.currency ?? Currency.PEN,
+		heroTitle: input.heroTitle ?? null,
+		welcomeMessage: input.welcomeMessage ?? null,
+		thankYouMessage: input.thankYouMessage ?? null,
+		displayName: input.displayName ?? null,
+		eventDate: toDraftDate(input.eventDate ?? null),
+		eventTime: input.eventTime ?? null,
+		eventLocation: input.eventLocation ?? null,
+		dressCode: input.dressCode ?? null,
+		coverImageUrls: input.coverImageUrls ?? [],
+		themeId: input.themeId ?? null,
+		layoutId: input.layoutId ?? null,
+		buttonStyle: input.buttonStyle ?? null,
+		fontPairing: input.fontPairing ?? null,
+		headingFont: input.headingFont ?? null,
+		bodyFont: input.bodyFont ?? null,
+		showHowItWorks: input.showHowItWorks ?? true,
+	});
 
 const mapServerDraft = (
 	wishlist: DraftWishlistRecord,
@@ -178,10 +182,13 @@ const mapServerDraft = (
 	eventLocation: wishlist.eventLocation,
 	dressCode: wishlist.dressCode,
 	coverImageUrl: wishlist.coverImageUrl,
+	coverImageUrls: wishlist.coverImageUrls,
 	themeId: wishlist.themeId,
 	layoutId: wishlist.layoutId,
 	buttonStyle: wishlist.buttonStyle,
 	fontPairing: wishlist.fontPairing,
+	headingFont: wishlist.headingFont,
+	bodyFont: wishlist.bodyFont,
 	showHowItWorks: wishlist.showHowItWorks,
 	categories: wishlist.categories.map((category) => category.name),
 	gifts: wishlist.gifts.map((gift) => ({
@@ -323,11 +330,15 @@ export const createWishlist = async (
 			eventTime: input.eventTime ?? null,
 			eventLocation: input.eventLocation ?? null,
 			dressCode: input.dressCode ?? null,
-			coverImageUrl: input.coverImageUrl ?? null,
+			...withCoverImageUrlMirror({
+				coverImageUrls: input.coverImageUrls ?? [],
+			}),
 			themeId: input.themeId ?? null,
 			layoutId: input.layoutId ?? null,
 			buttonStyle: input.buttonStyle ?? null,
 			fontPairing: input.fontPairing ?? null,
+			headingFont: input.headingFont ?? null,
+			bodyFont: input.bodyFont ?? null,
 			showHowItWorks: input.showHowItWorks ?? true,
 			status: WishlistStatus.draft,
 			publishedAt: null,

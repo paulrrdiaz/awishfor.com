@@ -45,10 +45,13 @@ export type PublicWishlistViewModel = {
 	eventLocation: string | null;
 	dressCode: string | null;
 	coverImageUrl: string | null;
+	coverImageUrls: string[];
 	themeId: string | null;
 	layoutId: string | null;
 	buttonStyle: string | null;
 	fontPairing: string | null;
+	headingFont: string | null;
+	bodyFont: string | null;
 	showHowItWorks: boolean;
 	categories: PublicCategoryViewModel[];
 	gifts: PublicGiftViewModel[];
@@ -161,10 +164,13 @@ export type DashboardWishlistCardViewModel = {
 	eventLocation: string | null;
 	dressCode: string | null;
 	coverImageUrl: string | null;
+	coverImageUrls: string[];
 	themeId: string | null;
 	layoutId: string | null;
 	buttonStyle: string | null;
 	fontPairing: string | null;
+	headingFont: string | null;
+	bodyFont: string | null;
 	showHowItWorks: boolean;
 	status: string;
 	visibleGiftCount: number;

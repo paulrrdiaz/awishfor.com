@@ -2,7 +2,14 @@ import type { DraftGift, WishlistDraft } from "@/stores/wishlist-wizard.store";
 
 export type PersistedWishlistDesign = Pick<
 	WishlistDraft,
-	"themeId" | "layoutId" | "fontPairing" | "buttonStyle" | "coverImageUrl"
+	| "themeId"
+	| "layoutId"
+	| "fontPairing"
+	| "headingFont"
+	| "bodyFont"
+	| "buttonStyle"
+	| "coverImageUrl"
+	| "coverImageUrls"
 >;
 
 export type PersistedWishlistPreviewSource = {
@@ -15,6 +22,7 @@ export type PersistedWishlistPreviewSource = {
 	eventLocation: string | null;
 	dressCode: string | null;
 	coverImageUrl: string | null;
+	coverImageUrls: string[];
 	heroTitle: string | null;
 	welcomeMessage: string | null;
 	thankYouMessage: string | null;
@@ -34,6 +42,8 @@ export type PersistedWishlistPreviewSource = {
 	layoutId: string | null;
 	buttonStyle: string | null;
 	fontPairing: string | null;
+	headingFont: string | null;
+	bodyFont: string | null;
 	showHowItWorks: boolean;
 };
 
@@ -50,7 +60,9 @@ export function persistedWishlistToPreviewDraft(
 	wishlist: PersistedWishlistPreviewSource,
 	design: Partial<PersistedWishlistDesign> = {},
 ): WishlistDraft {
-	const designValue = <Key extends keyof PersistedWishlistDesign>(
+	const designValue = <
+		Key extends Exclude<keyof PersistedWishlistDesign, "coverImageUrls">,
+	>(
 		key: Key,
 	): PersistedWishlistDesign[Key] =>
 		key in design ? (design[key] ?? null) : wishlist[key];
@@ -65,6 +77,7 @@ export function persistedWishlistToPreviewDraft(
 		eventLocation: wishlist.eventLocation ?? "",
 		dressCode: wishlist.dressCode ?? "",
 		coverImageUrl: designValue("coverImageUrl"),
+		coverImageUrls: design.coverImageUrls ?? wishlist.coverImageUrls,
 		heroTitle: wishlist.heroTitle ?? "",
 		welcomeMessage: wishlist.welcomeMessage ?? "",
 		thankYouMessage: wishlist.thankYouMessage ?? "",
@@ -73,6 +86,8 @@ export function persistedWishlistToPreviewDraft(
 		layoutId: designValue("layoutId"),
 		buttonStyle: designValue("buttonStyle"),
 		fontPairing: designValue("fontPairing"),
+		headingFont: designValue("headingFont"),
+		bodyFont: designValue("bodyFont"),
 		showHowItWorks: wishlist.showHowItWorks,
 		gifts: wishlist.gifts.map((gift) => ({
 			id: gift.id,
