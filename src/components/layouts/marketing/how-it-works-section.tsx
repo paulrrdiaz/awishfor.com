@@ -41,7 +41,10 @@ export function HowItWorksSection() {
 		>
 			<div className="mb-[56px] text-center" data-reveal>
 				<div className="m-eyebrow mb-3">Cómo funciona</div>
-				<h2 className="m-serif font-semibold text-[40px]">
+				<h2 className="m-serif font-semibold text-[32px] lg:hidden">
+					Cuatro pasos
+				</h2>
+				<h2 className="m-serif hidden font-semibold text-[40px] lg:block">
 					Cuatro pasos. Cero complicaciones.
 				</h2>
 			</div>

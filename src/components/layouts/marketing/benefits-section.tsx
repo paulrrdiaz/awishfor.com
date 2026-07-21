@@ -34,14 +34,17 @@ export function BenefitsSection() {
 		<section className="border-[var(--mline)] border-t bg-white px-11 py-[76px]">
 			<div className="mx-auto mb-[52px] max-w-[560px] text-center" data-reveal>
 				<div className="m-eyebrow mb-3">Por qué A Wish For</div>
-				<h2 className="m-serif font-semibold text-[40px] leading-[1.1]">
+				<h2 className="m-serif font-semibold text-[32px] leading-[1.1] lg:hidden">
+					Todo lo que necesitas
+				</h2>
+				<h2 className="m-serif hidden font-semibold text-[40px] leading-[1.1] lg:block">
 					Todo lo que necesitas,
 					<br />
 					sin complicaciones
 				</h2>
 			</div>
 			<div
-				className="mx-auto grid max-w-[1152px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+				className="mx-auto grid max-w-[1152px] grid-cols-2 gap-4 lg:grid-cols-4"
 				data-reveal-stagger
 			>
 				{BENEFITS.map((b) => (

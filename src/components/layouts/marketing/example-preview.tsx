@@ -9,10 +9,16 @@ export function ExamplePreview() {
 		>
 			<div data-reveal>
 				<div className="m-eyebrow mb-3">Un ejemplo real</div>
-				<h2 className="m-serif mb-2 font-semibold text-[38px]">
+				<h2 className="m-serif mb-2 font-semibold text-[30px] lg:hidden">
+					Una wishlist publicada
+				</h2>
+				<h2 className="m-serif mb-2 hidden font-semibold text-[38px] lg:block">
 					Así se ve una wishlist publicada
 				</h2>
-				<p className="mb-8 text-[15px] text-[var(--mmut)]">
+				<p className="mb-8 text-[15px] text-[var(--mmut)] lg:hidden">
+					Con fotos reales de cada regalo.
+				</p>
+				<p className="mb-8 hidden text-[15px] text-[var(--mmut)] lg:block">
 					Construida con los mismos componentes públicos, en modo compacto.
 				</p>
 			</div>

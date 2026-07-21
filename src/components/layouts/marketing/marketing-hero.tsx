@@ -59,14 +59,25 @@ export function MarketingHero() {
 						/>
 						Wishlists con buena vibra ✨
 					</div>
-					<h1 className="m-serif mb-[22px] font-semibold text-[62px] text-[var(--mink)] leading-[1.02] tracking-[-0.025em]">
+					<h1 className="m-serif mb-[22px] font-semibold text-[38px] text-[var(--mink)] leading-[1.08] tracking-[-0.02em] lg:hidden lg:text-[62px]">
+						Crea una wishlist{" "}
+						<span className="m-shimmer" data-shimmer>
+							hermosa
+						</span>{" "}
+						para tus momentos.
+					</h1>
+					<h1 className="m-serif mb-[22px] hidden font-semibold text-[62px] text-[var(--mink)] leading-[1.02] tracking-[-0.025em] lg:block">
 						Crea una wishlist{" "}
 						<span className="m-shimmer" data-shimmer>
 							hermosa
 						</span>{" "}
 						para tus momentos especiales.
 					</h1>
-					<p className="mb-8 max-w-[480px] text-[17px] text-[var(--mmut)] leading-[1.65]">
+					<p className="mb-8 max-w-[480px] text-[15px] text-[var(--mmut)] leading-[1.6] lg:hidden">
+						Agrega regalos de cualquier tienda, personaliza tu página y
+						compártela por enlace, WhatsApp o QR.
+					</p>
+					<p className="mb-8 hidden max-w-[480px] text-[17px] text-[var(--mmut)] leading-[1.65] lg:block">
 						Agrega regalos de cualquier tienda, personaliza tu página con temas
 						hermosos y compártela con tus invitados por enlace, WhatsApp o QR.
 						Ellos marcan lo que compran para no repetir.

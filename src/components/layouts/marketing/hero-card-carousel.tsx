@@ -264,15 +264,19 @@ export function HeroCardCarousel() {
 					<button
 						aria-current={i === current}
 						aria-label={`Ir al ejemplo: ${ex.title}`}
-						className={`h-2 rounded-full transition-all ${
-							i === current
-								? "w-6 bg-[var(--mink)]"
-								: "w-2 bg-[var(--mline)] hover:bg-[var(--mrose)]"
-						}`}
+						className="flex h-11 w-11 items-center justify-center"
 						key={ex.title}
 						onClick={() => api?.scrollTo(i)}
 						type="button"
-					/>
+					>
+						<span
+							className={`h-2 rounded-full transition-all ${
+								i === current
+									? "w-6 bg-[var(--mink)]"
+									: "w-2 bg-[var(--mline)] hover:bg-[var(--mrose)]"
+							}`}
+						/>
+					</button>
 				))}
 			</div>
 		</Carousel>

@@ -38,6 +38,15 @@ const SOCIALS = [
 	{ icon: MessageCircle, label: "WhatsApp" },
 ];
 
+const MOBILE_LINKS = [
+	{ label: "Cómo funciona", href: "#como-funciona" },
+	{ label: "Temas", href: "#temas" },
+	{ label: "Ejemplos", href: "#ejemplo" },
+	{ label: "FAQ", href: "#faq" },
+	{ label: "Términos", href: "/terms" },
+	{ label: "Privacidad", href: "/privacy" },
+];
+
 export function MarketingFooter() {
 	return (
 		<footer className="border-[#BCE25A] border-t-[3px] bg-[#EEF9E6] px-11 pt-14">
@@ -59,7 +68,7 @@ export function MarketingFooter() {
 						{SOCIALS.map((s) => (
 							<button
 								aria-label={s.label}
-								className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[var(--mline)] bg-white text-[var(--mink)] transition-colors hover:border-[var(--mrose)]"
+								className="flex h-11 w-11 items-center justify-center rounded-[10px] border border-[var(--mline)] bg-white text-[var(--mink)] transition-colors hover:border-[var(--mrose)] md:h-9 md:w-9"
 								key={s.label}
 								type="button"
 							>
@@ -69,9 +78,22 @@ export function MarketingFooter() {
 					</div>
 				</div>
 
-				{/* link columns */}
+				{/* flat link list, below md */}
+				<div className="flex flex-col gap-1 md:hidden">
+					{MOBILE_LINKS.map((l) => (
+						<Link
+							className="flex min-h-11 items-center text-[13.5px] text-[var(--mink)] hover:text-[var(--mrose)]"
+							href={l.href}
+							key={l.label}
+						>
+							{l.label}
+						</Link>
+					))}
+				</div>
+
+				{/* link columns, md:+ */}
 				{COLUMNS.map((col) => (
-					<div key={col.title}>
+					<div className="hidden md:block" key={col.title}>
 						<div className="m-eyebrow mb-[18px] text-[10px]">{col.title}</div>
 						<div className="flex flex-col gap-[11px]">
 							{col.links.map((l) => (
@@ -99,7 +121,10 @@ export function MarketingFooter() {
 			</div>
 
 			<div className="flex flex-col items-center justify-between gap-2 py-5 text-[12px] text-[var(--mmut)] sm:flex-row">
-				<span>© 2025 A Wish For · awishfor.com</span>
+				<span className="md:hidden">© 2025 A Wish For</span>
+				<span className="hidden md:inline">
+					© 2025 A Wish For · awishfor.com
+				</span>
 				<span>Hecho con cariño en México 🌿</span>
 			</div>
 		</footer>

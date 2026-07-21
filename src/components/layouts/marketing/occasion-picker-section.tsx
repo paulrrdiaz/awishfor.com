@@ -45,7 +45,7 @@ export function OccasionPickerSection() {
 				</p>
 			</div>
 			<div
-				className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+				className="grid grid-cols-2 gap-4 lg:grid-cols-4"
 				data-reveal-stagger
 			>
 				{OCCASIONS.map((o) => (
@@ -76,7 +76,8 @@ export function OccasionPickerSection() {
 								{o.subtitle}
 							</div>
 							<span className="inline-flex items-center gap-[7px] rounded-full bg-[var(--mlime)] px-4 py-[9px] font-bold text-[#1B3A12] text-[12.5px]">
-								Crear mi lista →
+								<span className="lg:hidden">Crear →</span>
+								<span className="hidden lg:inline">Crear mi lista →</span>
 							</span>
 						</div>
 					</Link>

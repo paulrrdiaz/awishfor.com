@@ -8,11 +8,11 @@ export function FinalCta() {
 				data-float
 			/>
 			<div
-				className="-bottom-[60px] left-[12%] m-blob h-[220px] w-[220px] bg-[#BCE25A] opacity-20 blur-[70px]"
+				className="-bottom-[60px] left-[12%] m-blob hidden h-[220px] w-[220px] bg-[#BCE25A] opacity-20 blur-[70px] lg:block"
 				data-float-rev
 			/>
 			<div
-				className="top-[20%] left-[5%] m-blob h-[140px] w-[140px] bg-[#7FB069] opacity-25 blur-[50px]"
+				className="top-[20%] left-[5%] m-blob hidden h-[140px] w-[140px] bg-[#7FB069] opacity-25 blur-[50px] lg:block"
 				data-float-3
 			/>
 			<div
@@ -22,23 +22,29 @@ export function FinalCta() {
 				🎁
 			</div>
 			<div
-				className="pointer-events-none absolute right-[13%] bottom-[36px] text-[26px] opacity-70"
+				className="pointer-events-none absolute right-[13%] bottom-[36px] hidden text-[26px] opacity-70 lg:block"
 				data-float-rev
 			>
 				🌿
 			</div>
 			<div
-				className="pointer-events-none absolute top-[64px] right-[7%] text-[20px] opacity-60"
+				className="pointer-events-none absolute top-[64px] right-[7%] hidden text-[20px] opacity-60 lg:block"
 				data-float-3
 			>
 				✨
 			</div>
 
 			<div className="relative" data-reveal>
-				<h2 className="m-serif mx-auto mb-[18px] max-w-[680px] font-semibold text-[52px] text-white leading-[1.07]">
+				<h2 className="m-serif mx-auto mb-[18px] max-w-[680px] font-semibold text-[34px] text-white leading-[1.15] lg:hidden">
+					Tu momento especial merece una página hermosa.
+				</h2>
+				<h2 className="m-serif mx-auto mb-[18px] hidden max-w-[680px] font-semibold text-[52px] text-white leading-[1.07] lg:block">
 					Tu próximo momento especial merece una página hermosa.
 				</h2>
-				<p className="mb-[34px] text-[17px] text-[rgba(255,255,255,0.75)] leading-[1.6]">
+				<p className="mb-[34px] text-[15px] text-[rgba(255,255,255,0.75)] leading-[1.55] lg:hidden">
+					Créala en minutos. Es gratis y se siente bonito.
+				</p>
+				<p className="mb-[34px] hidden text-[17px] text-[rgba(255,255,255,0.75)] leading-[1.6] lg:block">
 					Crea tu wishlist en minutos. Es gratis y se siente bonito. 🌿
 				</p>
 				<Link

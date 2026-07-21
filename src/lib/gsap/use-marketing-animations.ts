@@ -11,16 +11,18 @@ gsap.registerPlugin(ScrollTrigger);
  * Drives every marketing-landing animation from a single `gsap.context()` scoped
  * to `root`. All motion is gated behind `prefers-reduced-motion`: when the user
  * prefers reduced motion (or JS never runs) nothing animates and content stays at
- * its final, fully-visible state.
+ * its final, fully-visible state. The purely decorative loops (mesh drift, floating
+ * blobs/emoji) are additionally skipped below the `md` breakpoint, independent of
+ * `prefers-reduced-motion`.
  *
  * Animations attach by data-attribute so section markup can stay server-rendered:
  *   data-reveal        scroll-triggered fade-up (the `data-reveal-stagger` ancestor
  *                      staggers its direct [data-reveal] children)
- *   data-float / -rev / -3   ambient floating blobs & emoji
+ *   data-float / -rev / -3   ambient floating blobs & emoji (desktop-only, `md`+)
  *   data-bob           hero teaser card bob + slight tilt
  *   data-shimmer       headline gradient sweep
  *   data-marquee       partner-logo strip (track must be duplicated 2x)
- *   data-mesh          animated hero mesh gradient
+ *   data-mesh          animated hero mesh gradient (desktop-only, `md`+)
  *   data-pulse         pulsing badge dot
  *   data-spin          slow-spinning accent chip
  *   data-glow          primary CTA glow pulse
@@ -35,6 +37,13 @@ export function useMarketingAnimations(root: RefObject<HTMLElement | null>) {
 		) {
 			return;
 		}
+
+		// Ambient decorative loops (mesh drift, floating blobs/emoji) are skipped
+		// below `md` regardless of motion preference — they're purely decorative
+		// weight on small viewports, independent of prefers-reduced-motion.
+		const isDesktopViewport =
+			typeof window !== "undefined" &&
+			window.matchMedia("(min-width: 768px)").matches;
 
 		const ctx = gsap.context((self) => {
 			const q = self.selector;
@@ -68,33 +77,35 @@ export function useMarketingAnimations(root: RefObject<HTMLElement | null>) {
 				});
 			}
 
-			// Ambient floats
-			for (const node of q("[data-float]") as HTMLElement[]) {
-				gsap.to(node, {
-					y: -16,
-					duration: 6,
-					ease: "sine.inOut",
-					yoyo: true,
-					repeat: -1,
-				});
-			}
-			for (const node of q("[data-float-rev]") as HTMLElement[]) {
-				gsap.to(node, {
-					y: 16,
-					duration: 8,
-					ease: "sine.inOut",
-					yoyo: true,
-					repeat: -1,
-				});
-			}
-			for (const node of q("[data-float-3]") as HTMLElement[]) {
-				gsap.to(node, {
-					y: -12,
-					duration: 9,
-					ease: "sine.inOut",
-					yoyo: true,
-					repeat: -1,
-				});
+			// Ambient floats (decorative — skipped below `md`)
+			if (isDesktopViewport) {
+				for (const node of q("[data-float]") as HTMLElement[]) {
+					gsap.to(node, {
+						y: -16,
+						duration: 6,
+						ease: "sine.inOut",
+						yoyo: true,
+						repeat: -1,
+					});
+				}
+				for (const node of q("[data-float-rev]") as HTMLElement[]) {
+					gsap.to(node, {
+						y: 16,
+						duration: 8,
+						ease: "sine.inOut",
+						yoyo: true,
+						repeat: -1,
+					});
+				}
+				for (const node of q("[data-float-3]") as HTMLElement[]) {
+					gsap.to(node, {
+						y: -12,
+						duration: 9,
+						ease: "sine.inOut",
+						yoyo: true,
+						repeat: -1,
+					});
+				}
 			}
 
 			// Hero teaser bob (keeps the design's slight tilt)
@@ -137,15 +148,17 @@ export function useMarketingAnimations(root: RefObject<HTMLElement | null>) {
 				});
 			}
 
-			// Mesh gradient drift
-			for (const node of q("[data-mesh]") as HTMLElement[]) {
-				gsap.to(node, {
-					backgroundPosition: "100% 100%",
-					duration: 14,
-					ease: "sine.inOut",
-					yoyo: true,
-					repeat: -1,
-				});
+			// Mesh gradient drift (decorative — skipped below `md`)
+			if (isDesktopViewport) {
+				for (const node of q("[data-mesh]") as HTMLElement[]) {
+					gsap.to(node, {
+						backgroundPosition: "100% 100%",
+						duration: 14,
+						ease: "sine.inOut",
+						yoyo: true,
+						repeat: -1,
+					});
+				}
 			}
 
 			// Pulsing badge dot
