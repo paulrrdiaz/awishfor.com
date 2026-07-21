@@ -2,10 +2,18 @@
 
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 
 export default function SSOCallbackPage() {
+	return (
+		<Suspense fallback={<div id="clerk-captcha" />}>
+			<SSOCallbackContent />
+		</Suspense>
+	);
+}
+
+function SSOCallbackContent() {
 	const clerk = useClerk();
 	const { signIn } = useSignIn();
 	const { signUp } = useSignUp();

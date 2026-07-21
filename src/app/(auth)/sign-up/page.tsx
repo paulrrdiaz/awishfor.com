@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { SignUpForm } from "@/components/features/auth/sign-up-form";
 
@@ -20,7 +21,9 @@ export default function SignUpPage() {
 						</Link>
 					</p>
 				</div>
-				<SignUpForm />
+				<Suspense>
+					<SignUpForm />
+				</Suspense>
 			</div>
 		</div>
 	);

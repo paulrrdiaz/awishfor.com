@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { SignInForm } from "@/components/features/auth/sign-in-form";
 
@@ -18,7 +19,9 @@ export default function SignInPage() {
 						</Link>
 					</p>
 				</div>
-				<SignInForm />
+				<Suspense>
+					<SignInForm />
+				</Suspense>
 			</div>
 		</div>
 	);
