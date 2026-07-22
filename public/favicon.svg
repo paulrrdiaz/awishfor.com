@@ -1,0 +1,75 @@
+<svg
+	fill="none"
+	height="534"
+	viewBox="0 0 529 534"
+	width="529"
+	xmlns="http://www.w3.org/2000/svg"
+>
+	<title>A Wish For</title>
+	<metadata>
+		<rdf:RDF
+			xmlns:dc="http://purl.org/dc/elements/1.1/"
+			xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+			><rdf:Description
+				><dc:creator>RealFaviconGenerator</dc:creator
+				><dc:source
+					>https://realfavicongenerator.net</dc:source
+				></rdf:Description
+			></rdf:RDF
+		>
+	</metadata>
+	<path
+		d="M23.7196 154.769C25.8556 123.676 53.113 100.226 84.6029 102.389L464.709 128.501C496.199 130.664 519.994 157.621 517.858 188.714L515.537 222.492L21.3992 188.547L23.7196 154.769Z"
+		fill="#E9EEE3"
+		stroke="#173B36"
+		stroke-linejoin="round"
+		stroke-width="12"
+	></path>
+	<path
+		d="M67.012 191.68L469.925 219.359L453.682 455.804C450.834 497.259 414.489 528.528 372.504 525.644L121.634 508.411C79.6494 505.526 47.9215 469.581 50.7692 428.126L67.012 191.68Z"
+		fill="#DDE7D8"
+		stroke="#173B36"
+		stroke-linejoin="round"
+		stroke-width="12"
+	></path>
+	<path
+		d="M274.656 115.445L247.069 517.027"
+		stroke="#6B8F7A"
+		stroke-linecap="round"
+		stroke-width="14"
+	></path>
+	<path
+		d="M21.3992 188.547L515.537 222.492"
+		stroke="#173B36"
+		stroke-linecap="round"
+		stroke-width="12"
+	></path>
+	<path
+		d="M274.656 115.445C245.99 32.4028 174.834 -15.8497 124.485 22.1706C70.0763 63.6828 126.768 127.91 274.656 115.445Z"
+		fill="#FBFCF8"
+		stroke="#173B36"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		stroke-width="12"
+	></path>
+	<path
+		d="M274.656 115.445C314.409 37.1031 391.495 -0.965913 436.172 43.5822C484.392 92.1446 419.45 148.016 274.656 115.445Z"
+		fill="#FBFCF8"
+		stroke="#173B36"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		stroke-width="12"
+	></path>
+	<path
+		d="M274.656 115.445C261.128 90.0052 263.061 61.8569 279.555 44.1358C293.47 63.9458 291.536 92.0941 274.656 115.445Z"
+		fill="#6B8F7A"
+	></path>
+	<path
+		d="M274.656 115.445C268.085 99.9101 268.859 88.6508 277.234 77.9137C284.063 89.6953 283.289 100.955 274.656 115.445Z"
+		fill="#173B36"
+	></path>
+	<path
+		d="M257.382 366.903C258.993 343.446 231.323 329.29 212.801 348.757C197.114 326.94 167.768 337.179 166.156 360.636C163.965 392.538 207.902 420.066 207.902 420.066C207.902 420.066 255.191 398.804 257.382 366.903Z"
+		fill="#F2B9B3"
+	></path>
+</svg>
