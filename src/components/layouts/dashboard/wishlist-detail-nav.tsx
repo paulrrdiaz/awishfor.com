@@ -3,7 +3,7 @@
 import { MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { startTransition, useState } from "react";
+import { startTransition, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -97,6 +97,44 @@ export function WishlistDetailNavView({
 }: WishlistDetailNavViewProps) {
 	const statusMeta = getStatusMeta(status);
 	const [copyLabel, setCopyLabel] = useState("copiar");
+	const triggerRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+	const tabsListContainerRef = useRef<HTMLDivElement | null>(null);
+	const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+	const [measured, setMeasured] = useState(false);
+	const activeIndex = NAV_ITEMS.findIndex(
+		(item) => item.segment === activeSegment,
+	);
+
+	useLayoutEffect(() => {
+		const activeTrigger = triggerRefs.current[activeIndex];
+		if (!activeTrigger) {
+			return;
+		}
+		setIndicator({
+			left: activeTrigger.offsetLeft,
+			width: activeTrigger.offsetWidth,
+		});
+		setMeasured(true);
+	}, [activeIndex]);
+
+	useLayoutEffect(() => {
+		const container = tabsListContainerRef.current;
+		if (!container) {
+			return;
+		}
+		const observer = new ResizeObserver(() => {
+			const activeTrigger = triggerRefs.current[activeIndex];
+			if (!activeTrigger) {
+				return;
+			}
+			setIndicator({
+				left: activeTrigger.offsetLeft,
+				width: activeTrigger.offsetWidth,
+			});
+		});
+		observer.observe(container);
+		return () => observer.disconnect();
+	}, [activeIndex]);
 
 	const handleCopy = async () => {
 		const origin =
@@ -189,26 +227,47 @@ export function WishlistDetailNavView({
 						}
 						value={activeSegment}
 					>
-						<TabsList className="h-auto gap-8 rounded-none bg-transparent p-0">
-							{NAV_ITEMS.map((item) => {
-								const isActive = activeSegment === item.segment;
-								return (
-									<TabsTrigger
-										asChild
-										className={cn(
-											"rounded-none border-transparent border-b-2 bg-transparent px-0 pb-3 font-medium text-[#566174] shadow-none hover:text-[#17213a] data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-											isActive && "border-[#17213a] text-[#17213a]",
-										)}
-										key={item.segment || "summary"}
-										value={item.segment}
-									>
-										<Link href={hrefFor(wishlistId, item.segment)}>
-											{item.label}
-										</Link>
-									</TabsTrigger>
-								);
-							})}
-						</TabsList>
+						<div className="relative" ref={tabsListContainerRef}>
+							<TabsList className="h-auto gap-8 rounded-none border-none bg-transparent p-0">
+								{NAV_ITEMS.map((item, index) => {
+									const isActive = activeSegment === item.segment;
+									return (
+										<TabsTrigger
+											asChild
+											className={cn(
+												"group relative rounded-none border-transparent border-b-2 bg-transparent px-0 pb-3 font-medium text-[#566174] shadow-none outline-none hover:text-[#17213a] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[#17213a]/40 focus-visible:ring-offset-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+												isActive && "border-[#17213a] text-[#17213a]",
+											)}
+											key={item.segment || "summary"}
+											value={item.segment}
+										>
+											<Link
+												href={hrefFor(wishlistId, item.segment)}
+												ref={(node) => {
+													triggerRefs.current[index] = node;
+												}}
+											>
+												{item.label}
+												{!isActive && (
+													<span
+														aria-hidden="true"
+														className="absolute inset-x-0 bottom-0 h-0.5 bg-[#e4e4df] opacity-0 transition-opacity group-hover:opacity-100"
+													/>
+												)}
+											</Link>
+										</TabsTrigger>
+									);
+								})}
+							</TabsList>
+							<span
+								aria-hidden="true"
+								className={cn(
+									"pointer-events-none absolute bottom-0 z-10 h-0.5 bg-[#17213a] transition-[left,width,opacity] duration-200 ease-out",
+									measured ? "opacity-100" : "opacity-0",
+								)}
+								style={{ left: indicator.left, width: indicator.width }}
+							/>
+						</div>
 					</Tabs>
 				</div>
 
