@@ -17,8 +17,15 @@ export function Countdown({ eventDate }: Props) {
 	}, []);
 
 	return (
-		<div className="py-4 text-center">
-			<span className="font-medium text-primary text-sm uppercase">{text}</span>
+		<div className="px-6 py-4 text-center">
+			<div className="mx-auto inline-flex flex-col items-center gap-1 rounded-2xl bg-accent px-8 py-5">
+				<span className="font-medium text-accent-foreground/70 text-xs uppercase tracking-[0.2em]">
+					La cuenta regresiva
+				</span>
+				<span className="font-heading font-semibold text-accent-foreground text-lg">
+					{text}
+				</span>
+			</div>
 		</div>
 	);
 }

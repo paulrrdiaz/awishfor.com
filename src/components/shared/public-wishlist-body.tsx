@@ -40,8 +40,15 @@ export function PublicWishlistBody({
 			)}
 
 			{!isCompact && wishlist.welcomeMessage && (
-				<div className="mx-auto max-w-2xl px-6 py-6 text-center text-base leading-relaxed">
-					{wishlist.welcomeMessage}
+				<div className="mx-auto max-w-2xl px-6 py-6 text-center">
+					<p className="font-serif text-base italic leading-relaxed">
+						{wishlist.welcomeMessage}
+					</p>
+					{wishlist.displayName && (
+						<p className="mt-3 text-muted-foreground text-sm">
+							— {wishlist.displayName}
+						</p>
+					)}
 				</div>
 			)}
 

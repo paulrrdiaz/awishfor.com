@@ -4,13 +4,17 @@ type Props = {
 	className?: string;
 	primaryClassName?: string;
 	secondaryClassName?: string;
+	variant?: "default" | "on-photo";
 };
 
 export function HeroCtas({
 	className,
 	primaryClassName,
 	secondaryClassName,
+	variant = "default",
 }: Props) {
+	const isOnPhoto = variant === "on-photo";
+
 	return (
 		<div
 			className={cn(
@@ -20,7 +24,10 @@ export function HeroCtas({
 		>
 			<a
 				className={cn(
-					"public-btn bg-primary px-5 py-2.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90",
+					"public-btn px-5 py-2.5 text-sm transition-colors",
+					isOnPhoto
+						? "bg-white text-gray-900 hover:bg-white/90"
+						: "bg-primary text-primary-foreground hover:bg-primary/90",
 					primaryClassName,
 				)}
 				href="#regalos"
@@ -29,7 +36,10 @@ export function HeroCtas({
 			</a>
 			<a
 				className={cn(
-					"public-btn border border-current/25 px-5 py-2.5 text-sm transition-colors hover:bg-foreground/5",
+					"public-btn border px-5 py-2.5 text-sm transition-colors",
+					isOnPhoto
+						? "border-white/40 text-white hover:bg-white/10"
+						: "border-current/25 hover:bg-foreground/5",
 					secondaryClassName,
 				)}
 				href="#como-funciona"
