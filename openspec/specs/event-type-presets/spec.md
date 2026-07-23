@@ -7,13 +7,13 @@ Defines the event-type preset catalog used to seed wishlist copy, categories, sa
 
 The system SHALL expose a hardcoded preset for every `EventType` enum value (`baby_shower`, `birthday`, `wedding`, `housewarming`, `general`) from `src/config/event-type-presets.ts`. Each preset SHALL include: a Spanish `label`, a `defaultHeroTitleTemplate`, a `defaultWelcomeMessage`, a `defaultThankYouMessage`, a `defaultCategories` string array, a `sampleGifts` array, a `defaultThemeId`, and a `defaultLayoutId`.
 
-The `defaultThemeId` and `defaultLayoutId` per event type SHALL match the brief's default-by-event-type table:
+The `defaultThemeId` and `defaultLayoutId` per event type SHALL seed the new design-exploration layouts so no new wishlist starts on a deprecated layout:
 
-- `baby_shower` → theme `cielo-suave`, layout `editorial`
-- `birthday` → theme `lavanda-fiesta`, layout `grid`
-- `wedding` → theme `crema-elegante`, layout `editorial`
-- `housewarming` → theme `jardin-verde`, layout `minimal`
-- `general` → theme `clasico-minimal`, layout `grid`
+- `baby_shower` → theme `cielo-suave`, layout `collage-staggered`
+- `birthday` → theme `lavanda-fiesta`, layout `arch-split`
+- `wedding` → theme `crema-elegante`, layout `hero-cinematic`
+- `housewarming` → theme `jardin-verde`, layout `split-image-right`
+- `general` → theme `clasico-minimal`, layout `magazine-editorial`
 
 #### Scenario: Preset exists for every event type
 
@@ -25,10 +25,10 @@ The `defaultThemeId` and `defaultLayoutId` per event type SHALL match the brief'
 - **WHEN** a preset's `defaultThemeId` and `defaultLayoutId` are read
 - **THEN** each value matches an existing id in `src/config/public-themes.ts` and `src/config/public-layouts.ts` respectively
 
-#### Scenario: Default theme and layout match the brief table
+#### Scenario: Default layouts avoid deprecated presets
 
-- **WHEN** each event-type preset's `defaultThemeId` and `defaultLayoutId` are read
-- **THEN** they match the brief default-by-event-type pairing for that event type (e.g. `baby_shower` resolves to `cielo-suave` + `editorial`, `wedding` to `crema-elegante` + `editorial`, `housewarming` to `jardin-verde` + `minimal`)
+- **WHEN** each event-type preset's `defaultLayoutId` is read
+- **THEN** it matches the new default table above and none of them is `grid`, `editorial`, or `minimal`
 
 ### Requirement: Spanish labels and default categories match the PRD
 
