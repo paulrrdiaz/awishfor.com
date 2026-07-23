@@ -1,13 +1,11 @@
 import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
-import {
-	HeroImageSlot,
-	resolveHeroSlots,
-} from "@/components/shared/hero-gallery";
+import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
+import { resolveHeroSlots } from "@/lib/hero-slots";
 import { cn } from "@/lib/utils";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import type { PublicWishlistMode } from "./public-wishlist-page";

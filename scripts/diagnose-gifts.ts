@@ -22,7 +22,10 @@ function heading(text: string) {
 }
 
 async function main() {
-	console.log("DATABASE_URL host:", process.env.DATABASE_URL?.match(/@([^/]+)/)?.[1]);
+	console.log(
+		"DATABASE_URL host:",
+		process.env.DATABASE_URL?.match(/@([^/]+)/)?.[1],
+	);
 	console.log("Target wishlistId:", WISHLIST_ID);
 
 	heading("1. Users in this DB");
@@ -41,10 +44,19 @@ async function main() {
 	if (wl) {
 		heading("3. Is it owned + non-archived (what the sidebar list requires)?");
 		const inSidebar = await db.wishlist.findFirst({
-			where: { ownerId: wl.ownerId, status: { not: "archived" }, id: WISHLIST_ID },
+			where: {
+				ownerId: wl.ownerId,
+				status: { not: "archived" },
+				id: WISHLIST_ID,
+			},
 			select: { id: true },
 		});
-		console.log("Appears in sidebar list():", Boolean(inSidebar), "| status:", wl.status);
+		console.log(
+			"Appears in sidebar list():",
+			Boolean(inSidebar),
+			"| status:",
+			wl.status,
+		);
 
 		heading("4. assertOwnedWishlist({ id, ownerId }) — the gift.list guard");
 		const owned = await db.wishlist.findFirst({

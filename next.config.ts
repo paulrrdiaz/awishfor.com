@@ -29,6 +29,10 @@ const config: NextConfig = {
 				protocol: "http",
 				hostname: "infanti.com.pe",
 			},
+			{
+				protocol: "https",
+				hostname: "media.falabella.com",
+			},
 		],
 	},
 	async headers() {

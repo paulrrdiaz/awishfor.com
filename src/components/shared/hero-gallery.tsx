@@ -10,14 +10,6 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 
-/** Resolves an ordered list of cover images into exactly `slots` entries, `null` where an image is missing. */
-export function resolveHeroSlots(
-	images: string[],
-	slots: number,
-): Array<string | null> {
-	return Array.from({ length: slots }, (_, index) => images[index] ?? null);
-}
-
 type PlaceholderProps = {
 	className?: string;
 };
