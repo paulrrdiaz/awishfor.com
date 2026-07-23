@@ -146,15 +146,15 @@ The system SHALL expose the slug-availability check as a publicly callable proce
 
 ### Requirement: Design & Preview step
 
-The Design & Preview step SHALL let the user select a theme, layout, heading font, body font, and button style from the public config presets, manage up to six cover images, write each selection to the draft, and render a live preview using the public wishlist layout in preview mode with purchase actions disabled. The embedded preview SHALL be labeled "Vista previa con ejemplos".
+The Design & Preview step SHALL let the user select a theme, layout, heading font, body font, and button style from the public config presets, manage up to six cover images, write each selection to the draft, and render a live preview using the public wishlist layout in preview mode with purchase actions disabled. Layout selection SHALL use the modal layout picker: a compact trigger showing the current layout that opens a dialog of all layout thumbnails, rather than an inline grid. The "Imágenes de portada" section SHALL appear directly below the "Disposición" selection and SHALL display the selected layout's cover-image guidance. The embedded preview SHALL be labeled "Vista previa con ejemplos".
 
 The controls SHALL be:
 
 - **Tema de color**: a fixed-column swatch grid (6 columns on desktop, 4 on mobile) showing all twelve theme swatches.
-- **Disposición**: a 2-column thumbnail grid where each option renders an abstract skeleton preview of that layout's hero composition plus its Spanish label; the fourteen new layouts appear first and the deprecated `grid`/`editorial`/`minimal` appear last under a muted legacy grouping.
+- **Disposición**: a compact trigger that displays the selected layout's thumbnail and Spanish label, opens a modal grid with the active layouts first and the deprecated `grid`/`editorial`/`minimal` layouts last under a muted legacy grouping, and updates the draft when a layout is selected.
+- **Imágenes de portada**: the multi-image manager (add, remove, reorder, max six) directly below the layout trigger, with selected-layout guidance showing the recommended photo count, orientation, aspect ratio, and any circle-crop centering advice.
 - **Tipografía**: two selects — heading font ("Títulos") and body font ("Texto") — listing the heading/body font presets, each option rendered in its own font.
 - **Estilo de botón**: four chips where each chip renders in its own preset's shape (radius, border, weight) as a live self-preview.
-- **Imágenes de portada**: the multi-image manager (add, remove, reorder, max six) with a layout-aware hint showing how many photos the selected layout displays.
 
 #### Scenario: Selecting design options updates the preview
 
@@ -166,10 +166,15 @@ The controls SHALL be:
 - **WHEN** the Design & Preview step renders the theme selector
 - **THEN** all twelve theme swatches are shown in the fixed-column grid
 
-#### Scenario: Layout picker shows thumbnails with legacy group last
+#### Scenario: Layout is chosen through the modal picker
 
-- **WHEN** the Design & Preview step renders the Disposición picker
-- **THEN** seventeen options render as thumbnail cards in a 2-column grid, with the fourteen new layouts first and `grid`/`editorial`/`minimal` last under a muted legacy grouping
+- **WHEN** the user opens the layout picker and selects a layout in the modal
+- **THEN** the draft's `layoutId` updates, the modal closes, and the trigger reflects the new selection
+
+#### Scenario: Cover images follow the layout selection
+
+- **WHEN** the Design & Preview step renders
+- **THEN** the "Imágenes de portada" section appears directly below the layout selection and shows the selected layout's image guidance
 
 #### Scenario: Button style chips preview themselves
 
@@ -509,4 +514,3 @@ The Gifts step guest preview SHALL render gift images so the complete product im
 
 - **WHEN** the Gifts step preview pane is too narrow for three gift cards
 - **THEN** the preview falls back to fewer columns without overlapping card content or clipping text
-

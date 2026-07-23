@@ -1,3 +1,14 @@
+export type ImageOrientation = "landscape" | "portrait" | "square";
+
+export type LayoutImageGuidance = {
+	ratio: "16:9" | "4:3" | "3:4" | "2:3" | "1:1";
+	orientation: ImageOrientation;
+	/** Circle crops benefit from placing the subject near the center. */
+	centeredSubject?: boolean;
+	/** The composition uses multiple crop shapes; ratio is the safe default. */
+	mixed?: boolean;
+};
+
 export type PublicLayoutPreset = {
 	id: string;
 	label: string;
@@ -9,8 +20,34 @@ export type PublicLayoutPreset = {
 	heroImageSlots: number;
 	/** Shows prev/next gallery controls when 2+ cover images exist. */
 	supportsCarousel: boolean;
+	/** Recommended source-image shape for this layout's hero composition. */
+	imageGuidance: LayoutImageGuidance;
 	deprecated?: boolean;
 };
+
+export const IMAGE_ORIENTATION_GLYPHS: Record<ImageOrientation, string> = {
+	landscape: "▭",
+	portrait: "▯",
+	square: "◻",
+};
+
+const IMAGE_ORIENTATION_LABELS: Record<ImageOrientation, string> = {
+	landscape: "horizontal",
+	portrait: "vertical",
+	square: "cuadrada",
+};
+
+export function buildImageGuidanceHint(layout: PublicLayoutPreset): string {
+	const { imageGuidance, heroImageSlots } = layout;
+	const count = `${heroImageSlots} ${heroImageSlots === 1 ? "foto" : "fotos"}`;
+	const orientation = IMAGE_ORIENTATION_LABELS[imageGuidance.orientation];
+	const glyph = IMAGE_ORIENTATION_GLYPHS[imageGuidance.orientation];
+	const centeredSubject = imageGuidance.centeredSubject
+		? " · centra el sujeto"
+		: "";
+
+	return `Este diseño muestra ${count} · ${orientation} ${glyph} ${imageGuidance.ratio}${centeredSubject}`;
+}
 
 const layoutList: PublicLayoutPreset[] = [
 	{
@@ -22,6 +59,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 6,
 		supportsCarousel: true,
+		imageGuidance: { ratio: "16:9", orientation: "landscape" },
 	},
 	{
 		id: "split-image-right",
@@ -32,6 +70,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 1,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "3:4", orientation: "portrait" },
 	},
 	{
 		id: "arch-split",
@@ -42,6 +81,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 6,
 		supportsCarousel: true,
+		imageGuidance: { ratio: "2:3", orientation: "portrait" },
 	},
 	{
 		id: "collage-staggered",
@@ -52,6 +92,11 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 3,
 		supportsCarousel: false,
+		imageGuidance: {
+			ratio: "3:4",
+			orientation: "portrait",
+			mixed: true,
+		},
 	},
 	{
 		id: "magazine-editorial",
@@ -62,6 +107,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 1,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "1:1", orientation: "square" },
 	},
 	{
 		id: "overlap-duo",
@@ -72,6 +118,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 2,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "3:4", orientation: "portrait" },
 	},
 	{
 		id: "arch-hero-party",
@@ -82,6 +129,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 6,
 		supportsCarousel: true,
+		imageGuidance: { ratio: "2:3", orientation: "portrait" },
 	},
 	{
 		id: "arch-trio",
@@ -92,6 +140,11 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 3,
 		supportsCarousel: false,
+		imageGuidance: {
+			ratio: "1:1",
+			orientation: "square",
+			centeredSubject: true,
+		},
 	},
 	{
 		id: "wedding-formal",
@@ -102,6 +155,8 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 1,
 		supportsCarousel: false,
+		// Known heroImageSlots/no-render mismatch is intentionally out of scope.
+		imageGuidance: { ratio: "1:1", orientation: "square" },
 	},
 	{
 		id: "panoramic-band",
@@ -112,6 +167,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 6,
 		supportsCarousel: true,
+		imageGuidance: { ratio: "16:9", orientation: "landscape" },
 	},
 	{
 		id: "carousel-hero",
@@ -122,6 +178,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 6,
 		supportsCarousel: true,
+		imageGuidance: { ratio: "16:9", orientation: "landscape" },
 	},
 	{
 		id: "diagonal-duo",
@@ -132,6 +189,11 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 3,
 		supportsCarousel: false,
+		imageGuidance: {
+			ratio: "3:4",
+			orientation: "portrait",
+			centeredSubject: true,
+		},
 	},
 	{
 		id: "scrapbook-polaroids",
@@ -142,6 +204,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 3,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "4:3", orientation: "landscape" },
 	},
 	{
 		id: "portrait-frame-split",
@@ -152,6 +215,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 1,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "3:4", orientation: "portrait" },
 	},
 	{
 		id: "grid",
@@ -162,6 +226,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 1,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "16:9", orientation: "landscape" },
 		deprecated: true,
 	},
 	{
@@ -173,6 +238,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: true,
 		heroImageSlots: 1,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "16:9", orientation: "landscape" },
 		deprecated: true,
 	},
 	{
@@ -184,6 +250,7 @@ const layoutList: PublicLayoutPreset[] = [
 		showCategoryDividers: false,
 		heroImageSlots: 1,
 		supportsCarousel: false,
+		imageGuidance: { ratio: "16:9", orientation: "landscape" },
 		deprecated: true,
 	},
 ];

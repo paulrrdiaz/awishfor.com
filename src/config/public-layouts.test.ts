@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+	buildImageGuidanceHint,
 	DEFAULT_LAYOUT_ID,
 	getAllLayouts,
+	IMAGE_ORIENTATION_GLYPHS,
 	resolveLayout,
 } from "./public-layouts";
 
@@ -52,6 +54,7 @@ describe("getAllLayouts", () => {
 		for (const layout of layouts) {
 			expect(typeof layout.heroImageSlots).toBe("number");
 			expect(typeof layout.supportsCarousel).toBe("boolean");
+			expect(layout.imageGuidance).toBeDefined();
 		}
 	});
 
@@ -91,5 +94,42 @@ describe("getAllLayouts", () => {
 			expect(byId[id]?.heroImageSlots).toBe(6);
 			expect(byId[id]?.supportsCarousel).toBe(true);
 		}
+	});
+});
+
+describe("layout image guidance", () => {
+	it("uses sourced image guidance for active layouts", () => {
+		const byId = Object.fromEntries(
+			getAllLayouts().map((layout) => [layout.id, layout]),
+		);
+		expect(byId["hero-cinematic"]?.imageGuidance).toEqual({
+			ratio: "16:9",
+			orientation: "landscape",
+		});
+		expect(byId["arch-trio"]?.imageGuidance).toMatchObject({
+			ratio: "1:1",
+			orientation: "square",
+			centeredSubject: true,
+		});
+		expect(byId["diagonal-duo"]?.imageGuidance.centeredSubject).toBe(true);
+		expect(byId["collage-staggered"]?.imageGuidance).toMatchObject({
+			ratio: "3:4",
+			orientation: "portrait",
+			mixed: true,
+		});
+	});
+
+	it("builds one shared, readable hint with the orientation glyph", () => {
+		expect(IMAGE_ORIENTATION_GLYPHS).toEqual({
+			landscape: "▭",
+			portrait: "▯",
+			square: "◻",
+		});
+		expect(buildImageGuidanceHint(resolveLayout("hero-cinematic"))).toBe(
+			"Este diseño muestra 6 fotos · horizontal ▭ 16:9",
+		);
+		expect(buildImageGuidanceHint(resolveLayout("arch-trio"))).toBe(
+			"Este diseño muestra 3 fotos · cuadrada ◻ 1:1 · centra el sujeto",
+		);
 	});
 });

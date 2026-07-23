@@ -14,7 +14,11 @@ import {
 	getAllBodyFontOptions,
 	getAllHeadingFontOptions,
 } from "@/config/public-fonts";
-import { getAllLayouts, resolveLayout } from "@/config/public-layouts";
+import {
+	buildImageGuidanceHint,
+	getAllLayouts,
+	resolveLayout,
+} from "@/config/public-layouts";
 import { getAllThemes } from "@/config/public-themes";
 import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
 import { useWizardStore } from "./wizard-provider";
@@ -68,6 +72,22 @@ export function DesignStep() {
 						/>
 					</div>
 
+					<div>
+						<p className="mb-2 font-medium text-foreground text-sm">
+							Imágenes de portada
+						</p>
+						<MultiImageUpload
+							endpoint="coverImage"
+							guidance={selectedLayout.imageGuidance}
+							hint={buildImageGuidanceHint(selectedLayout)}
+							onChange={(urls) => {
+								setField("coverImageUrls", urls);
+								setField("coverImageUrl", urls[0] ?? null);
+							}}
+							value={draft.coverImageUrls}
+						/>
+					</div>
+
 					<FontSelect
 						defaultId={DEFAULT_HEADING_FONT_ID}
 						label="Tipografía · Títulos"
@@ -92,21 +112,6 @@ export function DesignStep() {
 							onSelect={(id) => setField("buttonStyle", id)}
 							options={BUTTON_STYLES}
 							selected={draft.buttonStyle}
-						/>
-					</div>
-
-					<div>
-						<p className="mb-2 font-medium text-foreground text-sm">
-							Imágenes de portada
-						</p>
-						<MultiImageUpload
-							endpoint="coverImage"
-							hint={`Este diseño muestra ${selectedLayout.heroImageSlots} ${selectedLayout.heroImageSlots === 1 ? "foto" : "fotos"}`}
-							onChange={(urls) => {
-								setField("coverImageUrls", urls);
-								setField("coverImageUrl", urls[0] ?? null);
-							}}
-							value={draft.coverImageUrls}
 						/>
 					</div>
 				</div>

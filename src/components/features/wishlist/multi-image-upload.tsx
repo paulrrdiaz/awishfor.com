@@ -18,17 +18,55 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
+import type {
+	ImageOrientation,
+	LayoutImageGuidance,
+} from "@/config/public-layouts";
 import { useUploadThing } from "@/lib/uploadthing/client";
 import { cn } from "@/lib/utils";
 
 const MAX_IMAGES = 6;
+export const IMAGE_ORIENTATION_SQUARE_DEADBAND = 0.15;
 
 type Props = {
 	value: string[];
 	onChange: (urls: string[]) => void;
 	endpoint: "coverImage";
 	hint?: string;
+	guidance?: LayoutImageGuidance;
 };
+
+const IMAGE_ORIENTATION_LABELS: Record<ImageOrientation, string> = {
+	landscape: "horizontal",
+	portrait: "vertical",
+	square: "cuadrada",
+};
+
+export function getImageOrientation(
+	width: number,
+	height: number,
+	deadband = IMAGE_ORIENTATION_SQUARE_DEADBAND,
+): ImageOrientation | null {
+	if (width <= 0 || height <= 0) return null;
+
+	const ratio = width / height;
+	if (Math.abs(ratio - 1) <= deadband) return "square";
+	return ratio > 1 ? "landscape" : "portrait";
+}
+
+export function hasImageOrientationMismatch(
+	detected: ImageOrientation | null | undefined,
+	recommended: ImageOrientation | null | undefined,
+): boolean {
+	return Boolean(detected && recommended && detected !== recommended);
+}
+
+export function getImageMismatchMessage(
+	detected: ImageOrientation,
+	recommended: ImageOrientation,
+): string {
+	return `Esta foto es ${IMAGE_ORIENTATION_LABELS[detected]}; este diseño luce mejor en ${IMAGE_ORIENTATION_LABELS[recommended]}.`;
+}
 
 function friendlyError(message: string): string {
 	if (message.toLowerCase().includes("size"))
@@ -47,10 +85,12 @@ function SortableThumbnail({
 	url,
 	isPrincipal,
 	onRemove,
+	onImageLoad,
 }: {
 	url: string;
 	isPrincipal: boolean;
 	onRemove: () => void;
+	onImageLoad: (url: string, width: number, height: number) => void;
 }) {
 	const {
 		attributes,
@@ -75,7 +115,19 @@ function SortableThumbnail({
 			ref={setNodeRef}
 			style={style}
 		>
-			<Image alt="Imagen de portada" className="object-cover" fill src={url} />
+			<Image
+				alt="Imagen de portada"
+				className="object-cover"
+				fill
+				onLoad={(event) => {
+					onImageLoad(
+						url,
+						event.currentTarget.naturalWidth,
+						event.currentTarget.naturalHeight,
+					);
+				}}
+				src={url}
+			/>
 			{isPrincipal && (
 				<span className="absolute top-1 left-1 rounded-full bg-foreground/80 px-2 py-0.5 font-medium text-[10px] text-background">
 					Principal
@@ -102,9 +154,18 @@ function SortableThumbnail({
 	);
 }
 
-export function MultiImageUpload({ value, onChange, endpoint, hint }: Props) {
+export function MultiImageUpload({
+	value,
+	onChange,
+	endpoint,
+	hint,
+	guidance,
+}: Props) {
 	const [error, setError] = useState<string | null>(null);
 	const [isHandlingUpload, setIsHandlingUpload] = useState(false);
+	const [imageOrientations, setImageOrientations] = useState<
+		Record<string, ImageOrientation>
+	>({});
 	const inputRef = useRef<HTMLInputElement>(null);
 	const sensors = useSensors(useSensor(PointerSensor));
 
@@ -116,6 +177,22 @@ export function MultiImageUpload({ value, onChange, endpoint, hint }: Props) {
 
 	const isBusy = isUploading || isHandlingUpload;
 	const canAddMore = value.length < MAX_IMAGES;
+	const mismatchMessages = value.flatMap((url) => {
+		const detected = imageOrientations[url];
+		const recommended = guidance?.orientation;
+		if (
+			!detected ||
+			!recommended ||
+			!hasImageOrientationMismatch(detected, recommended)
+		)
+			return [];
+		return [
+			{
+				url,
+				message: getImageMismatchMessage(detected, recommended),
+			},
+		];
+	});
 
 	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const files = Array.from(e.target.files ?? []);
@@ -150,7 +227,21 @@ export function MultiImageUpload({ value, onChange, endpoint, hint }: Props) {
 	}
 
 	function handleRemove(url: string) {
+		setImageOrientations((current) => {
+			const { [url]: _removed, ...remaining } = current;
+			return remaining;
+		});
 		onChange(value.filter((existing) => existing !== url));
+	}
+
+	function handleImageLoad(url: string, width: number, height: number) {
+		const orientation = getImageOrientation(width, height);
+		if (!orientation) return;
+		setImageOrientations((current) =>
+			current[url] === orientation
+				? current
+				: { ...current, [url]: orientation },
+		);
 	}
 
 	function handleDragEnd(event: DragEndEvent) {
@@ -177,6 +268,7 @@ export function MultiImageUpload({ value, onChange, endpoint, hint }: Props) {
 							<SortableThumbnail
 								isPrincipal={index === 0}
 								key={url}
+								onImageLoad={handleImageLoad}
 								onRemove={() => handleRemove(url)}
 								url={url}
 							/>
@@ -205,6 +297,11 @@ export function MultiImageUpload({ value, onChange, endpoint, hint }: Props) {
 				type="file"
 			/>
 			{hint && <p className="text-muted-foreground text-xs">{hint}</p>}
+			{mismatchMessages.map(({ url, message }) => (
+				<p className="text-muted-foreground text-xs" key={url} role="status">
+					{message}
+				</p>
+			))}
 			{error && <p className="text-destructive text-xs">{error}</p>}
 		</div>
 	);

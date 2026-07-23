@@ -17,7 +17,11 @@ import {
 	getAllBodyFontOptions,
 	getAllHeadingFontOptions,
 } from "@/config/public-fonts";
-import { getAllLayouts, resolveLayout } from "@/config/public-layouts";
+import {
+	buildImageGuidanceHint,
+	getAllLayouts,
+	resolveLayout,
+} from "@/config/public-layouts";
 import { getAllThemes } from "@/config/public-themes";
 import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
 import {
@@ -152,6 +156,22 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 						/>
 					</div>
 
+					<div className="space-y-3">
+						<p className="font-medium text-foreground text-sm">
+							Imágenes de portada
+						</p>
+						<MultiImageUpload
+							endpoint="coverImage"
+							guidance={selectedLayout.imageGuidance}
+							hint={buildImageGuidanceHint(selectedLayout)}
+							onChange={(urls) => {
+								setDesignField("coverImageUrls", urls);
+								setDesignField("coverImageUrl", urls[0] ?? null);
+							}}
+							value={design.coverImageUrls}
+						/>
+					</div>
+
 					<FontSelect
 						defaultId={DEFAULT_HEADING_FONT_ID}
 						label="Tipografía · Títulos"
@@ -176,21 +196,6 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 							onSelect={(id) => setDesignField("buttonStyle", id)}
 							options={BUTTON_STYLES}
 							selected={design.buttonStyle}
-						/>
-					</div>
-
-					<div className="space-y-3">
-						<p className="font-medium text-foreground text-sm">
-							Imágenes de portada
-						</p>
-						<MultiImageUpload
-							endpoint="coverImage"
-							hint={`Este diseño muestra ${selectedLayout.heroImageSlots} ${selectedLayout.heroImageSlots === 1 ? "foto" : "fotos"}`}
-							onChange={(urls) => {
-								setDesignField("coverImageUrls", urls);
-								setDesignField("coverImageUrl", urls[0] ?? null);
-							}}
-							value={design.coverImageUrls}
 						/>
 					</div>
 				</section>

@@ -1,7 +1,19 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { PublicLayoutPreset } from "@/config/public-layouts";
+import { useState } from "react";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+	type PublicLayoutPreset,
+	resolveLayout,
+} from "@/config/public-layouts";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -172,11 +184,16 @@ const LAYOUT_THUMBNAILS: Record<string, ReactNode> = {
 };
 
 export function LayoutPicker({ options, selected, onSelect }: Props) {
+	const [open, setOpen] = useState(false);
 	const activeOptions = options.filter((option) => !option.deprecated);
 	const legacyOptions = options.filter((option) => option.deprecated);
+	const currentLayout =
+		options.find((option) => option.id === selected) ??
+		options.find((option) => option.id === resolveLayout(selected).id) ??
+		resolveLayout(selected);
 
 	const renderOption = (option: PublicLayoutPreset) => {
-		const isSelected = selected === option.id;
+		const isSelected = currentLayout.id === option.id;
 		return (
 			<button
 				aria-pressed={isSelected}
@@ -187,7 +204,10 @@ export function LayoutPicker({ options, selected, onSelect }: Props) {
 						: "border-border",
 				)}
 				key={option.id}
-				onClick={() => onSelect(option.id)}
+				onClick={() => {
+					onSelect(option.id);
+					setOpen(false);
+				}}
 				type="button"
 			>
 				{LAYOUT_THUMBNAILS[option.id]}
@@ -199,20 +219,46 @@ export function LayoutPicker({ options, selected, onSelect }: Props) {
 	};
 
 	return (
-		<div className="space-y-3">
-			<div className="grid grid-cols-2 gap-2.5">
-				{activeOptions.map(renderOption)}
-			</div>
-			{legacyOptions.length > 0 && (
-				<>
-					<p className="pt-1 font-medium text-[11px] text-muted-foreground uppercase tracking-wide">
-						Clásico (se retirará)
-					</p>
-					<div className="grid grid-cols-2 gap-2.5 opacity-70">
-						{legacyOptions.map(renderOption)}
+		<Dialog onOpenChange={setOpen} open={open}>
+			<DialogTrigger asChild>
+				<button
+					className="flex w-full items-center gap-3 rounded-xl border bg-card p-2.5 text-left transition-colors hover:border-primary/50 hover:bg-muted/30"
+					type="button"
+				>
+					<div className="w-24 shrink-0">
+						{LAYOUT_THUMBNAILS[currentLayout.id]}
 					</div>
-				</>
-			)}
-		</div>
+					<span className="min-w-0 flex-1">
+						<span className="block truncate font-medium text-foreground text-sm">
+							{currentLayout.label}
+						</span>
+						<span className="mt-0.5 block text-muted-foreground text-xs">
+							Cambiar
+						</span>
+					</span>
+				</button>
+			</DialogTrigger>
+			<DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto p-4 sm:p-6">
+				<DialogHeader>
+					<DialogTitle>Elige una disposición</DialogTitle>
+					<DialogDescription>
+						Selecciona la composición que mejor presenta tu wishlist.
+					</DialogDescription>
+				</DialogHeader>
+				<div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+					{activeOptions.map(renderOption)}
+				</div>
+				{legacyOptions.length > 0 && (
+					<div className="space-y-2 pt-1">
+						<p className="font-medium text-[11px] text-muted-foreground uppercase tracking-wide">
+							Clásico (se retirará)
+						</p>
+						<div className="grid grid-cols-2 gap-2.5 opacity-70 sm:grid-cols-3">
+							{legacyOptions.map(renderOption)}
+						</div>
+					</div>
+				)}
+			</DialogContent>
+		</Dialog>
 	);
 }

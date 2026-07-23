@@ -3,6 +3,27 @@
 ## Purpose
 Defines public wishlist page layout composition, shared section components, section order, countdown behavior, render modes, and responsive layout behavior.
 ## Requirements
+### Requirement: Layout image guidance metadata
+
+Each `PublicLayoutPreset` SHALL carry recommended image-guidance metadata describing the shape its hero renderer crops cover images to: an aspect ratio, an orientation (`landscape`, `portrait`, or `square`), and, where applicable, flags for circle crops (centered subject) and mixed-shape compositions. The metadata SHALL be resolvable alongside the existing preset fields and SHALL match the actual crop applied by that layout's hero component.
+
+The populated recommendations SHALL be: `hero-cinematic` 16:9 landscape; `carousel-hero` 16:9 landscape; `panoramic-band` 16:9 (panoramic) landscape; `scrapbook-polaroids` 4:3 landscape; `split-image-right` 3:4 portrait; `portrait-frame-split` 3:4 portrait; `overlap-duo` 3:4 portrait; `arch-split` 2:3 portrait; `arch-hero-party` 2:3 portrait; `magazine-editorial` 1:1 square; `arch-trio` 1:1 square (centered subject); `diagonal-duo` 3:4 portrait (one circle crop); `collage-staggered` mixed, recommending a safe 3:4.
+
+#### Scenario: Preset exposes guidance for a layout
+
+- **WHEN** a layout preset is resolved by id
+- **THEN** its recommended aspect ratio and orientation are available and correspond to that layout's hero crop shape
+
+#### Scenario: Circle-crop layouts flag centered subject
+
+- **WHEN** the resolved layout is `arch-trio` or `diagonal-duo`
+- **THEN** its guidance indicates a circle crop that benefits from a centered subject
+
+#### Scenario: Mixed-composition layout recommends a safe ratio
+
+- **WHEN** the resolved layout is `collage-staggered`
+- **THEN** its guidance recommends a single safe 3:4 rather than a per-slot ratio
+
 ### Requirement: Public wishlist page shell
 
 The system SHALL provide a `PublicWishlistPage` component that takes a published or owner-preview wishlist view model and renders the full public page, resolving theme, layout, font, and button presets from the wishlist's `themeId`, `layoutId`, `headingFont`, `bodyFont`, and `buttonStyle` (falling back to the legacy `fontPairing` mapping when the font fields are null) and applying them as scoped CSS variables that do not affect the dashboard. The view model SHALL expose the ordered `coverImageUrls` list to the layout.
@@ -240,4 +261,3 @@ The `grid`, `editorial`, and `minimal` layout presets SHALL be flagged deprecate
 
 - **WHEN** `docs/FUTURE_IMPROVEMENTS.md` is read after this change
 - **THEN** it contains an entry to remove the legacy layouts, `coverImageUrl`, and `fontPairing` before PROD launch
-
