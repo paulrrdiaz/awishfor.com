@@ -64,6 +64,7 @@ export type DashboardGiftRowViewModel = {
 	productUrl: string | null;
 	imageUrl: string | null;
 	storeName: string | null;
+	size: string | null;
 	priceAmount: string | null;
 	priceCurrency: string | null;
 	quantityNeeded: number;

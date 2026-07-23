@@ -17,9 +17,17 @@
 		"typecheck": "tsc --noEmit",
 		"tunnel": "dotenv -e .env -- sh -c 'ngrok http \"$PORT\" --url=\"$NGROK_URL\"'",
 		"postinstall": "prisma generate",
+		"db:generate": "dotenv -e .env -- prisma generate",
+		"db:migrate": "dotenv -e .env -- prisma migrate dev",
+		"db:deploy": "dotenv -e .env -- prisma migrate deploy",
+		"db:status": "dotenv -e .env -- prisma migrate status",
+		"db:push": "dotenv -e .env -- prisma db push",
+		"db:reset": "dotenv -e .env -- prisma migrate reset",
+		"db:studio": "dotenv -e .env -- prisma studio",
 		"seed": "dotenv -e .env -- tsx prisma/seed.ts",
 		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"build-storybook": "storybook build",
+		"runTS": "dotenv -e .env -- tsx"
 	},
 	"prisma": {
 		"seed": "dotenv -e .env -- tsx prisma/seed.ts"
@@ -65,6 +73,7 @@
 		"nuqs": "^2.9.0",
 		"pg": "^8.22.0",
 		"qrcode": "^1.5.4",
+		"radix-ui": "^1.6.4",
 		"react": "19.2.7",
 		"react-day-picker": "^10.0.1",
 		"react-dom": "19.2.7",

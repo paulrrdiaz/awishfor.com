@@ -1,13 +1,25 @@
 import { notFound } from "next/navigation";
+import type { SearchParams } from "nuqs/server";
 import { GiftGroup } from "@/components/features/dashboard/gifts/gift-group";
+import { GiftsEmptyState } from "@/components/features/dashboard/gifts/gifts-empty-state";
+import { GiftsFilterToolbar } from "@/components/features/dashboard/gifts/gifts-filter-toolbar";
+import { GiftsFilteredEmptyState } from "@/components/features/dashboard/gifts/gifts-filtered-empty-state";
+import { GiftsHeaderToolbar } from "@/components/features/dashboard/gifts/gifts-header-toolbar";
+import { filterAndSortDashboardGifts } from "@/lib/dashboard/gift-filters";
 import { api } from "@/trpc/server";
+import { loadGiftsSearchParams } from "./search-params";
 
 type Props = {
 	params: Promise<{ id: string }>;
+	searchParams: Promise<SearchParams>;
 };
 
-export default async function DashboardWishlistGiftsPage({ params }: Props) {
+export default async function DashboardWishlistGiftsPage({
+	params,
+	searchParams,
+}: Props) {
 	const { id } = await params;
+	const { q, filter, sort } = await loadGiftsSearchParams(searchParams);
 
 	let grouped: Awaited<ReturnType<typeof api.gift.list>>;
 	try {
@@ -16,27 +28,44 @@ export default async function DashboardWishlistGiftsPage({ params }: Props) {
 		notFound();
 	}
 
-	const totalGifts =
-		grouped.available.length + grouped.purchased.length + grouped.hidden.length;
+	const categories = await api.category.list({ wishlistId: id });
+	const categoriesById = Object.fromEntries(
+		categories.map((category) => [category.id, category.name]),
+	);
+
+	const allGifts = [
+		...grouped.available,
+		...grouped.purchased,
+		...grouped.hidden,
+	];
+	const totalGifts = allGifts.length;
+	const filteredGifts = filterAndSortDashboardGifts(allGifts, {
+		q,
+		filter,
+		sort,
+	});
+	const isFiltered = q !== "" || filter !== "todos";
+	const sortable = sort === "manual" && !isFiltered;
 
 	return (
-		<div className="mx-auto w-full max-w-3xl px-4 py-8">
-			<h1 className="mb-1 font-semibold text-2xl text-gray-900">Regalos</h1>
-			<p className="mb-8 text-gray-500 text-sm">
-				{totalGifts === 0
-					? "Aún no hay regalos en esta lista."
-					: `${totalGifts} regalo${totalGifts !== 1 ? "s" : ""} en total`}
-			</p>
+		<div className="mx-auto w-full max-w-4xl space-y-5 px-4 py-8">
+			<GiftsHeaderToolbar
+				sortable={sortable}
+				totalGifts={totalGifts}
+				wishlistId={id}
+			/>
+
+			{totalGifts > 0 && <GiftsFilterToolbar />}
 
 			{totalGifts === 0 ? (
-				<div className="rounded-2xl border border-gray-200 border-dashed px-6 py-12 text-center text-gray-400 text-sm">
-					Agrega regalos desde la lista pública o el asistente.
-				</div>
+				<GiftsEmptyState wishlistId={id} />
+			) : filteredGifts.length === 0 ? (
+				<GiftsFilteredEmptyState />
 			) : (
 				<GiftGroup
-					available={grouped.available}
-					hidden={grouped.hidden}
-					purchased={grouped.purchased}
+					categoriesById={categoriesById}
+					gifts={filteredGifts}
+					sortable={sortable}
 					wishlistId={id}
 				/>
 			)}

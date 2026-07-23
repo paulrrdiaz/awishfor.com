@@ -1,74 +1,60 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { setGiftVisibilityAction } from "@/app/(protected)/dashboard/wishlists/[id]/gifts/actions";
 import { Button } from "@/components/ui/button";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
-import { api } from "@/trpc/react";
 import { PurchaseDrawer } from "../purchases/purchase-drawer";
-import { DeleteGiftDialog } from "./delete-gift-dialog";
-import { EditGiftDialog } from "./edit-gift-dialog";
+import { GiftRowMenu } from "./gift-row-menu";
 
 type Props = {
 	gift: DashboardGiftRowViewModel;
 	wishlistId: string;
+	onEdit: () => void;
 };
 
-export function GiftRowActions({ gift, wishlistId }: Props) {
-	const router = useRouter();
-	const [editOpen, setEditOpen] = useState(false);
+export function GiftRowActions({ gift, wishlistId, onEdit }: Props) {
+	const [isPending, startTransition] = useTransition();
 	const [purchaseDrawerOpen, setPurchaseDrawerOpen] = useState(false);
 	const isHidden = gift.visibilityStatus === "hidden";
 
-	const setVisibilityMutation = api.gift.setVisibility.useMutation({
-		onSuccess: () => router.refresh(),
-	});
+	function handleShow() {
+		startTransition(async () => {
+			try {
+				await setGiftVisibilityAction(wishlistId, gift.id, "available");
+			} catch {
+				toast.error("No pudimos actualizar el regalo.");
+			}
+		});
+	}
 
 	return (
 		<>
 			<div className="flex shrink-0 items-center gap-1">
-				<Button
-					onClick={() => setEditOpen(true)}
-					size="sm"
-					type="button"
-					variant="ghost"
-				>
-					Editar
-				</Button>
-				<Button
-					onClick={() => setPurchaseDrawerOpen(true)}
-					size="sm"
-					type="button"
-					variant="ghost"
-				>
-					Compras
-				</Button>
-				<Button
-					disabled={setVisibilityMutation.isPending}
-					onClick={() =>
-						setVisibilityMutation.mutate({
-							giftId: gift.id,
-							visibilityStatus: isHidden ? "available" : "hidden",
-						})
-					}
-					size="sm"
-					type="button"
-					variant="ghost"
-				>
-					{isHidden ? "Mostrar" : "Ocultar"}
-				</Button>
-				<DeleteGiftDialog
-					giftId={gift.id}
-					giftName={gift.name}
-					purchasedQuantity={gift.purchasedQuantity}
+				{isHidden ? (
+					<Button
+						className="text-secondary"
+						disabled={isPending}
+						onClick={handleShow}
+						size="sm"
+						type="button"
+						variant="ghost"
+					>
+						Mostrar
+					</Button>
+				) : (
+					<Button onClick={onEdit} size="sm" type="button" variant="ghost">
+						Editar
+					</Button>
+				)}
+				<GiftRowMenu
+					gift={gift}
+					onEdit={onEdit}
+					onOpenPurchases={() => setPurchaseDrawerOpen(true)}
+					wishlistId={wishlistId}
 				/>
 			</div>
-			<EditGiftDialog
-				gift={gift}
-				onClose={() => setEditOpen(false)}
-				open={editOpen}
-				wishlistId={wishlistId}
-			/>
 			<PurchaseDrawer
 				giftId={gift.id}
 				giftName={gift.name}

@@ -4,6 +4,8 @@ import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import {
 	createGift,
 	type DashboardGiftDatabase,
+	type DuplicateGiftDatabase,
+	duplicateGift,
 	findActiveGift,
 	type GiftDatabase,
 	type GiftWithPurchases,
@@ -27,6 +29,7 @@ const createGiftRecord = (overrides: Partial<Gift> = {}): Gift => ({
 	productUrl: null,
 	imageUrl: null,
 	storeName: null,
+	size: null,
 	priceAmount: null,
 	priceCurrency: null,
 	quantityNeeded: 1,
@@ -283,6 +286,7 @@ const makeRow = (
 	productUrl: null,
 	imageUrl: null,
 	storeName: null,
+	size: null,
 	priceAmount: null,
 	priceCurrency: null,
 	quantityNeeded: 2,
@@ -424,6 +428,77 @@ describe("reorderGifts", () => {
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
 
 		expect(updateCalls).toHaveLength(0);
+	});
+});
+
+const makeDuplicateDb = (
+	overrides: Partial<DuplicateGiftDatabase["gift"]> = {},
+): DuplicateGiftDatabase => ({
+	gift: {
+		findFirst: async () => createGiftRecord(),
+		findMany: async () => [],
+		create: async ({ data }) =>
+			createGiftRecord({
+				id: "gift_copy",
+				name: (data as Prisma.GiftUncheckedCreateInput).name as string,
+			}),
+		...overrides,
+	},
+});
+
+describe("duplicateGift", () => {
+	it("throws NOT_FOUND when the gift does not belong to the owner", async () => {
+		const db = makeDuplicateDb({ findFirst: async () => null });
+		await expect(
+			duplicateGift(db, { ownerId: 42, giftId: "gift_1" }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+
+	it("copies editable fields and appends sortOrder after the last gift", async () => {
+		const original = createGiftRecord({
+			name: "Original",
+			categoryId: "cat_1",
+			storeName: "Falabella",
+			size: "3-6 meses",
+			priceAmount: "100.00" as unknown as Gift["priceAmount"],
+			priority: "high",
+			visibilityStatus: "hidden",
+			publicNote: "note",
+		});
+		let capturedData: Prisma.GiftUncheckedCreateInput | undefined;
+		const db = makeDuplicateDb({
+			findFirst: async () => original,
+			findMany: async () => [{ sortOrder: 4 }],
+			create: async (args) => {
+				capturedData = args.data as Prisma.GiftUncheckedCreateInput;
+				return createGiftRecord({ id: "gift_copy" });
+			},
+		});
+
+		const result = await duplicateGift(db, { ownerId: 42, giftId: "gift_1" });
+
+		expect(result.id).toBe("gift_copy");
+		expect(capturedData?.name).toBe("Original");
+		expect(capturedData?.storeName).toBe("Falabella");
+		expect(capturedData?.size).toBe("3-6 meses");
+		expect(capturedData?.priority).toBe("high");
+		expect(capturedData?.visibilityStatus).toBe("hidden");
+		expect(capturedData?.sortOrder).toBe(5);
+	});
+
+	it("appends at sortOrder 0 when the wishlist has no other gifts", async () => {
+		let capturedData: Prisma.GiftUncheckedCreateInput | undefined;
+		const db = makeDuplicateDb({
+			findMany: async () => [],
+			create: async (args) => {
+				capturedData = args.data as Prisma.GiftUncheckedCreateInput;
+				return createGiftRecord({ id: "gift_copy" });
+			},
+		});
+
+		await duplicateGift(db, { ownerId: 42, giftId: "gift_1" });
+
+		expect(capturedData?.sortOrder).toBe(0);
 	});
 });
 

@@ -121,6 +121,7 @@ model Gift {
   productUrl       String?
   imageUrl         String?
   storeName        String?
+  size             String?
   priceAmount      Decimal?             @db.Decimal(10, 2)
   priceCurrency    Currency?
   quantityNeeded   Int                  @default(1)

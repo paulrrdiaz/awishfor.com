@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { deleteGiftAction } from "@/app/(protected)/dashboard/wishlists/[id]/gifts/actions";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -11,40 +12,41 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { api } from "@/trpc/react";
 
 type Props = {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	wishlistId: string;
 	giftId: string;
 	giftName: string;
 	purchasedQuantity: number;
 };
 
 export function DeleteGiftDialog({
+	open,
+	onOpenChange,
+	wishlistId,
 	giftId,
 	giftName,
 	purchasedQuantity,
 }: Props) {
-	const router = useRouter();
-	const [open, setOpen] = useState(false);
+	const [isPending, startTransition] = useTransition();
 	const hasPurchases = purchasedQuantity > 0;
 
-	const deleteMutation = api.gift.delete.useMutation({
-		onSuccess: () => {
-			setOpen(false);
-			router.refresh();
-		},
-	});
+	function handleDelete() {
+		startTransition(async () => {
+			try {
+				await deleteGiftAction(wishlistId, giftId);
+				onOpenChange(false);
+			} catch {
+				toast.error("No pudimos eliminar el regalo. Intenta de nuevo.");
+			}
+		});
+	}
 
 	return (
-		<AlertDialog onOpenChange={setOpen} open={open}>
-			<AlertDialogTrigger asChild>
-				<Button size="sm" variant="ghost">
-					Eliminar
-				</Button>
-			</AlertDialogTrigger>
+		<AlertDialog onOpenChange={onOpenChange} open={open}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
@@ -66,13 +68,13 @@ export function DeleteGiftDialog({
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancelar</AlertDialogCancel>
+					<AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
 					<AlertDialogAction
-						disabled={deleteMutation.isPending}
-						onClick={() => deleteMutation.mutate({ giftId })}
+						disabled={isPending}
+						onClick={handleDelete}
 						variant="destructive"
 					>
-						{deleteMutation.isPending ? "Eliminando…" : "Eliminar"}
+						{isPending ? "Eliminando…" : "Eliminar"}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

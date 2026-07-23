@@ -58,6 +58,27 @@ export type GroupedDashboardGifts = {
 	hidden: DashboardGiftRowViewModel[];
 };
 
+export type DuplicateGiftDatabase = {
+	gift: {
+		findFirst(args: Prisma.GiftFindFirstArgs): Promise<Gift | null>;
+		findMany(args: Prisma.GiftFindManyArgs): Promise<{ sortOrder: number }[]>;
+		create(args: Prisma.GiftCreateArgs): Promise<Gift>;
+	};
+};
+
+export const assertOwnedWishlist = async (
+	db: { wishlist: WishlistDelegate },
+	{ ownerId, wishlistId }: { ownerId: number; wishlistId: string },
+): Promise<void> => {
+	const wishlist = await db.wishlist.findFirst({
+		where: { id: wishlistId, ownerId },
+		select: { id: true },
+	});
+	if (!wishlist) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
+	}
+};
+
 export const listGifts = (
 	db: GiftDatabase,
 	{
@@ -87,6 +108,7 @@ export const createGift = (db: GiftDatabase, input: CreateGiftInput) =>
 			productUrl: input.productUrl ?? null,
 			imageUrl: input.imageUrl ?? null,
 			storeName: input.storeName ?? null,
+			size: input.size ?? null,
 			priceAmount: input.priceAmount ?? null,
 			priceCurrency: (input.priceCurrency as Gift["priceCurrency"]) ?? null,
 			quantityNeeded: input.quantityNeeded ?? 1,
@@ -107,6 +129,7 @@ export const updateGift = async (db: GiftDatabase, input: UpdateGiftInput) => {
 		data.productUrl = input.productUrl ?? null;
 	if (input.imageUrl !== undefined) data.imageUrl = input.imageUrl ?? null;
 	if (input.storeName !== undefined) data.storeName = input.storeName ?? null;
+	if (input.size !== undefined) data.size = input.size ?? null;
 	if (input.priceAmount !== undefined)
 		data.priceAmount = input.priceAmount ?? null;
 	if (input.priceCurrency !== undefined)
@@ -147,13 +170,7 @@ export const listDashboardGifts = async (
 	db: DashboardGiftDatabase,
 	{ ownerId, wishlistId }: { ownerId: number; wishlistId: string },
 ): Promise<GiftWithPurchases[]> => {
-	const wishlist = await db.wishlist.findFirst({
-		where: { id: wishlistId, ownerId },
-		select: { id: true },
-	});
-	if (!wishlist) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
-	}
+	await assertOwnedWishlist(db, { ownerId, wishlistId });
 	return db.gift.findMany({
 		where: { wishlistId, deletedAt: null },
 		orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -186,13 +203,7 @@ export const reorderGifts = async (
 		orderedGiftIds,
 	}: { ownerId: number } & ReorderGiftsInput,
 ): Promise<void> => {
-	const wishlist = await db.wishlist.findFirst({
-		where: { id: wishlistId, ownerId },
-		select: { id: true },
-	});
-	if (!wishlist) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
-	}
+	await assertOwnedWishlist(db, { ownerId, wishlistId });
 
 	const existingGifts = await db.gift.findMany({
 		where: { wishlistId, deletedAt: null },
@@ -215,6 +226,52 @@ export const reorderGifts = async (
 			db.gift.update({ where: { id }, data: { sortOrder: index } }),
 		),
 	);
+};
+
+export const duplicateGift = async (
+	db: DuplicateGiftDatabase,
+	{ ownerId, giftId }: { ownerId: number; giftId: string },
+): Promise<Gift> => {
+	const original = await db.gift.findFirst({
+		where: {
+			id: giftId,
+			deletedAt: null,
+			wishlist: { ownerId },
+		},
+	});
+	if (!original) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+
+	const [lastGift] = await db.gift.findMany({
+		where: { wishlistId: original.wishlistId, deletedAt: null },
+		orderBy: { sortOrder: "desc" },
+		take: 1,
+		select: { sortOrder: true },
+	});
+	const nextSortOrder = (lastGift?.sortOrder ?? -1) + 1;
+
+	return db.gift.create({
+		data: {
+			wishlist: { connect: { id: original.wishlistId } },
+			...(original.categoryId
+				? { category: { connect: { id: original.categoryId } } }
+				: {}),
+			name: original.name,
+			productUrl: original.productUrl,
+			imageUrl: original.imageUrl,
+			storeName: original.storeName,
+			size: original.size,
+			priceAmount: original.priceAmount,
+			priceCurrency: original.priceCurrency,
+			quantityNeeded: original.quantityNeeded,
+			priority: original.priority,
+			visibilityStatus: original.visibilityStatus,
+			publicNote: original.publicNote,
+			internalNote: original.internalNote,
+			sortOrder: nextSortOrder,
+		},
+	});
 };
 
 export const groupDashboardGifts = (

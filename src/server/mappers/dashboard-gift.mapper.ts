@@ -22,6 +22,7 @@ export function mapDashboardGift(
 		productUrl: gift.productUrl,
 		imageUrl: gift.imageUrl,
 		storeName: gift.storeName,
+		size: gift.size,
 		priceAmount: gift.priceAmount?.toString() ?? null,
 		priceCurrency: gift.priceCurrency,
 		quantityNeeded: gift.quantityNeeded,

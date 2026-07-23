@@ -52,6 +52,7 @@ function makeGift(overrides: Partial<Gift> = {}): Gift {
 		productUrl: null,
 		imageUrl: null,
 		storeName: null,
+		size: null,
 		priceAmount: null,
 		priceCurrency: null,
 		quantityNeeded: 1,

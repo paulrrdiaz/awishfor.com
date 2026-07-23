@@ -5,9 +5,12 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { mapDashboardGift } from "@/server/mappers/dashboard-gift.mapper";
 import type {
 	DashboardGiftDatabase,
+	GiftDatabase,
 	ReorderGiftDatabase,
 } from "@/server/services/gift.service";
 import {
+	assertOwnedWishlist,
+	createGift,
 	getOwnedGift,
 	groupDashboardGifts,
 	listDashboardGifts,
@@ -17,6 +20,7 @@ import {
 } from "@/server/services/gift.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
+	createGiftSchema,
 	deleteGiftSchema,
 	giftIdSchema,
 	reorderGiftsSchema,
@@ -35,7 +39,21 @@ const asDashboardDb = (ctx: GiftRouterContext): DashboardGiftDatabase =>
 const asReorderDb = (ctx: GiftRouterContext): ReorderGiftDatabase =>
 	ctx.db as unknown as ReorderGiftDatabase;
 
+const asGiftDb = (ctx: GiftRouterContext): GiftDatabase =>
+	ctx.db as unknown as GiftDatabase;
+
 export const giftRouter = createTRPCRouter({
+	create: protectedProcedure
+		.input(createGiftSchema)
+		.mutation(async ({ ctx, input }) => {
+			const ownerId = await getLocalUserId(ctx);
+			await assertOwnedWishlist(asDashboardDb(ctx), {
+				ownerId,
+				wishlistId: input.wishlistId,
+			});
+			return createGift(asGiftDb(ctx), input);
+		}),
+
 	list: protectedProcedure
 		.input(z.object({ wishlistId: z.string().min(1) }))
 		.query(async ({ ctx, input }) => {

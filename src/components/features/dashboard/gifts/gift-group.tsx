@@ -13,106 +13,95 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { reorderGiftsAction } from "@/app/(protected)/dashboard/wishlists/[id]/gifts/actions";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
-import { api } from "@/trpc/react";
+import { GiftSheet } from "./gift-sheet";
 import { SortableGiftRow } from "./sortable-gift-row";
-
-type GroupKey = "available" | "purchased" | "hidden";
-type Groups = Record<GroupKey, DashboardGiftRowViewModel[]>;
-
-const GROUP_LABELS: Record<GroupKey, string> = {
-	available: "Disponibles",
-	purchased: "Comprados",
-	hidden: "Ocultos",
-};
-const GROUP_ORDER: GroupKey[] = ["available", "purchased", "hidden"];
 
 type Props = {
 	wishlistId: string;
-	available: DashboardGiftRowViewModel[];
-	purchased: DashboardGiftRowViewModel[];
-	hidden: DashboardGiftRowViewModel[];
+	gifts: DashboardGiftRowViewModel[];
+	categoriesById: Record<string, string>;
+	sortable: boolean;
 };
 
-export function GiftGroup({ wishlistId, available, purchased, hidden }: Props) {
-	const [groups, setGroups] = useState<Groups>({
-		available,
-		purchased,
-		hidden,
-	});
-	const prevGroupsRef = useRef<Groups>(groups);
-	const utils = api.useUtils();
+export function GiftGroup({
+	wishlistId,
+	gifts,
+	categoriesById,
+	sortable,
+}: Props) {
+	const [items, setItems] = useState(gifts);
+	const prevItemsRef = useRef(items);
+	const [editingGift, setEditingGift] =
+		useState<DashboardGiftRowViewModel | null>(null);
 
-	const reorder = api.gift.reorder.useMutation({
-		onError: () => setGroups(prevGroupsRef.current),
-		onSettled: () => utils.gift.list.invalidate({ wishlistId }),
-	});
+	useEffect(() => {
+		setItems(gifts);
+	}, [gifts]);
 
 	const sensors = useSensors(useSensor(PointerSensor));
 
-	const handleDragEnd = (event: DragEndEvent) => {
+	function handleDragEnd(event: DragEndEvent) {
+		if (!sortable) return;
 		const { active, over } = event;
 		if (!over || active.id === over.id) return;
 
-		const activeId = String(active.id);
-		const overId = String(over.id);
+		const oldIndex = items.findIndex((g) => g.id === active.id);
+		const newIndex = items.findIndex((g) => g.id === over.id);
+		if (oldIndex === -1 || newIndex === -1) return;
 
-		const groupKey = GROUP_ORDER.find((key) =>
-			groups[key].some((g) => g.id === activeId),
-		);
-		if (!groupKey) return;
+		prevItemsRef.current = items;
+		const reordered = arrayMove(items, oldIndex, newIndex);
+		setItems(reordered);
 
-		const group = groups[groupKey];
-		if (!group.some((g) => g.id === overId)) return;
-
-		const oldIndex = group.findIndex((g) => g.id === activeId);
-		const newIndex = group.findIndex((g) => g.id === overId);
-		const reordered = arrayMove(group, oldIndex, newIndex);
-
-		prevGroupsRef.current = groups;
-		const nextGroups: Groups = { ...groups, [groupKey]: reordered };
-		setGroups(nextGroups);
-
-		const orderedGiftIds = GROUP_ORDER.flatMap((key) =>
-			nextGroups[key].map((g) => g.id),
-		);
-		reorder.mutate({ wishlistId, orderedGiftIds });
-	};
+		reorderGiftsAction({
+			wishlistId,
+			orderedGiftIds: reordered.map((g) => g.id),
+		}).catch(() => {
+			setItems(prevItemsRef.current);
+			toast.error("No pudimos guardar el nuevo orden.");
+		});
+	}
 
 	return (
-		<DndContext
-			collisionDetection={closestCenter}
-			onDragEnd={handleDragEnd}
-			sensors={sensors}
-		>
-			<div className="space-y-8">
-				{GROUP_ORDER.map((key) => {
-					const gifts = groups[key];
-					if (gifts.length === 0) return null;
-					return (
-						<section key={key}>
-							<h2 className="mb-3 font-medium text-gray-500 text-xs uppercase tracking-wide">
-								{GROUP_LABELS[key]} ({gifts.length})
-							</h2>
-							<SortableContext
-								items={gifts.map((g) => g.id)}
-								strategy={verticalListSortingStrategy}
-							>
-								<ul className="space-y-2">
-									{gifts.map((gift) => (
-										<SortableGiftRow
-											gift={gift}
-											key={gift.id}
-											wishlistId={wishlistId}
-										/>
-									))}
-								</ul>
-							</SortableContext>
-						</section>
-					);
-				})}
-			</div>
-		</DndContext>
+		<>
+			<DndContext
+				collisionDetection={closestCenter}
+				id={`gifts-${wishlistId}`}
+				onDragEnd={handleDragEnd}
+				sensors={sensors}
+			>
+				<SortableContext
+					items={items.map((g) => g.id)}
+					strategy={verticalListSortingStrategy}
+				>
+					<ul className="space-y-2.5">
+						{items.map((gift) => (
+							<SortableGiftRow
+								categoryName={
+									gift.categoryId ? categoriesById[gift.categoryId] : null
+								}
+								gift={gift}
+								key={gift.id}
+								onEdit={() => setEditingGift(gift)}
+								sortable={sortable}
+								wishlistId={wishlistId}
+							/>
+						))}
+					</ul>
+				</SortableContext>
+			</DndContext>
+			<GiftSheet
+				gift={editingGift}
+				onOpenChange={(open) => {
+					if (!open) setEditingGift(null);
+				}}
+				open={!!editingGift}
+				wishlistId={wishlistId}
+			/>
+		</>
 	);
 }

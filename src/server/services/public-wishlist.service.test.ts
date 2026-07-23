@@ -37,6 +37,7 @@ const makeGift = (overrides: Partial<MockGift> = {}): MockGift => ({
 	productUrl: null,
 	imageUrl: null,
 	storeName: null,
+	size: null,
 	priceAmount: null,
 	priceCurrency: null,
 	quantityNeeded: 1,

@@ -10,6 +10,7 @@ export const GIFT_NAME_MAX_LENGTH = 200;
 export const GIFT_NOTE_MAX_LENGTH = 2_000;
 export const GIFT_URL_MAX_LENGTH = 2_000;
 export const GIFT_STORE_NAME_MAX_LENGTH = 120;
+export const GIFT_SIZE_MAX_LENGTH = 60;
 
 export const giftIdSchema = z.string().min(1, "Gift id is required");
 
@@ -84,6 +85,7 @@ export const createGiftSchema = z.object({
 	productUrl: optionalUrl("Product URL"),
 	imageUrl: optionalUrl("Image URL"),
 	storeName: optionalTrimmedString("Store name", GIFT_STORE_NAME_MAX_LENGTH),
+	size: optionalTrimmedString("Size", GIFT_SIZE_MAX_LENGTH),
 	priceAmount: giftPriceAmountSchema,
 	priceCurrency: giftPriceCurrencySchema,
 	quantityNeeded: giftQuantityNeededSchema.default(1),
@@ -105,6 +107,7 @@ export const updateGiftSchema = z.object({
 	productUrl: optionalUrl("Product URL"),
 	imageUrl: optionalUrl("Image URL"),
 	storeName: optionalTrimmedString("Store name", GIFT_STORE_NAME_MAX_LENGTH),
+	size: optionalTrimmedString("Size", GIFT_SIZE_MAX_LENGTH),
 	priceAmount: giftPriceAmountSchema,
 	priceCurrency: giftPriceCurrencySchema,
 	quantityNeeded: giftQuantityNeededSchema.optional(),

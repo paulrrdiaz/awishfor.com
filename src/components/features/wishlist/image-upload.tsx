@@ -9,6 +9,7 @@ type Props = {
 	value: string | null;
 	onChange: (url: string | null) => void;
 	endpoint: "coverImage" | "giftImage";
+	variant?: "default" | "compact";
 };
 
 function friendlyError(message: string): string {
@@ -24,7 +25,12 @@ function friendlyError(message: string): string {
 	return "Error al subir la imagen. Inténtalo de nuevo.";
 }
 
-export function ImageUpload({ value, onChange, endpoint }: Props) {
+export function ImageUpload({
+	value,
+	onChange,
+	endpoint,
+	variant = "default",
+}: Props) {
 	const [error, setError] = useState<string | null>(null);
 	const [isHandlingUpload, setIsHandlingUpload] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -66,6 +72,63 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 			setIsHandlingUpload(false);
 			e.target.value = "";
 		}
+	}
+
+	const fileInput = (
+		<input
+			accept="image/jpeg,image/png,image/webp"
+			className="hidden"
+			disabled={isBusy}
+			onChange={handleFileChange}
+			ref={inputRef}
+			type="file"
+		/>
+	);
+
+	if (variant === "compact") {
+		return (
+			<div className="space-y-2">
+				<div className="flex items-center gap-3.5">
+					<div className="relative size-18 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+						{value ? (
+							<Image
+								alt="Imagen subida"
+								className="object-cover"
+								fill
+								src={value}
+								unoptimized
+							/>
+						) : null}
+					</div>
+					<div className="flex flex-col items-start gap-1.5">
+						<Button
+							disabled={isBusy}
+							onClick={() => inputRef.current?.click()}
+							size="sm"
+							type="button"
+							variant="outline"
+						>
+							{isBusy ? "Subiendo…" : value ? "Cambiar imagen" : "Subir imagen"}
+						</Button>
+						{value && (
+							<Button
+								className="h-auto p-0 text-xs"
+								onClick={() => onChange(null)}
+								type="button"
+								variant="link"
+							>
+								Eliminar imagen
+							</Button>
+						)}
+						<p className="text-muted-foreground text-xs">
+							JPG, PNG o WEBP · máx. 5 MB
+						</p>
+					</div>
+				</div>
+				{error && <p className="text-destructive text-xs">{error}</p>}
+				{fileInput}
+			</div>
+		);
 	}
 
 	if (value) {
@@ -116,14 +179,7 @@ export function ImageUpload({ value, onChange, endpoint }: Props) {
 					)}
 				</div>
 			</Button>
-			<input
-				accept="image/jpeg,image/png,image/webp"
-				className="hidden"
-				disabled={isBusy}
-				onChange={handleFileChange}
-				ref={inputRef}
-				type="file"
-			/>
+			{fileInput}
 			{error && <p className="text-destructive text-xs">{error}</p>}
 		</div>
 	);
