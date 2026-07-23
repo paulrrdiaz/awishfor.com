@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
 	{ label: "Resumen", segment: "" },
 	{ label: "Regalos", segment: "gifts" },
+	{ label: "Invitados", segment: "guests" },
 	{ label: "Diseño", segment: "design" },
 	{ label: "Configuración", segment: "settings" },
 ] as const;

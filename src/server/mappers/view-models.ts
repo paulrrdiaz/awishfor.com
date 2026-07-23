@@ -29,6 +29,17 @@ export type PublicCategoryViewModel = {
 	sortOrder: number;
 };
 
+export type PublicGuestExtraGuestViewModel = {
+	name: string | null;
+};
+
+export type PublicGuestViewModel = {
+	slug: string;
+	primaryName: string;
+	extraGuests: PublicGuestExtraGuestViewModel[];
+	status: string;
+};
+
 export type PublicWishlistViewModel = {
 	id: string;
 	slug: string;
@@ -56,6 +67,7 @@ export type PublicWishlistViewModel = {
 	categories: PublicCategoryViewModel[];
 	gifts: PublicGiftViewModel[];
 	progress: PublicWishlistProgress;
+	guest?: PublicGuestViewModel;
 };
 
 export type DashboardGiftRowViewModel = {
@@ -147,6 +159,27 @@ export type DashboardWishlistOverviewViewModel = {
 		};
 	};
 	recentPurchases: RecentPurchaseViewModel[];
+};
+
+export type InviteExtraGuestViewModel = {
+	id: string;
+	name: string | null;
+};
+
+export type DashboardInviteViewModel = {
+	id: string;
+	wishlistId: string;
+	primaryName: string;
+	primaryEmail: string | null;
+	primaryPhone: string | null;
+	slug: string;
+	status: string;
+	partySize: number;
+	extraGuests: InviteExtraGuestViewModel[];
+	openedAt: string | null;
+	respondedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 };
 
 export type DashboardWishlistCardViewModel = {

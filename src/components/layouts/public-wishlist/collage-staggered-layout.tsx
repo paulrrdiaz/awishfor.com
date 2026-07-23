@@ -1,3 +1,4 @@
+import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroImageSlot,
@@ -39,6 +40,11 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 							{wishlist.displayName}
 						</p>
 					)}
+					<GuestWelcomeSection
+						className="mt-3"
+						guest={wishlist.guest}
+						wishlistSlug={wishlist.slug}
+					/>
 				</div>
 				<div className="grid grid-cols-3 items-end gap-3 bg-gradient-to-b from-card to-background px-6 pb-9 sm:px-10">
 					<HeroImageSlot

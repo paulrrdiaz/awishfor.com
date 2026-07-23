@@ -1,3 +1,4 @@
+import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
@@ -61,6 +62,11 @@ export function WeddingFormalLayout({ wishlist, layout, mode }: Props) {
 				<h1 className="mt-5 font-heading font-semibold text-3xl leading-tight sm:text-4xl">
 					{heading}
 				</h1>
+				<GuestWelcomeSection
+					className="mt-4"
+					guest={wishlist.guest}
+					wishlistSlug={wishlist.slug}
+				/>
 				{!isCompact && (
 					<>
 						<div className="mt-5">

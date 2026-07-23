@@ -47,6 +47,12 @@ enum GiftVisibilityStatus {
   hidden
 }
 
+enum RsvpStatus {
+  pending
+  confirmed
+  declined
+}
+
 model User {
   id        Int        @id @default(autoincrement())
   clerkId   String     @unique
@@ -64,6 +70,7 @@ model Wishlist {
   owner           User           @relation(fields: [ownerId], references: [id])
   categories      Category[]
   gifts           Gift[]
+  invites         Invite[]
   title           String
   slug            String         @unique
   eventType       EventType
@@ -137,6 +144,35 @@ model Gift {
   @@index([wishlistId])
   @@index([wishlistId, sortOrder])
   @@index([categoryId])
+}
+
+model Invite {
+  id            String             @id @default(cuid())
+  wishlistId    String
+  wishlist      Wishlist           @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  extraGuests   InviteExtraGuest[]
+  primaryName   String
+  primaryEmail  String?
+  primaryPhone  String?
+  slug          String
+  status        RsvpStatus         @default(pending)
+  openedAt      DateTime?
+  respondedAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@unique([wishlistId, slug])
+  @@index([wishlistId])
+}
+
+model InviteExtraGuest {
+  id        String   @id @default(cuid())
+  inviteId  String
+  invite    Invite   @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  name      String?
+  sortOrder Int      @default(0)
+
+  @@index([inviteId])
 }
 
 model Purchase {

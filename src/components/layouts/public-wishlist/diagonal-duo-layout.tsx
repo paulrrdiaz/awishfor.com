@@ -1,3 +1,4 @@
+import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroImageSlot,
@@ -46,6 +47,10 @@ export function DiagonalDuoLayout({ wishlist, layout, mode }: Props) {
 								{wishlist.displayName}
 							</p>
 						)}
+						<GuestWelcomeSection
+							guest={wishlist.guest}
+							wishlistSlug={wishlist.slug}
+						/>
 						{!isCompact && (
 							<HeroCtas className="justify-center lg:justify-start" />
 						)}

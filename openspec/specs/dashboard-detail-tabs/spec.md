@@ -1,9 +1,25 @@
 # dashboard-detail-tabs Specification
 
 ## Purpose
-Defines the desktop/tablet tab navigation for the wishlist detail nav (`Resumen · Regalos · Diseño · Configuración`, `src/components/layouts/dashboard/wishlist-detail-nav.tsx`) — the animated active-tab indicator, hover/focus affordances, and the responsive handoff to the mobile `Select` fallback below the `md` breakpoint.
+Defines the desktop/tablet tab navigation for the wishlist detail nav (`Resumen · Regalos · Invitados · Diseño · Configuración`, `src/components/layouts/dashboard/wishlist-detail-nav.tsx`) — the animated active-tab indicator, hover/focus affordances, and the responsive handoff to the mobile `Select` fallback below the `md` breakpoint.
 
 ## Requirements
+
+### Requirement: Invitados tab in the detail nav
+
+The wishlist detail nav `NAV_ITEMS` SHALL include an `Invitados` tab mapping to the `guests` segment, positioned after `Regalos` and before `Diseño`. The Invitados tab SHALL participate in the animated active-tab indicator, hover, focus, and route-derived active-segment behavior identically to the other tabs, and SHALL appear as an option in the mobile `Select` fallback below the `md` breakpoint.
+
+#### Scenario: Invitados tab present and navigable
+- **WHEN** the wishlist detail nav renders
+- **THEN** an `Invitados` tab is shown that links to `/dashboard/wishlists/[id]/guests`
+
+#### Scenario: Indicator tracks the Invitados tab
+- **WHEN** a user loads `/dashboard/wishlists/[id]/guests` directly
+- **THEN** the active-tab indicator is positioned under the `Invitados` tab without requiring a prior click
+
+#### Scenario: Invitados appears in the mobile Select
+- **WHEN** the viewport is below the `md` breakpoint
+- **THEN** the section `Select` dropdown includes an `Invitados` option
 
 ### Requirement: Animated active-tab indicator
 The wishlist detail nav SHALL render a single active-tab indicator that visually moves (position and width transition) to the currently active tab whenever the active segment changes, rather than each tab independently toggling its own static border.

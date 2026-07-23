@@ -2,6 +2,7 @@ import { PublicGiftFilters } from "@/components/features/wishlist/public-filters
 import { Countdown } from "@/components/shared/countdown";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
+import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HowItWorks } from "@/components/shared/how-it-works";
 import { ProgressSummary } from "@/components/shared/progress-summary";
 import { WishlistFooter } from "@/components/shared/wishlist-footer";
@@ -29,6 +30,12 @@ export function GridWishlistLayout({ wishlist, layout, mode }: Props) {
 					eventTime: isCompact ? null : wishlist.eventTime,
 					eventLocation: isCompact ? null : wishlist.eventLocation,
 				}}
+			/>
+
+			<GuestWelcomeSection
+				className="mx-auto max-w-2xl px-6 text-center"
+				guest={wishlist.guest}
+				wishlistSlug={wishlist.slug}
 			/>
 
 			{!isCompact && <EventDetails wishlist={wishlist} />}

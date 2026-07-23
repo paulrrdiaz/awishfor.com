@@ -1,3 +1,4 @@
+import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroCarouselGallery } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
@@ -42,6 +43,12 @@ export function HeroCinematicLayout({ wishlist, layout, mode }: Props) {
 						{heading}
 					</h1>
 					{subtitle && <p className="mt-2 text-sm opacity-90">{subtitle}</p>}
+					<GuestWelcomeSection
+						className="mt-4"
+						guest={wishlist.guest}
+						tone="on-photo"
+						wishlistSlug={wishlist.slug}
+					/>
 					{!isCompact && (
 						<div className="mt-6">
 							<HeroCtas variant="on-photo" />

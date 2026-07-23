@@ -1,3 +1,4 @@
+import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroImageSlot,
@@ -64,6 +65,11 @@ export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
 							{wishlist.displayName}
 						</p>
 					)}
+					<GuestWelcomeSection
+						className="mt-3"
+						guest={wishlist.guest}
+						wishlistSlug={wishlist.slug}
+					/>
 				</div>
 				<div className="flex items-end justify-center gap-0 bg-gradient-to-b from-card to-background px-6 pt-7 pb-10 sm:px-10">
 					<Polaroid

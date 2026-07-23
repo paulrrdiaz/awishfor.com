@@ -1,3 +1,4 @@
+import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
@@ -35,6 +36,10 @@ export function SplitImageRightLayout({ wishlist, layout, mode }: Props) {
 							{wishlist.displayName}
 						</p>
 					)}
+					<GuestWelcomeSection
+						guest={wishlist.guest}
+						wishlistSlug={wishlist.slug}
+					/>
 					{!isCompact && <HeroCtas className="justify-start" />}
 				</div>
 				<div className="relative h-56 sm:h-72 lg:h-auto">
