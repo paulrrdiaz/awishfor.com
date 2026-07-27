@@ -11,11 +11,11 @@ interface GoogleButtonProps {
 export function GoogleButton({
 	onClick,
 	isLoading = false,
-	label = "Continue with Google",
+	label = "Continuar con Google",
 }: GoogleButtonProps) {
 	return (
 		<Button
-			className="w-full"
+			className="w-full rounded-full"
 			disabled={isLoading}
 			onClick={onClick}
 			type="button"
@@ -44,7 +44,7 @@ export function GoogleButton({
 					fill="#EA4335"
 				/>
 			</svg>
-			{isLoading ? "Redirecting…" : label}
+			{isLoading ? "Redirigiendo…" : label}
 		</Button>
 	);
 }
