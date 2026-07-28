@@ -2,18 +2,11 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 
-const isPublicRoute = createRouteMatcher([
-	"/",
-	"/sign-in(.*)",
-	"/sign-up(.*)",
-	"/forgot-password(.*)",
-	"/sso-callback(.*)",
-	"/api/webhooks(.*)",
-	"/api/uploadthing(.*)",
-	"/api/trpc(.*)",
-	"/w/(.*)",
-	"/create(.*)",
-]);
+// Only the dashboard actually requires auth. Everything else — marketing
+// pages, public wishlists, and any URL that matches no route — must stay
+// reachable by anonymous visitors so unmatched routes can render the
+// marketing not-found page instead of redirecting to sign-in.
+const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
@@ -27,7 +20,7 @@ export default clerkMiddleware(async (auth, req) => {
 		return NextResponse.redirect(new URL(redirectPath, req.url));
 	}
 
-	if (!isPublicRoute(req)) {
+	if (isProtectedRoute(req)) {
 		await auth.protect();
 	}
 });

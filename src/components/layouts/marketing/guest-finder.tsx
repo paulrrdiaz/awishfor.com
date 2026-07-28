@@ -1,50 +1,19 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { extractWishlistSlug } from "@/lib/wishlist/slug-extract";
-
-const guestFinderSchema = z.object({
-	query: z
-		.string()
-		.trim()
-		.min(2, "Ingresa al menos 2 caracteres")
-		.max(80, "Máximo 80 caracteres"),
-});
-
-type GuestFinderValues = z.infer<typeof guestFinderSchema>;
+import { useGuestFinder } from "@/lib/wishlist/use-guest-finder";
 
 export function GuestFinder() {
-	const router = useRouter();
-	const [notFoundError, setNotFoundError] = useState(false);
-
 	const {
 		register,
-		handleSubmit,
-		formState: { errors, isSubmitting },
-	} = useForm<GuestFinderValues>({
-		resolver: zodResolver(guestFinderSchema),
-		defaultValues: { query: "" },
-	});
-
-	const onSubmit = (values: GuestFinderValues) => {
-		const slug = extractWishlistSlug(values.query);
-
-		if (!slug) {
-			setNotFoundError(true);
-			return;
-		}
-
-		setNotFoundError(false);
-		router.push(`/w/${slug}`);
-	};
+		errors,
+		isSubmitting,
+		notFoundError,
+		clearNotFoundError,
+		onSubmit,
+	} = useGuestFinder();
 
 	return (
 		<section className="border-[var(--mline)] border-t bg-[#F0FAE8] px-11 py-16 text-center">
@@ -61,11 +30,7 @@ export function GuestFinder() {
 				<p className="mb-6 hidden text-[15px] text-[var(--mmut)] lg:block">
 					Encuentra su wishlist por nombre o por enlace.
 				</p>
-				<form
-					className="mx-auto max-w-[520px]"
-					noValidate
-					onSubmit={handleSubmit(onSubmit)}
-				>
+				<form className="mx-auto max-w-[520px]" noValidate onSubmit={onSubmit}>
 					<div className="flex items-start gap-[10px]">
 						<Field className="flex-1">
 							<Input
@@ -74,7 +39,7 @@ export function GuestFinder() {
 								className="h-auto rounded-full border-[var(--mline)] bg-white px-5 py-[14px] text-[14px] text-[var(--mink)] placeholder:text-[var(--mmut)] focus-visible:border-[var(--mrose)]"
 								placeholder="Nombre del evento o pareja…"
 								{...register("query", {
-									onChange: () => setNotFoundError(false),
+									onChange: clearNotFoundError,
 								})}
 							/>
 							<FieldError className="px-2 text-left" errors={[errors.query]} />
