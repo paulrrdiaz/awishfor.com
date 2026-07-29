@@ -6,9 +6,8 @@ import { FaqSection } from "@/components/layouts/marketing/faq-section";
 import { FinalCta } from "@/components/layouts/marketing/final-cta";
 import { GuestFinder } from "@/components/layouts/marketing/guest-finder";
 import { HowItWorksSection } from "@/components/layouts/marketing/how-it-works-section";
+import { MarketingFirstFold } from "@/components/layouts/marketing/marketing-first-fold";
 import { MarketingFooter } from "@/components/layouts/marketing/marketing-footer";
-import { MarketingHero } from "@/components/layouts/marketing/marketing-hero";
-import { MarketingNav } from "@/components/layouts/marketing/marketing-nav";
 import { OccasionPickerSection } from "@/components/layouts/marketing/occasion-picker-section";
 import { PartnersMarquee } from "@/components/layouts/marketing/partners-marquee";
 import { ThemePreviews } from "@/components/layouts/marketing/theme-previews";
@@ -23,8 +22,7 @@ export const metadata: Metadata = {
 export default function MarketingLandingPage() {
 	return (
 		<>
-			<MarketingNav />
-			<MarketingHero />
+			<MarketingFirstFold />
 			<OccasionPickerSection />
 			<BenefitsSection />
 			<HowItWorksSection />
