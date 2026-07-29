@@ -1,4 +1,4 @@
-import { Gift as GiftIcon, Star } from "lucide-react";
+import { GiftIcon, StarIcon } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -50,7 +50,7 @@ export function GiftRow({ gift, wishlistId, categoryName, onEdit }: Props) {
 			<div className="min-w-0 flex-1">
 				<div className="flex min-w-0 items-center gap-1.5">
 					{isHighPriority && (
-						<Star className="size-3.5 shrink-0 fill-current text-primary" />
+						<StarIcon className="size-3.5 shrink-0 fill-current text-primary" />
 					)}
 					<span
 						className={cn(
@@ -89,10 +89,10 @@ export function GiftRow({ gift, wishlistId, categoryName, onEdit }: Props) {
 			</div>
 
 			<div className="flex shrink-0 flex-col items-end gap-2.5">
-				{isHidden && <Badge variant="secondary">Oculto</Badge>}
-				{isFullyPurchased && <Badge>✓ Comprado</Badge>}
+				{isHidden && <Badge variant="archived">Oculto</Badge>}
+				{isFullyPurchased && <Badge variant="published">✓ Comprado</Badge>}
 				{isPartial && (
-					<Badge variant="outline">
+					<Badge variant="draft">
 						{gift.purchasedQuantity} de {gift.quantityNeeded}
 					</Badge>
 				)}

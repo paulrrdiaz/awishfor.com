@@ -1,4 +1,4 @@
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBagIcon } from "lucide-react";
 import type { Locale } from "@/generated/prisma/enums";
 import { formatRelativeDate } from "@/lib/format/dates";
 import type { RecentPurchaseViewModel } from "@/server/mappers/view-models";
@@ -29,17 +29,15 @@ function getInitials(name: string) {
 
 export function RecentPurchases({ purchases, language }: Props) {
 	return (
-		<section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+		<section className="rounded-lg border border-border bg-card p-5 shadow-sm">
 			<div className="mb-5 flex items-center justify-between gap-4">
 				<div>
-					<h2 className="font-heading font-semibold text-xl">
-						Compras recientes
-					</h2>
+					<h2 className="font-semibold text-[15px]">Compras recientes</h2>
 					<p className="mt-1 text-muted-foreground text-sm">
 						Últimas compras registradas en esta wishlist.
 					</p>
 				</div>
-				<ShoppingBag className="size-5 text-primary" />
+				<ShoppingBagIcon className="size-5 text-primary" />
 			</div>
 
 			{purchases.length === 0 ? (

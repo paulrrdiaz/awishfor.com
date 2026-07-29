@@ -29,7 +29,7 @@ export default async function DashboardWishlistGuestsPage({ params }: Props) {
 	}));
 
 	return (
-		<div className="mx-auto w-full max-w-4xl space-y-5 px-4 py-8">
+		<div className="w-full space-y-5 px-7 pt-1 pb-5">
 			<GuestsHeaderToolbar totalInvites={invites.length} wishlistId={id} />
 
 			{invites.length === 0 ? (

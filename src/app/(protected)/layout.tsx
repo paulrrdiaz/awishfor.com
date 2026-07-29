@@ -20,10 +20,10 @@ export default async function ProtectedLayout({
 	}
 
 	return (
-		<div className="min-h-svh p-2 md:p-4">
-			<SidebarProvider className="min-h-[calc(100svh-1rem)] overflow-hidden rounded-xl md:min-h-[calc(100svh-2rem)]">
+		<div className="h-svh p-2 md:p-4">
+			<SidebarProvider className="h-[calc(100svh-1rem)] min-h-0 overflow-hidden rounded-xl md:h-[calc(100svh-2rem)]">
 				<AppSidebar wishlists={wishlists} />
-				<SidebarInset>{children}</SidebarInset>
+				<SidebarInset className="min-h-0">{children}</SidebarInset>
 			</SidebarProvider>
 		</div>
 	);

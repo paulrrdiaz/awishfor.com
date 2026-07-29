@@ -104,9 +104,9 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 						<p className="text-muted-foreground text-sm">Diseño de wishlist</p>
 						<Badge variant="secondary">{statusLabel(wishlist.status)}</Badge>
 					</div>
-					<h1 className="font-heading font-semibold text-3xl">
+					<h2 className="font-heading font-semibold text-3xl">
 						{wishlist.title}
-					</h1>
+					</h2>
 					<p className="mt-2 max-w-2xl text-muted-foreground text-sm">
 						Ajusta el tema, la composición y la portada. La vista previa cambia
 						al instante; guarda para publicar los cambios.

@@ -20,17 +20,17 @@ export default async function DashboardWishlistOverviewPage({ params }: Props) {
 	}
 
 	return (
-		<div className="w-full px-6 py-5">
-			<div className="space-y-6">
+		<div className="w-full p-7">
+			<div className="space-y-[18px]">
 				<MetricCards metrics={wishlist.metrics} />
-				<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.7fr)]">
-					<div className="space-y-6">
+				<div className="grid gap-[18px] lg:grid-cols-[1.3fr_1fr]">
+					<div className="space-y-[18px]">
 						<RecentPurchases
 							language={wishlist.language}
 							purchases={wishlist.recentPurchases}
 						/>
 					</div>
-					<div className="space-y-6">
+					<div className="space-y-[18px]">
 						<PublishReadinessChecklist readiness={wishlist.readiness} />
 						<PublishButton wishlist={wishlist} />
 					</div>

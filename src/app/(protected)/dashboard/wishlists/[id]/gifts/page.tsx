@@ -48,7 +48,7 @@ export default async function DashboardWishlistGiftsPage({
 	const sortable = sort === "manual" && !isFiltered;
 
 	return (
-		<div className="mx-auto w-full max-w-4xl space-y-5 px-4 py-8">
+		<div className="w-full space-y-5 px-7 pt-1 pb-5">
 			<GiftsHeaderToolbar
 				sortable={sortable}
 				totalGifts={totalGifts}

@@ -257,9 +257,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					</p>
 					<Badge variant="secondary">{statusLabel(wishlist.status)}</Badge>
 				</div>
-				<h1 className="font-heading font-semibold text-3xl">
+				<h2 className="font-heading font-semibold text-3xl">
 					{wishlist.title}
-				</h1>
+				</h2>
 				<p className="mt-2 text-muted-foreground text-sm">
 					Edita el contenido, la URL y las opciones de tu lista.
 				</p>

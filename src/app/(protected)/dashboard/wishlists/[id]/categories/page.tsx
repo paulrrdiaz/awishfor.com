@@ -18,12 +18,12 @@ export default async function DashboardWishlistCategoriesPage({
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-3xl px-4 py-8">
-			<div className="mb-8">
-				<h1 className="mb-1 font-semibold text-2xl text-gray-900">
+		<div className="w-full px-7 py-5">
+			<div className="mb-6">
+				<h2 className="mb-1 font-semibold text-base text-foreground">
 					Categorías
-				</h1>
-				<p className="text-gray-500 text-sm">
+				</h2>
+				<p className="text-muted-foreground text-sm">
 					Organiza los filtros públicos de esta lista y revisa cuántos regalos
 					tiene cada categoría.
 				</p>

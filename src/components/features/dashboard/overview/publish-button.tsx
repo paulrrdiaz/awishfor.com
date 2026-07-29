@@ -1,6 +1,6 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { SendIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -38,9 +38,9 @@ export function PublishButton({ wishlist }: Props) {
 
 	if (isPublished) {
 		return (
-			<section className="space-y-3">
-				<div>
-					<h2 className="font-heading font-semibold text-xl">Compartir</h2>
+			<section className="rounded-lg border border-border bg-card p-5 shadow-sm">
+				<div className="mb-3">
+					<h2 className="font-semibold text-[15px]">Compartir</h2>
 					<p className="mt-1 text-muted-foreground text-sm">
 						Esta wishlist ya está publicada.
 					</p>
@@ -55,10 +55,10 @@ export function PublishButton({ wishlist }: Props) {
 	}
 
 	return (
-		<section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+		<section className="rounded-lg border border-border bg-card p-5 shadow-sm">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h2 className="font-heading font-semibold text-xl">Publicar</h2>
+					<h2 className="font-semibold text-[15px]">Publicar</h2>
 					<p className="mt-1 text-muted-foreground text-sm">
 						Al publicar, tus invitados podrán abrir el enlace público.
 					</p>
@@ -71,7 +71,7 @@ export function PublishButton({ wishlist }: Props) {
 					}}
 					type="button"
 				>
-					<Send />
+					<SendIcon />
 					Publicar
 				</Button>
 			</div>

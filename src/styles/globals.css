@@ -54,7 +54,7 @@
 	--radius-2xl: calc(var(--radius) * 1.8);
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-4xl: calc(var(--radius) * 2.6);
-	--font-mono: JetBrains Mono, monospace;
+	--font-mono: var(--font-jetbrains-mono), monospace;
 	--radius: 1rem;
 	--tracking-tighter: calc(var(--tracking-normal) - 0.05em);
 	--tracking-tight: calc(var(--tracking-normal) - 0.025em);
@@ -79,6 +79,12 @@
 	--shadow-opacity: var(--shadow-opacity);
 	--color-shadow-color: var(--shadow-color);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-status-published: var(--status-published);
+	--color-status-published-foreground: var(--status-published-foreground);
+	--color-status-draft: var(--status-draft);
+	--color-status-draft-foreground: var(--status-draft-foreground);
+	--color-status-archived: var(--status-archived);
+	--color-status-archived-foreground: var(--status-archived-foreground);
 }
 
 /*
@@ -119,6 +125,12 @@
 	--sidebar-border: oklch(0.9683 0.0069 247.8956);
 	--sidebar-ring: oklch(0.8871 0.2122 128.5041);
 	--destructive-foreground: oklch(1 0 0);
+	--status-published: #e4f3e8;
+	--status-published-foreground: #2f7d43;
+	--status-draft: #f4f4f1;
+	--status-draft-foreground: #77756e;
+	--status-archived: #eaecef;
+	--status-archived-foreground: #71798a;
 	--font-sans:
 		var(--font-inter, Inter), ui-sans-serif, system-ui, sans-serif,
 		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";

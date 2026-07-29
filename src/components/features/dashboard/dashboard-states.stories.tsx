@@ -5,7 +5,6 @@ import {
 	RestoreWishlistDialogContent,
 } from "@/components/features/dashboard/settings/wishlist-settings-form";
 import { WishlistCardGrid } from "@/components/features/dashboard/wishlist-card-grid";
-import { WishlistDetailNavView } from "@/components/layouts/dashboard/wishlist-detail-nav";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const meta = {
@@ -17,20 +16,6 @@ type Story = StoryObj;
 
 export const EmptyState: Story = {
 	render: () => <WishlistCardGrid wishlists={[]} />,
-};
-
-export const TabsToSelectNav: Story = {
-	render: () => (
-		<WishlistDetailNavView
-			activeSegment="settings"
-			onSegmentChange={() => undefined}
-			publicUrlPath="/w/esperando-a-mateo"
-			slug="esperando-a-mateo"
-			status="published"
-			title="Esperando a Mateo"
-			wishlistId="wishlist-1"
-		/>
-	),
 };
 
 export const SlugWarning: Story = {
