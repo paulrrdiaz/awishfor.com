@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { HeroCardCarousel } from "./hero-card-carousel";
+
 const OCCASIONS = [
 	{
 		eventType: "baby_shower",
@@ -90,6 +92,9 @@ export function OccasionPickerSection() {
 						Crea una wishlist general →
 					</Link>
 				</span>
+			</div>
+			<div className="mx-auto mt-14 max-w-[480px]" data-reveal>
+				<HeroCardCarousel />
 			</div>
 		</section>
 	);

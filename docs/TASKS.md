@@ -1969,13 +1969,14 @@ Implemented faithfully from the Claude Design canvas (`A Wish For.dc.html` §5,
 `#CCE8BE`, lime pop `#BCE25A`, sunshine accent `#F4C84A`. Deep-green serif (Lora) headlines,
 lime primary buttons. Tokens scoped to a `.marketing-theme` wrapper — they never touch the
 app `:root` or the seven public wishlist themes. Animations use **GSAP + ScrollTrigger**
-(scroll reveals, floating blobs/emoji, hero bob, headline shimmer, partner marquee, mesh
-gradient, pulse dot, slow spin, button glow), all gated by `prefers-reduced-motion`. Brand
+(scroll reveals, the four-occasion hero rotation, floating blobs/emoji, partner marquee,
+and button glow), all gated by `prefers-reduced-motion`. Brand
 logo (`public/assets/awishfor-logo.svg`) used in nav (and footer, inverted on the dark band).
 
 Tasks:
 
 - [x] Add hero section (split: serif shimmer headline + CTAs + stats left, bobbing public-page card right).
+- [x] Replace the split hero with one responsive H2b photographic rotator, synchronized proof rail, trust line, and mobile crops.
 - [x] Add ¿Por qué A Wish For? benefits row (4 cards: todo en un lugar · gratis sin comisiones · enlace/QR · listas sugeridas).
 - [x] Add Cómo funciona section (3 numbered cards).
 - [x] Add Casos de uso section (5 event pills).

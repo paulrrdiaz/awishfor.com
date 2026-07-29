@@ -36,7 +36,7 @@ export async function MarketingNav({ variant = "default" }: MarketingNavProps) {
 					data-h2b-nav
 					data-scrolled="false"
 				>
-					<div className="mx-auto max-w-[1240px] px-11 transition-[padding] duration-300 ease-out group-data-[scrolled=true]/h2b:px-8 motion-reduce:transition-none">
+					<div className="mx-auto max-w-[1240px] transition-[padding] duration-300 ease-out group-data-[scrolled=true]/h2b:px-8 motion-reduce:transition-none">
 						<div className="flex items-center justify-between pt-[22px] pb-[18px] transition-[padding] duration-300 ease-out group-data-[scrolled=true]/h2b:pt-4 group-data-[scrolled=true]/h2b:pb-[13px] motion-reduce:transition-none">
 							<Link
 								aria-label="A Wish For"
@@ -99,7 +99,7 @@ export async function MarketingNav({ variant = "default" }: MarketingNavProps) {
 
 function DefaultMarketingNav({ isSignedIn }: { isSignedIn: boolean }) {
 	return (
-		<nav className="flex items-center justify-between border-[var(--mline)] border-b bg-[rgba(238,249,230,0.95)] px-5 py-3 backdrop-blur md:px-11 md:py-[18px]">
+		<nav className="flex items-center justify-between border-[var(--mline)] border-b bg-[rgba(238,249,230,0.95)] px-5 py-3 backdrop-blur">
 			<Link className="flex items-center" href="/">
 				<Image
 					alt="A Wish For"
