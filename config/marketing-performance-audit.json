@@ -1,0 +1,55 @@
+{
+	"url": "http://127.0.0.1:4173/",
+	"port": 4173,
+	"mobile": {
+		"runs": 3,
+		"formFactor": "mobile",
+		"screenEmulation": {
+			"mobile": true,
+			"width": 412,
+			"height": 823,
+			"deviceScaleFactor": 1.75,
+			"disabled": false
+		},
+		"throttling": {
+			"rttMs": 150,
+			"throughputKbps": 1638.4,
+			"requestLatencyMs": 150,
+			"downloadThroughputKbps": 1638.4,
+			"uploadThroughputKbps": 768,
+			"cpuSlowdownMultiplier": 4
+		}
+	},
+	"desktop": {
+		"runs": 1,
+		"formFactor": "desktop",
+		"screenEmulation": {
+			"mobile": false,
+			"width": 1350,
+			"height": 940,
+			"deviceScaleFactor": 1,
+			"disabled": false
+		},
+		"throttling": {
+			"rttMs": 40,
+			"throughputKbps": 10240,
+			"requestLatencyMs": 0,
+			"downloadThroughputKbps": 0,
+			"uploadThroughputKbps": 0,
+			"cpuSlowdownMultiplier": 1
+		}
+	},
+	"budgets": {
+		"performanceMedian": 0.95,
+		"performanceRunMinimum": 0.9,
+		"largestContentfulPaintMs": 2500,
+		"cumulativeLayoutShift": 0.1,
+		"totalBlockingTimeMs": 200,
+		"javascriptBytes": 225280,
+		"cssBytes": 40960,
+		"fontPreloadBytes": 102400,
+		"totalTransferBytes": 819200,
+		"highPriorityContentImages": 1,
+		"fontPreloadCount": 3
+	}
+}

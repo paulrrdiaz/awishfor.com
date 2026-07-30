@@ -2,6 +2,8 @@
 
 import { Menu } from "lucide-react";
 import Link from "next/link";
+import type { MouseEvent } from "react";
+import { useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +16,30 @@ import {
 } from "@/components/ui/sheet";
 
 export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
+	const pendingSection = useRef<string | null>(null);
+
+	const handleDrawerClose = (event: Event) => {
+		const hash = pendingSection.current;
+		if (!hash) return;
+
+		event.preventDefault();
+		pendingSection.current = null;
+		requestAnimationFrame(() => {
+			const target = document.querySelector<HTMLElement>(hash);
+			if (!target) return;
+
+			target.scrollIntoView({
+				behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+					? "auto"
+					: "smooth",
+			});
+		});
+	};
+
+	const handleSectionNavigation = (event: MouseEvent<HTMLAnchorElement>) => {
+		pendingSection.current = event.currentTarget.hash;
+	};
+
 	return (
 		<Sheet>
 			<SheetTrigger asChild>
@@ -28,6 +54,7 @@ export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
 			</SheetTrigger>
 			<SheetContent
 				className="marketing-theme gap-0 bg-[var(--mbg)]"
+				onCloseAutoFocus={handleDrawerClose}
 				side="right"
 			>
 				<SheetHeader>
@@ -35,20 +62,22 @@ export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
 				</SheetHeader>
 				<nav className="flex flex-col gap-1 px-4 pb-4">
 					<SheetClose asChild>
-						<a
+						<Link
 							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)]"
 							href="#como-funciona"
+							onClick={handleSectionNavigation}
 						>
 							Cómo funciona
-						</a>
+						</Link>
 					</SheetClose>
 					<SheetClose asChild>
-						<a
+						<Link
 							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)]"
 							href="#ocasiones"
+							onClick={handleSectionNavigation}
 						>
 							Ocasiones
-						</a>
+						</Link>
 					</SheetClose>
 					<SheetClose asChild>
 						<Link

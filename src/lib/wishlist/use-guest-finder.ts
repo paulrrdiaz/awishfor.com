@@ -1,59 +1,33 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { extractWishlistSlug } from "@/lib/wishlist/slug-extract";
 
-const guestFinderSchema = z.object({
-	query: z
-		.string()
-		.trim()
-		.min(2, "Ingresa al menos 2 caracteres")
-		.max(80, "Máximo 80 caracteres"),
-});
-
-export type GuestFinderValues = z.infer<typeof guestFinderSchema>;
-
-/**
- * Shared validation, slug extraction, and navigation behind the guest
- * list-finder, so every surface that offers it (the landing page, the public
- * 404) resolves input identically. Presentation is left entirely to callers.
- */
+/** Native-form client behavior shared by the small list-finder surfaces. */
 export function useGuestFinder() {
 	const router = useRouter();
-	const [notFoundError, setNotFoundError] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors, isSubmitting },
-	} = useForm<GuestFinderValues>({
-		resolver: zodResolver(guestFinderSchema),
-		defaultValues: { query: "" },
-	});
-
-	const onSubmit = handleSubmit((values) => {
-		const slug = extractWishlistSlug(values.query);
-
-		if (!slug) {
-			setNotFoundError(true);
+	const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const query = String(
+			new FormData(event.currentTarget).get("query") ?? "",
+		).trim();
+		if (query.length < 2 || query.length > 80) {
+			setError("Ingresa entre 2 y 80 caracteres.");
 			return;
 		}
-
-		setNotFoundError(false);
+		const slug = extractWishlistSlug(query);
+		if (!slug) {
+			setError("No reconocimos ese enlace o nombre de lista.");
+			return;
+		}
+		setError(null);
 		router.push(`/w/${slug}`);
-	});
-
-	return {
-		register,
-		errors,
-		isSubmitting,
-		notFoundError,
-		clearNotFoundError: () => setNotFoundError(false),
-		onSubmit,
 	};
+
+	return { error, onSubmit, clearError: () => setError(null) };
 }

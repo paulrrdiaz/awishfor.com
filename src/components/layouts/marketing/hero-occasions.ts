@@ -9,7 +9,7 @@ type Gift = {
 };
 
 export type HeroOccasion = {
-	id: "boda" | "cumpleanos" | "baby-shower" | "nuevo-hogar";
+	id: string;
 	label: string;
 	photo: { desktop: string; mobile: string };
 	scrim: "light" | "medium" | "heavy";
@@ -78,10 +78,8 @@ export const HERO_OCCASIONS = [
 		id: "boda",
 		label: "Boda",
 		photo: {
-			desktop:
-				"https://images.unsplash.com/photo-1519741497674-611481863552?w=1280&h=560&fit=crop&auto=format",
-			mobile:
-				"https://images.unsplash.com/photo-1519741497674-611481863552?w=720&h=1000&fit=crop&auto=format",
+			desktop: "/assets/hero/photo-1519741497674-611481863552.jpeg",
+			mobile: "/assets/hero/photo-1519741497674-611481863552.jpeg",
 		},
 		scrim: "light",
 		rail: {
@@ -111,7 +109,7 @@ export const HERO_OCCASIONS = [
 			eyebrow: "Boda · 14 de septiembre",
 			title: "María & Tomás",
 			countdown: "Faltan 60 días",
-			photo: "https://images.unsplash.com/photo-1777651929448-055c21fef72e",
+			photo: "/assets/hero/photo-1519741497674-611481863552.jpeg",
 			accentBg: "#F7F2EA",
 			accentFg: "#3A2E18",
 			btn: "#BFA06B",
@@ -139,10 +137,8 @@ export const HERO_OCCASIONS = [
 		id: "cumpleanos",
 		label: "Cumpleaños",
 		photo: {
-			desktop:
-				"https://images.unsplash.com/photo-1503266980949-bd30d04d0b7a?w=1280&h=560&fit=crop&auto=format",
-			mobile:
-				"https://images.unsplash.com/photo-1503266980949-bd30d04d0b7a?w=720&h=1000&fit=crop&auto=format",
+			desktop: "/assets/hero/photo-1503266980949-bd30d04d0b7a.jpeg",
+			mobile: "/assets/hero/photo-1503266980949-bd30d04d0b7a.jpeg",
 		},
 		scrim: "medium",
 		rail: {
@@ -172,7 +168,7 @@ export const HERO_OCCASIONS = [
 			eyebrow: "Cumpleaños · 5 de julio",
 			title: "Mis 30 🎉",
 			countdown: "Faltan 9 días",
-			photo: "https://images.unsplash.com/photo-1503266980949-bd30d04d0b7a",
+			photo: "/assets/hero/photo-1503266980949-bd30d04d0b7a.jpeg",
 			accentBg: "#F3EFFA",
 			accentFg: "#3A2A52",
 			btn: "#B79CE0",
@@ -200,10 +196,8 @@ export const HERO_OCCASIONS = [
 		id: "baby-shower",
 		label: "Baby Shower",
 		photo: {
-			desktop:
-				"https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=1280&h=560&fit=crop&auto=format",
-			mobile:
-				"https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=720&h=1000&fit=crop&auto=format",
+			desktop: "/assets/hero/photo-1492725764893-90b379c2b6e7.jpeg",
+			mobile: "/assets/hero/photo-1492725764893-90b379c2b6e7.jpeg",
 		},
 		scrim: "heavy",
 		rail: {
@@ -233,7 +227,7 @@ export const HERO_OCCASIONS = [
 			eyebrow: "Baby Shower · 12 de agosto",
 			title: "Esperando a Mateo",
 			countdown: "Faltan 21 días",
-			photo: "https://images.unsplash.com/photo-1492725764893-90b379c2b6e7",
+			photo: "/assets/hero/photo-1492725764893-90b379c2b6e7.jpeg",
 			accentBg: "#EEF5FB",
 			accentFg: "#1B2A40",
 			btn: "#8FBEE0",
@@ -261,10 +255,8 @@ export const HERO_OCCASIONS = [
 		id: "nuevo-hogar",
 		label: "Nuevo hogar",
 		photo: {
-			desktop:
-				"https://images.unsplash.com/photo-1758523671285-9ff3f4e0ff38?w=1280&h=560&fit=crop&auto=format",
-			mobile:
-				"https://images.unsplash.com/photo-1758523671285-9ff3f4e0ff38?w=720&h=1000&fit=crop&auto=format",
+			desktop: "/assets/hero/photo-1758523671285-9ff3f4e0ff38.jpeg",
+			mobile: "/assets/hero/photo-1758523671285-9ff3f4e0ff38.jpeg",
 		},
 		scrim: "medium",
 		rail: {
@@ -294,7 +286,7 @@ export const HERO_OCCASIONS = [
 			eyebrow: "Nuevo hogar · 20 de octubre",
 			title: "Nuestra casa nueva",
 			countdown: "Faltan 32 días",
-			photo: "https://images.unsplash.com/photo-1758523671285-9ff3f4e0ff38",
+			photo: "/assets/hero/photo-1758523671285-9ff3f4e0ff38.jpeg",
 			accentBg: "#EEF4EC",
 			accentFg: "#22382A",
 			btn: "#9CC4A0",
@@ -313,6 +305,218 @@ export const HERO_OCCASIONS = [
 					badge: "done",
 					badgeText: "✓ Comprado",
 					image: "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec",
+				},
+			],
+		},
+	},
+	{
+		id: "revelacion",
+		label: "Revelación",
+		photo: {
+			desktop: "/assets/hero/gabriel-campos-gHsVQsrVGFY-unsplash.jpg",
+			mobile: "/assets/hero/gabriel-campos-gHsVQsrVGFY-unsplash.jpg",
+		},
+		scrim: "heavy",
+		rail: {
+			eyebrow: "Ejemplo real",
+			name: "Baby de Valentina",
+			meta: "Revelación · 18 días · 11 regalos",
+			gifts: [
+				{
+					name: "Moisés de mimbre",
+					image:
+						"https://images.unsplash.com/photo-1542901689-8917f44e3541?w=96&h=96&fit=crop&auto=format",
+				},
+				{
+					name: "Manta suave",
+					image:
+						"https://images.unsplash.com/photo-1622290319146-7b63df48a635?w=96&h=96&fit=crop&auto=format",
+				},
+			],
+			url: "awishfor.com/w/baby-valentina",
+		},
+		card: {
+			eyebrow: "Revelación · 3 de noviembre",
+			title: "Baby de Valentina",
+			countdown: "Faltan 18 días",
+			photo: "/assets/hero/gabriel-campos-gHsVQsrVGFY-unsplash.jpg",
+			accentBg: "#F4EFF9",
+			accentFg: "#473052",
+			btn: "#C6ACE4",
+			btnFg: "#30213A",
+			gifts: [
+				{
+					name: "Moisés de mimbre",
+					price: "$1,850",
+					badge: "avail",
+					badgeText: "Disponible",
+					image: "https://images.unsplash.com/photo-1542901689-8917f44e3541",
+				},
+				{
+					name: "Manta suave",
+					price: "$240",
+					badge: "part",
+					badgeText: "1 de 3",
+					image: "https://images.unsplash.com/photo-1622290319146-7b63df48a635",
+				},
+			],
+		},
+	},
+	{
+		id: "boda-intima",
+		label: "Boda íntima",
+		photo: {
+			desktop: "/assets/hero/hannah-busing-6NUUZZ16hJk-unsplash.jpg",
+			mobile: "/assets/hero/hannah-busing-6NUUZZ16hJk-unsplash.jpg",
+		},
+		scrim: "heavy",
+		rail: {
+			eyebrow: "Ejemplo real",
+			name: "Sofía & Diego",
+			meta: "Boda · 46 días · 18 regalos",
+			gifts: [
+				{
+					name: "Copas de cristal",
+					image:
+						"https://images.unsplash.com/photo-1546567379-1af2e0d527e8?w=96&h=96&fit=crop&auto=format",
+				},
+				{
+					name: "Vajilla artesanal",
+					image:
+						"https://images.unsplash.com/photo-1737681707230-04eebda96529?w=96&h=96&fit=crop&auto=format",
+				},
+			],
+			url: "awishfor.com/w/sofia-y-diego",
+		},
+		card: {
+			eyebrow: "Boda · 28 de septiembre",
+			title: "Sofía & Diego",
+			countdown: "Faltan 46 días",
+			photo: "/assets/hero/hannah-busing-6NUUZZ16hJk-unsplash.jpg",
+			accentBg: "#F8F1E8",
+			accentFg: "#3B2B20",
+			btn: "#D2A978",
+			btnFg: "#3B2B20",
+			gifts: [
+				{
+					name: "Copas de cristal",
+					price: "$320",
+					badge: "avail",
+					badgeText: "Disponible",
+					image: "https://images.unsplash.com/photo-1546567379-1af2e0d527e8",
+				},
+				{
+					name: "Vajilla artesanal",
+					price: "$760",
+					badge: "part",
+					badgeText: "2 de 6",
+					image: "https://images.unsplash.com/photo-1737681707230-04eebda96529",
+				},
+			],
+		},
+	},
+	{
+		id: "baby-en-camino",
+		label: "Baby en camino",
+		photo: {
+			desktop: "/assets/hero/siora-photography-_TvsS-0Qef4-unsplash.jpg",
+			mobile: "/assets/hero/siora-photography-_TvsS-0Qef4-unsplash.jpg",
+		},
+		scrim: "medium",
+		rail: {
+			eyebrow: "Ejemplo real",
+			name: "Esperando a Emma",
+			meta: "Baby Shower · 27 días · 13 regalos",
+			gifts: [
+				{
+					name: "Cuna de madera",
+					image:
+						"https://images.unsplash.com/photo-1542901689-8917f44e3541?w=96&h=96&fit=crop&auto=format",
+				},
+				{
+					name: "Kit de baño",
+					image:
+						"https://images.unsplash.com/photo-1522771930-78848d9293e8?w=96&h=96&fit=crop&auto=format",
+				},
+			],
+			url: "awishfor.com/w/esperando-a-emma",
+		},
+		card: {
+			eyebrow: "Baby Shower · 24 de agosto",
+			title: "Esperando a Emma",
+			countdown: "Faltan 27 días",
+			photo: "/assets/hero/siora-photography-_TvsS-0Qef4-unsplash.jpg",
+			accentBg: "#EEF5FB",
+			accentFg: "#1B2A40",
+			btn: "#9CC8E6",
+			btnFg: "#1B2A40",
+			gifts: [
+				{
+					name: "Cuna de madera",
+					price: "$2,400",
+					badge: "avail",
+					badgeText: "Disponible",
+					image: "https://images.unsplash.com/photo-1542901689-8917f44e3541",
+				},
+				{
+					name: "Kit de baño",
+					price: "$390",
+					badge: "done",
+					badgeText: "✓ Comprado",
+					image: "https://images.unsplash.com/photo-1522771930-78848d9293e8",
+				},
+			],
+		},
+	},
+	{
+		id: "boda-jardin",
+		label: "Boda en jardín",
+		photo: {
+			desktop: "/assets/hero/zhouxing-lu-wz52C93GD78-unsplash.jpg",
+			mobile: "/assets/hero/zhouxing-lu-wz52C93GD78-unsplash.jpg",
+		},
+		scrim: "heavy",
+		rail: {
+			eyebrow: "Ejemplo real",
+			name: "Luisa & Andrés",
+			meta: "Boda · 73 días · 20 regalos",
+			gifts: [
+				{
+					name: "Set de mantelería",
+					image:
+						"https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=96&h=96&fit=crop&auto=format",
+				},
+				{
+					name: "Lámpara de mesa",
+					image:
+						"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=96&h=96&fit=crop&auto=format",
+				},
+			],
+			url: "awishfor.com/w/luisa-y-andres",
+		},
+		card: {
+			eyebrow: "Boda · 16 de noviembre",
+			title: "Luisa & Andrés",
+			countdown: "Faltan 73 días",
+			photo: "/assets/hero/zhouxing-lu-wz52C93GD78-unsplash.jpg",
+			accentBg: "#EFF4EA",
+			accentFg: "#253920",
+			btn: "#A8C889",
+			btnFg: "#253920",
+			gifts: [
+				{
+					name: "Set de mantelería",
+					price: "$480",
+					badge: "avail",
+					badgeText: "Disponible",
+					image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261",
+				},
+				{
+					name: "Lámpara de mesa",
+					price: "$560",
+					badge: "part",
+					badgeText: "1 de 2",
+					image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c",
 				},
 			],
 		},

@@ -2,9 +2,9 @@
  * Marketing landing styles — scoped to `.marketing-theme`.
  * Token values come verbatim from the Claude Design canvas
  * (A Wish For.dc.html §5, "Marketing / landing · desktop · light green theme").
- * Motion is driven by GSAP (see src/lib/gsap), NOT CSS keyframes — these are
- * static styles only. Content renders at its final state by default so the page
- * is fully visible without JS and under prefers-reduced-motion.
+ * Motion is driven by GSAP (see src/lib/gsap). Content renders at its final
+ * state by default so the page is fully visible without JavaScript and under
+ * prefers-reduced-motion.
  */
 
 .marketing-theme {

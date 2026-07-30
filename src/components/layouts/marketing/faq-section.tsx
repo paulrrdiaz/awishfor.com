@@ -1,12 +1,3 @@
-"use client";
-
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
-
 const FAQS = [
 	{
 		q: "¿Qué es A Wish For?",
@@ -46,28 +37,21 @@ export function FaqSection() {
 					Resolvemos tus dudas
 				</h2>
 			</div>
-			<Accordion
+			<div
 				className="mx-auto flex max-w-[720px] flex-col gap-[10px]"
-				collapsible
 				data-reveal-stagger
-				defaultValue="faq-0"
-				type="single"
 			>
 				{FAQS.map((f, i) => (
-					<AccordionItem
-						className="!border-b-0 m-card px-6"
-						key={f.q}
-						value={`faq-${i}`}
-					>
-						<AccordionTrigger className="m-serif py-5 font-semibold text-[17px] text-[var(--mink)] hover:no-underline">
+					<details className="group m-card px-6" key={f.q} open={i === 0}>
+						<summary className="m-serif cursor-pointer list-none py-5 font-semibold text-[17px] text-[var(--mink)] [&::-webkit-details-marker]:hidden">
 							{f.q}
-						</AccordionTrigger>
-						<AccordionContent className="text-[14px] text-[var(--mmut)] leading-[1.65]">
+						</summary>
+						<p className="pb-5 text-[14px] text-[var(--mmut)] leading-[1.65]">
 							{f.a}
-						</AccordionContent>
-					</AccordionItem>
+						</p>
+					</details>
 				))}
-			</Accordion>
+			</div>
 		</section>
 	);
 }

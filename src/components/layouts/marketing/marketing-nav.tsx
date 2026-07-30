@@ -1,7 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
-
+import { H2bNavController } from "./h2b-nav-controller";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
 type MarketingNavProps = {
@@ -15,19 +14,19 @@ const NAV_ITEMS = [
 	{ id: "ejemplo", href: "#ejemplo", label: "Ejemplos" },
 ] as const;
 
-export async function MarketingNav({ variant = "default" }: MarketingNavProps) {
-	const { userId } = await auth();
-
+export function MarketingNav({ variant = "default" }: MarketingNavProps) {
 	if (variant === "h2b") {
 		return (
 			<>
+				<H2bNavController />
 				<div
 					aria-hidden
-					className="fixed top-0 right-0 left-0 z-50 hidden h-[3px] bg-[rgba(0,0,0,.12)] lg:block"
+					className="fixed top-0 right-0 left-0 z-50 hidden h-1 bg-white/[.16] lg:block"
 				>
 					<div
-						className="h-full w-0 bg-[linear-gradient(90deg,var(--mlime),#7FB069)] shadow-[0_0_8px_rgba(140,200,60,.6)]"
+						className="h-full w-full origin-left bg-[linear-gradient(90deg,var(--mlime),#7FB069)] shadow-[0_0_10px_rgba(188,226,90,.9)] will-change-transform"
 						data-h2b-scroll-progress
+						style={{ transform: "scaleX(0)" }}
 					/>
 				</div>
 				<nav
@@ -72,9 +71,10 @@ export async function MarketingNav({ variant = "default" }: MarketingNavProps) {
 							<div className="flex items-center gap-[16px] transition-[gap] duration-300 ease-out group-data-[scrolled=true]/h2b:gap-[14px] motion-reduce:transition-none">
 								<Link
 									className="whitespace-nowrap font-semibold text-[13.5px] hover:opacity-70 focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 group-data-[scrolled=true]/h2b:text-[12.5px]"
-									href={userId ? "/dashboard" : "/sign-in"}
+									data-marketing-account-link
+									href="/sign-in"
 								>
-									{userId ? "Dashboard" : "Iniciar sesión"}
+									Iniciar sesión
 								</Link>
 								<Link
 									className="rounded-full bg-[var(--mlime)] px-5 py-[10px] font-semibold text-[#1B3A12] text-[13.5px] shadow-[0_8px_22px_rgba(140,200,60,0.4)] transition-[padding,transform] duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 group-data-[scrolled=true]/h2b:px-4 group-data-[scrolled=true]/h2b:py-2 group-data-[scrolled=true]/h2b:text-[12.5px] motion-reduce:transition-none"
@@ -88,26 +88,26 @@ export async function MarketingNav({ variant = "default" }: MarketingNavProps) {
 					</div>
 				</nav>
 				<div className="lg:hidden">
-					<DefaultMarketingNav isSignedIn={!!userId} />
+					<DefaultMarketingNav />
 				</div>
 			</>
 		);
 	}
 
-	return <DefaultMarketingNav isSignedIn={!!userId} />;
+	return <DefaultMarketingNav />;
 }
 
-function DefaultMarketingNav({ isSignedIn }: { isSignedIn: boolean }) {
+function DefaultMarketingNav() {
 	return (
 		<nav className="flex items-center justify-between border-[var(--mline)] border-b bg-[rgba(238,249,230,0.95)] px-5 py-3 backdrop-blur">
 			<Link className="flex items-center" href="/">
 				<Image
 					alt="A Wish For"
-					className="h-10 w-auto md:h-12"
-					height={198.26}
+					className="size-10 md:size-12"
+					height={48}
 					priority
 					src="/assets/logo.svg"
-					width={910}
+					width={48}
 				/>
 			</Link>
 
@@ -127,9 +127,10 @@ function DefaultMarketingNav({ isSignedIn }: { isSignedIn: boolean }) {
 				</a>
 				<Link
 					className="font-medium text-[14px] text-[var(--mmut)] hover:text-[var(--mink)]"
-					href={isSignedIn ? "/dashboard" : "/sign-in"}
+					data-marketing-account-link
+					href="/sign-in"
 				>
-					{isSignedIn ? "Dashboard" : "Iniciar sesión"}
+					Iniciar sesión
 				</Link>
 				<Link
 					className="!px-[22px] !py-[11px] !text-[14px] m-btn m-btn-lime"
@@ -149,7 +150,7 @@ function DefaultMarketingNav({ isSignedIn }: { isSignedIn: boolean }) {
 				>
 					Crear
 				</Link>
-				<MobileNavDrawer isSignedIn={isSignedIn} />
+				<MobileNavDrawer isSignedIn={false} />
 			</div>
 		</nav>
 	);
