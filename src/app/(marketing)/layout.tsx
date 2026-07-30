@@ -1,6 +1,7 @@
 import "@/styles/marketing.css";
 
-import { MarketingShell } from "@/components/layouts/marketing/marketing-shell";
+import { AccountLinkEnhancement } from "@/components/layouts/marketing/account-link-enhancement";
+import { marketingInter, marketingLora } from "@/lib/marketing-fonts";
 
 export default function MarketingLayout({
 	children,
@@ -8,8 +9,11 @@ export default function MarketingLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="marketing-theme min-h-svh">
-			<MarketingShell>{children}</MarketingShell>
+		<div
+			className={`${marketingInter.variable} ${marketingLora.variable} marketing-theme min-h-svh`}
+		>
+			{children}
+			<AccountLinkEnhancement />
 		</div>
 	);
 }

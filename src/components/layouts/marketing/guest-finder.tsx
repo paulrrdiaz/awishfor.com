@@ -1,19 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Field, FieldError } from "@/components/ui/field";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useGuestFinder } from "@/lib/wishlist/use-guest-finder";
 
 export function GuestFinder() {
-	const {
-		register,
-		errors,
-		isSubmitting,
-		notFoundError,
-		clearNotFoundError,
-		onSubmit,
-	} = useGuestFinder();
+	const { error, clearError, onSubmit } = useGuestFinder();
 
 	return (
 		<section className="border-[var(--mline)] border-t bg-[#F0FAE8] px-11 py-16 text-center">
@@ -34,26 +27,20 @@ export function GuestFinder() {
 					<div className="flex items-start gap-[10px]">
 						<Field className="flex-1">
 							<Input
-								aria-invalid={!!errors.query || notFoundError}
+								aria-invalid={Boolean(error)}
 								aria-label="Enlace o nombre de la lista"
 								className="h-auto rounded-full border-[var(--mline)] bg-white px-5 py-[14px] text-[14px] text-[var(--mink)] placeholder:text-[var(--mmut)] focus-visible:border-[var(--mrose)]"
+								name="query"
+								onChange={clearError}
 								placeholder="Nombre del evento o pareja…"
-								{...register("query", {
-									onChange: clearNotFoundError,
-								})}
 							/>
-							<FieldError className="px-2 text-left" errors={[errors.query]} />
-							{notFoundError && (
+							{error && (
 								<p className="px-2 text-left text-destructive text-sm">
-									No reconocimos ese enlace o nombre de lista.
+									{error}
 								</p>
 							)}
 						</Field>
-						<Button
-							className="m-btn m-btn-pri h-auto"
-							disabled={isSubmitting}
-							type="submit"
-						>
+						<Button className="m-btn m-btn-pri h-auto" type="submit">
 							Buscar
 						</Button>
 					</div>

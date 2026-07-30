@@ -52,3 +52,6 @@ yarn-error.log*
 
 # Storybook
 storybook-static/
+
+# Generated production Lighthouse reports
+/artifacts/marketing-performance/
