@@ -53,7 +53,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 					<HeroImageSlot
 						alt={`${heading} 2`}
 						className="aspect-[3/4] rounded-xl shadow-xl"
-						priority
+						priority={!isCompact}
 						src={slots[1] ?? null}
 					/>
 					<HeroImageSlot

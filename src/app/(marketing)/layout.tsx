@@ -1,17 +1,30 @@
-import "@/styles/marketing.css";
+import { preload } from "react-dom";
 
 import { AccountLinkEnhancement } from "@/components/layouts/marketing/account-link-enhancement";
-import { marketingInter, marketingLora } from "@/lib/marketing-fonts";
 
 export default function MarketingLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	preload("/assets/fonts/marketing-inter-latin.woff2", {
+		as: "font",
+		crossOrigin: "anonymous",
+		type: "font/woff2",
+	});
+	preload("/assets/fonts/marketing-lora-latin.woff2", {
+		as: "font",
+		crossOrigin: "anonymous",
+		type: "font/woff2",
+	});
+	preload("/assets/hero/wedding-hero-mobile-300.jpg", {
+		as: "image",
+		fetchPriority: "high",
+		media: "(max-width: 1023px)",
+	});
+
 	return (
-		<div
-			className={`${marketingInter.variable} ${marketingLora.variable} marketing-theme min-h-svh`}
-		>
+		<div className="marketing-theme min-h-svh" data-marketing-theme>
 			{children}
 			<AccountLinkEnhancement />
 		</div>

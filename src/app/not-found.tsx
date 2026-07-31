@@ -1,6 +1,3 @@
-import "@/styles/marketing.css";
-
-import Link from "next/link";
 import { MarketingNav } from "@/components/layouts/marketing/marketing-nav";
 import { MarketingShell } from "@/components/layouts/marketing/marketing-shell";
 import { GiftEscapedArt } from "@/components/shared/gift-escaped-art";
@@ -29,15 +26,15 @@ export default function NotFound() {
 							esté incompleto o que la página se haya mudado.
 						</p>
 						<div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
-							<Link className="m-btn m-btn-lime" data-glow href="/">
+							<a className="m-btn m-btn-lime" data-glow href="/">
 								Volver al inicio
-							</Link>
-							<Link
+							</a>
+							<a
 								className="m-btn border border-[var(--mline)] bg-white text-[var(--mink)]"
 								href="/#ejemplo"
 							>
 								Ver un ejemplo
-							</Link>
+							</a>
 						</div>
 					</div>
 				</main>

@@ -41,6 +41,7 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 							alt={heading}
 							className="h-full w-full"
 							images={wishlist.coverImageUrls}
+							priority={!isCompact}
 						/>
 					</div>
 				</div>

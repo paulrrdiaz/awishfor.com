@@ -1968,9 +1968,9 @@ Implemented faithfully from the Claude Design canvas (`A Wish For.dc.html` §5,
 `.mkt` tokens): bg `#EEF9E6`, forest-green ink `#173E29`, sage muted `#4E6E56`, hairline
 `#CCE8BE`, lime pop `#BCE25A`, sunshine accent `#F4C84A`. Deep-green serif (Lora) headlines,
 lime primary buttons. Tokens scoped to a `.marketing-theme` wrapper — they never touch the
-app `:root` or the seven public wishlist themes. Animations use **GSAP + ScrollTrigger**
-(scroll reveals, the four-occasion hero rotation, floating blobs/emoji, partner marquee,
-and button glow), all gated by `prefers-reduced-motion`. Brand
+app `:root` or the seven public wishlist themes. Motion uses CSS and small native browser
+controllers, with the photographic hero controller loaded only after meaningful visitor
+activity and all motion gated by `prefers-reduced-motion`. Brand
 logo (`public/assets/awishfor-logo.svg`) used in nav (and footer, inverted on the dark band).
 
 Tasks:
@@ -1982,19 +1982,22 @@ Tasks:
 - [x] Add Casos de uso section (5 event pills).
 - [x] Add Tiendas aliadas partner-logo strip (GSAP marquee + "y cualquier tienda con enlace").
 - [x] Add theme previews section (gradient swatches for the seven themes).
-- [x] Add example public wishlist preview (real `PublicWishlistPage` in compact mode).
+- [x] Add a server-rendered example wishlist preview from the shared public view model.
 - [x] Add final CTA section (dark-green band).
 - [x] Add minimal nav (uses logo asset).
-- [x] Add GSAP animation engine scoped to the marketing route, with reduced-motion fallback.
+- [x] Replace route-wide GSAP/ScrollTrigger motion with CSS and focused browser controllers.
 - [x] Add guest list-finder + FAQ sections (folded in from 8.2 since the canvas includes them).
+- [x] Isolate `/` as a static route without Clerk UI, tRPC, React Query, nuqs, tooltip, or toaster runtimes.
+- [x] Defer future hero, proof-rail, example, carousel, and occasion media until activity or proximity.
+- [x] Add the production Lighthouse budget gate and pass three cold mobile runs plus desktop comparison.
 
 Acceptance criteria:
 
 - CTA `Crear mi wishlist` links to `/create`.
 - Secondary CTA `Ver ejemplo` links to the example block.
 - Signed-out nav shows Iniciar sesión + Crear mi wishlist.
-- Signed-in nav shows Dashboard + Crear mi wishlist (server-side `auth()`; this Clerk v7 build does not export `<SignedIn>/<SignedOut>`).
-- Example block reuses the real public components (single source of truth).
+- Signed-in nav enhances the geometry-stable anonymous fallback after activity without loading Clerk UI.
+- Example content is derived from the shared server-safe public presentation contract.
 - All animations off and content fully visible under `prefers-reduced-motion` / no-JS.
 - `.marketing-theme` tokens do not leak into app or public themes.
 
@@ -2002,9 +2005,9 @@ Affected areas:
 
 - `src/app/(marketing)/layout.tsx`, `src/app/(marketing)/page.tsx`
 - `src/components/layouts/marketing/*`
-- `src/components/layouts/marketing/marketing-shell.tsx`, `src/lib/gsap/use-marketing-animations.ts`
+- `src/components/layouts/marketing/marketing-shell.tsx`
 - `src/config/demo-wishlist.ts`
-- `src/styles/marketing.css`, `src/app/layout.tsx` (JetBrains Mono font)
+- `src/styles/marketing.css`, `src/app/layout.tsx`
 
 Notes/out-of-scope:
 
@@ -2052,7 +2055,7 @@ Subtle celebratory motion, fully static under `prefers-reduced-motion: reduce`.
 
 Tasks:
 
-- [x] Add `useInView()` hook to fire reveals once on enter (implemented via GSAP ScrollTrigger).
+- [x] Keep content visible by default and use lightweight native visibility controllers where enhancement is useful.
 - [x] Add hero mesh-gradient drift + blurred blobs + floating emoji.
 - [x] Add staggered `rise` entrance + "hermosa" shimmer sweep.
 - [x] Add hero card `bob` + pulsing status dot.
@@ -2060,7 +2063,7 @@ Tasks:
 - [x] Add allied-stores infinite marquee (edge-masked, pause on hover).
 - [x] Add card fade-up stagger + hover lift.
 - [x] Add button hover scale + arrow nudge.
-- [x] Keep all `@keyframes` in `globals.css`, every animated rule inside the reduced-motion guard (implemented via GSAP with `prefers-reduced-motion` guard).
+- [x] Keep optional motion compositor-friendly and fully disabled by `prefers-reduced-motion`.
 
 Acceptance criteria:
 
@@ -2402,7 +2405,7 @@ Tasks:
 - [ ] Verify privacy/terms links.
 - [ ] Verify no public data leak.
 - [ ] Verify all seven themes render correctly via `data-theme`.
-- [ ] Verify reduced-motion disables landing animations.
+- [x] Verify reduced-motion disables landing animations.
 
 Acceptance criteria:
 

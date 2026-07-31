@@ -1,103 +1,107 @@
 "use client";
 
-import { Menu } from "lucide-react";
-import Link from "next/link";
-import type { MouseEvent } from "react";
-import { useRef } from "react";
-
-import { Button } from "@/components/ui/button";
-import {
-	Sheet,
-	SheetClose,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from "@/components/ui/sheet";
+import { Menu, X } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 
 export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
-	const pendingSection = useRef<string | null>(null);
+	const dialogRef = useRef<HTMLDialogElement>(null);
+	const triggerRef = useRef<HTMLButtonElement>(null);
+	const titleId = useId();
+	const [open, setOpen] = useState(false);
 
-	const handleDrawerClose = (event: Event) => {
-		const hash = pendingSection.current;
-		if (!hash) return;
+	useEffect(() => {
+		const dialog = dialogRef.current;
+		if (!dialog) return;
 
-		event.preventDefault();
-		pendingSection.current = null;
-		requestAnimationFrame(() => {
-			const target = document.querySelector<HTMLElement>(hash);
-			if (!target) return;
+		if (open && !dialog.open) dialog.showModal();
+		if (!open && dialog.open) dialog.close();
+	}, [open]);
 
-			target.scrollIntoView({
-				behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-					? "auto"
-					: "smooth",
-			});
-		});
-	};
+	const closeDrawer = () => setOpen(false);
 
-	const handleSectionNavigation = (event: MouseEvent<HTMLAnchorElement>) => {
-		pendingSection.current = event.currentTarget.hash;
+	const handleClose = () => {
+		setOpen(false);
+		triggerRef.current?.focus({ preventScroll: true });
 	};
 
 	return (
-		<Sheet>
-			<SheetTrigger asChild>
-				<Button
-					aria-label="Abrir menú"
-					className="h-11 w-11 rounded-full text-[var(--mink)] hover:bg-[rgba(23,62,41,0.06)]"
-					size="icon"
-					variant="ghost"
-				>
-					<Menu className="size-5" />
-				</Button>
-			</SheetTrigger>
-			<SheetContent
-				className="marketing-theme gap-0 bg-[var(--mbg)]"
-				onCloseAutoFocus={handleDrawerClose}
-				side="right"
+		<>
+			<button
+				aria-controls="marketing-mobile-nav"
+				aria-expanded={open}
+				aria-haspopup="dialog"
+				aria-label="Abrir menú"
+				className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--mink)] transition-colors hover:bg-[rgba(23,62,41,0.06)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
+				onClick={() => setOpen(true)}
+				ref={triggerRef}
+				type="button"
 			>
-				<SheetHeader>
-					<SheetTitle className="m-serif text-[var(--mink)]">Menú</SheetTitle>
-				</SheetHeader>
-				<nav className="flex flex-col gap-1 px-4 pb-4">
-					<SheetClose asChild>
-						<Link
-							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)]"
+				<Menu aria-hidden="true" className="size-5" />
+			</button>
+			<dialog
+				aria-labelledby={titleId}
+				className="m-0 ml-auto h-full max-h-none w-[min(22rem,calc(100vw-1.5rem))] border-0 bg-[var(--mbg)] p-0 text-[var(--mink)] shadow-[-18px_0_48px_rgba(2,16,8,.22)] backdrop:bg-[rgba(2,16,8,.54)]"
+				id="marketing-mobile-nav"
+				onClick={(event) => {
+					if (event.target === event.currentTarget) closeDrawer();
+				}}
+				onClose={handleClose}
+				onKeyDown={(event) => {
+					if (event.key === "Escape") closeDrawer();
+				}}
+				ref={dialogRef}
+			>
+				<div className="flex h-full flex-col px-5 pt-5 pb-7">
+					<div className="flex items-center justify-between border-[var(--mline)] border-b pb-4">
+						<h2 className="m-serif text-[22px] text-[var(--mink)]" id={titleId}>
+							Menú
+						</h2>
+						<button
+							aria-label="Cerrar menú"
+							className="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-[rgba(23,62,41,0.06)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
+							onClick={closeDrawer}
+							type="button"
+						>
+							<X aria-hidden="true" className="size-5" />
+						</button>
+					</div>
+					<nav
+						aria-label="Navegación móvil"
+						className="flex flex-col gap-1 pt-5"
+					>
+						{/* biome-ignore lint/a11y/useValidAnchor: native hash navigation is preserved; the handler only dismisses the dialog. */}
+						<a
+							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
 							href="#como-funciona"
-							onClick={handleSectionNavigation}
+							onClick={closeDrawer}
 						>
 							Cómo funciona
-						</Link>
-					</SheetClose>
-					<SheetClose asChild>
-						<Link
-							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)]"
+						</a>
+						{/* biome-ignore lint/a11y/useValidAnchor: native hash navigation is preserved; the handler only dismisses the dialog. */}
+						<a
+							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
 							href="#ocasiones"
-							onClick={handleSectionNavigation}
+							onClick={closeDrawer}
 						>
 							Ocasiones
-						</Link>
-					</SheetClose>
-					<SheetClose asChild>
-						<Link
-							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)]"
+						</a>
+						<a
+							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
 							href={isSignedIn ? "/dashboard" : "/sign-in"}
+							onClick={closeDrawer}
 						>
 							{isSignedIn ? "Dashboard" : "Iniciar sesión"}
-						</Link>
-					</SheetClose>
-					<SheetClose asChild>
-						<Link
-							className="!w-full m-btn m-btn-lime mt-3 justify-center"
-							data-glow
+						</a>
+						<a
+							className="!w-full m-btn m-btn-lime mt-4 justify-center focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
 							href="/create"
+							onClick={closeDrawer}
 						>
 							Crear mi wishlist
-						</Link>
-					</SheetClose>
-				</nav>
-			</SheetContent>
-		</Sheet>
+						</a>
+					</nav>
+				</div>
+			</dialog>
+		</>
 	);
 }

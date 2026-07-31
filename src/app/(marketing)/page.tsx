@@ -24,16 +24,36 @@ export default function MarketingLandingPage() {
 		<>
 			<MarketingFirstFold />
 			<OccasionPickerSection />
-			<BenefitsSection />
-			<HowItWorksSection />
-			<UseCasesSection />
-			<PartnersMarquee />
-			<ThemePreviews />
-			<ExamplePreview />
-			<GuestFinder />
-			<FaqSection />
-			<FinalCta />
-			<MarketingFooter />
+			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
+				<BenefitsSection />
+			</div>
+			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
+				<HowItWorksSection />
+			</div>
+			<div className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]">
+				<UseCasesSection />
+			</div>
+			<div className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]">
+				<PartnersMarquee />
+			</div>
+			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
+				<ThemePreviews />
+			</div>
+			<div className="[contain-intrinsic-size:auto_900px] [content-visibility:auto]">
+				<ExamplePreview />
+			</div>
+			<div className="[contain-intrinsic-size:auto_400px] [content-visibility:auto]">
+				<GuestFinder />
+			</div>
+			<div className="[contain-intrinsic-size:auto_600px] [content-visibility:auto]">
+				<FaqSection />
+			</div>
+			<div className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]">
+				<FinalCta />
+			</div>
+			<div className="[contain-intrinsic-size:auto_400px] [content-visibility:auto]">
+				<MarketingFooter />
+			</div>
 		</>
 	);
 }

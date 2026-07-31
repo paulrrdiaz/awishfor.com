@@ -1,16 +1,17 @@
+/* biome-ignore-all lint/performance/noImgElement: thumbnails are URL-sized and enabled only after hero activation. */
 "use client";
-
-import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { HERO_OCCASIONS } from "./hero-occasions";
 
 /** One accessible proof rail, replaced in sync with the active photograph. */
 export function HeroExampleRail() {
-	const [index, setIndex] = useState(0);
+	const [occasionId, setOccasionId] = useState<string>(
+		HERO_OCCASIONS[0]?.id ?? "",
+	);
+	const [mediaEnabled, setMediaEnabled] = useState(false);
 	const [motion, setMotion] = useState<"entering" | "exiting" | "idle">("idle");
-	const indexRef = useRef(index);
+	const occasionIdRef = useRef<string>(occasionId);
 	const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const enterFrameRef = useRef<number | null>(null);
 
@@ -22,20 +23,25 @@ export function HeroExampleRail() {
 			enterFrameRef.current = null;
 		};
 		const update = (event: Event) => {
-			const next = (event as CustomEvent<{ index: number }>).detail.index;
-			if (next === indexRef.current) return;
+			const next = (event as CustomEvent<{ id: string }>).detail.id;
+			if (
+				next === occasionIdRef.current ||
+				!HERO_OCCASIONS.some((occasion) => occasion.id === next)
+			)
+				return;
+			setMediaEnabled(true);
 			clearSwap();
 			if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-				indexRef.current = next;
-				setIndex(next);
+				occasionIdRef.current = next;
+				setOccasionId(next);
 				setMotion("idle");
 				return;
 			}
 
 			setMotion("exiting");
 			exitTimerRef.current = setTimeout(() => {
-				indexRef.current = next;
-				setIndex(next);
+				occasionIdRef.current = next;
+				setOccasionId(next);
 				setMotion("entering");
 				requestAnimationFrame(() => {
 					enterFrameRef.current = requestAnimationFrame(() => {
@@ -51,7 +57,8 @@ export function HeroExampleRail() {
 			window.removeEventListener("hero-occasion-change", update);
 		};
 	}, []);
-	const occasion = HERO_OCCASIONS[index] ?? HERO_OCCASIONS[0];
+	const occasion =
+		HERO_OCCASIONS.find(({ id }) => id === occasionId) ?? HERO_OCCASIONS[0];
 	return (
 		<aside
 			aria-label={`Ejemplo real: la wishlist de ${occasion.rail.name}`}
@@ -80,28 +87,38 @@ export function HeroExampleRail() {
 						{occasion.rail.meta}
 					</p>
 				</div>
-				<div className="flex flex-1 justify-start gap-2">
+				<div className="hidden flex-1 justify-start gap-2 sm:flex">
 					{occasion.rail.gifts.slice(0, 2).map((gift) => (
 						<div className="flex min-w-0 items-center gap-1" key={gift.name}>
-							<Image
-								alt=""
-								className="h-8 w-8 shrink-0 rounded-[4px] object-cover"
-								height={32}
-								src={gift.image}
-								width={32}
-							/>
+							{mediaEnabled ? (
+								<img
+									alt=""
+									className="h-8 w-8 shrink-0 rounded-[4px] object-cover"
+									fetchPriority="low"
+									height={32}
+									loading="lazy"
+									src={gift.image}
+									width={32}
+								/>
+							) : (
+								<span
+									aria-hidden
+									className="h-8 w-8 shrink-0 rounded-[4px] bg-white/10"
+								/>
+							)}
 							<p className="truncate font-medium text-white/[.9] text-xs">
 								{gift.name}
 							</p>
 						</div>
 					))}
 				</div>
-				<Link
+				<a
 					className="shrink-0 font-semibold text-[#D7F09E] text-sm hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4"
 					href="#ejemplo"
 				>
-					Ver esta wishlist →
-				</Link>
+					<span className="sm:hidden">Ver →</span>
+					<span className="hidden sm:inline">Ver esta wishlist →</span>
+				</a>
 			</div>
 		</aside>
 	);

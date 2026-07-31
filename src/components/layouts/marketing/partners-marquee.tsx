@@ -13,17 +13,13 @@ const STORES_DESKTOP = [
 const STORES_MOBILE = STORES_DESKTOP.filter((s) => s !== "palacio de hierro");
 
 function MarqueeTrack({ stores }: { stores: string[] }) {
-	// Track is rendered twice so the GSAP -50% translate loops seamlessly.
-	const track = [...stores, ...stores];
-
 	return (
-		<div className="m-marquee-mask">
-			<div className="m-marquee-track" data-marquee>
-				{track.map((s, i) => (
+		<div className="m-marquee-mask overflow-x-auto [scrollbar-width:thin]">
+			<div className="m-marquee-track pb-2">
+				{stores.map((s) => (
 					<div
 						className="m-ph h-[46px] w-[120px] rounded-[10px] bg-[#D4EEC6]"
-						// biome-ignore lint/suspicious/noArrayIndexKey: duplicated static marquee track
-						key={`${s}-${i}`}
+						key={s}
 					>
 						<span className="m-ph-lbl">{s}</span>
 					</div>

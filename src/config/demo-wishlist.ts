@@ -1,10 +1,9 @@
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 
 /**
- * Static fixture for the marketing landing's "Ejemplo real" block. It is shaped
- * exactly like a real `PublicWishlistViewModel` so the landing can render the
- * production `PublicWishlistPage` in compact mode — keeping the marketing preview
- * a single source of truth with the live public page.
+ * Static fixture for the marketing landing's "Ejemplo real" block. It retains
+ * the production view-model shape so the server-safe marketing preview contract
+ * can be derived from the same fields as a live public wishlist.
  */
 export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	id: "demo-wishlist",

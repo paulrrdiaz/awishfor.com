@@ -24,6 +24,7 @@ export function EditorialWishlistLayout({ wishlist, layout, mode }: Props) {
 	return (
 		<div className="flex flex-col">
 			<WishlistHero
+				priority={!isCompact}
 				wishlist={{
 					...wishlist,
 					eventDate: isCompact ? null : wishlist.eventDate,

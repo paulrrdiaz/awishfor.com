@@ -29,6 +29,7 @@ export function CarouselHeroLayout({ wishlist, layout, mode }: Props) {
 					alt={heading}
 					className="absolute inset-0 h-full w-full"
 					images={wishlist.coverImageUrls}
+					priority={!isCompact}
 				/>
 				<div className="absolute inset-0 bg-black/45" />
 				<div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">

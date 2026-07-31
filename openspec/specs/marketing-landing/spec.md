@@ -4,7 +4,7 @@ The public marketing landing page at `/` — the top of the funnel. It explains 
 ## Requirements
 ### Requirement: Marketing landing route at `/`
 
-The system SHALL serve a public marketing landing page at the root path `/`, rendered server-side in a `(marketing)` route group, accessible without authentication, and indexable by search engines.
+The system SHALL serve a public marketing landing page at the root path `/`, rendered in a `(marketing)` route group, accessible without authentication, and indexable by search engines. The anonymous route shell and its initial content MUST be statically renderable and cacheable; request-time authentication, database access, and application client-provider initialization MUST NOT block its initial response.
 
 #### Scenario: Signed-out visitor opens the site root
 
@@ -14,8 +14,19 @@ The system SHALL serve a public marketing landing page at the root path `/`, ren
 #### Scenario: Landing is indexable
 
 - **WHEN** a crawler requests `/`
-- **THEN** the page is not marked `noindex` (unlike `/w/[slug]` public wishlist pages)
+- **THEN** the page is not marked `noindex` unlike `/w/[slug]` public wishlist pages
 - **AND** the document exposes a descriptive `<title>` and meta description
+
+#### Scenario: Production build classifies the landing as static
+
+- **WHEN** the application completes a production build
+- **THEN** `/` is reported as a static or prerendered route
+- **AND** reading authentication state is not part of the route's server render
+
+#### Scenario: Marketing bypasses unrelated providers
+
+- **WHEN** an anonymous visitor loads `/`
+- **THEN** Clerk, tRPC, React Query, nuqs, tooltip, and toaster client runtimes are absent from the initial marketing bundle unless a visible marketing feature directly requires them
 
 ### Requirement: Landing section structure and order
 
@@ -81,7 +92,7 @@ The landing SHALL use a self-contained light-green marketing theme whose CSS cus
 
 ### Requirement: H2b photographic desktop first fold
 
-At every viewport, the landing page SHALL render the Claude Design **H2b · Filete de luz** first fold instead of the green mesh and rotating wishlist-card hero. The H2b first fold SHALL preserve the exported photographic composition, exact copy hierarchy, contrast treatment, and CTA destinations while excluding the canvas annotation label. The photograph within that composition SHALL rotate automatically through the four occasions defined by the `hero-occasion-rotation` capability; the composition, overlays, copy, CTAs, and trust line SHALL NOT change as the photograph rotates.
+At every viewport, the landing page SHALL render the Claude Design **H2b · Filete de luz** first fold instead of the green mesh and rotating wishlist-card hero. The H2b first fold SHALL preserve the exported photographic composition, exact copy hierarchy, contrast treatment, and CTA destinations while excluding the canvas annotation label. The photograph within that composition SHALL rotate through the four occasions defined by the `hero-occasion-rotation` capability only after its activity and visibility conditions are satisfied; the composition, overlays, copy, CTAs, and trust line SHALL NOT change as the photograph rotates.
 
 #### Scenario: Desktop visitor sees H2b
 
@@ -117,7 +128,7 @@ At every viewport, the landing page SHALL render the Claude Design **H2b · File
 #### Scenario: Mobile first fold uses the same photographic hero
 
 - **WHEN** the landing renders below `lg`
-- **THEN** it renders the same photographic first fold, scaled for the viewport, with the rotating photograph and synchronized proof rail
+- **THEN** it renders the same photographic first fold, scaled for the viewport, with the activity-gated photograph and synchronized proof rail
 - **AND** it renders the shorter mobile hero copy, the trust line, the mobile navigation drawer, and minimum touch targets
 - **AND** the desktop-only H2b geometry does not force horizontal overflow
 
@@ -129,7 +140,7 @@ At every viewport, the landing page SHALL render the Claude Design **H2b · File
 
 ### Requirement: H2b hero proof rail
 
-The H2b first fold SHALL include the exported overlapping “Ejemplo real” teaser rail as a compact proof point while retaining the existing full example preview later on the page. The rail's content SHALL rotate in step with the hero photograph, always showing the example belonging to the occasion currently displayed.
+The H2b first fold SHALL include the exported overlapping “Ejemplo real” teaser rail as a compact proof point while retaining a faithful lightweight example preview later on the page. The rail's content SHALL rotate in step with the hero photograph, always showing the example belonging to the occasion currently displayed.
 
 #### Scenario: Proof rail content matches the source
 
@@ -150,7 +161,7 @@ The H2b first fold SHALL include the exported overlapping “Ejemplo real” tea
 
 - **WHEN** a visitor activates “Ver esta wishlist →” in the proof rail
 - **THEN** the page navigates to the existing `#ejemplo` section
-- **AND** the downstream `PublicWishlistPage` compact preview remains present and unchanged
+- **AND** the downstream lightweight marketing preview remains present
 
 ### Requirement: Brand logo in nav and footer
 
@@ -169,18 +180,25 @@ The landing SHALL present an accessible “A Wish For” brand treatment in navi
 
 ### Requirement: Auth-aware navigation and CTAs
 
-The landing navigation SHALL reflect authentication state in the initial desktop and mobile navigation, SHALL be usable at all viewport widths down to 390px, and the primary call-to-action SHALL drive visitors to the creation flow. The H2b desktop navigation SHALL transition from its over-photo top state to the exported compact mint state after the visitor scrolls beyond the top portion of the hero.
+The landing navigation SHALL render an anonymous-safe account action in its static initial HTML, SHALL be usable at all viewport widths down to 390px, and the primary call-to-action SHALL drive visitors to the creation flow. After first paint, a small non-blocking session enhancement MAY replace the account action with “Dashboard” for an authenticated visitor without loading the full Clerk UI runtime or shifting navigation geometry. The H2b desktop navigation SHALL transition from its over-photo top state to the exported compact mint state after the visitor scrolls beyond the top portion of the hero.
 
-#### Scenario: Signed-out initial desktop nav
+#### Scenario: Initial desktop nav is static and safe
 
-- **WHEN** a signed-out visitor views the landing at the top of a desktop viewport
+- **WHEN** any visitor receives the initial desktop marketing HTML
 - **THEN** the H2b navigation shows “Cómo funciona”, “Ocasiones”, “Ejemplos”, “Iniciar sesión”, and “Crear mi wishlist”
+- **AND** rendering that HTML does not require server-side authentication
 
-#### Scenario: Signed-in initial desktop nav
+#### Scenario: Signed-in account action enhances without blocking paint
 
-- **WHEN** a signed-in visitor views the landing at the top of a desktop viewport
-- **THEN** the H2b navigation shows “Dashboard” instead of “Iniciar sesión”
-- **AND** it shows “Crear mi wishlist”
+- **WHEN** a signed-in visitor's session enhancement completes after first paint
+- **THEN** “Iniciar sesión” is replaced by “Dashboard”
+- **AND** the account slot keeps stable dimensions so the replacement does not cause layout shift
+- **AND** the enhancement does not load Clerk's prebuilt UI bundle
+
+#### Scenario: Signed-in visitor activates the static fallback
+
+- **WHEN** a signed-in visitor activates “Iniciar sesión” before session enhancement completes or when JavaScript is unavailable
+- **THEN** the existing auth-route redirect sends the visitor to the dashboard or configured safe redirect
 
 #### Scenario: H2b desktop nav enters compact scrolled state
 
@@ -204,94 +222,115 @@ The landing navigation SHALL reflect authentication state in the initial desktop
 - **WHEN** a visitor clicks the hero "Ver ejemplo"
 - **THEN** the page scrolls to the "Ejemplo real" block
 
-#### Scenario: Mobile nav collapses to a drawer
+#### Scenario: Mobile nav collapses to an accessible drawer
 
 - **WHEN** the nav renders below the `md` breakpoint
-- **THEN** it shows the logo, a condensed "Crear" CTA, and a "≡" trigger
-- **AND** the full link set (including any anchor links and the auth-aware Iniciar sesión/Dashboard link) is only reachable by opening a shadcn `Sheet` drawer from the trigger
+- **THEN** it shows the logo, a condensed "Crear" CTA, and a menu trigger
+- **AND** the full link set, including the current account action, is reachable by opening an accessible drawer or dialog
 
 #### Scenario: Mobile nav drawer is dismissible
 
 - **WHEN** the mobile nav drawer is open
-- **THEN** it can be closed via an explicit close control, clicking outside it, or the Escape key, returning focus to the trigger
+- **THEN** it can be closed via an explicit close control, clicking outside it, or the Escape key
+- **AND** focus returns to the trigger
 
 ### Requirement: Example preview reuses real public components
 
-The "Ejemplo real" section SHALL render the production `PublicWishlistPage` component in `compact` mode, fed by a static demo fixture, so the marketing preview stays a single source of truth with the live public page.
+The "Ejemplo real" section SHALL render a lightweight, server-rendered marketing preview from `src/config/demo-wishlist.ts`. It SHALL reuse shared public-wishlist presentation contracts or server-safe presentational primitives where that prevents visual drift, but it MUST NOT import the full layout registry, purchase flows, modal code, or client-side gift-card behavior.
 
-#### Scenario: Compact public page used
+#### Scenario: Lightweight public preview is used
 
 - **WHEN** the example section renders
-- **THEN** it mounts `PublicWishlistPage` in `compact` mode using `src/config/demo-wishlist.ts`
-- **AND** purchase actions are non-interactive in the preview
+- **THEN** it displays the configured demo title, event metadata, hero treatment, and representative gifts from `src/config/demo-wishlist.ts`
+- **AND** it does not mount `PublicWishlistPage`
 
-### Requirement: GSAP-driven animations with reduced-motion fallback
+#### Scenario: Preview remains non-interactive
 
-The landing SHALL use GSAP with ScrollTrigger for scroll reveals, the H2b header-state transition, the hero occasion rotation, the partner marquee, and CTA glow. It SHALL NOT register mesh-drift, bob, pulse, spin, or headline-shimmer loops, since no markup consumes them after the mesh hero is removed. It SHALL retain the floating blob and emoji loops that later sections still use. It SHALL disable non-structural motion when the visitor prefers reduced motion.
+- **WHEN** a visitor inspects or activates a gift in the marketing preview
+- **THEN** no purchase modal or reservation mutation is available
+- **AND** no purchase-flow JavaScript is loaded for the preview
+
+#### Scenario: Preview remains visually faithful
+
+- **WHEN** shared public presentation fields or tokens change
+- **THEN** the marketing preview consumes the same server-safe contract where applicable
+- **AND** a focused visual or component test detects unintended divergence
+
+### Requirement: Targeted hero and header motion with reduced-motion fallback
+
+The landing SHALL preserve the required H2b header state and scroll-progress indicator and the required activity-gated hero rotation. GSAP MAY be used only for the hero and header when it provides these required behaviors; other marketing motion is optional and SHALL use CSS or small browser APIs rather than broad animation-runtime expansion. Motion SHALL use compositor-friendly transform and opacity changes, SHALL initialize only when its target approaches the viewport or the visitor activates the hero, and SHALL stop when hidden. Decorative infinite paint effects SHALL be replaced by static, hover/focus, or finite treatments. All content SHALL remain visible when JavaScript is unavailable, and non-structural motion SHALL be disabled when reduced motion is preferred.
 
 #### Scenario: H2b header state follows scroll
 
 - **WHEN** a desktop visitor crosses the H2b header trigger in either direction
-- **THEN** ScrollTrigger applies the corresponding top or compact navigation state
+- **THEN** the corresponding top or compact navigation state is applied
+- **AND** the header exposes a visible progress indicator that advances with document scroll
+- **AND** any GSAP use remains confined to the header implementation
 
-#### Scenario: Scroll reveals on enter
+#### Scenario: Scroll reveals enhance visible content
 
-- **WHEN** a section scrolls into the viewport
-- **THEN** its content animates in via a GSAP scroll-triggered reveal
+- **WHEN** a reveal target approaches the viewport with motion allowed
+- **THEN** it animates through transform and opacity
+- **AND** content is visible by default before enhancement is registered
 
-#### Scenario: Hero rotation is registered
+#### Scenario: Hero rotation is activated lazily
 
-- **WHEN** the landing animations initialize with motion allowed
-- **THEN** the hero occasion rotation timeline is registered and running
+- **WHEN** the landing has loaded, motion is allowed, the hero is visible, and the visitor provides a meaningful activity signal
+- **THEN** the hero rotation controller starts
+- **AND** it was not running during idle first paint
+- **AND** any GSAP use remains confined to the hero implementation
 
-#### Scenario: Retired loops are not registered
+#### Scenario: Paint-heavy loops are absent
 
 - **WHEN** the landing animations initialize
-- **THEN** no mesh-drift, bob, pulse, spin, or headline-shimmer animation is registered
-- **AND** the floating blob and emoji loops used by the final CTA and guest-finder sections are still registered
+- **THEN** no continuous box-shadow, filter, gradient, mesh-drift, bob, pulse, spin, or headline-shimmer loop runs
+- **AND** any marquee or decorative transform loop pauses while outside the viewport
 
 #### Scenario: Reduced motion disables animation
 
 - **WHEN** the user has `prefers-reduced-motion: reduce` set
-- **THEN** decorative GSAP animations do not play
+- **THEN** decorative animations do not play
 - **AND** the hero photograph does not rotate
 - **AND** the structural H2b header state still changes without an animated transition
 
 #### Scenario: No layout shift or content gating
 
-- **WHEN** JavaScript is disabled or GSAP fails to load
+- **WHEN** JavaScript is disabled or an enhancement fails to load
 - **THEN** all landing content remains visible and readable
 - **AND** the hero shows its first occasion photograph, copy, trust line, and proof rail
 - **AND** the H2b top header scrolls away with the first fold instead of remaining transparent over later content
 
 ### Requirement: Shadcn-first, Tailwind-fallback implementation
 
-The landing page's interactive UI patterns SHALL use existing shadcn primitives where one exists for the pattern (accordion disclosure, search input, carousel), and presentational styling SHALL use Tailwind utility classes rather than inline `style` objects or bespoke CSS wherever a Tailwind utility can express the same value. The scoped `marketing-theme` CSS custom properties (`--mbg`, `--mink`, `--mmut`, `--mline`, `--mrose`, `--msky`, `--mlime`, `--msun`), the per-occasion hero scrim custom property, and GSAP animation target styles are the only exceptions, since Tailwind's default theme cannot express a self-contained, non-leaking marketing palette or a value that changes per active occasion.
+The landing page SHALL select the lightest accessible implementation that preserves the design and behavior contract. Existing shadcn primitives MAY be used when their client runtime is already required by the same interaction, but native HTML, CSS scroll snap, and small progressive-enhancement controllers SHALL be preferred for isolated marketing disclosures, forms, drawers, and carousels. Presentational styling SHALL use Tailwind utility classes rather than inline `style` objects or bespoke CSS wherever a Tailwind utility can express the same value. Scoped marketing theme properties, per-occasion hero scrim values, responsive picture attributes, and values updated by a small animation controller are permitted exceptions.
 
-#### Scenario: FAQ uses shadcn Accordion
+#### Scenario: FAQ works without a component runtime
 
 - **WHEN** the FAQ section renders
-- **THEN** each question/answer pair is a shadcn `Accordion` item rather than custom disclosure markup
+- **THEN** every question and answer is present in server HTML
+- **AND** disclosure behavior remains keyboard and screen-reader accessible without requiring a general-purpose UI library
 
-#### Scenario: Guest finder uses shadcn form primitives
+#### Scenario: Guest finder avoids form-framework overhead
 
 - **WHEN** the guest list-finder section renders
-- **THEN** its search input and submit action use shadcn `Input`/`Button` (or `Command` if the canvas specifies typeahead results)
+- **THEN** its simple slug or URL input uses native form semantics and the established button/input appearance
+- **AND** React Hook Form, its resolver, and Zod are not loaded solely for this field
 
-#### Scenario: Interactive card carousel uses the shadcn primitive
+#### Scenario: Occasion carousel is progressively enhanced
 
 - **WHEN** the wishlist-card carousel renders inside the occasion picker
-- **THEN** it uses the existing shadcn `Carousel` primitive with its autoplay plugin
+- **THEN** all cards remain readable and horizontally reachable without JavaScript
+- **AND** autoplay, looping, and dots are initialized only when the section approaches the viewport and motion is allowed
 
-#### Scenario: Non-interactive hero rotation does not use the carousel primitive
+#### Scenario: Non-interactive hero rotation avoids carousel semantics
 
 - **WHEN** the hero occasion rotation renders
-- **THEN** it is implemented as a GSAP-driven crossfade rather than the shadcn `Carousel` primitive
-- **AND** this is treated as intentional, because the hero exposes no gestures, controls, or carousel semantics
+- **THEN** it exposes no carousel interaction semantics or controls
+- **AND** its lightweight crossfade controller is loaded only under the hero activation conditions
 
-#### Scenario: Layout/spacing prefers Tailwind utilities
+#### Scenario: Layout and spacing prefer Tailwind utilities
 
-- **WHEN** a landing section needs spacing, sizing, or color that Tailwind's utility classes (including arbitrary values) can express
+- **WHEN** a landing section needs spacing, sizing, or color that Tailwind utilities, including arbitrary values, can express
 - **THEN** the component uses a Tailwind class rather than an inline `style` object or a new custom CSS rule
 
 ### Requirement: Desktop landing verified against design canvas
@@ -316,25 +355,25 @@ The landing first fold SHALL be verified against `A Wish For.dc.html` §14, **H2
 
 ### Requirement: Section content adapts per breakpoint
 
-Landing sections whose canvas mobile frame specifies shorter heading/body copy than the desktop frame SHALL render that shorter copy below the `lg` breakpoint, without client-side viewport detection or hydration-dependent copy swaps.
+Landing sections whose canvas mobile frame specifies shorter heading/body copy than the desktop frame SHALL render that shorter copy below the `lg` breakpoint without client-side viewport detection or hydration-dependent copy swaps.
 
 At `lg` and above, the hero SHALL use the exact H2b desktop copy while all later sections retain the approved desktop copy from the existing fidelity pass.
 
 #### Scenario: Shorter mobile copy renders server-side
 
-- **WHEN** a section with distinct mobile copy (e.g. hero, benefits, how-it-works, final CTA) renders below `lg`
-- **THEN** the shorter copy is present in the initial server-rendered HTML, not swapped in after hydration
+- **WHEN** a section with distinct mobile copy such as hero, benefits, how-it-works, or final CTA renders below `lg`
+- **THEN** the shorter copy is present in the initial server-rendered HTML and is not swapped after hydration
 
 #### Scenario: H2b desktop hero copy renders server-side
 
 - **WHEN** the hero renders at `lg` or above
 - **THEN** the exact H2b eyebrow, headline, body, CTA, and trust-line copy is present in the initial server-rendered HTML
 
-#### Scenario: All occasions' rail copy renders server-side
+#### Scenario: Initial occasion rail copy renders server-side
 
 - **WHEN** the hero renders at any viewport
-- **THEN** every occasion's proof-rail copy is present in the initial server-rendered HTML
-- **AND** none of it is fetched or assembled after hydration
+- **THEN** the first occasion's proof-rail copy is present in the initial server-rendered HTML
+- **AND** later occasion data does not create additional initial image requests or duplicate accessible rails
 
 #### Scenario: Later desktop copy remains unchanged
 
@@ -362,17 +401,60 @@ All interactive elements on the landing page (buttons, links, nav items, accordi
 
 ### Requirement: Decorative animation gating on small viewports
 
-Ambient decorative GSAP effects (floating blob and emoji loops in later sections) SHALL be simplified or skipped on viewports below `md` independent of the `prefers-reduced-motion` setting, while scroll-reveals and the hero occasion rotation SHALL still play at every viewport (subject to `prefers-reduced-motion` as already specified).
+Ambient decorative effects in later sections SHALL remain static on viewports below `md` and SHALL initialize at larger viewports only while their section is visible. Scroll reveals MAY play at every viewport after their target approaches the viewport, while hero occasion rotation SHALL remain subject to visitor activity, visibility, page lifecycle, and reduced-motion conditions.
 
-#### Scenario: Ambient effects skipped on small viewports
+#### Scenario: Ambient effects are static on small viewports
 
-- **WHEN** the landing renders below `md` with motion allowed (`prefers-reduced-motion` not set)
+- **WHEN** the landing renders below `md` with motion allowed
 - **THEN** floating blob and emoji loops do not run
-- **AND** scroll-reveal animations still run
-- **AND** the hero occasion rotation still runs
+- **AND** viewport-triggered scroll reveals may still run
+- **AND** the hero remains static until the visitor activity condition is satisfied
+
+#### Scenario: Offscreen ambient effects pause
+
+- **WHEN** an animated later section leaves the viewport
+- **THEN** its decorative transform timeline pauses
+- **AND** it performs no continuous per-frame work while hidden
 
 #### Scenario: Reduced motion still wins
 
-- **WHEN** `prefers-reduced-motion: reduce` is set, at any viewport width
-- **THEN** no GSAP animations play, per the existing reduced-motion requirement
+- **WHEN** `prefers-reduced-motion: reduce` is set at any viewport width
+- **THEN** no non-structural marketing animations play
 
+### Requirement: Marketing typography is route-scoped
+
+The marketing route SHALL load only the font families and weights used by the approved landing design. The public-wishlist font catalog and application monospace font SHALL NOT be imported or preloaded by the anonymous marketing route.
+
+#### Scenario: Marketing font resources are isolated
+
+- **WHEN** the anonymous `/` route loads
+- **THEN** its font requests are limited to the Lora and Inter resources required by visible marketing content
+- **AND** no Playfair Display, Cormorant Garamond, DM Serif Display, Nunito, Figtree, Source Serif 4, Karla, or JetBrains Mono resource is preloaded
+
+#### Scenario: Public wishlist typography remains available
+
+- **WHEN** a public wishlist uses a configured font pair outside the marketing route
+- **THEN** that route can still render the selected public font family
+- **AND** marketing font isolation does not remove a supported wishlist option
+
+### Requirement: Marketing media follows viewport and visibility priority
+
+The marketing route SHALL request only one optimized local first hero image at high priority. Images outside the first fold SHALL use explicit dimensions and deferred loading, and a compact example SHALL NOT cause its hero or gift imagery to be preloaded.
+
+#### Scenario: Initial hero does not duplicate downloads
+
+- **WHEN** the first fold loads at any supported viewport
+- **THEN** only one optimized first-occasion hero image is requested
+- **AND** a duplicate hidden breakpoint image is not downloaded
+
+#### Scenario: Example imagery is below-the-fold
+
+- **WHEN** the initial document is loading and the example section is outside the viewport
+- **THEN** the example hero and gift images are not assigned high priority
+- **AND** they do not produce image preload links
+
+#### Scenario: Media reserves layout space
+
+- **WHEN** a marketing image has not completed loading
+- **THEN** its rendered container has a deterministic aspect ratio or intrinsic dimensions
+- **AND** loading the image does not shift surrounding content

@@ -30,7 +30,7 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 					<HeroImageSlot
 						alt={`${heading} 1`}
 						className="absolute top-4 left-0 size-[72%] rounded-full border-4 border-card shadow-lg"
-						priority
+						priority={!isCompact}
 						src={slots[0] ?? null}
 					/>
 					<HeroImageSlot

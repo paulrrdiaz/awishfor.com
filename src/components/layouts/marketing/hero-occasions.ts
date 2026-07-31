@@ -78,8 +78,8 @@ export const HERO_OCCASIONS = [
 		id: "boda",
 		label: "Boda",
 		photo: {
-			desktop: "/assets/hero/photo-1519741497674-611481863552.jpeg",
-			mobile: "/assets/hero/photo-1519741497674-611481863552.jpeg",
+			desktop: "/assets/hero/wedding-hero.jpg",
+			mobile: "/assets/hero/wedding-hero-mobile.jpg",
 		},
 		scrim: "light",
 		rail: {
@@ -522,3 +522,5 @@ export const HERO_OCCASIONS = [
 		},
 	},
 ] as const satisfies readonly HeroOccasion[];
+
+export const HERO_FEATURED_OCCASIONS = HERO_OCCASIONS.slice(0, 4);

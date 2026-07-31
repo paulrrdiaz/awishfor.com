@@ -38,6 +38,16 @@ const config: NextConfig = {
 	async headers() {
 		return [
 			{
+				source: "/",
+				headers: [
+					{
+						key: "Link",
+						value:
+							'</assets/hero/wedding-hero-mobile-300.jpg>; rel=preload; as=image; fetchpriority=high; media="(max-width: 1023px)", </assets/hero/wedding-hero.jpg>; rel=preload; as=image; fetchpriority=high; media="(min-width: 1024px)"',
+					},
+				],
+			},
+			{
 				source: "/(.*)",
 				headers: [
 					{ key: "X-Frame-Options", value: "DENY" },

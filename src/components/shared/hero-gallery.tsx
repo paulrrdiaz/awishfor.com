@@ -122,6 +122,7 @@ type HeroCarouselGalleryProps = {
 	alt: string;
 	className?: string;
 	maxImages?: number;
+	priority: boolean;
 };
 
 /**
@@ -134,6 +135,7 @@ export function HeroCarouselGallery({
 	alt,
 	className,
 	maxImages = 6,
+	priority,
 }: HeroCarouselGalleryProps) {
 	const visibleImages = images.slice(0, maxImages);
 
@@ -142,7 +144,7 @@ export function HeroCarouselGallery({
 			<HeroImageSlot
 				alt={alt}
 				className={className}
-				priority
+				priority={priority}
 				src={visibleImages[0] ?? null}
 			/>
 		);
@@ -158,7 +160,7 @@ export function HeroCarouselGallery({
 								alt={`${alt} ${index + 1}`}
 								className="object-cover"
 								fill
-								priority={index === 0}
+								priority={priority && index === 0}
 								src={src}
 							/>
 						</div>

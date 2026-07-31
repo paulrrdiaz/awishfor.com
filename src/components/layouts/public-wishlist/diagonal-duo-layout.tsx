@@ -57,7 +57,7 @@ export function DiagonalDuoLayout({ wishlist, layout, mode }: Props) {
 						<HeroImageSlot
 							alt={`${heading} 1`}
 							className="absolute top-0 left-0 size-40 rounded-full border-4 border-card shadow-lg"
-							priority
+							priority={!isCompact}
 							src={slots[0] ?? null}
 						/>
 						<HeroImageSlot

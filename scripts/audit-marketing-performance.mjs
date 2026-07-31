@@ -76,20 +76,30 @@ function requestItems(lhr) {
 	return lhr.audits["network-requests"]?.details?.items ?? [];
 }
 
-function payloadSummary(lhr) {
+function criticalResourceSignals(html) {
+	const preloadTags = html.match(/<link\b[^>]*\brel="preload"[^>]*>/gi) ?? [];
+	const imagePreloads = preloadTags.filter((tag) => /\bas="image"/i.test(tag));
+	const fontPreloads = preloadTags
+		.filter((tag) => /\bas="font"/i.test(tag))
+		.map((tag) => tag.match(/\bhref="([^"]+)"/i)?.[1])
+		.filter(Boolean);
+	const explicitHighPriorityImages =
+		html.match(/<img\b[^>]*\bfetchpriority="high"[^>]*>/gi) ?? [];
+	return {
+		fontPreloadUrls: fontPreloads,
+		highPriorityContentImages:
+			imagePreloads.length || explicitHighPriorityImages.length,
+	};
+}
+
+function payloadSummary(lhr, criticalSignals) {
 	const requests = requestItems(lhr);
 	const isFont = (item) =>
 		item.resourceType === "Font" || /\\.(woff2?|ttf)(?:$|\\?)/i.test(item.url);
-	const isPreload = (item) =>
-		item.initiatorType === "link" || item.initiatorType === "preload";
-	const highPriorityImages = requests.filter(
-		(item) =>
-			item.resourceType === "Image" &&
-			["High", "VeryHigh"].includes(item.priority) &&
-			!/favicon|icon/i.test(item.url),
-	);
 	const fontPreloads = requests.filter(
-		(item) => isFont(item) && isPreload(item),
+		(item) =>
+			isFont(item) &&
+			criticalSignals.fontPreloadUrls.some((url) => item.url.endsWith(url)),
 	);
 	return {
 		javascriptBytes: requests
@@ -106,7 +116,7 @@ function payloadSummary(lhr) {
 			(sum, item) => sum + item.transferSize,
 			0,
 		),
-		highPriorityContentImages: highPriorityImages.length,
+		highPriorityContentImages: criticalSignals.highPriorityContentImages,
 		fontPreloadCount: fontPreloads.length,
 		requests,
 	};
@@ -121,8 +131,8 @@ function diagnosticRequests(summary) {
 		.join("\n");
 }
 
-function measuredRun(lhr) {
-	const payload = payloadSummary(lhr);
+function measuredRun(lhr, criticalSignals) {
+	const payload = payloadSummary(lhr, criticalSignals);
 	return {
 		performance: lhr.categories.performance.score,
 		lcp: lhr.audits["largest-contentful-paint"]?.numericValue ?? 0,
@@ -199,7 +209,7 @@ function validateMobile(runs) {
 	return { report, failures };
 }
 
-async function lighthouseRun(profile, index) {
+async function lighthouseRun(profile, index, criticalSignals) {
 	const chrome = await launch({
 		chromeFlags: ["--headless=new", "--no-sandbox", "--disable-gpu"],
 	});
@@ -213,7 +223,7 @@ async function lighthouseRun(profile, index) {
 			formFactor: profile.formFactor,
 			screenEmulation: profile.screenEmulation,
 			throttling: profile.throttling,
-			throttlingMethod: "simulate",
+			throttlingMethod: profile.throttlingMethod,
 		});
 	} finally {
 		await chrome.kill();
@@ -224,7 +234,7 @@ async function lighthouseRun(profile, index) {
 		resolve(artifactDirectory, `${basename}.report.json`),
 		result.report,
 	);
-	return measuredRun(result.lhr);
+	return measuredRun(result.lhr, criticalSignals);
 }
 
 await mkdir(artifactDirectory, { recursive: true });
@@ -234,9 +244,10 @@ if (!(await portAvailable(config.port)))
 let server;
 try {
 	await run("pnpm", ["build"]);
+	const nextCli = resolve(root, "node_modules/next/dist/bin/next");
 	server = spawn(
-		"pnpm",
-		["exec", "next", "start", "--port", String(config.port)],
+		process.execPath,
+		[nextCli, "start", "--port", String(config.port)],
 		{ cwd: root, stdio: "inherit" },
 	);
 	server.once("error", (error) => {
@@ -249,11 +260,12 @@ try {
 			"Audit refused: the target looks like a Next.js development runtime",
 		);
 	}
+	const criticalSignals = criticalResourceSignals(html);
 
 	const mobileRuns = [];
 	for (let index = 0; index < config.mobile.runs; index += 1)
-		mobileRuns.push(await lighthouseRun(config.mobile, index));
-	const desktopRun = await lighthouseRun(config.desktop, 0);
+		mobileRuns.push(await lighthouseRun(config.mobile, index, criticalSignals));
+	const desktopRun = await lighthouseRun(config.desktop, 0, criticalSignals);
 	const { report, failures } = validateMobile(mobileRuns);
 	const evidence = {
 		revision,
@@ -286,5 +298,18 @@ try {
 		process.exitCode = 1;
 	}
 } finally {
-	if (server && !server.killed) server.kill("SIGTERM");
+	if (server && server.exitCode === null && server.signalCode === null) {
+		const exited = new Promise((resolveExit) =>
+			server.once("exit", resolveExit),
+		);
+		server.kill("SIGTERM");
+		await Promise.race([
+			exited,
+			new Promise((resolveTimeout) => setTimeout(resolveTimeout, 5000)),
+		]);
+		if (server.exitCode === null && server.signalCode === null) {
+			server.kill("SIGKILL");
+			await exited;
+		}
+	}
 }

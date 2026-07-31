@@ -1,9 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-
 import { HeroExampleRail } from "./hero-example-rail";
 import { HERO_OCCASIONS, HERO_SCRIM_VALUES } from "./hero-occasions";
-import { HeroRotatorDriver } from "./hero-rotator-driver";
+import { HeroRotatorLoader } from "./hero-rotator-loader";
 
 export function H2bHero() {
 	const wedding = HERO_OCCASIONS[0];
@@ -15,19 +12,31 @@ export function H2bHero() {
 			data-hero-rotator
 			style={HERO_SCRIM_VALUES[wedding.scrim]}
 		>
-			<div className="absolute inset-x-0 top-0 h-full overflow-hidden">
-				<Image
-					alt=""
-					className="object-cover brightness-[1.2] contrast-[.95] saturate-[1.06]"
-					data-hero-photo-index="0"
-					fill
-					loading="eager"
-					priority
-					sizes="(min-width: 1240px) 1240px, 100vw"
-					src={wedding.photo.desktop}
-					style={{ transform: "translate(-0.5%, -0.25%) scale(1.04)" }}
-				/>
-				<HeroRotatorDriver />
+			<div
+				className="absolute inset-x-0 top-0 h-full overflow-hidden"
+				data-hero-photo-layer
+			>
+				<picture>
+					<source
+						height={1072}
+						media="(min-width: 1024px)"
+						srcSet={wedding.photo.desktop}
+						width={1600}
+					/>
+					<img
+						alt=""
+						className="absolute inset-0 h-full w-full object-cover"
+						data-hero-photo-index="0"
+						data-initial-hero-photo
+						decoding="sync"
+						fetchPriority="high"
+						height={510}
+						loading="eager"
+						src="/assets/hero/wedding-hero-mobile-300.jpg"
+						width={300}
+					/>
+				</picture>
+				<HeroRotatorLoader />
 				<div
 					aria-hidden
 					className="absolute inset-0 z-10 bg-[linear-gradient(105deg,rgba(2,16,8,.64)_0%,rgba(2,16,8,.5)_44%,rgba(2,16,8,.3)_100%)]"
@@ -75,13 +84,12 @@ export function H2bHero() {
 						</span>
 					</p>
 					<div className="mt-8 flex flex-wrap items-center gap-3 lg:mt-8">
-						<Link
+						<a
 							className="rounded-full bg-[var(--mlime)] px-5 py-3 font-semibold text-[#1B3A12] text-[14px] shadow-[0_8px_22px_rgba(140,200,60,0.4)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4 lg:px-[26px] lg:py-[14px] lg:text-[15px]"
-							data-glow
 							href="/create"
 						>
 							Crear mi wishlist →
-						</Link>
+						</a>
 						<a
 							className="rounded-full border border-white/[.42] bg-white/[.14] px-5 py-3 font-semibold text-[14px] text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4 lg:px-[26px] lg:py-[14px] lg:text-[15px]"
 							href="#ejemplo"

@@ -33,6 +33,7 @@ export function HeroCinematicLayout({ wishlist, layout, mode }: Props) {
 					alt={heading}
 					className="absolute inset-0 h-full w-full"
 					images={wishlist.coverImageUrls}
+					priority={!isCompact}
 				/>
 				<div className="absolute inset-0 bg-gradient-to-b from-[rgba(20,10,5,.04)] via-[rgba(20,10,5,.44)] to-[rgba(20,10,5,.82)]" />
 				<div className="absolute inset-x-0 bottom-0 px-6 pb-9 text-center text-white">

@@ -1,5 +1,5 @@
-import Image from "next/image";
-import Link from "next/link";
+/* biome-ignore-all lint/performance/noImgElement: local SVG marks do not need the next/image client runtime. */
+import { BrandMark } from "@/components/features/dashboard/brand-logo";
 import { H2bNavController } from "./h2b-nav-controller";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
@@ -37,22 +37,23 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
 				>
 					<div className="mx-auto max-w-[1240px] transition-[padding] duration-300 ease-out group-data-[scrolled=true]/h2b:px-8 motion-reduce:transition-none">
 						<div className="flex items-center justify-between pt-[22px] pb-[18px] transition-[padding] duration-300 ease-out group-data-[scrolled=true]/h2b:pt-4 group-data-[scrolled=true]/h2b:pb-[13px] motion-reduce:transition-none">
-							<Link
+							<a
 								aria-label="A Wish For"
 								className="flex items-center gap-[9px] focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4 group-data-[scrolled=true]/h2b:gap-2 group-data-[scrolled=true]/h2b:focus-visible:outline-[var(--mink)]"
 								href="/"
 							>
-								<Image
+								<img
 									alt=""
 									className="h-7 w-7 transition-[width,height] duration-300 ease-out group-data-[scrolled=true]/h2b:h-[22px] group-data-[scrolled=true]/h2b:w-[22px] motion-reduce:transition-none"
 									height={28}
+									loading="lazy"
 									src="/assets/isotype.svg"
 									width={28}
 								/>
 								<span className="m-serif font-semibold text-[19px] tracking-[-0.012em] transition-[font-size] duration-300 ease-out group-data-[scrolled=true]/h2b:text-[16px] motion-reduce:transition-none">
 									A Wish For
 								</span>
-							</Link>
+							</a>
 
 							<div className="flex items-center gap-[26px] transition-[gap] duration-300 ease-out group-data-[scrolled=true]/h2b:gap-[22px] motion-reduce:transition-none">
 								{NAV_ITEMS.map(({ href, id, label }) => (
@@ -69,20 +70,19 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
 							</div>
 
 							<div className="flex items-center gap-[16px] transition-[gap] duration-300 ease-out group-data-[scrolled=true]/h2b:gap-[14px] motion-reduce:transition-none">
-								<Link
+								<a
 									className="whitespace-nowrap font-semibold text-[13.5px] hover:opacity-70 focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 group-data-[scrolled=true]/h2b:text-[12.5px]"
 									data-marketing-account-link
 									href="/sign-in"
 								>
 									Iniciar sesión
-								</Link>
-								<Link
+								</a>
+								<a
 									className="rounded-full bg-[var(--mlime)] px-5 py-[10px] font-semibold text-[#1B3A12] text-[13.5px] shadow-[0_8px_22px_rgba(140,200,60,0.4)] transition-[padding,transform] duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 group-data-[scrolled=true]/h2b:px-4 group-data-[scrolled=true]/h2b:py-2 group-data-[scrolled=true]/h2b:text-[12.5px] motion-reduce:transition-none"
-									data-glow
 									href="/create"
 								>
 									Crear mi wishlist
-								</Link>
+								</a>
 							</div>
 						</div>
 					</div>
@@ -100,16 +100,9 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
 function DefaultMarketingNav() {
 	return (
 		<nav className="flex items-center justify-between border-[var(--mline)] border-b bg-[rgba(238,249,230,0.95)] px-5 py-3 backdrop-blur">
-			<Link className="flex items-center" href="/">
-				<Image
-					alt="A Wish For"
-					className="size-10 md:size-12"
-					height={48}
-					priority
-					src="/assets/logo.svg"
-					width={48}
-				/>
-			</Link>
+			<a className="flex items-center" href="/">
+				<BrandMark className="size-10 md:size-12" />
+			</a>
 
 			{/* full inline nav, md:+ */}
 			<div className="hidden items-center gap-[22px] md:flex">
@@ -125,31 +118,26 @@ function DefaultMarketingNav() {
 				>
 					Cómo funciona
 				</a>
-				<Link
+				<a
 					className="font-medium text-[14px] text-[var(--mmut)] hover:text-[var(--mink)]"
 					data-marketing-account-link
 					href="/sign-in"
 				>
 					Iniciar sesión
-				</Link>
-				<Link
+				</a>
+				<a
 					className="!px-[22px] !py-[11px] !text-[14px] m-btn m-btn-lime"
-					data-glow
 					href="/create"
 				>
 					Crear mi wishlist
-				</Link>
+				</a>
 			</div>
 
 			{/* condensed nav, below md */}
 			<div className="flex items-center gap-2 md:hidden">
-				<Link
-					className="!px-4 !text-[13.5px] m-btn m-btn-lime"
-					data-glow
-					href="/create"
-				>
+				<a className="!px-4 !text-[13.5px] m-btn m-btn-lime" href="/create">
 					Crear
-				</Link>
+				</a>
 				<MobileNavDrawer isSignedIn={false} />
 			</div>
 		</nav>

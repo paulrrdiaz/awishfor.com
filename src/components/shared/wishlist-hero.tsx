@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getWishlistHeading } from "@/lib/wishlist/public-presentation";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 
 type Props = {
@@ -12,10 +13,11 @@ type Props = {
 		| "eventTime"
 		| "eventLocation"
 	>;
+	priority: boolean;
 };
 
-export function WishlistHero({ wishlist }: Props) {
-	const heading = wishlist.heroTitle ?? wishlist.title;
+export function WishlistHero({ wishlist, priority }: Props) {
+	const heading = getWishlistHeading(wishlist);
 
 	return (
 		<header className="w-full">
@@ -25,7 +27,7 @@ export function WishlistHero({ wishlist }: Props) {
 						alt={heading}
 						className="object-cover"
 						fill
-						priority
+						priority={priority}
 						src={wishlist.coverImageUrl}
 					/>
 				</div>

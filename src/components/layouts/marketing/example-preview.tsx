@@ -1,9 +1,18 @@
-import Image from "next/image";
+/* biome-ignore-all lint/performance/noImgElement: preview media is URL-sized, lazy, and outside the first fold. */
 
 import { DEMO_WISHLIST } from "@/config/demo-wishlist";
+import { toMarketingWishlistPreview } from "@/lib/wishlist/public-presentation";
+
+const sizedImage = (url: string | null, width: number, height: number) => {
+	if (!url) return "";
+	if (!url.startsWith("https://images.unsplash.com/")) return url;
+	return `${url}?w=${width}&h=${height}&fit=crop&auto=format`;
+};
 
 /** Server-only compact proof of the public wishlist contract; no live gift flow. */
 export function ExamplePreview() {
+	const preview = toMarketingWishlistPreview(DEMO_WISHLIST);
+
 	return (
 		<section
 			className="border-[var(--mline)] border-t bg-white px-11 py-[76px] text-center"
@@ -26,38 +35,36 @@ export function ExamplePreview() {
 				data-reveal
 			>
 				<div className="relative aspect-[5/2] overflow-hidden">
-					<Image
+					<img
 						alt=""
-						className="object-cover"
-						fill
+						className="absolute inset-0 h-full w-full object-cover"
+						data-priority="false"
+						height={328}
 						loading="lazy"
-						sizes="(min-width: 1024px) 820px, 100vw"
-						src={DEMO_WISHLIST.coverImageUrl ?? ""}
+						src={sizedImage(preview.coverImageUrl, 820, 328)}
+						width={820}
 					/>
 					<div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(23,62,41,.76),transparent_70%)]" />
 					<div className="absolute inset-x-0 bottom-0 p-6 text-white">
-						<p className="m-serif font-semibold text-3xl">
-							{DEMO_WISHLIST.title}
-						</p>
-						<p className="mt-1 text-sm text-white/80">
-							{DEMO_WISHLIST.displayName}
-						</p>
+						<p className="m-serif font-semibold text-3xl">{preview.title}</p>
+						<p className="mt-1 text-sm text-white/80">{preview.displayName}</p>
 					</div>
 				</div>
 				<div className="grid gap-4 p-5 sm:grid-cols-3">
-					{DEMO_WISHLIST.gifts.map((gift) => (
+					{preview.gifts.map((gift) => (
 						<article
 							className="overflow-hidden rounded-xl border border-[var(--mline)]"
 							key={gift.id}
 						>
 							<div className="relative aspect-[4/3]">
-								<Image
+								<img
 									alt={gift.name}
-									className="object-cover"
-									fill
+									className="absolute inset-0 h-full w-full object-cover"
+									data-priority="false"
+									height={180}
 									loading="lazy"
-									sizes="240px"
-									src={gift.imageUrl ?? ""}
+									src={sizedImage(gift.imageUrl, 240, 180)}
+									width={240}
 								/>
 							</div>
 							<div className="p-3">

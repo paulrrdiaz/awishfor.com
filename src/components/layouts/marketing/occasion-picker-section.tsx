@@ -1,7 +1,5 @@
-import Image from "next/image";
-import Link from "next/link";
-
 import { HeroCardCarousel } from "./hero-card-carousel";
+import { OccasionMediaController } from "./occasion-media-controller";
 
 const OCCASIONS = [
 	{
@@ -48,21 +46,36 @@ export function OccasionPickerSection() {
 			</div>
 			<div
 				className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+				data-occasion-grid
 				data-reveal-stagger
 			>
 				{OCCASIONS.map((o) => (
-					<Link
+					<a
 						className="card-lift group relative block h-[300px] cursor-pointer overflow-hidden rounded-[20px] shadow-[0_10px_30px_rgba(20,60,20,0.1)]"
 						href={`/create?type=${o.eventType}`}
 						key={o.eventType}
 					>
-						<Image
+						{/* biome-ignore lint/performance/noImgElement: src is assigned only after intersection; next/image requires an eager src. */}
+						<img
 							alt=""
-							className="object-cover transition-transform duration-500 group-hover:scale-105"
-							fill
-							sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-							src={`${o.photo}?w=340&h=420&fit=crop&auto=format`}
+							className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+							data-deferred-src={`${o.photo}?w=340&h=420&fit=crop&auto=format`}
+							decoding="async"
+							height={420}
+							loading="lazy"
+							width={340}
 						/>
+						<noscript>
+							{/* biome-ignore lint/performance/noImgElement: this is the no-JavaScript fallback for the deferred image. */}
+							<img
+								alt=""
+								className="absolute inset-0 h-full w-full object-cover"
+								height={420}
+								loading="lazy"
+								src={`${o.photo}?w=340&h=420&fit=crop&auto=format`}
+								width={340}
+							/>
+						</noscript>
 						<div
 							className="absolute inset-0"
 							style={{
@@ -82,15 +95,16 @@ export function OccasionPickerSection() {
 								<span className="hidden lg:inline">Crear mi lista →</span>
 							</span>
 						</div>
-					</Link>
+					</a>
 				))}
 			</div>
+			<OccasionMediaController />
 			<div className="mt-6 text-center" data-reveal>
 				<span className="text-[13.5px] text-[var(--mmut)]">
 					¿Otra ocasión?{" "}
-					<Link className="font-semibold text-[var(--msky)]" href="/create">
+					<a className="font-semibold text-[var(--msky)]" href="/create">
 						Crea una wishlist general →
-					</Link>
+					</a>
 				</span>
 			</div>
 			<div className="mx-auto mt-14 max-w-[480px]" data-reveal>

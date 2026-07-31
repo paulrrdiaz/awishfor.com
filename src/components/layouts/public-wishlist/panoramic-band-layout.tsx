@@ -29,6 +29,7 @@ export function PanoramicBandLayout({ wishlist, layout, mode }: Props) {
 						alt={heading}
 						className="h-full w-full"
 						images={wishlist.coverImageUrls}
+						priority={!isCompact}
 					/>
 					<div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/25" />
 				</div>

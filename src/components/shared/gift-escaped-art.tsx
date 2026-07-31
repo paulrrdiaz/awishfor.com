@@ -1,8 +1,4 @@
-"use client";
-
 import type { CSSProperties } from "react";
-import { useRef } from "react";
-import { useEscapedGiftMotion } from "@/lib/gsap/use-escaped-gift-motion";
 import { cn } from "@/lib/utils";
 
 type ConfettiColorVar = "--gb-c1" | "--gb-c2" | "--gb-c3";
@@ -148,9 +144,6 @@ export function GiftEscapedArt({
 	confettiColors,
 	className,
 }: Props) {
-	const rootRef = useRef<HTMLDivElement>(null);
-	useEscapedGiftMotion(rootRef);
-
 	const isSmall = size === "sm";
 	const style: GiftBoxVars = {
 		"--gb-fill": fillColor,
@@ -168,7 +161,6 @@ export function GiftEscapedArt({
 				isSmall ? SMALL_CONTAINER : CONTAINER_SIZE[variant],
 				className,
 			)}
-			ref={rootRef}
 			style={style}
 		>
 			{CONFETTI.map((conf) => (

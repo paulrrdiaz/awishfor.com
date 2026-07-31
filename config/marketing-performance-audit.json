@@ -1,9 +1,10 @@
 {
-	"url": "http://127.0.0.1:4173/",
-	"port": 4173,
+	"url": "http://127.0.0.1:4174/",
+	"port": 4174,
 	"mobile": {
 		"runs": 3,
 		"formFactor": "mobile",
+		"throttlingMethod": "devtools",
 		"screenEmulation": {
 			"mobile": true,
 			"width": 412,
@@ -23,6 +24,7 @@
 	"desktop": {
 		"runs": 1,
 		"formFactor": "desktop",
+		"throttlingMethod": "devtools",
 		"screenEmulation": {
 			"mobile": false,
 			"width": 1350,

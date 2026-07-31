@@ -28,7 +28,7 @@ export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 					<HeroImageSlot
 						alt={heading}
 						className="aspect-[3/4] w-full max-w-56 rounded-sm border-8 border-card shadow-xl"
-						priority
+						priority={!isCompact}
 						src={wishlist.coverImageUrls[0] ?? null}
 					/>
 				</div>

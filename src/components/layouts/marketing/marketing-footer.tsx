@@ -1,6 +1,5 @@
+/* biome-ignore-all lint/performance/noImgElement: the local SVG is already optimized and lazy. */
 import { AtSign, Camera, MessageCircle } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import { SUPPORT_EMAIL } from "@/config/contact";
 
 const COLUMNS = [
@@ -53,10 +52,11 @@ export function MarketingFooter() {
 			<div className="grid grid-cols-1 gap-10 border-[var(--mline)] border-b pb-12 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
 				{/* brand */}
 				<div>
-					<Image
+					<img
 						alt="A Wish For"
 						className="mb-[10px] h-8 w-auto"
 						height={660}
+						loading="lazy"
 						src="/assets/awishfor-logo.svg"
 						width={916}
 					/>
@@ -81,13 +81,13 @@ export function MarketingFooter() {
 				{/* flat link list, below md */}
 				<div className="flex flex-col gap-1 md:hidden">
 					{MOBILE_LINKS.map((l) => (
-						<Link
+						<a
 							className="flex min-h-11 items-center text-[13.5px] text-[var(--mink)] hover:text-[var(--mrose)]"
 							href={l.href}
 							key={l.label}
 						>
 							{l.label}
-						</Link>
+						</a>
 					))}
 				</div>
 
@@ -97,13 +97,13 @@ export function MarketingFooter() {
 						<div className="m-eyebrow mb-[18px] text-[10px]">{col.title}</div>
 						<div className="flex flex-col gap-[11px]">
 							{col.links.map((l) => (
-								<Link
+								<a
 									className="text-[13.5px] text-[var(--mink)] hover:text-[var(--mrose)]"
 									href={l.href}
 									key={l.label}
 								>
 									{l.label}
-								</Link>
+								</a>
 							))}
 						</div>
 						{col.title === "Legal" && (

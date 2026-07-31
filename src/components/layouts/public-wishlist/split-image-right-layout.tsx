@@ -46,7 +46,7 @@ export function SplitImageRightLayout({ wishlist, layout, mode }: Props) {
 					<HeroImageSlot
 						alt={heading}
 						className="absolute inset-0 h-full w-full"
-						priority
+						priority={!isCompact}
 						src={wishlist.coverImageUrls[0] ?? null}
 					/>
 				</div>

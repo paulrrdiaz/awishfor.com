@@ -11,9 +11,7 @@ export function GuestFinder() {
 	return (
 		<section className="border-[var(--mline)] border-t bg-[#F0FAE8] px-11 py-16 text-center">
 			<div data-reveal>
-				<div className="mb-3 block text-[30px]" data-float-rev>
-					🔍
-				</div>
+				<div className="mb-3 block text-[30px]">🔍</div>
 				<h2 className="m-serif mb-[6px] font-semibold text-[32px]">
 					¿Buscas la lista de alguien?
 				</h2>
