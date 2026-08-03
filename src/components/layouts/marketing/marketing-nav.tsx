@@ -1,5 +1,4 @@
 /* biome-ignore-all lint/performance/noImgElement: local SVG marks do not need the next/image client runtime. */
-import { BrandMark } from "@/components/features/dashboard/brand-logo";
 import { H2bNavController } from "./h2b-nav-controller";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
@@ -101,7 +100,14 @@ function DefaultMarketingNav() {
 	return (
 		<nav className="flex items-center justify-between border-[var(--mline)] border-b bg-[rgba(238,249,230,0.95)] px-5 py-3 backdrop-blur">
 			<a className="flex items-center" href="/">
-				<BrandMark className="size-10 md:size-12" />
+				<img
+					alt="A Wish For"
+					className="h-10 w-auto md:h-12"
+					height={40}
+					loading="lazy"
+					src="/assets/isotype.svg"
+					width={40}
+				/>
 			</a>
 
 			{/* full inline nav, md:+ */}

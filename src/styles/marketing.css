@@ -64,10 +64,16 @@
 .marketing-theme .m-eyebrow {
 	font-family: var(--font-mono), ui-monospace, monospace;
 	font-weight: 500;
-	letter-spacing: 0.16em;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	font-size: 11px;
+	font-size: 10px;
 	color: var(--mmut);
+}
+@media (min-width: 1024px) {
+	.marketing-theme .m-eyebrow {
+		letter-spacing: 0.16em;
+		font-size: 11px;
+	}
 }
 
 /* ---- buttons ---- */

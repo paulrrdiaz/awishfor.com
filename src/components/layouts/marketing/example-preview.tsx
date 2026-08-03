@@ -40,20 +40,20 @@ export function ExamplePreview() {
 
 	return (
 		<section
-			className="border-[var(--mline)] border-t bg-white px-11 py-[76px] text-center"
+			className="border-[var(--mline)] border-t bg-white px-[22px] py-11 text-center lg:px-11 lg:py-[76px]"
 			id="ejemplo"
 		>
-			<div className="m-eyebrow mb-3">Un ejemplo real</div>
-			<h2 className="m-serif mb-2 font-semibold text-[38px]">
+			<div className="m-eyebrow mb-[9px] lg:mb-3">Un ejemplo real</div>
+			<h2 className="m-serif mb-[6px] font-semibold text-[25px] lg:mb-2 lg:text-[38px]">
 				Así se ve una wishlist publicada
 			</h2>
-			<p className="mb-[34px] text-[15px] text-[var(--mmut)]">
+			<p className="mb-[22px] text-[13px] text-[var(--mmut)] lg:mb-[34px] lg:text-[15px]">
 				Construida con los mismos componentes públicos, con fotos reales de cada
 				regalo.
 			</p>
 
-			<div className="m-preview-theme mx-auto max-w-[820px] overflow-hidden rounded-[22px] bg-[var(--card)] text-left text-[var(--fg)] shadow-[0_24px_64px_rgba(30,50,80,0.14)]">
-				<div className="flex items-center justify-between border-[var(--border)] border-b bg-[var(--card)] px-[22px] py-3">
+			<div className="m-preview-theme mx-auto max-w-[820px] overflow-hidden rounded-[18px] bg-[var(--card)] text-left text-[var(--fg)] shadow-[0_18px_44px_rgba(30,50,80,0.14)] lg:rounded-[22px] lg:shadow-[0_24px_64px_rgba(30,50,80,0.14)]">
+				<div className="hidden items-center justify-between border-[var(--border)] border-b bg-[var(--card)] px-[22px] py-3 lg:flex">
 					<img alt="" className="h-[18px] w-auto" src="/assets/isotype.svg" />
 					<div className="flex items-center gap-2">
 						<span className="inline-flex items-center gap-[5px] rounded-full bg-[#E4F3E8] px-[10px] py-1 font-semibold text-[#2F7D43] text-[9px]">
@@ -65,22 +65,22 @@ export function ExamplePreview() {
 					</div>
 				</div>
 
-				<div className="bg-[linear-gradient(180deg,var(--accent),var(--card))] px-11 pt-8 pb-[22px] text-center">
-					<div className="m-eyebrow mb-2 text-[var(--muted-fg)]">
+				<div className="bg-[linear-gradient(180deg,var(--accent),var(--card))] px-[18px] pt-[22px] pb-4 text-center lg:px-11 lg:pt-8 lg:pb-[22px]">
+					<div className="m-eyebrow mb-[6px] text-[9px] text-[var(--muted-fg)] lg:mb-2">
 						{preview.eyebrow}
 					</div>
-					<div className="m-serif font-semibold text-[40px] text-[var(--fg)] leading-[1.05]">
+					<div className="m-serif font-semibold text-[26px] text-[var(--fg)] leading-[1.05] lg:text-[40px]">
 						{preview.title}
 					</div>
 					{preview.displayName && (
-						<div className="mt-[6px] text-[13px] text-[var(--muted-fg)]">
+						<div className="mt-[5px] text-[11px] text-[var(--muted-fg)] lg:mt-[6px] lg:text-[13px]">
 							{preview.displayName}
 						</div>
 					)}
 				</div>
 
-				<div className="grid grid-cols-3 items-end gap-3 bg-[linear-gradient(180deg,var(--card),var(--bg))] px-8 pb-[30px]">
-					<div className="mt-9 h-[150px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)]">
+				<div className="grid grid-cols-[1fr_1.1fr_1fr] items-end gap-2 bg-[linear-gradient(180deg,var(--card),var(--bg))] px-[18px] pb-5 lg:grid-cols-[1fr_1.15fr_1fr] lg:gap-3 lg:px-8 lg:pb-[30px]">
+					<div className="mt-[22px] h-[82px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
 						<img
 							alt=""
 							className="h-full w-full object-cover"
@@ -88,7 +88,7 @@ export function ExamplePreview() {
 							src={sizedImage(collageLeft ?? null, 280, 200)}
 						/>
 					</div>
-					<div className="h-[210px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_18px_44px_rgba(30,50,80,0.13)]">
+					<div className="h-[118px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_18px_44px_rgba(30,50,80,0.13)] lg:h-[210px]">
 						<img
 							alt=""
 							className="h-full w-full object-cover"
@@ -96,7 +96,7 @@ export function ExamplePreview() {
 							src={sizedImage(collageCenter ?? null, 320, 280)}
 						/>
 					</div>
-					<div className="mt-9 h-[150px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)]">
+					<div className="mt-[22px] h-[82px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
 						<img
 							alt=""
 							className="h-full w-full object-cover"
@@ -106,18 +106,18 @@ export function ExamplePreview() {
 					</div>
 				</div>
 
-				<div className="px-8 pt-[26px] pb-[30px]">
+				<div className="px-[18px] pt-4 pb-5 lg:px-8 lg:pt-[26px] lg:pb-[30px]">
 					{countdown && (
-						<div className="mb-5 rounded-[var(--radius)] bg-[var(--accent)] p-4 text-center">
+						<div className="mb-[10px] rounded-xl bg-[var(--accent)] p-3 text-center lg:mb-5 lg:rounded-[var(--radius)] lg:p-4">
 							<div className="m-eyebrow mb-[3px] text-[9px] opacity-70">
 								Cuenta regresiva
 							</div>
-							<div className="m-serif font-semibold text-[30px]">
+							<div className="m-serif font-semibold text-[22px] lg:text-[30px]">
 								{countdown}
 							</div>
 						</div>
 					)}
-					<div className="mb-[6px] flex items-center justify-between">
+					<div className="mb-[6px] hidden items-center justify-between lg:flex">
 						<div className="m-serif font-semibold text-[20px] text-[var(--fg)]">
 							Lista de regalos
 						</div>
@@ -126,17 +126,17 @@ export function ExamplePreview() {
 							{preview.purchasedGiftCount} comprados
 						</span>
 					</div>
-					<div className="mb-3 text-[11px] text-[var(--muted-fg)]">
+					<div className="mb-2 text-[10px] text-[var(--muted-fg)] lg:mb-3 lg:text-[11px]">
 						↓ Desliza para ver los {preview.gifts.length} regalos
 					</div>
 					<div
-						className="-mx-1 max-h-[300px] overflow-y-auto px-1 pr-1"
+						className="-mx-1 max-h-[240px] overflow-y-auto px-1 pr-1 lg:max-h-[300px]"
 						style={{
 							maskImage: "linear-gradient(180deg,#000 88%,transparent)",
 							WebkitMaskImage: "linear-gradient(180deg,#000 88%,transparent)",
 						}}
 					>
-						<div className="grid grid-cols-2 gap-[14px] sm:grid-cols-3">
+						<div className="grid grid-cols-2 gap-[10px] lg:grid-cols-3 lg:gap-[14px]">
 							{preview.gifts.map((gift) => {
 								const badge = STATUS_BADGE[gift.status];
 								const isPurchased = gift.status === "purchased";
@@ -148,30 +148,30 @@ export function ExamplePreview() {
 										<div className="relative">
 											<img
 												alt={gift.name}
-												className="h-[130px] w-full object-cover"
+												className="h-[84px] w-full object-cover lg:h-[130px]"
 												loading="lazy"
 												src={sizedImage(gift.imageUrl, 300, 150)}
 											/>
 											{gift.priority === "high" && (
-												<span className="absolute top-2 left-2 inline-flex items-center rounded-full bg-[var(--accent)] px-[10px] py-1 font-semibold text-[#7A7162] text-[9px]">
+												<span className="absolute top-1.5 left-1.5 inline-flex items-center rounded-full bg-[var(--accent)] px-[10px] py-1 font-semibold text-[#7A7162] text-[8px] lg:top-2 lg:left-2 lg:text-[9px]">
 													★ Infaltable
 												</span>
 											)}
 										</div>
-										<div className="p-3">
+										<div className="p-[9px] lg:p-3">
 											<div className="m-eyebrow mb-[3px] text-[9px] text-[var(--muted-fg)]">
 												{[gift.category, gift.store]
 													.filter(Boolean)
 													.join(" · ")}
 											</div>
 											<div
-												className={`m-serif font-semibold text-[13px] text-[var(--fg)] ${isPurchased ? "line-through" : ""}`}
+												className={`m-serif font-semibold text-[11px] text-[var(--fg)] lg:text-[13px] ${isPurchased ? "line-through" : ""}`}
 											>
 												{gift.name}
 											</div>
 											<div className="mt-2 flex items-center justify-between">
 												<span
-													className={`font-semibold text-[13px] ${isPurchased ? "text-[var(--muted-fg)]" : ""}`}
+													className={`font-semibold text-[11px] lg:text-[13px] ${isPurchased ? "text-[var(--muted-fg)]" : ""}`}
 												>
 													{gift.priceAmount && gift.priceCurrency
 														? formatMoney(gift.priceAmount, {
@@ -181,7 +181,7 @@ export function ExamplePreview() {
 														: null}
 												</span>
 												<span
-													className="inline-flex items-center rounded-full px-[10px] py-1 font-semibold text-[9px]"
+													className="inline-flex items-center rounded-full px-[10px] py-1 font-semibold text-[8px] lg:text-[9px]"
 													style={{ background: badge.bg, color: badge.fg }}
 												>
 													{statusLabel(gift)}
@@ -195,8 +195,11 @@ export function ExamplePreview() {
 					</div>
 				</div>
 			</div>
-			<div className="mt-[26px]">
-				<a className="m-btn m-btn-out" href="/w/esperando-a-mateo">
+			<div className="mt-5 lg:mt-[26px]">
+				<a
+					className="m-btn m-btn-out w-full lg:w-auto"
+					href="/w/esperando-a-mateo"
+				>
 					Ver ejemplo completo →
 				</a>
 			</div>

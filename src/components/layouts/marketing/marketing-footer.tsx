@@ -172,12 +172,7 @@ export function MarketingFooter() {
 					</div>
 
 					<div className="py-[14px] text-[11px] text-[var(--mmut)] lg:py-5 lg:text-[12px]">
-						<span className="lg:hidden">
-							© 2025 A Wish For · Hecho con cariño en México 🌿
-						</span>
-						<span className="hidden lg:inline">
-							© 2025 A Wish For · awishfor.com
-						</span>
+						© 2025 A Wish For · awishfor.com
 					</div>
 				</div>
 			</MarketingContainer>

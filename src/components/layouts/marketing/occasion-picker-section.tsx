@@ -28,42 +28,80 @@ const OCCASIONS = [
 	},
 ] as const;
 
-const CARD_LAYOUTS = {
-	baby_shower: "h-[158px] md:col-start-2 md:row-start-1 md:h-auto",
-	wedding:
-		"col-span-2 h-[280px] md:col-span-1 md:row-span-2 md:row-start-1 md:h-auto",
-	birthday: "h-[158px] md:col-start-3 md:row-start-1 md:h-auto",
-	housewarming: "h-[158px] md:col-start-2 md:row-start-2 md:h-auto",
+const SMALL_TILE_LAYOUTS = {
+	baby_shower: "lg:col-start-2 lg:row-start-1",
+	birthday: "lg:col-start-3 lg:row-start-1",
+	housewarming: "lg:col-start-2 lg:row-start-2",
 } as const;
 
 export function OccasionPickerSection() {
+	const [lead, ...smallOccasions] = OCCASIONS;
+
 	return (
 		<section
-			className="border-[var(--mline)] border-t bg-white px-6 py-16 sm:px-10 lg:py-[66px]"
+			className="border-[var(--mline)] border-t bg-white px-[22px] py-11 lg:px-11 lg:py-[76px]"
 			id="ocasiones"
 		>
 			<MarketingContainer>
-				<div className="mx-auto mb-9 max-w-[600px] text-center md:mb-10">
-					<div className="m-eyebrow mb-3">Elige tu ocasión</div>
-					<h2 className="m-serif font-semibold text-[34px] leading-[1.1] sm:text-[40px]">
+				<div className="mx-auto mb-6 max-w-[600px] text-center lg:mb-11">
+					<div className="m-eyebrow mb-[9px] lg:mb-3">Elige tu ocasión</div>
+					<h2 className="m-serif font-semibold text-[27px] leading-[1.1] lg:text-[40px]">
 						¿Qué estás celebrando?
 					</h2>
-					<p className="mt-3 text-[14px] text-[var(--mmut)] leading-[1.55] sm:text-[15px] sm:leading-[1.6]">
+					<p className="mt-3 hidden text-[15px] text-[var(--mmut)] leading-[1.6] lg:block">
 						Empieza con una plantilla pensada para tu momento. Tema, colores y
 						regalos sugeridos, listos en segundos.
 					</p>
 				</div>
 				<div
-					className="grid grid-cols-2 gap-3 md:grid-cols-[1.3fr_1fr_1fr] md:grid-rows-[repeat(2,157px)]"
+					className="flex flex-col gap-3 lg:grid lg:h-[392px] lg:grid-cols-[1.3fr_1fr_1fr] lg:grid-rows-2 lg:gap-4"
 					data-occasion-grid
 				>
-					{OCCASIONS.map((o) => {
-						const isWedding = o.eventType === "wedding";
+					<a
+						aria-label={`Crear una lista para ${lead.label}`}
+						className="card-lift group relative block h-[172px] cursor-pointer overflow-hidden rounded-2xl shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:row-span-2 lg:h-auto lg:rounded-[20px] lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)]"
+						href={`/create?type=${lead.eventType}`}
+					>
+						{/* biome-ignore lint/performance/noImgElement: src is assigned only after intersection; next/image requires an eager src. */}
+						<img
+							alt=""
+							className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+							data-deferred-src={`${lead.photo}?w=760&h=780&fit=crop&auto=format`}
+							decoding="async"
+							height={780}
+							loading="lazy"
+							width={760}
+						/>
+						<noscript>
+							{/* biome-ignore lint/performance/noImgElement: this is the no-JavaScript fallback for the deferred image. */}
+							<img
+								alt=""
+								className="absolute inset-0 h-full w-full object-cover"
+								height={780}
+								loading="lazy"
+								src={`${lead.photo}?w=760&h=780&fit=crop&auto=format`}
+								width={760}
+							/>
+						</noscript>
+						<div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,45,25,.03)_30%,rgba(15,45,25,.82)_100%)]" />
+						<div className="absolute inset-x-0 bottom-0 p-3.5 lg:p-[26px]">
+							<div className="m-serif font-semibold text-[18px] text-white lg:mb-1 lg:text-[28px]">
+								{lead.label}
+							</div>
+							<div className="hidden text-[13px] text-white/85 lg:mb-4 lg:block">
+								{lead.subtitle}
+							</div>
+							<span className="mt-2 inline-flex rounded-full bg-[var(--mlime)] px-[11px] py-[5px] font-bold text-[#1B3A12] text-[10.5px] lg:mt-0 lg:px-4 lg:py-[9px] lg:text-[12.5px]">
+								Crear mi lista →
+							</span>
+						</div>
+					</a>
 
-						return (
+					<div className="grid grid-cols-2 gap-3 lg:contents">
+						{smallOccasions.map((o) => (
 							<a
 								aria-label={`Crear una lista para ${o.label}`}
-								className={`card-lift group relative block cursor-pointer overflow-hidden rounded-[15px] shadow-[0_10px_30px_rgba(20,60,20,0.1)] ${CARD_LAYOUTS[o.eventType]}`}
+								className={`card-lift group relative block h-[130px] cursor-pointer overflow-hidden rounded-2xl shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:h-auto lg:rounded-[18px] lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)] ${SMALL_TILE_LAYOUTS[o.eventType]}`}
 								href={`/create?type=${o.eventType}`}
 								key={o.eventType}
 							>
@@ -71,67 +109,53 @@ export function OccasionPickerSection() {
 								<img
 									alt=""
 									className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-									data-deferred-src={`${o.photo}?w=760&h=680&fit=crop&auto=format`}
+									data-deferred-src={`${o.photo}?w=340&h=340&fit=crop&auto=format`}
 									decoding="async"
-									height={680}
+									height={340}
 									loading="lazy"
-									width={760}
+									width={340}
 								/>
 								<noscript>
 									{/* biome-ignore lint/performance/noImgElement: this is the no-JavaScript fallback for the deferred image. */}
 									<img
 										alt=""
 										className="absolute inset-0 h-full w-full object-cover"
-										height={680}
+										height={340}
 										loading="lazy"
-										src={`${o.photo}?w=760&h=680&fit=crop&auto=format`}
-										width={760}
+										src={`${o.photo}?w=340&h=340&fit=crop&auto=format`}
+										width={340}
 									/>
 								</noscript>
-								<div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,45,25,.03)_24%,rgba(15,45,25,.78)_100%)]" />
-								<div
-									className={`absolute inset-x-0 bottom-0 ${
-										isWedding ? "p-[22px]" : "p-3"
-									}`}
-								>
-									<div
-										className={`m-serif font-semibold text-white ${
-											isWedding ? "mb-1 text-[24px]" : "text-[16px]"
-										}`}
-									>
+								<div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,45,25,.03)_40%,rgba(15,45,25,.82)_100%)]" />
+								<div className="absolute inset-x-0 bottom-0 p-[11px] lg:p-4">
+									<div className="m-serif font-semibold text-[14px] text-white lg:text-[17px]">
 										{o.label}
 									</div>
-									<div
-										className={`text-white/85 ${
-											isWedding ? "mb-[13px] text-[11px]" : "text-[10px]"
-										}`}
-									>
+									<div className="hidden text-[11px] text-white/80 lg:mt-0.5 lg:block">
 										{o.subtitle}
 									</div>
-									{isWedding && (
-										<span className="inline-flex rounded-full bg-[var(--mlime)] px-3.5 py-2 font-bold text-[#1B3A12] text-[10px]">
-											Crear mi lista →
-										</span>
-									)}
 								</div>
 							</a>
-						);
-					})}
-					<a
-						aria-label="Crear una wishlist general"
-						className="card-lift col-span-2 flex h-[158px] flex-col items-center justify-center rounded-[15px] bg-[#1D432D] px-4 text-center text-white md:col-start-3 md:row-start-2 md:h-auto"
-						href="/create?type=general"
-					>
-						<span aria-hidden="true" className="mb-2 text-[24px] leading-none">
-							✦
-						</span>
-						<span className="m-serif font-semibold text-[16px]">
-							Wishlist general
-						</span>
-						<span className="mt-1 text-[10px] text-white/75">
-							Para cualquier momento →
-						</span>
-					</a>
+						))}
+						<a
+							aria-label="Crear una wishlist general"
+							className="card-lift flex h-[130px] flex-col items-center justify-center rounded-2xl bg-[#173E29] p-2 text-center text-white shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:col-start-3 lg:row-start-2 lg:h-auto lg:rounded-[18px] lg:p-3.5 lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)]"
+							href="/create?type=general"
+						>
+							<span
+								aria-hidden="true"
+								className="mb-0.5 text-[16px] leading-none lg:mb-1 lg:text-[20px]"
+							>
+								✦
+							</span>
+							<span className="m-serif font-semibold text-[#D7F09E] text-[12.5px] lg:text-[15px]">
+								Wishlist general
+							</span>
+							<span className="mt-[3px] hidden text-[10.5px] text-white/65 lg:block">
+								Para cualquier momento →
+							</span>
+						</a>
+					</div>
 				</div>
 			</MarketingContainer>
 			<OccasionMediaController />

@@ -40,13 +40,13 @@ const FAQS = [
 export function FaqSection() {
 	return (
 		<section
-			className="border-[var(--mline)] border-t bg-white px-[22px] py-11 sm:px-11 lg:py-[76px]"
+			className="border-[var(--mline)] border-t bg-white px-[22px] py-11 lg:px-11 lg:py-[76px]"
 			id="faq"
 		>
 			<MarketingContainer>
-				<header className="mb-[22px] text-center sm:mb-10">
-					<div className="m-eyebrow mb-[9px] sm:mb-3">Preguntas frecuentes</div>
-					<h2 className="m-serif font-semibold text-[24px] leading-[1.15] sm:text-[36px]">
+				<header className="mb-[22px] text-center lg:mb-10">
+					<div className="m-eyebrow mb-[9px] lg:mb-3">Preguntas frecuentes</div>
+					<h2 className="m-serif font-semibold text-[24px] leading-[1.15] lg:text-[36px]">
 						Resolvemos tus dudas
 					</h2>
 				</header>
@@ -59,7 +59,7 @@ export function FaqSection() {
 				>
 					{FAQS.map((faq, index) => (
 						<AccordionItem
-							className={`flex items-start gap-3 py-4 sm:gap-[14px] sm:py-5 ${
+							className={`flex items-start gap-3 py-4 lg:gap-[14px] lg:py-5 ${
 								index < FAQS.length - 1 ? "border-[var(--mline)] border-b" : ""
 							}`}
 							key={faq.q}
@@ -67,16 +67,16 @@ export function FaqSection() {
 						>
 							<div
 								aria-hidden
-								className="flex size-[30px] shrink-0 items-center justify-center rounded-[9px] bg-[#F0FAE8] text-[13px] sm:size-[34px] sm:rounded-[10px] sm:text-[15px]"
+								className="flex size-[30px] shrink-0 items-center justify-center rounded-[9px] bg-[#F0FAE8] text-[13px] lg:size-[34px] lg:rounded-[10px] lg:text-[15px]"
 							>
 								{faq.icon}
 							</div>
 							<div className="min-w-0 flex-1">
-								<AccordionTrigger className="!rounded-none !py-0 m-serif font-semibold text-[14.5px] text-[var(--mink)] hover:no-underline focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-4 sm:text-[16.5px] [&_[data-slot=accordion-trigger-icon]]:ml-5 [&_[data-slot=accordion-trigger-icon]]:size-[18px] [&_[data-slot=accordion-trigger-icon]]:text-[var(--mmut)]">
+								<AccordionTrigger className="!rounded-none !py-0 m-serif font-semibold text-[14.5px] text-[var(--mink)] hover:no-underline focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-4 lg:text-[16.5px] [&_[data-slot=accordion-trigger-icon]]:ml-5 [&_[data-slot=accordion-trigger-icon]]:size-[18px] [&_[data-slot=accordion-trigger-icon]]:text-[var(--mmut)]">
 									{faq.q}
 								</AccordionTrigger>
 								<AccordionContent className="max-w-[520px] pt-0 pb-0">
-									<p className="mt-[6px] text-[12.5px] text-[var(--mmut)] leading-[1.6] sm:mt-2 sm:text-[13.5px] sm:leading-[1.65]">
+									<p className="mt-[6px] text-[12.5px] text-[var(--mmut)] leading-[1.6] lg:mt-2 lg:text-[13.5px] lg:leading-[1.65]">
 										{faq.a}
 									</p>
 								</AccordionContent>
