@@ -1,55 +1,39 @@
-const STORES_DESKTOP = [
-	"amazon",
-	"liverpool",
-	"mercado libre",
-	"coppel",
-	"sears",
-	"etsy",
-	"palacio de hierro",
-	"ripley",
+import { MarketingContainer } from "./marketing-container";
+
+const STORES = [
+	"Amazon",
+	"Liverpool",
+	"Mercado Libre",
+	"Coppel",
+	"Sears",
+	"Etsy",
+	"Palacio de Hierro",
+	"Ripley",
 ];
-
-// Mobile canvas frame drops "palacio de hierro" from the strip.
-const STORES_MOBILE = STORES_DESKTOP.filter((s) => s !== "palacio de hierro");
-
-function MarqueeTrack({ stores }: { stores: string[] }) {
-	return (
-		<div className="m-marquee-mask overflow-x-auto [scrollbar-width:thin]">
-			<div className="m-marquee-track pb-2">
-				{stores.map((s) => (
-					<div
-						className="m-ph h-[46px] w-[120px] rounded-[10px] bg-[#D4EEC6]"
-						key={s}
-					>
-						<span className="m-ph-lbl">{s}</span>
-					</div>
-				))}
-			</div>
-		</div>
-	);
-}
 
 export function PartnersMarquee() {
 	return (
-		<section className="overflow-hidden border-[var(--mline)] border-t bg-[#F0FAE8] px-11 py-[52px] text-center">
-			<div data-reveal>
-				<div className="m-eyebrow mb-2">Tiendas aliadas</div>
-				<h2 className="m-serif mt-[10px] mb-[26px] font-semibold text-[30px] lg:hidden">
-					Agrega de donde quieras
+		<section className="border-[var(--mline)] border-t bg-[#F0FAE8] px-6 py-16 text-center sm:px-10 lg:px-11 lg:py-[76px]">
+			<MarketingContainer>
+				<div className="m-eyebrow mb-3">Tiendas aliadas</div>
+				<h2 className="m-serif mx-auto max-w-[520px] font-semibold text-[30px] leading-[1.15] sm:text-[36px]">
+					No dependes de una sola tienda
 				</h2>
-				<h2 className="m-serif mt-[10px] mb-[26px] hidden font-semibold text-[30px] lg:block">
-					Agrega regalos de donde quieras
-				</h2>
-			</div>
-			<div className="lg:hidden">
-				<MarqueeTrack stores={STORES_MOBILE} />
-			</div>
-			<div className="hidden lg:block">
-				<MarqueeTrack stores={STORES_DESKTOP} />
-			</div>
-			<p className="mt-5 text-[14px] text-[var(--mmut)]">
-				Y de cualquier tienda con enlace — funciona en todo el mundo.
-			</p>
+				<p className="mx-auto mt-[14px] max-w-[480px] text-[14px] text-[var(--mmut)] leading-[1.7] sm:text-[15px]">
+					Agrega regalos de las tiendas que ya conoces, o de cualquier enlace
+					que encuentres en internet. Funciona en todo el mundo.
+				</p>
+				<div className="mx-auto mt-8 flex max-w-[680px] flex-wrap justify-center gap-[10px]">
+					{STORES.map((store) => (
+						<div
+							className="m-serif rounded-full border border-[var(--mline)] bg-white px-5 py-[11px] font-semibold text-[13px] text-[var(--mink)] sm:text-[14px]"
+							key={store}
+						>
+							{store}
+						</div>
+					))}
+				</div>
+			</MarketingContainer>
 		</section>
 	);
 }

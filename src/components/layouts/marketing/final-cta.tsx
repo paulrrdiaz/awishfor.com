@@ -1,34 +1,32 @@
+/* biome-ignore-all lint/performance/noImgElement: the band photograph is a local, optimized, lazily loaded asset. */
 export function FinalCta() {
 	return (
-		<section className="relative m-cta-bg overflow-hidden px-11 py-[92px] text-center">
-			<div className="-top-[100px] right-[20%] m-blob h-[320px] w-[320px] bg-[#3A8A54] opacity-[0.38] blur-[90px]" />
-			<div className="-bottom-[60px] left-[12%] m-blob hidden h-[220px] w-[220px] bg-[#BCE25A] opacity-20 blur-[70px] lg:block" />
-			<div className="top-[20%] left-[5%] m-blob hidden h-[140px] w-[140px] bg-[#7FB069] opacity-25 blur-[50px] lg:block" />
-			<div className="pointer-events-none absolute top-[32px] left-[11%] text-[28px] opacity-70">
-				🎁
-			</div>
-			<div className="pointer-events-none absolute right-[13%] bottom-[36px] hidden text-[26px] opacity-70 lg:block">
-				🌿
-			</div>
-			<div className="pointer-events-none absolute top-[64px] right-[7%] hidden text-[20px] opacity-60 lg:block">
-				✨
-			</div>
-
-			<div className="relative" data-reveal>
-				<h2 className="m-serif mx-auto mb-[18px] max-w-[680px] font-semibold text-[34px] text-white leading-[1.15] lg:hidden">
-					Tu momento especial merece una página hermosa.
-				</h2>
-				<h2 className="m-serif mx-auto mb-[18px] hidden max-w-[680px] font-semibold text-[52px] text-white leading-[1.07] lg:block">
+		<section className="relative min-h-[280px] overflow-hidden text-center">
+			<picture>
+				<source
+					media="(min-width: 1024px)"
+					srcSet="/assets/hero/final-cta-band.jpg"
+				/>
+				<img
+					alt=""
+					className="absolute inset-0 h-full w-full object-cover"
+					decoding="async"
+					height={1066}
+					loading="lazy"
+					src="/assets/hero/final-cta-band-mobile.jpg"
+					width={640}
+				/>
+			</picture>
+			<div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,30,20,0.55),rgba(10,30,20,0.86))]" />
+			<div className="relative px-11 py-[110px]">
+				<h2 className="m-serif mx-auto mb-[18px] max-w-[680px] font-semibold text-[52px] text-white leading-[1.07]">
 					Tu próximo momento especial merece una página hermosa.
 				</h2>
-				<p className="mb-[34px] text-[15px] text-[rgba(255,255,255,0.75)] leading-[1.55] lg:hidden">
-					Créala en minutos. Es gratis y se siente bonito.
-				</p>
-				<p className="mb-[34px] hidden text-[17px] text-[rgba(255,255,255,0.75)] leading-[1.6] lg:block">
+				<p className="mb-[34px] text-[17px] text-white/80 leading-[1.6]">
 					Crea tu wishlist en minutos. Es gratis y se siente bonito. 🌿
 				</p>
 				<a
-					className="!px-10 !py-[17px] !text-[16px] m-btn m-btn-lime"
+					className="!px-10 !py-[17px] !text-[16px] m-btn m-btn-glow m-btn-lime"
 					href="/create"
 				>
 					Crear mi wishlist →

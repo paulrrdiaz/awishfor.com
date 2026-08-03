@@ -3,8 +3,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
-import type { ImgHTMLAttributes } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { DEMO_WISHLIST } from "@/config/demo-wishlist";
 import {
 	getWishlistHeading,
@@ -12,40 +11,46 @@ import {
 } from "@/lib/wishlist/public-presentation";
 import { ExamplePreview } from "./example-preview";
 
-vi.mock("next/image", () => ({
-	default: ({
-		alt = "",
-		priority,
-		fill: _fill,
-		...props
-	}: ImgHTMLAttributes<HTMLImageElement> & {
-		priority?: boolean;
-		fill?: boolean;
-	}) => (
-		// biome-ignore lint/performance/noImgElement: next/image test double
-		<img alt={alt} data-priority={priority ? "true" : "false"} {...props} />
-	),
-}));
-
 describe("marketing example preview", () => {
 	it("derives faithful demo content from the shared server-safe contract", () => {
 		const preview = toMarketingWishlistPreview(DEMO_WISHLIST);
 		expect(preview.title).toBe(getWishlistHeading(DEMO_WISHLIST));
-		expect(preview.gifts.map((gift) => gift.name)).toEqual([
-			"Copas de cristal",
-			"Vajilla 12 piezas",
-			"Mantel de lino",
-		]);
+		expect(preview.eyebrow).toBe("Baby Shower");
+		expect(preview.gifts).toHaveLength(8);
+		expect(preview.coverImageUrls).toHaveLength(3);
+	});
 
+	it("carries full gift-state coverage: priority, available, partial and purchased", () => {
+		const preview = toMarketingWishlistPreview(DEMO_WISHLIST);
+		const statuses = preview.gifts.map((gift) => gift.status);
+		expect(statuses).toContain("available");
+		expect(statuses).toContain("partial");
+		expect(statuses).toContain("purchased");
+		expect(preview.gifts.some((gift) => gift.priority === "high")).toBe(true);
+	});
+
+	it("renders every gift-state badge from fixture data with no client-side purchase behavior", () => {
 		render(<ExamplePreview />);
-		expect(screen.getByText("María & Tomás")).toBeInTheDocument();
+
+		expect(screen.getByText("Esperando a Mateo")).toBeInTheDocument();
 		expect(
-			screen.getByText(DEMO_WISHLIST.displayName ?? ""),
+			screen.getByText("Ana & Diego · 13 de septiembre · Jardín Las Acacias"),
 		).toBeInTheDocument();
-		expect(screen.getAllByText("Solo ejemplo")).toHaveLength(3);
+
+		const highPriorityCount = DEMO_WISHLIST.gifts.filter(
+			(gift) => gift.priority === "high",
+		).length;
+		const purchasedCount = DEMO_WISHLIST.gifts.filter(
+			(gift) => gift.status === "purchased",
+		).length;
+		expect(screen.getAllByText("★ Infaltable")).toHaveLength(highPriorityCount);
+		expect(screen.getAllByText("✓ Comprado")).toHaveLength(purchasedCount);
+
+		// Purchased gift names render struck through.
+		const mantita = screen.getByText("Mantita de algodón");
+		expect(mantita.className).toContain("line-through");
+
 		expect(screen.queryByRole("button")).not.toBeInTheDocument();
-		for (const image of screen.getAllByRole("img"))
-			expect(image).toHaveAttribute("data-priority", "false");
 	});
 
 	it("does not import the production layout registry or purchase flow", async () => {

@@ -26,7 +26,7 @@ export default function NotFound() {
 							esté incompleto o que la página se haya mudado.
 						</p>
 						<div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
-							<a className="m-btn m-btn-lime" data-glow href="/">
+							<a className="m-btn m-btn-glow m-btn-lime" href="/">
 								Volver al inicio
 							</a>
 							<a

@@ -11,7 +11,6 @@ import { MarketingFooter } from "@/components/layouts/marketing/marketing-footer
 import { OccasionPickerSection } from "@/components/layouts/marketing/occasion-picker-section";
 import { PartnersMarquee } from "@/components/layouts/marketing/partners-marquee";
 import { ThemePreviews } from "@/components/layouts/marketing/theme-previews";
-import { UseCasesSection } from "@/components/layouts/marketing/use-cases-section";
 
 export const metadata: Metadata = {
 	title: "A Wish For — Crea una wishlist hermosa para tus momentos especiales",
@@ -31,16 +30,13 @@ export default function MarketingLandingPage() {
 				<HowItWorksSection />
 			</div>
 			<div className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]">
-				<UseCasesSection />
-			</div>
-			<div className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]">
 				<PartnersMarquee />
-			</div>
-			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
-				<ThemePreviews />
 			</div>
 			<div className="[contain-intrinsic-size:auto_900px] [content-visibility:auto]">
 				<ExamplePreview />
+			</div>
+			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
+				<ThemePreviews />
 			</div>
 			<div className="[contain-intrinsic-size:auto_400px] [content-visibility:auto]">
 				<GuestFinder />

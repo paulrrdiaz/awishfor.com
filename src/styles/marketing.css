@@ -23,9 +23,18 @@
 	src: url("/assets/fonts/marketing-lora-latin.woff2") format("woff2");
 }
 
+@font-face {
+	font-family: "Marketing JetBrains Mono";
+	font-style: normal;
+	font-weight: 400 700;
+	font-display: optional;
+	src: url("/assets/fonts/marketing-jetbrains-mono-latin.woff2") format("woff2");
+}
+
 .marketing-theme {
 	--font-inter: "Marketing Inter";
 	--font-lora: "Marketing Lora";
+	--font-mono: "Marketing JetBrains Mono";
 	--mbg: #eef9e6;
 	--mink: #173e29;
 	--mmut: #4e6e56;
@@ -53,10 +62,11 @@
 }
 
 .marketing-theme .m-eyebrow {
-	font-family: inherit;
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-weight: 500;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
-	font-size: 12px;
+	font-size: 11px;
 	color: var(--mmut);
 }
 
@@ -96,6 +106,24 @@
 	border-color: var(--mline);
 }
 
+/* ---- lime CTA glow: the only permitted ambient marketing animation ---- */
+@keyframes m-btn-glow {
+	0%,
+	100% {
+		box-shadow: 0 8px 22px rgba(140, 200, 60, 0.4);
+	}
+	50% {
+		box-shadow:
+			0 8px 30px rgba(140, 200, 60, 0.75),
+			0 0 18px rgba(188, 226, 90, 0.55);
+	}
+}
+@media (prefers-reduced-motion: no-preference) {
+	.marketing-theme .m-btn-glow {
+		animation: m-btn-glow 2.4s ease-in-out infinite;
+	}
+}
+
 /* ---- cards ---- */
 .marketing-theme .m-card {
 	background: #fff;
@@ -113,6 +141,19 @@
 .marketing-theme .card-lift:hover {
 	transform: translateY(-5px);
 	box-shadow: 0 18px 44px rgba(20, 80, 20, 0.11);
+}
+
+/* ---- example-preview theme (canvas theme-cielo, scoped to the preview card only) ---- */
+.marketing-theme .m-preview-theme {
+	--bg: #eef5fb;
+	--fg: #33425c;
+	--card: #ffffff;
+	--primary: #8fbee0;
+	--accent: #f1eee7;
+	--border: #dce7f2;
+	--muted-fg: #6c7c95;
+	--ph-tint: #dceaf6;
+	--radius: 18px;
 }
 
 /* ---- final CTA dark gradient background ---- */

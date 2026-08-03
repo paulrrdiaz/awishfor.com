@@ -25,16 +25,13 @@ const USE_CASES = [
 export function UseCasesSection() {
 	return (
 		<section className="border-[var(--mline)] border-t bg-white px-11 py-[76px] text-center">
-			<div data-reveal>
+			<div>
 				<div className="m-eyebrow mb-3">Para cada celebración</div>
 				<h2 className="m-serif mb-11 font-semibold text-[40px]">
 					Para cada momento que importa
 				</h2>
 			</div>
-			<div
-				className="flex flex-wrap justify-center gap-[14px]"
-				data-reveal-stagger
-			>
+			<div className="flex flex-wrap justify-center gap-[14px]">
 				{USE_CASES.map((u) => (
 					<div
 						className="card-lift m-card px-[30px] py-[26px] text-center"
