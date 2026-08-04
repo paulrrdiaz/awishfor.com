@@ -112,7 +112,7 @@
 	border-color: var(--mline);
 }
 
-/* ---- lime CTA glow: the only permitted ambient marketing animation ---- */
+/* ---- scroll-linked motion is permitted; ambient idle loops remain banned ---- */
 @keyframes m-btn-glow {
 	0%,
 	100% {
@@ -127,6 +127,59 @@
 @media (prefers-reduced-motion: no-preference) {
 	.marketing-theme .m-btn-glow {
 		animation: m-btn-glow 2.4s ease-in-out infinite;
+	}
+}
+
+@keyframes m-parallax {
+	from {
+		transform: translate3d(0, var(--m-par-from), 0);
+	}
+	to {
+		transform: translate3d(0, var(--m-par-to), 0);
+	}
+}
+
+@keyframes m-scroll-rise {
+	from {
+		opacity: 0;
+		transform: translate3d(0, var(--m-rise-from, 18px), 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.marketing-theme .m-parallax,
+		.marketing-theme img[src="/assets/hero/guest-finder-band-mobile.jpg"] {
+			animation: m-parallax linear both;
+			animation-range: cover 0% cover 100%;
+			animation-timeline: view();
+			will-change: transform;
+		}
+
+		.marketing-theme
+			section:has(
+				> picture > img[src="/assets/hero/guest-finder-band-mobile.jpg"]
+			) {
+			overflow: clip;
+		}
+
+		.marketing-theme img[src="/assets/hero/guest-finder-band-mobile.jpg"] {
+			--m-par-from: -7%;
+			--m-par-to: 7%;
+			scale: 1.16;
+		}
+
+		.marketing-theme .m-scroll-rise {
+			animation: m-scroll-rise linear both;
+			animation-range: var(--m-rise-start, cover 0%)
+				var(--m-rise-end, cover 45%);
+			animation-timeline: view();
+			will-change: transform, opacity;
+		}
 	}
 }
 

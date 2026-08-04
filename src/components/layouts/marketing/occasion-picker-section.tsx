@@ -59,13 +59,13 @@ export function OccasionPickerSection() {
 				>
 					<a
 						aria-label={`Crear una lista para ${lead.label}`}
-						className="card-lift group relative block h-[172px] cursor-pointer overflow-hidden rounded-2xl shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:row-span-2 lg:h-auto lg:rounded-[20px] lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)]"
+						className="card-lift group relative block h-[172px] cursor-pointer overflow-clip rounded-2xl shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:row-span-2 lg:h-auto lg:rounded-[20px] lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)]"
 						href={`/create?type=${lead.eventType}`}
 					>
 						{/* biome-ignore lint/performance/noImgElement: src is assigned only after intersection; next/image requires an eager src. */}
 						<img
 							alt=""
-							className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+							className="absolute inset-0 m-parallax h-full w-full scale-[1.08] object-cover transition-transform duration-500 [--m-par-from:-3%] [--m-par-to:3%] group-hover:scale-[1.1]"
 							data-deferred-src={`${lead.photo}?w=760&h=780&fit=crop&auto=format`}
 							decoding="async"
 							height={780}

@@ -8,6 +8,7 @@ const STEPS = [
 		thumb: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9",
 		title: "Elige el tipo de evento",
 		body: "Baby shower, boda, cumpleaños, nuevo hogar o una lista general.",
+		riseRange: "[--m-rise-start:cover_0%] [--m-rise-end:cover_35%]",
 	},
 	{
 		n: "2",
@@ -16,6 +17,7 @@ const STEPS = [
 		thumb: "https://images.unsplash.com/photo-1519741497674-611481863552",
 		title: "Ponle nombre y elige tu enlace",
 		body: "El título, los anfitriones y una URL propia para compartir.",
+		riseRange: "[--m-rise-start:cover_4%] [--m-rise-end:cover_39%]",
 	},
 	{
 		n: "3",
@@ -24,6 +26,7 @@ const STEPS = [
 		thumb: null,
 		title: "Elige tu tema y personalízalo",
 		body: "Siete estilos con vista previa en vivo mientras decides.",
+		riseRange: "[--m-rise-start:cover_8%] [--m-rise-end:cover_43%]",
 	},
 	{
 		n: "4",
@@ -32,6 +35,7 @@ const STEPS = [
 		thumb: "https://images.unsplash.com/photo-1592194996308-7b43878e84a6",
 		title: "Agrega tus regalos",
 		body: "Pega el enlace de cualquier tienda; nosotros traemos foto, nombre y precio.",
+		riseRange: "[--m-rise-start:cover_12%] [--m-rise-end:cover_47%]",
 	},
 	{
 		n: "5",
@@ -40,6 +44,7 @@ const STEPS = [
 		thumb: "link",
 		title: "Publica y comparte",
 		body: "Copia tu enlace, comparte por WhatsApp o descarga tu código QR.",
+		riseRange: "[--m-rise-start:cover_16%] [--m-rise-end:cover_51%]",
 	},
 ] as const;
 
@@ -62,7 +67,7 @@ export function HowItWorksSection() {
 				<div className="absolute top-[14px] bottom-[14px] left-[26px] z-0 hidden w-[2px] bg-[var(--mline)] lg:block" />
 				{STEPS.map((s, index) => (
 					<div
-						className={`relative flex items-center gap-3.5 py-1.5 lg:gap-[22px] lg:py-5 ${
+						className={`relative m-scroll-rise flex items-center gap-3.5 py-1.5 lg:gap-[22px] lg:py-5 ${s.riseRange} ${
 							index < STEPS.length - 1
 								? "lg:border-[var(--mline)] lg:border-b lg:border-dashed"
 								: ""

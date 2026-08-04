@@ -2063,6 +2063,8 @@ Tasks:
 - [x] Add allied-stores infinite marquee (edge-masked, pause on hover).
 - [x] Add card fade-up stagger + hover lift.
 - [x] Add button hover scale + arrow nudge.
+- [x] Add CSS `view()` parallax to the occasion lead image, published-list collage, and guest-finder band.
+- [x] Add scroll-linked staggered rise to the five how-it-works steps.
 - [x] Keep optional motion compositor-friendly and fully disabled by `prefers-reduced-motion`.
 
 Acceptance criteria:

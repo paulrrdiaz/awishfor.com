@@ -52,7 +52,7 @@ export function ExamplePreview() {
 				regalo.
 			</p>
 
-			<div className="m-preview-theme mx-auto max-w-[820px] overflow-hidden rounded-[18px] bg-[var(--card)] text-left text-[var(--fg)] shadow-[0_18px_44px_rgba(30,50,80,0.14)] lg:rounded-[22px] lg:shadow-[0_24px_64px_rgba(30,50,80,0.14)]">
+			<div className="m-preview-theme mx-auto max-w-[820px] overflow-clip rounded-[18px] bg-[var(--card)] text-left text-[var(--fg)] shadow-[0_18px_44px_rgba(30,50,80,0.14)] lg:rounded-[22px] lg:shadow-[0_24px_64px_rgba(30,50,80,0.14)]">
 				<div className="hidden items-center justify-between border-[var(--border)] border-b bg-[var(--card)] px-[22px] py-3 lg:flex">
 					<img alt="" className="h-[18px] w-auto" src="/assets/isotype.svg" />
 					<div className="flex items-center gap-2">
@@ -80,26 +80,26 @@ export function ExamplePreview() {
 				</div>
 
 				<div className="grid grid-cols-[1fr_1.1fr_1fr] items-end gap-2 bg-[linear-gradient(180deg,var(--card),var(--bg))] px-[18px] pb-5 lg:grid-cols-[1fr_1.15fr_1fr] lg:gap-3 lg:px-8 lg:pb-[30px]">
-					<div className="mt-[22px] h-[82px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
+					<div className="mt-[22px] h-[82px] overflow-clip rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
 						<img
 							alt=""
-							className="h-full w-full object-cover"
+							className="m-parallax h-full w-full scale-[1.14] object-cover [--m-par-from:-6%] [--m-par-to:6%]"
 							loading="lazy"
 							src={sizedImage(collageLeft ?? null, 280, 200)}
 						/>
 					</div>
-					<div className="h-[118px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_18px_44px_rgba(30,50,80,0.13)] lg:h-[210px]">
+					<div className="h-[118px] overflow-clip rounded-xl bg-[var(--ph-tint)] shadow-[0_18px_44px_rgba(30,50,80,0.13)] lg:h-[210px]">
 						<img
 							alt=""
-							className="h-full w-full object-cover"
+							className="m-parallax h-full w-full scale-[1.08] object-cover [--m-par-from:-3%] [--m-par-to:3%]"
 							loading="lazy"
 							src={sizedImage(collageCenter ?? null, 320, 280)}
 						/>
 					</div>
-					<div className="mt-[22px] h-[82px] overflow-hidden rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
+					<div className="mt-[22px] h-[82px] overflow-clip rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
 						<img
 							alt=""
-							className="h-full w-full object-cover"
+							className="m-parallax h-full w-full scale-[1.14] object-cover [--m-par-from:-6%] [--m-par-to:6%]"
 							loading="lazy"
 							src={sizedImage(collageRight ?? null, 280, 200)}
 						/>
