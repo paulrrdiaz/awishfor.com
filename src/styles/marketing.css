@@ -153,7 +153,7 @@
 @supports (animation-timeline: view()) {
 	@media (prefers-reduced-motion: no-preference) {
 		.marketing-theme .m-parallax,
-		.marketing-theme img[src="/assets/hero/guest-finder-band-mobile.jpg"] {
+		.marketing-theme img[src="/assets/hero/buscas-la-lista-de-alguien.jpg"] {
 			animation: m-parallax linear both;
 			animation-range: cover 0% cover 100%;
 			animation-timeline: view();
@@ -161,16 +161,13 @@
 		}
 
 		.marketing-theme
-			section:has(
-				> picture > img[src="/assets/hero/guest-finder-band-mobile.jpg"]
-			) {
+			section:has(> img[src="/assets/hero/buscas-la-lista-de-alguien.jpg"]) {
 			overflow: clip;
 		}
 
-		.marketing-theme img[src="/assets/hero/guest-finder-band-mobile.jpg"] {
+		.marketing-theme img[src="/assets/hero/buscas-la-lista-de-alguien.jpg"] {
 			--m-par-from: -7%;
 			--m-par-to: 7%;
-			scale: 1.16;
 		}
 
 		.marketing-theme .m-scroll-rise {

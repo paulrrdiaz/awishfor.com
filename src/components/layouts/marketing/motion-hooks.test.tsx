@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const ORPHANED_HOOK_PATTERN =
 	/data-reveal|data-reveal-stagger|data-float|data-float-rev|data-float-3|data-glow/;
 const MOTION_CLASS_PATTERN = /\b(m-(?:parallax|scroll-rise))\b/g;
-const GUEST_FINDER_IMAGE = "/assets/hero/guest-finder-band-mobile.jpg";
+const GUEST_FINDER_IMAGE = "/assets/hero/buscas-la-lista-de-alguien.jpg";
 
 async function marketingComponentFiles() {
 	const dir = resolve(process.cwd(), "src/components/layouts/marketing");

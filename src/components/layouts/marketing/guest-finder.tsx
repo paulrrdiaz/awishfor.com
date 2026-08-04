@@ -1,4 +1,4 @@
-/* biome-ignore-all lint/performance/noImgElement: the band photograph is a local, optimized, lazily loaded asset. */
+/* biome-ignore-all lint/performance/noImgElement: the photograph is a local, optimized, lazily loaded asset. */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -10,21 +10,15 @@ export function GuestFinder() {
 
 	return (
 		<section className="relative min-h-[220px] overflow-hidden border-[var(--mline)] border-t lg:min-h-[280px]">
-			<picture>
-				<source
-					media="(min-width: 1024px)"
-					srcSet="/assets/hero/guest-finder-band.jpg"
-				/>
-				<img
-					alt=""
-					className="absolute inset-0 h-full w-full object-cover"
-					decoding="async"
-					height={1066}
-					loading="lazy"
-					src="/assets/hero/guest-finder-band-mobile.jpg"
-					width={640}
-				/>
-			</picture>
+			<img
+				alt=""
+				className="absolute inset-0 h-full w-full object-cover"
+				decoding="async"
+				height={1279}
+				loading="lazy"
+				src="/assets/hero/buscas-la-lista-de-alguien.jpg"
+				width={1917}
+			/>
 			<div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(11,30,20,0.72),rgba(11,30,20,0.55))] lg:bg-[linear-gradient(150deg,rgba(11,30,20,0.72),rgba(11,30,20,0.55))]" />
 			<div className="relative px-[22px] py-11 text-center text-white lg:px-11 lg:py-[70px]">
 				<div className="mb-[10px] text-[22px] lg:mb-3 lg:text-[26px]">🔍</div>
