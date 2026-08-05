@@ -7,16 +7,16 @@ Defines public wishlist page layout composition, shared section components, sect
 
 Each `PublicLayoutPreset` SHALL carry recommended image-guidance metadata describing the shape its hero renderer crops cover images to: an aspect ratio, an orientation (`landscape`, `portrait`, or `square`), and, where applicable, flags for circle crops (centered subject) and mixed-shape compositions. The metadata SHALL be resolvable alongside the existing preset fields and SHALL match the actual crop applied by that layout's hero component.
 
-The populated recommendations SHALL be: `hero-cinematic` 16:9 landscape; `carousel-hero` 16:9 landscape; `panoramic-band` 16:9 (panoramic) landscape; `scrapbook-polaroids` 4:3 landscape; `split-image-right` 3:4 portrait; `portrait-frame-split` 3:4 portrait; `overlap-duo` 3:4 portrait; `arch-split` 2:3 portrait; `arch-hero-party` 2:3 portrait; `magazine-editorial` 1:1 square; `arch-trio` 1:1 square (centered subject); `diagonal-duo` 3:4 portrait (one circle crop); `collage-staggered` mixed, recommending a safe 3:4.
+The populated recommendations SHALL be: `carousel-hero` 16:9 landscape; `scrapbook-polaroids` 4:3 landscape; `split-image-right` 3:4 portrait; `portrait-frame-split` 3:4 portrait; `overlap-duo` 3:4 portrait; `arch-hero-party` 2:3 portrait; `magazine-editorial` 1:1 square; `arch-trio` 1:1 square (centered subject); `collage-staggered` mixed, recommending a safe 3:4.
 
 #### Scenario: Preset exposes guidance for a layout
 
 - **WHEN** a layout preset is resolved by id
 - **THEN** its recommended aspect ratio and orientation are available and correspond to that layout's hero crop shape
 
-#### Scenario: Circle-crop layouts flag centered subject
+#### Scenario: Circle-crop layout flags centered subject
 
-- **WHEN** the resolved layout is `arch-trio` or `diagonal-duo`
+- **WHEN** the resolved layout is `arch-trio`
 - **THEN** its guidance indicates a circle crop that benefits from a centered subject
 
 #### Scenario: Mixed-composition layout recommends a safe ratio
@@ -26,7 +26,7 @@ The populated recommendations SHALL be: `hero-cinematic` 16:9 landscape; `carous
 
 ### Requirement: Public wishlist page shell
 
-The system SHALL provide a `PublicWishlistPage` component that takes a published or owner-preview wishlist view model and renders the full public page, resolving theme, layout, font, and button presets from the wishlist's `themeId`, `layoutId`, `headingFont`, `bodyFont`, and `buttonStyle` (falling back to the legacy `fontPairing` mapping when the font fields are null) and applying them as scoped CSS variables that do not affect the dashboard. The view model SHALL expose the ordered `coverImageUrls` list to the layout.
+The system SHALL provide a `PublicWishlistPage` component that takes a published or owner-preview wishlist view model and renders the full public page, resolving theme, layout, font, and button presets from the wishlist's `themeId`, `layoutId`, `headingFont`, `bodyFont`, and `buttonStyle` and applying them as scoped CSS variables that do not affect the dashboard. Null font fields SHALL resolve to the default fonts; there is no legacy pairing field to consult. The view model SHALL expose the ordered cover-image records — url, dimensions and orientation — to the layout.
 
 #### Scenario: Page resolves presets from view model
 
@@ -38,10 +38,10 @@ The system SHALL provide a `PublicWishlistPage` component that takes a published
 - **WHEN** a wishlist's preset id is null or does not match any preset
 - **THEN** the page renders the default preset for that dimension without error
 
-#### Scenario: Legacy font pairing still resolves
+#### Scenario: Null fonts resolve to defaults
 
-- **WHEN** a wishlist has null `headingFont`/`bodyFont` but a legacy `fontPairing` value
-- **THEN** the page resolves the fonts through the legacy mapping (`serif-soft` → Lora+Inter, `sans-modern` → Inter+Inter, `rounded-friendly` → Nunito+Nunito)
+- **WHEN** a wishlist has null `headingFont` and `bodyFont`
+- **THEN** the page resolves the default heading and body fonts without consulting any legacy pairing value
 
 ### Requirement: Required section order
 
@@ -64,26 +64,26 @@ The system SHALL render the public page sections in this order: hero, event deta
 
 ### Requirement: Layout variants
 
-The system SHALL provide seventeen layout variants selected by the resolved `layoutId`: fourteen new variants implemented from the Claude Design explorations (`hero-cinematic`, `split-image-right`, `arch-split`, `collage-staggered`, `magazine-editorial`, `overlap-duo`, `arch-hero-party`, `arch-trio`, `wedding-formal`, `panoramic-band`, `carousel-hero`, `diagonal-duo`, `scrapbook-polaroids`, `portrait-frame-split`) plus the legacy `grid`, `editorial`, and `minimal` variants. Every variant SHALL compose the shared section components and honor the required section order, render modes, and purchased-gift rules.
+The system SHALL provide nine layout variants selected by the resolved `layoutId`: `carousel-hero`, `scrapbook-polaroids`, `portrait-frame-split`, `arch-hero-party`, `arch-trio`, `overlap-duo`, `split-image-right`, `collage-staggered`, and `magazine-editorial`. Every variant SHALL compose the shared section components and honor the required section order, render modes, and purchased-gift rules.
 
 #### Scenario: Layout selected by id
 
-- **WHEN** the resolved layout id matches any of the seventeen variants
+- **WHEN** the resolved layout id matches any of the nine variants
 - **THEN** the corresponding layout component renders with its hero composition from the design canvas
 
-#### Scenario: New layout composes shared sections
+#### Scenario: Every layout composes shared sections
 
-- **WHEN** any of the fourteen new layout variants renders
+- **WHEN** any of the nine layout variants renders
 - **THEN** event details, countdown, welcome message, gift list, how-it-works, thank-you, and footer render through the shared section components in the required order
 
-#### Scenario: Minimal layout renders gifts as a list
+#### Scenario: Retired layout ids fall back
 
-- **WHEN** the resolved layout is `minimal`
-- **THEN** gifts render as single-column rows without category dividers
+- **WHEN** a wishlist references a retired layout id such as `grid` or `hero-cinematic`
+- **THEN** the default layout renders without error
 
 ### Requirement: Shared section components
 
-The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `GiftGrid`/`GiftList`, `HowItWorks`, and `WishlistFooter` components consumed by every layout variant, each driven by the public wishlist view model. The `Countdown` component SHALL render its label and remaining-time text inside a tinted, rounded accent-card container rather than as plain unstyled text. The welcome-message block SHALL render `wishlist.welcomeMessage` in italic styling and, when `wishlist.displayName` is present, SHALL render a separate attribution line below it reading `— {displayName}`.
+The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `GiftGrid`/`GiftList`, `HowItWorks`, and `WishlistFooter` components consumed by every layout variant, each driven by the public wishlist view model. The `Countdown` component SHALL render its label and remaining-time text inside a tinted, rounded accent-card container rather than as plain unstyled text. The welcome-message block SHALL render `wishlist.welcomeMessage` in italic styling.
 
 #### Scenario: Gift card reflects status
 
@@ -99,16 +99,6 @@ The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `Gift
 
 - **WHEN** a wishlist has an event date and the `Countdown` section renders
 - **THEN** the countdown label and remaining-time text render inside a tinted rounded accent-card container, not as a bare line of text
-
-#### Scenario: Welcome message renders with attribution
-
-- **WHEN** a wishlist has a `welcomeMessage` and a `displayName`
-- **THEN** the welcome-message block renders the message in italic styling followed by a separate `— {displayName}` attribution line
-
-#### Scenario: Welcome message renders without attribution when displayName is absent
-
-- **WHEN** a wishlist has a `welcomeMessage` but no `displayName`
-- **THEN** the welcome-message block renders the italic message with no attribution line
 
 ### Requirement: Countdown formatting
 
@@ -181,6 +171,11 @@ The public wishlist page SHALL render an event-details section composed of up to
 - **WHEN** a wishlist has no event date, no event location, and no dress code
 - **THEN** the event-details section is not rendered
 
+#### Scenario: Every layout renders the section
+
+- **WHEN** each of the nine layout variants renders a wishlist that has event details
+- **THEN** the event-details section appears in all nine
+
 ### Requirement: Purchased gift de-emphasis and ordering
 
 The public wishlist SHALL visually de-emphasize fully purchased gifts by rendering them at approximately 60% opacity with a line-through on the gift name, and SHALL sort purchased gifts below gifts that still have remaining units within the default order.
@@ -195,43 +190,9 @@ The public wishlist SHALL visually de-emphasize fully purchased gifts by renderi
 - **WHEN** the gift list renders in the default recommended order
 - **THEN** fully purchased gifts appear after gifts that still have remaining units
 
-### Requirement: HeroCinematic hero content and contrast
-
-The `HeroCinematicLayout` hero SHALL show an eyebrow combining the event type label and the formatted event date (joined by ` · `) when an event date is present, falling back to the event type label alone when it is not. The hero subtitle line SHALL show `wishlist.eventLocation` when present, falling back to `wishlist.displayName` when `eventLocation` is absent, and SHALL render nothing when both are absent. The hero's call-to-action buttons SHALL render in a neutral on-photo treatment (legible over arbitrary cover photography) independent of the active theme's primary color.
-
-#### Scenario: Eyebrow includes event date
-
-- **WHEN** `HeroCinematicLayout` renders for a wishlist with an event type and an event date
-- **THEN** the eyebrow shows the event type label and the formatted date joined by ` · `
-
-#### Scenario: Eyebrow omits date when absent
-
-- **WHEN** `HeroCinematicLayout` renders for a wishlist with no event date
-- **THEN** the eyebrow shows only the event type label
-
-#### Scenario: Subtitle prefers event location
-
-- **WHEN** `HeroCinematicLayout` renders for a wishlist with both `eventLocation` and `displayName` set
-- **THEN** the hero subtitle shows `eventLocation`
-
-#### Scenario: Subtitle falls back to display name
-
-- **WHEN** `HeroCinematicLayout` renders for a wishlist with no `eventLocation` but a `displayName`
-- **THEN** the hero subtitle shows `displayName`
-
-#### Scenario: Subtitle omitted when both fields absent
-
-- **WHEN** `HeroCinematicLayout` renders for a wishlist with no `eventLocation` and no `displayName`
-- **THEN** no hero subtitle line renders
-
-#### Scenario: Hero CTAs stay legible over photography
-
-- **WHEN** `HeroCinematicLayout` renders its call-to-action buttons over a cover photo
-- **THEN** the buttons render in the neutral on-photo treatment regardless of the wishlist's active theme
-
 ### Requirement: Hero gallery with multiple cover images
 
-Each layout preset SHALL declare `heroImageSlots` (how many cover images its hero composition displays) and `supportsCarousel`. A shared hero gallery SHALL render the wishlist's ordered `coverImageUrls` into the composition's slots, fill missing slots with the active theme's tinted placeholder, and, when the layout supports a carousel and 2 or more images exist, render prev/next controls with a "Galería · foto N/M" caption. With 0 or 1 images no carousel controls SHALL appear.
+Each layout preset SHALL declare `heroImageSlots` (how many cover images its hero composition displays) and `supportsCarousel`. A shared hero gallery SHALL render the wishlist's ordered cover-image records into the composition's slots, fill missing slots with the active theme's tinted placeholder, and, when the layout supports a carousel and 2 or more images exist, render prev/next controls with a "Galería · foto N/M" caption. With 0 or 1 images no carousel controls SHALL appear. Placeholder slots SHALL never be filled with stock or sample photography on a published page.
 
 #### Scenario: Carousel activates at two or more images
 
@@ -246,18 +207,18 @@ Each layout preset SHALL declare `heroImageSlots` (how many cover images its her
 #### Scenario: Fixed-slot layouts fill gaps with placeholders
 
 - **WHEN** a layout with `heroImageSlots` of 3 (e.g. `collage-staggered`, `arch-trio`) renders a wishlist with fewer images
-- **THEN** the remaining slots render the theme's tinted placeholder instead of an empty gray box
+- **THEN** the remaining slots render the theme's tinted placeholder instead of an empty gray box or a stock photo
 
-### Requirement: Legacy layouts are deprecated
+### Requirement: Hero shows the wishlist title alone
 
-The `grid`, `editorial`, and `minimal` layout presets SHALL be flagged deprecated. They SHALL continue to render for wishlists that reference them, SHALL appear last in layout pickers under a muted legacy grouping, and their removal (with data migration) SHALL be recorded as pre-PROD tech debt in `docs/FUTURE_IMPROVEMENTS.md`.
+Every layout's hero composition SHALL present the wishlist's `title` as its heading and SHALL NOT render a separate name or subtitle line beneath it. Contextual information that previously shared the hero — date, venue and dress code — reaches the guest through the event-details section instead.
 
-#### Scenario: Existing wishlist on a legacy layout still renders
+#### Scenario: Hero renders the title
 
-- **WHEN** a published wishlist has `layoutId` `grid`, `editorial`, or `minimal`
-- **THEN** the public page renders that legacy layout without error
+- **WHEN** any layout variant renders a wishlist
+- **THEN** the hero heading is the wishlist's `title`
 
-#### Scenario: Tech debt is recorded
+#### Scenario: No subtitle line under the hero heading
 
-- **WHEN** `docs/FUTURE_IMPROVEMENTS.md` is read after this change
-- **THEN** it contains an entry to remove the legacy layouts, `coverImageUrl`, and `fontPairing` before PROD launch
+- **WHEN** any layout variant renders a wishlist that has an event location and a date
+- **THEN** the hero renders no subtitle line, and the location and date appear in the event-details section

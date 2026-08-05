@@ -36,19 +36,17 @@ const makeInput = (
 	eventType: "wedding",
 	language: "es",
 	currency: "PEN",
-	heroTitle: "Nuestra boda",
 	welcomeMessage: "Gracias por acompañarnos",
 	thankYouMessage: "Con cariño",
-	displayName: "Ana y Luis",
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
 	eventLocation: "Barranco",
-	coverImageUrl: "https://example.com/cover.jpg",
-	coverImageUrls: ["https://example.com/cover.jpg"],
+	coverImages: [
+		{ url: "https://example.com/cover.jpg", width: 1600, height: 900 },
+	],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
-	fontPairing: "serif-soft",
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -71,19 +69,24 @@ function makeStoredWishlist(overrides: Record<string, unknown> = {}) {
 		eventType: "wedding",
 		language: "es",
 		currency: "PEN",
-		heroTitle: "Nuestra boda",
 		welcomeMessage: "Gracias por acompañarnos",
 		thankYouMessage: "Con cariño",
-		displayName: "Ana y Luis",
 		eventDate: null,
 		eventTime: null,
 		eventLocation: "Barranco",
 		dressCode: null,
-		coverImageUrl: "https://example.com/cover.jpg",
+		images: [
+			{
+				id: "img_1",
+				url: "https://example.com/cover.jpg",
+				width: 1600,
+				height: 900,
+				orientation: "landscape",
+			},
+		],
 		themeId: "cielo-suave",
-		layoutId: "grid",
+		layoutId: "magazine-editorial",
 		buttonStyle: "rounded",
-		fontPairing: "serif-soft",
 		showHowItWorks: true,
 		status: "draft",
 		publishedAt: null,
@@ -123,10 +126,14 @@ function makeWishlistDb({
 	userFindUnique = vi.fn().mockResolvedValue({ id: 42 }),
 	wishlistFindFirst = vi.fn(),
 	wishlistUpdate = vi.fn(),
+	imageDeleteMany = vi.fn().mockResolvedValue({ count: 0 }),
+	imageCreateMany = vi.fn().mockResolvedValue({ count: 0 }),
 }: {
 	userFindUnique?: ReturnType<typeof vi.fn>;
 	wishlistFindFirst?: ReturnType<typeof vi.fn>;
 	wishlistUpdate?: ReturnType<typeof vi.fn>;
+	imageDeleteMany?: ReturnType<typeof vi.fn>;
+	imageCreateMany?: ReturnType<typeof vi.fn>;
 }) {
 	return {
 		user: {
@@ -136,6 +143,19 @@ function makeWishlistDb({
 			findFirst: wishlistFindFirst,
 			update: wishlistUpdate,
 		},
+		wishlistImage: {
+			deleteMany: imageDeleteMany,
+			createMany: imageCreateMany,
+		},
+		$transaction: vi.fn(async (callback: (tx: unknown) => unknown) =>
+			callback({
+				wishlist: { update: wishlistUpdate },
+				wishlistImage: {
+					deleteMany: imageDeleteMany,
+					createMany: imageCreateMany,
+				},
+			}),
+		),
 	};
 }
 
@@ -323,7 +343,15 @@ describe("wishlistRouter.getById", () => {
 			id: "wishlist_123",
 			slug: "lista-de-boda",
 			themeId: "cielo-suave",
-			layoutId: "grid",
+			layoutId: "magazine-editorial",
+			images: [
+				{
+					url: "https://example.com/cover.jpg",
+					width: 1600,
+					height: 900,
+					orientation: "landscape",
+				},
+			],
 			gifts: [
 				expect.objectContaining({
 					id: "gift_1",
@@ -379,23 +407,41 @@ describe("wishlistRouter.updateDesign", () => {
 			slug: "lista-de-boda",
 			themeId: "crema-elegante",
 			layoutId: "editorial",
-			fontPairing: "sans-modern",
+			headingFont: null,
+			bodyFont: null,
 			buttonStyle: "pill",
-			coverImageUrl: null,
-			coverImageUrls: [],
 			updatedAt: now,
+			images: [
+				{
+					id: "img_1",
+					wishlistId: "wishlist_123",
+					url: "https://example.com/cover.jpg",
+					width: 1600,
+					height: 900,
+					orientation: "landscape",
+					sortOrder: 0,
+					createdAt: now,
+				},
+			],
 		});
-		const db = makeWishlistDb({ wishlistFindFirst, wishlistUpdate });
+		const imageDeleteMany = vi.fn().mockResolvedValue({ count: 0 });
+		const imageCreateMany = vi.fn().mockResolvedValue({ count: 1 });
+		const db = makeWishlistDb({
+			wishlistFindFirst,
+			wishlistUpdate,
+			imageDeleteMany,
+			imageCreateMany,
+		});
 		const caller = makeCaller(db);
 
 		const result = await caller.updateDesign({
 			id: "wishlist_123",
 			themeId: "crema-elegante",
 			layoutId: "editorial",
-			fontPairing: "sans-modern",
 			buttonStyle: "pill",
-			coverImageUrl: null,
-			coverImageUrls: [],
+			coverImages: [
+				{ url: "https://example.com/cover.jpg", width: 1600, height: 900 },
+			],
 		});
 
 		expect(wishlistFindFirst).toHaveBeenCalledWith({
@@ -408,6 +454,21 @@ describe("wishlistRouter.updateDesign", () => {
 				slug: true,
 			},
 		});
+		expect(imageDeleteMany).toHaveBeenCalledWith({
+			where: { wishlistId: "wishlist_123" },
+		});
+		expect(imageCreateMany).toHaveBeenCalledWith({
+			data: [
+				{
+					wishlistId: "wishlist_123",
+					url: "https://example.com/cover.jpg",
+					width: 1600,
+					height: 900,
+					orientation: "landscape",
+					sortOrder: 0,
+				},
+			],
+		});
 		expect(wishlistUpdate).toHaveBeenCalledWith({
 			where: {
 				id: "wishlist_123",
@@ -415,29 +476,34 @@ describe("wishlistRouter.updateDesign", () => {
 			data: {
 				themeId: "crema-elegante",
 				layoutId: "editorial",
-				fontPairing: "sans-modern",
 				headingFont: null,
 				bodyFont: null,
 				buttonStyle: "pill",
-				coverImageUrl: null,
-				coverImageUrls: [],
 			},
 			select: {
 				id: true,
 				slug: true,
 				themeId: true,
 				layoutId: true,
-				fontPairing: true,
 				headingFont: true,
 				bodyFont: true,
 				buttonStyle: true,
-				coverImageUrl: true,
-				coverImageUrls: true,
 				updatedAt: true,
+				images: {
+					orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+				},
 			},
 		});
 		expect(revalidatePathMock).toHaveBeenCalledWith("/w/lista-de-boda");
 		expect(result.updatedAt).toBe("2026-06-28T10:00:00.000Z");
+		expect(result.images).toEqual([
+			{
+				url: "https://example.com/cover.jpg",
+				width: 1600,
+				height: 900,
+				orientation: "landscape",
+			},
+		]);
 	});
 
 	it("allows published wishlist design updates by not constraining status", async () => {
@@ -449,11 +515,12 @@ describe("wishlistRouter.updateDesign", () => {
 			id: "wishlist_published",
 			slug: "published-list",
 			themeId: "jardin-verde",
-			layoutId: "minimal",
-			fontPairing: "rounded-friendly",
+			layoutId: "split-image-right",
+			headingFont: null,
+			bodyFont: null,
 			buttonStyle: "rounded",
-			coverImageUrl: "https://example.com/new.jpg",
 			updatedAt: now,
+			images: [],
 		});
 		const db = makeWishlistDb({ wishlistFindFirst, wishlistUpdate });
 		const caller = makeCaller(db);
@@ -461,10 +528,11 @@ describe("wishlistRouter.updateDesign", () => {
 		await caller.updateDesign({
 			id: "wishlist_published",
 			themeId: "jardin-verde",
-			layoutId: "minimal",
-			fontPairing: "rounded-friendly",
+			layoutId: "split-image-right",
 			buttonStyle: "rounded",
-			coverImageUrl: "https://example.com/new.jpg",
+			coverImages: [
+				{ url: "https://example.com/new.jpg", width: 1600, height: 900 },
+			],
 		});
 
 		expect(wishlistFindFirst).toHaveBeenCalledWith(
@@ -495,9 +563,7 @@ describe("wishlistRouter.updateDesign", () => {
 				id: "wishlist_other",
 				themeId: "crema-elegante",
 				layoutId: "editorial",
-				fontPairing: "sans-modern",
 				buttonStyle: "pill",
-				coverImageUrl: null,
 			}),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",

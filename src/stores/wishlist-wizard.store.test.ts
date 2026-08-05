@@ -27,33 +27,15 @@ describe("wishlist-wizard store", () => {
 			store.getState().setEventType("birthday");
 			const { draft } = store.getState();
 			const preset = EVENT_TYPE_PRESETS.birthday;
-			expect(draft.heroTitle).toBe("Wishlist de cumpleaños");
 			expect(draft.welcomeMessage).toBe(preset.defaultWelcomeMessage);
 			expect(draft.thankYouMessage).toBe(preset.defaultThankYouMessage);
 		});
 
-		it("interpolates displayName into the hero title template", () => {
+		it("never writes a wishlist name when the event type changes", () => {
 			const store = makeStore();
-			store.getState().setField("displayName", "María");
+			store.getState().setField("title", "Mi lista");
 			store.getState().setEventType("birthday");
-			const { draft } = store.getState();
-			expect(draft.heroTitle).toBe("Wishlist de cumpleaños de María");
-		});
-
-		it("keeps hero title in sync as displayName changes, until touched", () => {
-			const store = makeStore();
-			store.getState().setEventType("birthday");
-			store.getState().setField("displayName", "María");
-			expect(store.getState().draft.heroTitle).toBe(
-				"Wishlist de cumpleaños de María",
-			);
-			store.getState().setField("displayName", "María García");
-			expect(store.getState().draft.heroTitle).toBe(
-				"Wishlist de cumpleaños de María García",
-			);
-			store.getState().setField("heroTitle", "Título personalizado");
-			store.getState().setField("displayName", "Otro nombre");
-			expect(store.getState().draft.heroTitle).toBe("Título personalizado");
+			expect(store.getState().draft.title).toBe("Mi lista");
 		});
 
 		it("preserves edited copy when event type changes", () => {
@@ -64,7 +46,6 @@ describe("wishlist-wizard store", () => {
 			store.getState().setEventType("wedding");
 			const { draft } = store.getState();
 			expect(draft.welcomeMessage).toBe(editedWelcome);
-			expect(draft.heroTitle).toBe("Wishlist de boda");
 			const weddingPreset = EVENT_TYPE_PRESETS.wedding;
 			expect(draft.thankYouMessage).toBe(weddingPreset.defaultThankYouMessage);
 		});
@@ -72,13 +53,10 @@ describe("wishlist-wizard store", () => {
 		it("preserves all touched copy fields across event-type change", () => {
 			const store = makeStore();
 			store.getState().setEventType("birthday");
-			const customHero = "Mi título personalizado";
 			const customThankYou = "Mi mensaje de gracias";
-			store.getState().setField("heroTitle", customHero);
 			store.getState().setField("thankYouMessage", customThankYou);
 			store.getState().setEventType("housewarming");
 			const { draft } = store.getState();
-			expect(draft.heroTitle).toBe(customHero);
 			expect(draft.thankYouMessage).toBe(customThankYou);
 			expect(draft.welcomeMessage).toBe(
 				EVENT_TYPE_PRESETS.housewarming.defaultWelcomeMessage,
@@ -90,15 +68,12 @@ describe("wishlist-wizard store", () => {
 		it("resets all copy fields to current preset defaults", () => {
 			const store = makeStore();
 			store.getState().setEventType("wedding");
-			store.getState().setField("heroTitle", "Título editado");
 			store.getState().setField("welcomeMessage", "Bienvenida editada");
 			store.getState().regenerateCopy();
 			const { draft, copyTouched } = store.getState();
 			const preset = EVENT_TYPE_PRESETS.wedding;
-			expect(draft.heroTitle).toBe("Wishlist de boda");
 			expect(draft.welcomeMessage).toBe(preset.defaultWelcomeMessage);
 			expect(draft.thankYouMessage).toBe(preset.defaultThankYouMessage);
-			expect(copyTouched.heroTitle).toBe(false);
 			expect(copyTouched.welcomeMessage).toBe(false);
 			expect(copyTouched.thankYouMessage).toBe(false);
 		});
@@ -151,7 +126,6 @@ describe("wishlist-wizard store", () => {
 		it("clears all draft state including extended fields", () => {
 			const store = makeStore();
 			store.getState().setEventType("wedding");
-			store.getState().setField("heroTitle", "Título");
 			store.getState().setField("title", "Mi boda");
 			store.getState().addGift({
 				name: "Regalo de prueba",
@@ -176,11 +150,10 @@ describe("wishlist-wizard store", () => {
 				slugTouched,
 			} = store.getState();
 			expect(draft.eventType).toBeNull();
-			expect(draft.heroTitle).toBe("");
 			expect(draft.title).toBe("");
 			expect(draft.slug).toBe("");
 			expect(draft.gifts).toEqual([]);
-			expect(copyTouched.heroTitle).toBe(false);
+			expect(copyTouched.welcomeMessage).toBe(false);
 			expect(updatedAt).toBeNull();
 			expect(savedWishlistId).toBeNull();
 			expect(savedSlug).toBeNull();
@@ -225,21 +198,17 @@ describe("wishlist-wizard store", () => {
 					eventType: "wedding",
 					title: "Versión del dashboard",
 					slug: "version-dashboard",
-					displayName: "Ana y Luis",
 					eventDate: "2026-12-24",
 					eventTime: "18:30",
 					eventLocation: "Barranco",
 					dressCode: "",
-					coverImageUrl: null,
-					coverImageUrls: [],
-					heroTitle: "Nuestra boda",
+					images: [],
 					welcomeMessage: "Bienvenidos",
 					thankYouMessage: "Gracias",
 					categories: ["Hogar"],
 					themeId: "soft",
 					layoutId: "editorial",
 					buttonStyle: "pill",
-					fontPairing: "serif-soft",
 					headingFont: null,
 					bodyFont: null,
 					showHowItWorks: true,
@@ -278,7 +247,6 @@ describe("wishlist-wizard store", () => {
 			expect(draft.title).toBe("Versión del dashboard");
 			expect(draft.slug).toBe("version-dashboard");
 			expect(draft.gifts[0]?.name).toBe("Juego de sábanas");
-			expect(copyTouched.heroTitle).toBe(true);
 			expect(copyTouched.welcomeMessage).toBe(true);
 			expect(copyTouched.thankYouMessage).toBe(true);
 			expect(slugTouched).toBe(true);
@@ -600,10 +568,9 @@ describe("wishlist-wizard store", () => {
 			expect(reordered[1]?.sortOrder).toBe(1);
 		});
 
-		it("new fields (title, displayName, eventDate, gifts) are included in reset", () => {
+		it("new fields (title, eventDate, gifts) are included in reset", () => {
 			const store = makeStore();
 			store.getState().setField("title", "Mi título");
-			store.getState().setField("displayName", "Ana");
 			store.getState().setField("eventDate", "2025-12-25");
 			store.getState().addGift({
 				name: "X",
@@ -620,14 +587,13 @@ describe("wishlist-wizard store", () => {
 			store.getState().reset();
 			const { draft } = store.getState();
 			expect(draft.title).toBe("");
-			expect(draft.displayName).toBe("");
 			expect(draft.eventDate).toBeNull();
 			expect(draft.gifts).toEqual([]);
 		});
 	});
 
 	describe("migratePersistedWishlistWizardState", () => {
-		it("seeds coverImageUrls and fonts from legacy fields on a v0 draft", () => {
+		it("derives fonts from a legacy fontPairing on a v0 draft", () => {
 			const legacyState = {
 				draft: {
 					title: "Lista de boda",
@@ -639,11 +605,9 @@ describe("wishlist-wizard store", () => {
 
 			const migrated = migratePersistedWishlistWizardState(legacyState, 0);
 
-			expect(migrated.draft.coverImageUrls).toEqual([
-				"https://example.com/cover.jpg",
-			]);
 			expect(migrated.draft.headingFont).toBe("nunito");
 			expect(migrated.draft.bodyFont).toBe("nunito");
+			expect(migrated.draft.images).toEqual([]);
 		});
 
 		it("defaults to an empty gallery and null fonts when legacy fields are absent", () => {
@@ -658,7 +622,7 @@ describe("wishlist-wizard store", () => {
 
 			const migrated = migratePersistedWishlistWizardState(legacyState, 0);
 
-			expect(migrated.draft.coverImageUrls).toEqual([]);
+			expect(migrated.draft.images).toEqual([]);
 			expect(migrated.draft.headingFont).toBeNull();
 			expect(migrated.draft.bodyFont).toBeNull();
 		});
@@ -667,16 +631,78 @@ describe("wishlist-wizard store", () => {
 			const currentState = {
 				draft: {
 					title: "Lista actual",
-					coverImageUrls: ["https://example.com/a.jpg"],
+					images: [
+						{
+							url: "https://example.com/a.jpg",
+							width: 1600,
+							height: 900,
+							orientation: "landscape",
+						},
+					],
 					headingFont: "lora",
 					bodyFont: "inter",
 				},
 				updatedAt: 456,
 			};
 
-			const migrated = migratePersistedWishlistWizardState(currentState, 1);
+			const migrated = migratePersistedWishlistWizardState(currentState, 2);
 
 			expect(migrated).toBe(currentState);
+		});
+
+		it("rehydrates a pre-change (v1) draft without throwing, dropping removed fields", () => {
+			const preChangeState = {
+				draft: {
+					eventType: "wedding",
+					title: "Lista de boda",
+					slug: "lista-de-boda",
+					displayName: "Ana y Luis",
+					eventDate: "2026-12-24",
+					eventTime: "18:30",
+					eventLocation: "Barranco",
+					dressCode: "",
+					coverImageUrl: "https://example.com/cover.jpg",
+					coverImageUrls: ["https://example.com/cover.jpg"],
+					heroTitle: "Nuestra boda",
+					welcomeMessage: "Bienvenidos",
+					thankYouMessage: "Gracias",
+					categories: ["Hogar"],
+					themeId: "soft",
+					layoutId: "editorial",
+					buttonStyle: "pill",
+					fontPairing: "serif-soft",
+					headingFont: null,
+					bodyFont: null,
+					showHowItWorks: true,
+					gifts: [],
+				},
+				copyTouched: {
+					heroTitle: true,
+					welcomeMessage: true,
+					thankYouMessage: false,
+				},
+				updatedAt: 789,
+			};
+
+			expect(() =>
+				migratePersistedWishlistWizardState(preChangeState, 1),
+			).not.toThrow();
+
+			const migrated = migratePersistedWishlistWizardState(preChangeState, 1);
+
+			expect(migrated.draft).not.toHaveProperty("displayName");
+			expect(migrated.draft).not.toHaveProperty("heroTitle");
+			expect(migrated.draft).not.toHaveProperty("fontPairing");
+			expect(migrated.draft).not.toHaveProperty("coverImageUrl");
+			expect(migrated.draft).not.toHaveProperty("coverImageUrls");
+			expect(migrated.draft.title).toBe("Lista de boda");
+			expect(migrated.draft.images).toEqual([]);
+			expect(migrated.draft.headingFont).toBe("lora");
+			expect(migrated.draft.bodyFont).toBe("inter");
+			expect(migrated.copyTouched).toEqual({
+				welcomeMessage: true,
+				thankYouMessage: false,
+			});
 		});
 	});
 });

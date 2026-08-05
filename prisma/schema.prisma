@@ -53,6 +53,12 @@ enum RsvpStatus {
   declined
 }
 
+enum ImageOrientation {
+  landscape
+  portrait
+  square
+}
+
 model User {
   id        Int        @id @default(autoincrement())
   clerkId   String     @unique
@@ -71,25 +77,21 @@ model Wishlist {
   categories      Category[]
   gifts           Gift[]
   invites         Invite[]
+  images          WishlistImage[]
   title           String
   slug            String         @unique
   eventType       EventType
   language        Locale         @default(es)
   currency        Currency       @default(PEN)
-  heroTitle       String?
   welcomeMessage  String?
   thankYouMessage String?
-  displayName     String?
   eventDate       DateTime?
   eventTime       String?
   eventLocation   String?
   dressCode       String?
-  coverImageUrl   String?
-  coverImageUrls  String[]       @default([])
   themeId         String?
   layoutId        String?
   buttonStyle     String?
-  fontPairing     String?
   headingFont     String?
   bodyFont        String?
   showHowItWorks  Boolean        @default(true)
@@ -101,6 +103,21 @@ model Wishlist {
 
   @@index([ownerId])
   @@index([ownerId, status])
+}
+
+model WishlistImage {
+  id          String           @id @default(cuid())
+  wishlistId  String
+  wishlist    Wishlist         @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  url         String
+  width       Int
+  height      Int
+  orientation ImageOrientation
+  sortOrder   Int              @default(0)
+  createdAt   DateTime         @default(now())
+
+  @@index([wishlistId])
+  @@index([wishlistId, sortOrder])
 }
 
 model Category {

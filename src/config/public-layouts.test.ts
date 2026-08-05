@@ -9,7 +9,7 @@ import {
 
 describe("resolveLayout", () => {
 	it("resolves an explicit layout id", () => {
-		expect(resolveLayout("arch-split").id).toBe("arch-split");
+		expect(resolveLayout("carousel-hero").id).toBe("carousel-hero");
 	});
 
 	it("falls back to the default when the id is null", () => {
@@ -20,34 +20,51 @@ describe("resolveLayout", () => {
 		expect(resolveLayout("not-a-real-layout").id).toBe(DEFAULT_LAYOUT_ID);
 	});
 
-	it("still resolves a legacy wishlist referencing a deprecated layout", () => {
-		const layout = resolveLayout("grid");
-		expect(layout.id).toBe("grid");
-		expect(layout.deprecated).toBe(true);
+	it("falls back to the default for a retired layout id", () => {
+		for (const id of [
+			"grid",
+			"editorial",
+			"minimal",
+			"hero-cinematic",
+			"arch-split",
+			"wedding-formal",
+			"panoramic-band",
+			"diagonal-duo",
+		]) {
+			expect(resolveLayout(id).id).toBe(DEFAULT_LAYOUT_ID);
+		}
 	});
 });
 
 describe("getAllLayouts", () => {
 	const layouts = getAllLayouts();
 
-	it("exposes 17 layout presets (14 new + 3 legacy)", () => {
-		expect(layouts).toHaveLength(17);
-	});
-
-	it("flags grid, editorial, and minimal as deprecated", () => {
-		const deprecatedIds = layouts
-			.filter((layout) => layout.deprecated)
-			.map((layout) => layout.id);
-		expect(deprecatedIds.sort()).toEqual(["editorial", "grid", "minimal"]);
-	});
-
-	it("sorts deprecated layouts after the new explorations", () => {
-		const ids = layouts.map((layout) => layout.id);
-		const lastNewIndex = ids.indexOf("portrait-frame-split");
-		const firstDeprecatedIndex = ids.findIndex(
-			(id) => id === "grid" || id === "editorial" || id === "minimal",
+	it("exposes exactly the nine design layouts", () => {
+		expect(layouts).toHaveLength(9);
+		expect(layouts.map((layout) => layout.id).sort()).toEqual(
+			[
+				"arch-hero-party",
+				"arch-trio",
+				"carousel-hero",
+				"collage-staggered",
+				"magazine-editorial",
+				"overlap-duo",
+				"portrait-frame-split",
+				"scrapbook-polaroids",
+				"split-image-right",
+			].sort(),
 		);
-		expect(lastNewIndex).toBeLessThan(firstDeprecatedIndex);
+	});
+
+	it("does not flag any layout as deprecated", () => {
+		for (const layout of layouts) {
+			expect(layout).not.toHaveProperty("deprecated");
+		}
+	});
+
+	it("default layout resolves within the catalog", () => {
+		const ids = layouts.map((layout) => layout.id);
+		expect(ids).toContain(DEFAULT_LAYOUT_ID);
 	});
 
 	it("declares heroImageSlots and supportsCarousel for every layout", () => {
@@ -65,7 +82,6 @@ describe("getAllLayouts", () => {
 		for (const id of [
 			"collage-staggered",
 			"arch-trio",
-			"diagonal-duo",
 			"scrapbook-polaroids",
 		]) {
 			expect(byId[id]?.heroImageSlots).toBe(3);
@@ -74,7 +90,6 @@ describe("getAllLayouts", () => {
 		for (const id of [
 			"split-image-right",
 			"magazine-editorial",
-			"wedding-formal",
 			"portrait-frame-split",
 		]) {
 			expect(byId[id]?.heroImageSlots).toBe(1);
@@ -84,13 +99,7 @@ describe("getAllLayouts", () => {
 
 	it("gives gallery/carousel layouts a 6-image cap with carousel support", () => {
 		const byId = Object.fromEntries(layouts.map((l) => [l.id, l]));
-		for (const id of [
-			"hero-cinematic",
-			"arch-split",
-			"arch-hero-party",
-			"panoramic-band",
-			"carousel-hero",
-		]) {
+		for (const id of ["arch-hero-party", "carousel-hero"]) {
 			expect(byId[id]?.heroImageSlots).toBe(6);
 			expect(byId[id]?.supportsCarousel).toBe(true);
 		}
@@ -102,7 +111,7 @@ describe("layout image guidance", () => {
 		const byId = Object.fromEntries(
 			getAllLayouts().map((layout) => [layout.id, layout]),
 		);
-		expect(byId["hero-cinematic"]?.imageGuidance).toEqual({
+		expect(byId["carousel-hero"]?.imageGuidance).toEqual({
 			ratio: "16:9",
 			orientation: "landscape",
 		});
@@ -111,7 +120,6 @@ describe("layout image guidance", () => {
 			orientation: "square",
 			centeredSubject: true,
 		});
-		expect(byId["diagonal-duo"]?.imageGuidance.centeredSubject).toBe(true);
 		expect(byId["collage-staggered"]?.imageGuidance).toMatchObject({
 			ratio: "3:4",
 			orientation: "portrait",
@@ -125,7 +133,7 @@ describe("layout image guidance", () => {
 			portrait: "▯",
 			square: "◻",
 		});
-		expect(buildImageGuidanceHint(resolveLayout("hero-cinematic"))).toBe(
+		expect(buildImageGuidanceHint(resolveLayout("carousel-hero"))).toBe(
 			"Este diseño muestra 6 fotos · horizontal ▭ 16:9",
 		);
 		expect(buildImageGuidanceHint(resolveLayout("arch-trio"))).toBe(

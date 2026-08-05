@@ -80,11 +80,8 @@ export function DesignStep() {
 							endpoint="coverImage"
 							guidance={selectedLayout.imageGuidance}
 							hint={buildImageGuidanceHint(selectedLayout)}
-							onChange={(urls) => {
-								setField("coverImageUrls", urls);
-								setField("coverImageUrl", urls[0] ?? null);
-							}}
-							value={draft.coverImageUrls}
+							onChange={(images) => setField("images", images)}
+							value={draft.images}
 						/>
 					</div>
 

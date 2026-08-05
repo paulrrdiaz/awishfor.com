@@ -16,7 +16,7 @@ type Props = {
 
 export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 	const isCompact = mode === "compact";
-	const heading = wishlist.heroTitle ?? wishlist.title;
+	const heading = wishlist.title;
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
@@ -40,7 +40,7 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 						<HeroCarouselGallery
 							alt={heading}
 							className="h-full w-full"
-							images={wishlist.coverImageUrls}
+							images={wishlist.images}
 							priority={!isCompact}
 						/>
 					</div>
@@ -52,11 +52,6 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 					<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
-					{wishlist.displayName && (
-						<p className="text-muted-foreground text-sm">
-							{wishlist.displayName}
-						</p>
-					)}
 					<GuestWelcomeSection
 						guest={wishlist.guest}
 						wishlistSlug={wishlist.slug}

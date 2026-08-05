@@ -20,7 +20,7 @@ The system SHALL serve a settings page at `/dashboard/wishlists/[id]/settings` t
 
 ### Requirement: Edit core wishlist content
 
-The settings form SHALL allow the owner to edit the title, display name, event date and time (chosen through a single `DateTimePicker` field combining a calendar popover and time input), event location, dress code, hero/welcome/thank-you copy, language, currency, and the How-it-works toggle, and persist them via an owner-scoped mutation.
+The settings form SHALL allow the owner to edit a single wishlist name (`title`), event date and time (chosen through a single `DateTimePicker` field combining a calendar popover and time input), event location, dress code, welcome and thank-you copy, language, currency, and the How-it-works toggle, and persist them via an owner-scoped mutation. The form SHALL NOT expose a separate display name or hero title, since the wishlist has one name that serves both the owner's dashboard and the public page.
 
 #### Scenario: Save content changes
 
@@ -38,6 +38,16 @@ The settings form SHALL allow the owner to edit the title, display name, event d
 - **WHEN** the owner opens the event date/time field
 - **THEN** a popover with a calendar and a time input opens
 - **AND** selecting a date and time updates the same `eventDate`/`eventTime` values previously edited via native inputs
+
+#### Scenario: One name field only
+
+- **WHEN** the settings form renders
+- **THEN** it shows a single name field bound to `title` and no display-name or hero-title field
+
+#### Scenario: Renaming updates the public page
+
+- **WHEN** the owner changes the wishlist name and saves
+- **THEN** the public page's hero heading reflects the new name after revalidation
 
 ### Requirement: Slug editing with availability and published warning
 
@@ -102,4 +112,3 @@ The system SHALL generate canonical wishlist share URLs using the `NEXT_PUBLIC_A
 
 - **WHEN** the application starts without `NEXT_PUBLIC_APP_URL` set in the environment
 - **THEN** the `createEnv` validation throws and the app does not start, surfacing the missing variable
-

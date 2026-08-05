@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,15 +89,6 @@ export function DetailsStep() {
 		debouncedCheckSlug(draft.slug);
 	}, [draft.slug, debouncedCheckSlug]);
 
-	const hasPrefilledTitle = useRef(false);
-	useEffect(() => {
-		if (hasPrefilledTitle.current) return;
-		hasPrefilledTitle.current = true;
-		if (!draft.title && draft.heroTitle) {
-			setField("title", draft.heroTitle);
-		}
-	}, [draft.title, draft.heroTitle, setField]);
-
 	const isPastDate = draft.eventDate
 		? new Date(`${draft.eventDate}T00:00:00`) <
 			new Date(new Date().toDateString())
@@ -119,7 +110,7 @@ export function DetailsStep() {
 				<FieldGroup>
 					<Field>
 						<FieldLabel htmlFor="title">
-							Título <span className="text-destructive">*</span>
+							Nombre de tu wishlist <span className="text-destructive">*</span>
 						</FieldLabel>
 						<Input
 							className="min-h-11"
@@ -130,23 +121,8 @@ export function DetailsStep() {
 							value={draft.title}
 						/>
 						<FieldDescription className="text-xs">
-							Uso interno: así identificas esta lista en tu panel. No se muestra
-							a tus invitados.
-						</FieldDescription>
-					</Field>
-
-					<Field>
-						<FieldLabel htmlFor="displayName">Nombre para mostrar</FieldLabel>
-						<Input
-							className="min-h-11"
-							id="displayName"
-							onChange={(e) => setField("displayName", e.target.value)}
-							placeholder="Ej. María García"
-							type="text"
-							value={draft.displayName}
-						/>
-						<FieldDescription className="text-xs">
-							Nombre que aparecerá en tu lista pública
+							Así la identificas en tu panel y así la verán tus invitados — un
+							solo nombre para ambos.
 						</FieldDescription>
 					</Field>
 
@@ -290,13 +266,8 @@ export function DetailsStep() {
 						{draft.eventDate || "Fecha por definir"}
 					</p>
 					<h2 className="mt-3 font-serif text-4xl text-foreground">
-						{draft.heroTitle || draft.title || "Tu wishlist especial"}
+						{draft.title || "Tu wishlist especial"}
 					</h2>
-					<p className="mt-4 text-muted-foreground text-sm">
-						{draft.displayName
-							? `Anfitrión: ${draft.displayName}`
-							: "Agrega el nombre que verán tus invitados"}
-					</p>
 					<div className="mt-6 inline-flex rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground text-sm">
 						{draft.eventDate ? "Cuenta regresiva activa" : "Sin fecha aún"}
 					</div>

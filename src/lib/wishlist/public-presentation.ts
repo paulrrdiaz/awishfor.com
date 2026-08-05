@@ -26,7 +26,6 @@ export type MarketingWishlistPreviewGift = {
 export type MarketingWishlistPreviewViewModel = {
 	eyebrow: string;
 	title: string;
-	displayName: string | null;
 	eventDate: string | null;
 	coverImageUrls: string[];
 	availableGiftCount: number;
@@ -36,9 +35,9 @@ export type MarketingWishlistPreviewViewModel = {
 
 /** Shared, server-safe title resolution for live and marketing wishlist heroes. */
 export function getWishlistHeading(
-	wishlist: Pick<PublicWishlistViewModel, "heroTitle" | "title">,
+	wishlist: Pick<PublicWishlistViewModel, "title">,
 ) {
-	return wishlist.heroTitle ?? wishlist.title;
+	return wishlist.title;
 }
 
 /**
@@ -53,14 +52,7 @@ export function getWishlistHeading(
 export function toMarketingWishlistPreview(
 	wishlist: Pick<
 		PublicWishlistViewModel,
-		| "heroTitle"
-		| "title"
-		| "displayName"
-		| "eventType"
-		| "eventDate"
-		| "coverImageUrls"
-		| "categories"
-		| "gifts"
+		"title" | "eventType" | "eventDate" | "images" | "categories" | "gifts"
 	>,
 ): MarketingWishlistPreviewViewModel {
 	const categoryNameById = new Map(
@@ -86,9 +78,8 @@ export function toMarketingWishlistPreview(
 	return {
 		eyebrow: EVENT_TYPE_EYEBROWS[wishlist.eventType] ?? wishlist.eventType,
 		title: getWishlistHeading(wishlist),
-		displayName: wishlist.displayName,
 		eventDate: wishlist.eventDate,
-		coverImageUrls: wishlist.coverImageUrls,
+		coverImageUrls: wishlist.images.map((image) => image.url),
 		availableGiftCount: gifts.filter((gift) => gift.status !== "purchased")
 			.length,
 		purchasedGiftCount: gifts.filter((gift) => gift.status === "purchased")

@@ -6,7 +6,7 @@ import {
 	type Prisma,
 	WishlistStatus,
 } from "@/generated/prisma/client";
-import { withCoverImageUrlMirror } from "@/lib/wishlist/cover-images";
+import { buildCoverImageRecords } from "@/lib/wishlist/cover-images";
 import {
 	evaluatePublishReadiness,
 	PublishReadinessError,
@@ -67,6 +67,9 @@ const wishlistDetailInclude = {
 	categories: {
 		orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
 	},
+	images: {
+		orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+	},
 	gifts: {
 		orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
 		include: {
@@ -115,20 +118,21 @@ export const wishlistRouter = createTRPCRouter({
 				eventType: wishlist.eventType,
 				language: wishlist.language,
 				currency: wishlist.currency,
-				heroTitle: wishlist.heroTitle,
 				welcomeMessage: wishlist.welcomeMessage,
 				thankYouMessage: wishlist.thankYouMessage,
-				displayName: wishlist.displayName,
 				eventDate: wishlist.eventDate?.toISOString() ?? null,
 				eventTime: wishlist.eventTime,
 				eventLocation: wishlist.eventLocation,
 				dressCode: wishlist.dressCode,
-				coverImageUrl: wishlist.coverImageUrl,
-				coverImageUrls: wishlist.coverImageUrls,
+				images: wishlist.images.map((image) => ({
+					url: image.url,
+					width: image.width,
+					height: image.height,
+					orientation: image.orientation,
+				})),
 				themeId: wishlist.themeId,
 				layoutId: wishlist.layoutId,
 				buttonStyle: wishlist.buttonStyle,
-				fontPairing: wishlist.fontPairing,
 				headingFont: wishlist.headingFont,
 				bodyFont: wishlist.bodyFont,
 				showHowItWorks: wishlist.showHowItWorks,
@@ -295,38 +299,57 @@ export const wishlistRouter = createTRPCRouter({
 				throw new TRPCError({ code: "NOT_FOUND" });
 			}
 
-			const updated = await ctx.db.wishlist.update({
-				where: {
-					id: wishlist.id,
-				},
-				data: {
-					themeId: input.themeId ?? null,
-					layoutId: input.layoutId ?? null,
-					fontPairing: input.fontPairing ?? null,
-					headingFont: input.headingFont ?? null,
-					bodyFont: input.bodyFont ?? null,
-					buttonStyle: input.buttonStyle ?? null,
-					...withCoverImageUrlMirror({ coverImageUrls: input.coverImageUrls }),
-				},
-				select: {
-					id: true,
-					slug: true,
-					themeId: true,
-					layoutId: true,
-					fontPairing: true,
-					headingFont: true,
-					bodyFont: true,
-					buttonStyle: true,
-					coverImageUrl: true,
-					coverImageUrls: true,
-					updatedAt: true,
-				},
+			const updated = await ctx.db.$transaction(async (tx) => {
+				await tx.wishlistImage.deleteMany({
+					where: { wishlistId: wishlist.id },
+				});
+
+				if (input.coverImages.length > 0) {
+					await tx.wishlistImage.createMany({
+						data: buildCoverImageRecords(input.coverImages).map((image) => ({
+							wishlistId: wishlist.id,
+							...image,
+						})),
+					});
+				}
+
+				return tx.wishlist.update({
+					where: {
+						id: wishlist.id,
+					},
+					data: {
+						themeId: input.themeId ?? null,
+						layoutId: input.layoutId ?? null,
+						headingFont: input.headingFont ?? null,
+						bodyFont: input.bodyFont ?? null,
+						buttonStyle: input.buttonStyle ?? null,
+					},
+					select: {
+						id: true,
+						slug: true,
+						themeId: true,
+						layoutId: true,
+						headingFont: true,
+						bodyFont: true,
+						buttonStyle: true,
+						updatedAt: true,
+						images: {
+							orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+						},
+					},
+				});
 			});
 
 			revalidatePath(`/w/${updated.slug}`);
 
 			return {
 				...updated,
+				images: updated.images.map((image) => ({
+					url: image.url,
+					width: image.width,
+					height: image.height,
+					orientation: image.orientation,
+				})),
 				updatedAt: updated.updatedAt.toISOString(),
 			};
 		}),
@@ -351,12 +374,10 @@ export const wishlistRouter = createTRPCRouter({
 					data: {
 						title: input.title,
 						slug: input.slug,
-						displayName: input.displayName ?? null,
 						eventDate: input.eventDate ?? null,
 						eventTime: input.eventTime ?? null,
 						eventLocation: input.eventLocation ?? null,
 						dressCode: input.dressCode ?? null,
-						heroTitle: input.heroTitle ?? null,
 						welcomeMessage: input.welcomeMessage ?? null,
 						thankYouMessage: input.thankYouMessage ?? null,
 						language: input.language,

@@ -1,4 +1,12 @@
+import type { ImageOrientation } from "@/config/public-layouts";
 import type { GiftPublicStatus } from "@/server/services/purchase.service";
+
+export type WishlistImageViewModel = {
+	url: string;
+	width: number;
+	height: number;
+	orientation: ImageOrientation;
+};
 
 export type PublicWishlistProgress = {
 	availableGiftCount: number;
@@ -47,20 +55,16 @@ export type PublicWishlistViewModel = {
 	eventType: string;
 	language: string;
 	currency: string;
-	heroTitle: string | null;
 	welcomeMessage: string | null;
 	thankYouMessage: string | null;
-	displayName: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
-	coverImageUrl: string | null;
-	coverImageUrls: string[];
+	images: WishlistImageViewModel[];
 	themeId: string | null;
 	layoutId: string | null;
 	buttonStyle: string | null;
-	fontPairing: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
 	showHowItWorks: boolean;
@@ -122,7 +126,6 @@ export type DashboardWishlistSummaryViewModel = {
 	eventType: string;
 	status: string;
 	eventDate: string | null;
-	coverImageUrl: string | null;
 	totalUnits: number;
 	purchasedUnits: number;
 	availableGiftCount: number;
@@ -189,20 +192,16 @@ export type DashboardWishlistCardViewModel = {
 	eventType: string;
 	language: string;
 	currency: string;
-	heroTitle: string | null;
 	welcomeMessage: string | null;
 	thankYouMessage: string | null;
-	displayName: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
-	coverImageUrl: string | null;
-	coverImageUrls: string[];
+	images: WishlistImageViewModel[];
 	themeId: string | null;
 	layoutId: string | null;
 	buttonStyle: string | null;
-	fontPairing: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
 	showHowItWorks: boolean;

@@ -138,7 +138,6 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [title, setTitle] = useState(wishlist.title);
 	const [slug, setSlug] = useState(wishlist.slug);
 	const [savedSlug, setSavedSlug] = useState(wishlist.slug);
-	const [displayName, setDisplayName] = useState(wishlist.displayName ?? "");
 	const [eventDate, setEventDate] = useState(
 		wishlist.eventDate ? wishlist.eventDate.split("T")[0] : "",
 	);
@@ -147,7 +146,6 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		wishlist.eventLocation ?? "",
 	);
 	const [dressCode, setDressCode] = useState(wishlist.dressCode ?? "");
-	const [heroTitle, setHeroTitle] = useState(wishlist.heroTitle ?? "");
 	const [welcomeMessage, setWelcomeMessage] = useState(
 		wishlist.welcomeMessage ?? "",
 	);
@@ -234,12 +232,10 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			id: wishlist.id,
 			title: title.trim(),
 			slug,
-			displayName: displayName || null,
 			eventDate: (eventDate || null) as unknown as Date | null,
 			eventTime: eventTime || null,
 			eventLocation: eventLocation || null,
 			dressCode: dressCode || null,
-			heroTitle: heroTitle || null,
 			welcomeMessage: welcomeMessage || null,
 			thankYouMessage: thankYouMessage || null,
 			language: language as Locale,
@@ -272,7 +268,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 
 					<div className="space-y-1.5">
 						<Label htmlFor="title">
-							Título <span className="text-destructive">*</span>
+							Nombre de tu wishlist <span className="text-destructive">*</span>
 						</Label>
 						<Input
 							id="title"
@@ -281,18 +277,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							required
 							value={title}
 						/>
-					</div>
-
-					<div className="space-y-1.5">
-						<Label htmlFor="displayName">Nombre para mostrar</Label>
-						<Input
-							id="displayName"
-							onChange={(e) => setDisplayName(e.target.value)}
-							placeholder="Ej. María García"
-							value={displayName}
-						/>
 						<p className="text-muted-foreground text-xs">
-							Nombre que aparecerá en tu lista pública
+							Así la identificas en tu panel y así la verán tus invitados — un
+							solo nombre para ambos.
 						</p>
 					</div>
 
@@ -365,16 +352,6 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 				{/* Contenido */}
 				<section className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm">
 					<h2 className="font-medium text-base">Contenido</h2>
-
-					<div className="space-y-1.5">
-						<Label htmlFor="heroTitle">Título principal</Label>
-						<Input
-							id="heroTitle"
-							onChange={(e) => setHeroTitle(e.target.value)}
-							placeholder="Ej. ¡Bienvenidos a mi baby shower!"
-							value={heroTitle}
-						/>
-					</div>
 
 					<div className="space-y-1.5">
 						<Label htmlFor="welcomeMessage">Mensaje de bienvenida</Label>

@@ -18,55 +18,25 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import type {
-	ImageOrientation,
-	LayoutImageGuidance,
-} from "@/config/public-layouts";
+import type { LayoutImageGuidance } from "@/config/public-layouts";
 import { useUploadThing } from "@/lib/uploadthing/client";
 import { cn } from "@/lib/utils";
+import {
+	getImageMismatchMessage,
+	getImageOrientation,
+	hasImageOrientationMismatch,
+} from "@/lib/wishlist/image-orientation";
+import type { DraftCoverImage } from "@/stores/wishlist-wizard.store";
 
 const MAX_IMAGES = 6;
-export const IMAGE_ORIENTATION_SQUARE_DEADBAND = 0.15;
 
 type Props = {
-	value: string[];
-	onChange: (urls: string[]) => void;
+	value: DraftCoverImage[];
+	onChange: (images: DraftCoverImage[]) => void;
 	endpoint: "coverImage";
 	hint?: string;
 	guidance?: LayoutImageGuidance;
 };
-
-const IMAGE_ORIENTATION_LABELS: Record<ImageOrientation, string> = {
-	landscape: "horizontal",
-	portrait: "vertical",
-	square: "cuadrada",
-};
-
-export function getImageOrientation(
-	width: number,
-	height: number,
-	deadband = IMAGE_ORIENTATION_SQUARE_DEADBAND,
-): ImageOrientation | null {
-	if (width <= 0 || height <= 0) return null;
-
-	const ratio = width / height;
-	if (Math.abs(ratio - 1) <= deadband) return "square";
-	return ratio > 1 ? "landscape" : "portrait";
-}
-
-export function hasImageOrientationMismatch(
-	detected: ImageOrientation | null | undefined,
-	recommended: ImageOrientation | null | undefined,
-): boolean {
-	return Boolean(detected && recommended && detected !== recommended);
-}
-
-export function getImageMismatchMessage(
-	detected: ImageOrientation,
-	recommended: ImageOrientation,
-): string {
-	return `Esta foto es ${IMAGE_ORIENTATION_LABELS[detected]}; este diseño luce mejor en ${IMAGE_ORIENTATION_LABELS[recommended]}.`;
-}
 
 function friendlyError(message: string): string {
 	if (message.toLowerCase().includes("size"))
@@ -81,16 +51,32 @@ function friendlyError(message: string): string {
 	return "Error al subir la imagen. Inténtalo de nuevo.";
 }
 
+function measureImageDimensions(
+	file: File,
+): Promise<{ width: number; height: number } | null> {
+	return new Promise((resolve) => {
+		const objectUrl = URL.createObjectURL(file);
+		const img = new window.Image();
+		img.onload = () => {
+			resolve({ width: img.naturalWidth, height: img.naturalHeight });
+			URL.revokeObjectURL(objectUrl);
+		};
+		img.onerror = () => {
+			resolve(null);
+			URL.revokeObjectURL(objectUrl);
+		};
+		img.src = objectUrl;
+	});
+}
+
 function SortableThumbnail({
-	url,
+	image,
 	isPrincipal,
 	onRemove,
-	onImageLoad,
 }: {
-	url: string;
+	image: DraftCoverImage;
 	isPrincipal: boolean;
 	onRemove: () => void;
-	onImageLoad: (url: string, width: number, height: number) => void;
 }) {
 	const {
 		attributes,
@@ -99,7 +85,7 @@ function SortableThumbnail({
 		transform,
 		transition,
 		isDragging,
-	} = useSortable({ id: url });
+	} = useSortable({ id: image.url });
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -119,14 +105,7 @@ function SortableThumbnail({
 				alt="Imagen de portada"
 				className="object-cover"
 				fill
-				onLoad={(event) => {
-					onImageLoad(
-						url,
-						event.currentTarget.naturalWidth,
-						event.currentTarget.naturalHeight,
-					);
-				}}
-				src={url}
+				src={image.url}
 			/>
 			{isPrincipal && (
 				<span className="absolute top-1 left-1 rounded-full bg-foreground/80 px-2 py-0.5 font-medium text-[10px] text-background">
@@ -163,9 +142,6 @@ export function MultiImageUpload({
 }: Props) {
 	const [error, setError] = useState<string | null>(null);
 	const [isHandlingUpload, setIsHandlingUpload] = useState(false);
-	const [imageOrientations, setImageOrientations] = useState<
-		Record<string, ImageOrientation>
-	>({});
 	const inputRef = useRef<HTMLInputElement>(null);
 	const sensors = useSensors(useSensor(PointerSensor));
 
@@ -177,19 +153,17 @@ export function MultiImageUpload({
 
 	const isBusy = isUploading || isHandlingUpload;
 	const canAddMore = value.length < MAX_IMAGES;
-	const mismatchMessages = value.flatMap((url) => {
-		const detected = imageOrientations[url];
+	const mismatchMessages = value.flatMap((image) => {
 		const recommended = guidance?.orientation;
 		if (
-			!detected ||
 			!recommended ||
-			!hasImageOrientationMismatch(detected, recommended)
+			!hasImageOrientationMismatch(image.orientation, recommended)
 		)
 			return [];
 		return [
 			{
-				url,
-				message: getImageMismatchMessage(detected, recommended),
+				url: image.url,
+				message: getImageMismatchMessage(image.orientation, recommended),
 			},
 		];
 	});
@@ -206,13 +180,26 @@ export function MultiImageUpload({
 		setError(null);
 		setIsHandlingUpload(true);
 
-		const uploadedUrls: string[] = [];
+		const uploadedImages: DraftCoverImage[] = [];
 		for (const file of filesToUpload) {
+			const dimensions = await measureImageDimensions(file);
+			if (!dimensions) {
+				setError("No pudimos leer esta imagen. Inténtalo de nuevo.");
+				continue;
+			}
+
 			try {
 				const res = await startUpload([file]);
 				const url = res?.[0]?.ufsUrl ?? res?.[0]?.url;
 				if (url) {
-					uploadedUrls.push(url);
+					uploadedImages.push({
+						url,
+						width: dimensions.width,
+						height: dimensions.height,
+						orientation:
+							getImageOrientation(dimensions.width, dimensions.height) ??
+							"square",
+					});
 				}
 			} catch (err) {
 				const message = err instanceof Error ? err.message : "Upload failed";
@@ -220,36 +207,22 @@ export function MultiImageUpload({
 			}
 		}
 
-		if (uploadedUrls.length > 0) {
-			onChange([...value, ...uploadedUrls]);
+		if (uploadedImages.length > 0) {
+			onChange([...value, ...uploadedImages]);
 		}
 		setIsHandlingUpload(false);
 	}
 
 	function handleRemove(url: string) {
-		setImageOrientations((current) => {
-			const { [url]: _removed, ...remaining } = current;
-			return remaining;
-		});
-		onChange(value.filter((existing) => existing !== url));
-	}
-
-	function handleImageLoad(url: string, width: number, height: number) {
-		const orientation = getImageOrientation(width, height);
-		if (!orientation) return;
-		setImageOrientations((current) =>
-			current[url] === orientation
-				? current
-				: { ...current, [url]: orientation },
-		);
+		onChange(value.filter((existing) => existing.url !== url));
 	}
 
 	function handleDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
 		if (!over || active.id === over.id) return;
 
-		const oldIndex = value.indexOf(String(active.id));
-		const newIndex = value.indexOf(String(over.id));
+		const oldIndex = value.findIndex((image) => image.url === active.id);
+		const newIndex = value.findIndex((image) => image.url === over.id);
 		if (oldIndex === -1 || newIndex === -1) return;
 
 		onChange(arrayMove(value, oldIndex, newIndex));
@@ -262,15 +235,17 @@ export function MultiImageUpload({
 				onDragEnd={handleDragEnd}
 				sensors={sensors}
 			>
-				<SortableContext items={value} strategy={horizontalListSortingStrategy}>
+				<SortableContext
+					items={value.map((image) => image.url)}
+					strategy={horizontalListSortingStrategy}
+				>
 					<div className="flex flex-wrap gap-3">
-						{value.map((url, index) => (
+						{value.map((image, index) => (
 							<SortableThumbnail
+								image={image}
 								isPrincipal={index === 0}
-								key={url}
-								onImageLoad={handleImageLoad}
-								onRemove={() => handleRemove(url)}
-								url={url}
+								key={image.url}
+								onRemove={() => handleRemove(image.url)}
 							/>
 						))}
 						{canAddMore && (

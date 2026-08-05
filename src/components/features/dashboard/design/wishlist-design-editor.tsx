@@ -56,12 +56,10 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 	const [design, setDesign] = useState<PersistedWishlistDesign>({
 		themeId: wishlist.themeId,
 		layoutId: wishlist.layoutId,
-		fontPairing: wishlist.fontPairing,
 		headingFont: wishlist.headingFont,
 		bodyFont: wishlist.bodyFont,
 		buttonStyle: wishlist.buttonStyle,
-		coverImageUrl: wishlist.coverImageUrl,
-		coverImageUrls: wishlist.coverImageUrls,
+		images: wishlist.images,
 	});
 
 	const updateDesign = api.wishlist.updateDesign.useMutation({
@@ -79,7 +77,7 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 		design.headingFont !== wishlist.headingFont ||
 		design.bodyFont !== wishlist.bodyFont ||
 		design.buttonStyle !== wishlist.buttonStyle ||
-		design.coverImageUrl !== wishlist.coverImageUrl;
+		JSON.stringify(design.images) !== JSON.stringify(wishlist.images);
 
 	const previewViewModel = draftToPreview(
 		persistedWishlistToPreviewDraft(wishlist, design),
@@ -118,7 +116,16 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 						onClick={() => {
 							updateDesign.mutate({
 								id: wishlist.id,
-								...design,
+								themeId: design.themeId,
+								layoutId: design.layoutId,
+								headingFont: design.headingFont,
+								bodyFont: design.bodyFont,
+								buttonStyle: design.buttonStyle,
+								coverImages: design.images.map(({ url, width, height }) => ({
+									url,
+									width,
+									height,
+								})),
 							});
 						}}
 						type="button"
@@ -164,11 +171,8 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 							endpoint="coverImage"
 							guidance={selectedLayout.imageGuidance}
 							hint={buildImageGuidanceHint(selectedLayout)}
-							onChange={(urls) => {
-								setDesignField("coverImageUrls", urls);
-								setDesignField("coverImageUrl", urls[0] ?? null);
-							}}
-							value={design.coverImageUrls}
+							onChange={(images) => setDesignField("images", images)}
+							value={design.images}
 						/>
 					</div>
 

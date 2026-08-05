@@ -3,8 +3,11 @@
  * using `null` where an image is missing.
  */
 export function resolveHeroSlots(
-	images: string[],
+	images: Array<{ url: string }>,
 	slots: number,
 ): Array<string | null> {
-	return Array.from({ length: slots }, (_, index) => images[index] ?? null);
+	return Array.from(
+		{ length: slots },
+		(_, index) => images[index]?.url ?? null,
+	);
 }

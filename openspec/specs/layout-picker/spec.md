@@ -1,9 +1,11 @@
 # layout-picker Specification
 
 ## Purpose
+
 Defines the shared compact layout picker and the image guidance it exposes to wishlist design surfaces.
 
 ## Requirements
+
 ### Requirement: Compact layout trigger
 
 The layout picker SHALL render, in place of an inline grid, a single compact trigger that displays the currently selected layout's thumbnail and label together with a "Cambiar" affordance. The same picker component SHALL be used by both the dashboard design editor and the wizard's Design & Preview step, keeping its public props (`options`, `selected`, `onSelect`) unchanged.
@@ -20,12 +22,12 @@ The layout picker SHALL render, in place of an inline grid, a single compact tri
 
 ### Requirement: Modal layout selection
 
-Activating the trigger SHALL open a modal dialog containing the full grid of layout thumbnails, including the active layouts and the deprecated "Clásico" group. Selecting a layout inside the dialog SHALL invoke `onSelect` with that layout id and close the dialog. The dialog SHALL be dismissible without changing the selection (escape, backdrop, or close control).
+Activating the trigger SHALL open a modal dialog containing the full grid of the nine layout thumbnails. There SHALL be no deprecated or legacy grouping, since every listed layout is active. Selecting a layout inside the dialog SHALL invoke `onSelect` with that layout id and close the dialog. The dialog SHALL be dismissible without changing the selection (escape, backdrop, or close control).
 
 #### Scenario: Opening the picker shows all layouts
 
 - **WHEN** the user activates the layout trigger
-- **THEN** a modal opens showing every active layout thumbnail and the deprecated "Clásico" group
+- **THEN** a modal opens showing all nine layout thumbnails with no legacy grouping
 
 #### Scenario: Selecting a layout updates and closes
 
@@ -39,11 +41,11 @@ Activating the trigger SHALL open a modal dialog containing the full grid of lay
 
 ### Requirement: Per-layout cover-image guidance
 
-The cover-images section SHALL display guidance derived from the selected layout's recommended image shape: the number of photos, the recommended orientation and aspect ratio in text, and an orientation glyph (`▭` landscape, `▯` portrait, `◻` square). For layouts that crop images into circles (`arch-trio`, `diagonal-duo`), the guidance SHALL additionally advise centering the subject.
+The cover-images section SHALL display guidance derived from the selected layout's recommended image shape: the number of photos, the recommended orientation and aspect ratio in text, and an orientation glyph (`▭` landscape, `▯` portrait, `◻` square). For the layout that crops images into circles (`arch-trio`), the guidance SHALL additionally advise centering the subject.
 
 #### Scenario: Landscape layout guidance
 
-- **WHEN** the selected layout recommends a landscape ratio (e.g. `hero-cinematic` 16:9)
+- **WHEN** the selected layout recommends a landscape ratio (e.g. `carousel-hero` 16:9)
 - **THEN** the cover-images hint states the photo count with "horizontal 16:9" and shows the landscape glyph
 
 #### Scenario: Portrait layout guidance
@@ -53,7 +55,7 @@ The cover-images section SHALL display guidance derived from the selected layout
 
 #### Scenario: Circle-crop layout advises centering
 
-- **WHEN** the selected layout crops images into circles (`arch-trio` or `diagonal-duo`)
+- **WHEN** the selected layout is `arch-trio`
 - **THEN** the guidance includes a "centra el sujeto" note
 
 ### Requirement: Soft aspect-ratio warning

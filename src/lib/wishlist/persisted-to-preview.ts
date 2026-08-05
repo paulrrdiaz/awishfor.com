@@ -1,29 +1,23 @@
-import type { DraftGift, WishlistDraft } from "@/stores/wishlist-wizard.store";
+import type {
+	DraftCoverImage,
+	DraftGift,
+	WishlistDraft,
+} from "@/stores/wishlist-wizard.store";
 
 export type PersistedWishlistDesign = Pick<
 	WishlistDraft,
-	| "themeId"
-	| "layoutId"
-	| "fontPairing"
-	| "headingFont"
-	| "bodyFont"
-	| "buttonStyle"
-	| "coverImageUrl"
-	| "coverImageUrls"
+	"themeId" | "layoutId" | "headingFont" | "bodyFont" | "buttonStyle" | "images"
 >;
 
 export type PersistedWishlistPreviewSource = {
 	eventType: WishlistDraft["eventType"];
 	title: string;
 	slug: string;
-	displayName: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
-	coverImageUrl: string | null;
-	coverImageUrls: string[];
-	heroTitle: string | null;
+	images: DraftCoverImage[];
 	welcomeMessage: string | null;
 	thankYouMessage: string | null;
 	categories: Array<{ name: string }>;
@@ -41,7 +35,6 @@ export type PersistedWishlistPreviewSource = {
 	themeId: string | null;
 	layoutId: string | null;
 	buttonStyle: string | null;
-	fontPairing: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
 	showHowItWorks: boolean;
@@ -61,7 +54,7 @@ export function persistedWishlistToPreviewDraft(
 	design: Partial<PersistedWishlistDesign> = {},
 ): WishlistDraft {
 	const designValue = <
-		Key extends Exclude<keyof PersistedWishlistDesign, "coverImageUrls">,
+		Key extends Exclude<keyof PersistedWishlistDesign, "images">,
 	>(
 		key: Key,
 	): PersistedWishlistDesign[Key] =>
@@ -71,21 +64,17 @@ export function persistedWishlistToPreviewDraft(
 		eventType: wishlist.eventType,
 		title: wishlist.title,
 		slug: wishlist.slug,
-		displayName: wishlist.displayName ?? "",
 		eventDate: wishlist.eventDate,
 		eventTime: wishlist.eventTime,
 		eventLocation: wishlist.eventLocation ?? "",
 		dressCode: wishlist.dressCode ?? "",
-		coverImageUrl: designValue("coverImageUrl"),
-		coverImageUrls: design.coverImageUrls ?? wishlist.coverImageUrls,
-		heroTitle: wishlist.heroTitle ?? "",
+		images: design.images ?? wishlist.images,
 		welcomeMessage: wishlist.welcomeMessage ?? "",
 		thankYouMessage: wishlist.thankYouMessage ?? "",
 		categories: wishlist.categories.map((category) => category.name),
 		themeId: designValue("themeId"),
 		layoutId: designValue("layoutId"),
 		buttonStyle: designValue("buttonStyle"),
-		fontPairing: designValue("fontPairing"),
 		headingFont: designValue("headingFont"),
 		bodyFont: designValue("bodyFont"),
 		showHowItWorks: wishlist.showHowItWorks,

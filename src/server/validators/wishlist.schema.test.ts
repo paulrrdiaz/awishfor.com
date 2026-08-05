@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	createWishlistSchema,
 	restoreWishlistSchema,
+	wishlistCoverImagesSchema,
 	wishlistRestoreTargetStatusSchema,
 } from "@/server/validators/wishlist.schema";
 
@@ -85,6 +86,38 @@ describe("wishlist creation validation", () => {
 			eventTime: "08:15",
 			eventLocation: "Barranco, Lima",
 		});
+	});
+});
+
+describe("wishlist cover images validation", () => {
+	it("accepts up to six url/width/height records", () => {
+		const images = Array.from({ length: 6 }, (_, index) => ({
+			url: `https://example.com/cover-${index}.jpg`,
+			width: 1600,
+			height: 900,
+		}));
+
+		expect(wishlistCoverImagesSchema.parse(images)).toEqual(images);
+	});
+
+	it("rejects a seventh cover image", () => {
+		const images = Array.from({ length: 7 }, (_, index) => ({
+			url: `https://example.com/cover-${index}.jpg`,
+			width: 1600,
+			height: 900,
+		}));
+
+		expect(() => wishlistCoverImagesSchema.parse(images)).toThrow(
+			"You can add at most 6 cover images",
+		);
+	});
+
+	it("rejects a non-positive width or height", () => {
+		expect(() =>
+			wishlistCoverImagesSchema.parse([
+				{ url: "https://example.com/cover.jpg", width: 0, height: 900 },
+			]),
+		).toThrow();
 	});
 });
 

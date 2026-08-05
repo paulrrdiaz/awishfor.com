@@ -5,6 +5,7 @@ import type {
 	Prisma,
 	Purchase,
 	Wishlist,
+	WishlistImage,
 } from "@/generated/prisma/client";
 import {
 	Currency,
@@ -26,6 +27,7 @@ type MockCategory = Category & { gifts: MockGift[] };
 type MockRow = Wishlist & {
 	categories: MockCategory[];
 	gifts: MockGift[];
+	images: WishlistImage[];
 	owner: { clerkId: string };
 };
 
@@ -61,20 +63,15 @@ const makeWishlist = (overrides: Partial<MockRow> = {}): MockRow => ({
 	eventType: EventType.wedding,
 	language: Locale.es,
 	currency: Currency.PEN,
-	heroTitle: null,
 	welcomeMessage: null,
 	thankYouMessage: null,
-	displayName: "Ana y Luis",
 	eventDate: null,
 	eventTime: null,
 	eventLocation: null,
 	dressCode: null,
-	coverImageUrl: null,
-	coverImageUrls: [],
 	themeId: null,
 	layoutId: null,
 	buttonStyle: null,
-	fontPairing: null,
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -85,6 +82,7 @@ const makeWishlist = (overrides: Partial<MockRow> = {}): MockRow => ({
 	updatedAt: BASE_DATE,
 	categories: [],
 	gifts: [],
+	images: [],
 	owner: { clerkId: "clerk_owner" },
 	...overrides,
 });
@@ -160,7 +158,6 @@ describe("getPublicWishlistBySlug", () => {
 		expect(result.kind).toBe("archived");
 		if (result.kind === "archived") {
 			expect(result.archived.title).toBe("Mi lista");
-			expect(result.archived.displayName).toBe("Ana y Luis");
 			expect(Object.hasOwn(result.archived, "gifts")).toBe(false);
 		}
 	});

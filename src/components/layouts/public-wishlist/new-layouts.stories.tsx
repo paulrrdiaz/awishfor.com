@@ -1,28 +1,44 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DEMO_WISHLIST } from "@/config/demo-wishlist";
-import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
+import type {
+	PublicWishlistViewModel,
+	WishlistImageViewModel,
+} from "@/server/mappers/view-models";
 import { PublicWishlistPage } from "./public-wishlist-page";
 
-const ZERO_IMAGES: string[] = [];
+function image(url: string): WishlistImageViewModel {
+	return { url, width: 1200, height: 800, orientation: "landscape" };
+}
+
+const ZERO_IMAGES: WishlistImageViewModel[] = [];
 const ONE_IMAGE = [
-	"https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop",
+	image(
+		"https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop",
+	),
 ];
 const MANY_IMAGES = [
-	"https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop",
-	"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=1200&h=800&fit=crop",
-	"https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=1200&h=800&fit=crop",
-	"https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=1200&h=800&fit=crop",
+	image(
+		"https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop",
+	),
+	image(
+		"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=1200&h=800&fit=crop",
+	),
+	image(
+		"https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=1200&h=800&fit=crop",
+	),
+	image(
+		"https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=1200&h=800&fit=crop",
+	),
 ];
 
 function wishlistWithLayout(
 	layoutId: string,
-	coverImageUrls: string[] = ONE_IMAGE,
+	images: WishlistImageViewModel[] = ONE_IMAGE,
 ): PublicWishlistViewModel {
 	return {
 		...DEMO_WISHLIST,
 		layoutId,
-		coverImageUrls,
-		coverImageUrl: coverImageUrls[0] ?? null,
+		images,
 	};
 }
 
@@ -37,22 +53,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const HeroCinematic: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("hero-cinematic") },
-};
-export const HeroCinematicNoImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("hero-cinematic", ZERO_IMAGES),
-	},
-};
-export const HeroCinematicManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("hero-cinematic", MANY_IMAGES),
-	},
-};
-
 export const SplitImageRight: Story = {
 	args: { mode: "compact", wishlist: wishlistWithLayout("split-image-right") },
 };
@@ -60,16 +60,6 @@ export const SplitImageRightNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("split-image-right", ZERO_IMAGES),
-	},
-};
-
-export const ArchSplit: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("arch-split") },
-};
-export const ArchSplitManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("arch-split", MANY_IMAGES),
 	},
 };
 
@@ -141,20 +131,6 @@ export const ArchTrioManyImages: Story = {
 	},
 };
 
-export const WeddingFormal: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("wedding-formal") },
-};
-
-export const PanoramicBand: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("panoramic-band") },
-};
-export const PanoramicBandManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("panoramic-band", MANY_IMAGES),
-	},
-};
-
 export const CarouselHero: Story = {
 	args: { mode: "compact", wishlist: wishlistWithLayout("carousel-hero") },
 };
@@ -168,22 +144,6 @@ export const CarouselHeroManyImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("carousel-hero", MANY_IMAGES),
-	},
-};
-
-export const DiagonalDuo: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("diagonal-duo") },
-};
-export const DiagonalDuoNoImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("diagonal-duo", ZERO_IMAGES),
-	},
-};
-export const DiagonalDuoManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("diagonal-duo", MANY_IMAGES),
 	},
 };
 

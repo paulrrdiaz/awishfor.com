@@ -6,7 +6,7 @@ import {
 	Locale,
 	WishlistStatus,
 } from "@/generated/prisma/client";
-import { withCoverImageUrlMirror } from "@/lib/wishlist/cover-images";
+import { buildCoverImageRecords } from "@/lib/wishlist/cover-images";
 import {
 	evaluatePublishReadiness,
 	PublishReadinessError,
@@ -31,6 +31,7 @@ type WishlistPublishedAtLookup = Pick<Wishlist, "publishedAt">;
 type DraftWishlistRecord = Prisma.WishlistGetPayload<{
 	include: {
 		categories: true;
+		images: true;
 		gifts: {
 			include: {
 				category: {
@@ -66,10 +67,20 @@ type GiftDelegate = {
 	deleteMany(args: Prisma.GiftDeleteManyArgs): Promise<Prisma.BatchPayload>;
 };
 
+type WishlistImageDelegate = {
+	createMany(
+		args: Prisma.WishlistImageCreateManyArgs,
+	): Promise<Prisma.BatchPayload>;
+	deleteMany(
+		args: Prisma.WishlistImageDeleteManyArgs,
+	): Promise<Prisma.BatchPayload>;
+};
+
 type WishlistTransaction = {
 	wishlist: WishlistDelegate;
 	category: CategoryDelegate;
 	gift: GiftDelegate;
+	wishlistImage: WishlistImageDelegate;
 };
 
 export type WishlistDatabase = WishlistTransaction & {
@@ -115,9 +126,17 @@ const draftGiftOrderBy = [
 	{ createdAt: "asc" },
 ] satisfies Prisma.GiftOrderByWithRelationInput[];
 
+const draftImageOrderBy = [
+	{ sortOrder: "asc" },
+	{ createdAt: "asc" },
+] satisfies Prisma.WishlistImageOrderByWithRelationInput[];
+
 const draftWishlistInclude = {
 	categories: {
 		orderBy: draftCategoryOrderBy,
+	},
+	images: {
+		orderBy: draftImageOrderBy,
 	},
 	gifts: {
 		orderBy: draftGiftOrderBy,
@@ -140,30 +159,25 @@ const sortDraftGifts = (gifts: SaveDraftGiftInput[]) =>
 		.sort((a, b) => a.gift.sortOrder - b.gift.sortOrder || a.index - b.index)
 		.map(({ gift }) => gift);
 
-const wishlistDraftToData = (input: SaveDraftDraftContent) =>
-	withCoverImageUrlMirror({
-		title: input.title,
-		slug: input.slug,
-		eventType: input.eventType,
-		language: input.language ?? Locale.es,
-		currency: input.currency ?? Currency.PEN,
-		heroTitle: input.heroTitle ?? null,
-		welcomeMessage: input.welcomeMessage ?? null,
-		thankYouMessage: input.thankYouMessage ?? null,
-		displayName: input.displayName ?? null,
-		eventDate: toDraftDate(input.eventDate ?? null),
-		eventTime: input.eventTime ?? null,
-		eventLocation: input.eventLocation ?? null,
-		dressCode: input.dressCode ?? null,
-		coverImageUrls: input.coverImageUrls ?? [],
-		themeId: input.themeId ?? null,
-		layoutId: input.layoutId ?? null,
-		buttonStyle: input.buttonStyle ?? null,
-		fontPairing: input.fontPairing ?? null,
-		headingFont: input.headingFont ?? null,
-		bodyFont: input.bodyFont ?? null,
-		showHowItWorks: input.showHowItWorks ?? true,
-	});
+const wishlistDraftToData = (input: SaveDraftDraftContent) => ({
+	title: input.title,
+	slug: input.slug,
+	eventType: input.eventType,
+	language: input.language ?? Locale.es,
+	currency: input.currency ?? Currency.PEN,
+	welcomeMessage: input.welcomeMessage ?? null,
+	thankYouMessage: input.thankYouMessage ?? null,
+	eventDate: toDraftDate(input.eventDate ?? null),
+	eventTime: input.eventTime ?? null,
+	eventLocation: input.eventLocation ?? null,
+	dressCode: input.dressCode ?? null,
+	themeId: input.themeId ?? null,
+	layoutId: input.layoutId ?? null,
+	buttonStyle: input.buttonStyle ?? null,
+	headingFont: input.headingFont ?? null,
+	bodyFont: input.bodyFont ?? null,
+	showHowItWorks: input.showHowItWorks ?? true,
+});
 
 const mapServerDraft = (
 	wishlist: DraftWishlistRecord,
@@ -173,20 +187,20 @@ const mapServerDraft = (
 	eventType: wishlist.eventType,
 	language: wishlist.language,
 	currency: wishlist.currency,
-	heroTitle: wishlist.heroTitle,
 	welcomeMessage: wishlist.welcomeMessage,
 	thankYouMessage: wishlist.thankYouMessage,
-	displayName: wishlist.displayName,
 	eventDate: wishlist.eventDate?.toISOString().slice(0, 10) ?? null,
 	eventTime: wishlist.eventTime,
 	eventLocation: wishlist.eventLocation,
 	dressCode: wishlist.dressCode,
-	coverImageUrl: wishlist.coverImageUrl,
-	coverImageUrls: wishlist.coverImageUrls,
+	coverImages: wishlist.images.map((image) => ({
+		url: image.url,
+		width: image.width,
+		height: image.height,
+	})),
 	themeId: wishlist.themeId,
 	layoutId: wishlist.layoutId,
 	buttonStyle: wishlist.buttonStyle,
-	fontPairing: wishlist.fontPairing,
 	headingFont: wishlist.headingFont,
 	bodyFont: wishlist.bodyFont,
 	showHowItWorks: wishlist.showHowItWorks,
@@ -238,11 +252,13 @@ const replaceDraftCollections = async (
 		categories,
 		gifts,
 		currency,
+		coverImages,
 	}: {
 		wishlistId: string;
 		categories: SaveDraftWishlistInput["categories"];
 		gifts: SaveDraftGiftInput[];
 		currency: Currency;
+		coverImages: SaveDraftWishlistInput["coverImages"];
 	},
 ) => {
 	await db.gift.deleteMany({
@@ -256,6 +272,21 @@ const replaceDraftCollections = async (
 			wishlistId,
 		},
 	});
+
+	await db.wishlistImage.deleteMany({
+		where: {
+			wishlistId,
+		},
+	});
+
+	if (coverImages.length > 0) {
+		await db.wishlistImage.createMany({
+			data: buildCoverImageRecords(coverImages).map((image) => ({
+				wishlistId,
+				...image,
+			})),
+		});
+	}
 
 	const categoryIdByName = new Map<string, string>();
 
@@ -322,21 +353,18 @@ export const createWishlist = async (
 			eventType: input.eventType,
 			language: input.language ?? Locale.es,
 			currency: input.currency ?? Currency.PEN,
-			heroTitle: input.heroTitle ?? null,
 			welcomeMessage: input.welcomeMessage ?? null,
 			thankYouMessage: input.thankYouMessage ?? null,
-			displayName: input.displayName ?? null,
 			eventDate: input.eventDate ?? null,
 			eventTime: input.eventTime ?? null,
 			eventLocation: input.eventLocation ?? null,
 			dressCode: input.dressCode ?? null,
-			...withCoverImageUrlMirror({
-				coverImageUrls: input.coverImageUrls ?? [],
-			}),
+			images: {
+				create: buildCoverImageRecords(input.coverImages ?? []),
+			},
 			themeId: input.themeId ?? null,
 			layoutId: input.layoutId ?? null,
 			buttonStyle: input.buttonStyle ?? null,
-			fontPairing: input.fontPairing ?? null,
 			headingFont: input.headingFont ?? null,
 			bodyFont: input.bodyFont ?? null,
 			showHowItWorks: input.showHowItWorks ?? true,
@@ -374,6 +402,7 @@ export const saveWishlistDraft = async (
 				categories: input.categories,
 				gifts: orderedGifts,
 				currency: input.currency,
+				coverImages: input.coverImages,
 			});
 
 			const savedDraft = await getOwnedDraftWithRelations(tx, {
@@ -441,6 +470,7 @@ export const saveWishlistDraft = async (
 			categories: input.categories,
 			gifts: orderedGifts,
 			currency: input.currency,
+			coverImages: input.coverImages,
 		});
 
 		const savedDraft = await getOwnedDraftWithRelations(tx, {

@@ -3,12 +3,14 @@ import type {
 	Gift,
 	Purchase,
 	Wishlist,
+	WishlistImage,
 } from "@/generated/prisma/client";
 import type {
 	PublicCategoryViewModel,
 	PublicGiftViewModel,
 	PublicWishlistProgress,
 	PublicWishlistViewModel,
+	WishlistImageViewModel,
 } from "@/server/mappers/view-models";
 import { deriveGiftPublicStatus } from "@/server/services/purchase.service";
 
@@ -17,7 +19,17 @@ type CategoryWithGifts = Category & { gifts: GiftWithPurchases[] };
 type WishlistWithRelations = Wishlist & {
 	categories: CategoryWithGifts[];
 	gifts: GiftWithPurchases[];
+	images: WishlistImage[];
 };
+
+function mapImages(images: WishlistImage[]): WishlistImageViewModel[] {
+	return images.map((image) => ({
+		url: image.url,
+		width: image.width,
+		height: image.height,
+		orientation: image.orientation,
+	}));
+}
 
 function getPurchasedQuantityFromLoaded(purchases: Purchase[]): number {
 	return purchases.reduce((sum, p) => sum + p.quantity, 0);
@@ -85,20 +97,16 @@ export function mapPublicWishlist(
 		eventType: wishlist.eventType,
 		language: wishlist.language,
 		currency: wishlist.currency,
-		heroTitle: wishlist.heroTitle,
 		welcomeMessage: wishlist.welcomeMessage,
 		thankYouMessage: wishlist.thankYouMessage,
-		displayName: wishlist.displayName,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
 		eventLocation: wishlist.eventLocation,
 		dressCode: wishlist.dressCode,
-		coverImageUrl: wishlist.coverImageUrl,
-		coverImageUrls: wishlist.coverImageUrls,
+		images: mapImages(wishlist.images),
 		themeId: wishlist.themeId,
 		layoutId: wishlist.layoutId,
 		buttonStyle: wishlist.buttonStyle,
-		fontPairing: wishlist.fontPairing,
 		headingFont: wishlist.headingFont,
 		bodyFont: wishlist.bodyFont,
 		showHowItWorks: wishlist.showHowItWorks,

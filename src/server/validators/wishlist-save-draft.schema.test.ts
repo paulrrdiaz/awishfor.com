@@ -12,19 +12,17 @@ const makeInput = (
 	eventType: "wedding",
 	language: "es",
 	currency: "PEN",
-	heroTitle: "Nuestra boda",
 	welcomeMessage: "Gracias por acompañarnos",
 	thankYouMessage: "Con cariño",
-	displayName: "Ana y Luis",
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
 	eventLocation: "Barranco",
-	coverImageUrl: "https://example.com/cover.jpg",
-	coverImageUrls: ["https://example.com/cover.jpg"],
+	coverImages: [
+		{ url: "https://example.com/cover.jpg", width: 1600, height: 900 },
+	],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
-	fontPairing: "serif-soft",
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -56,18 +54,14 @@ describe("saveDraftWishlistSchema", () => {
 			makeInput({
 				language: undefined,
 				currency: undefined,
-				heroTitle: "",
 				welcomeMessage: "",
 				thankYouMessage: "",
-				displayName: "",
 				eventDate: null,
 				eventTime: "",
 				eventLocation: "",
-				coverImageUrl: "",
 				themeId: "",
 				layoutId: "",
 				buttonStyle: "",
-				fontPairing: "",
 				gifts: [
 					{
 						name: "Licuadora",
@@ -90,18 +84,14 @@ describe("saveDraftWishlistSchema", () => {
 		expect(result.language).toBe("es");
 		expect(result.currency).toBe("PEN");
 		expect(result.force).toBe(false);
-		expect(result.heroTitle).toBeNull();
 		expect(result.welcomeMessage).toBeNull();
 		expect(result.thankYouMessage).toBeNull();
-		expect(result.displayName).toBeNull();
 		expect(result.eventDate).toBeNull();
 		expect(result.eventTime).toBeNull();
 		expect(result.eventLocation).toBeNull();
-		expect(result.coverImageUrl).toBeNull();
 		expect(result.themeId).toBeNull();
 		expect(result.layoutId).toBeNull();
 		expect(result.buttonStyle).toBeNull();
-		expect(result.fontPairing).toBeNull();
 		expect(result.gifts[0]?.productUrl).toBeNull();
 		expect(result.gifts[0]?.imageUrl).toBeNull();
 		expect(result.gifts[0]?.category).toBeNull();

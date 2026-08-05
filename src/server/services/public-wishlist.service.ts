@@ -4,6 +4,7 @@ import type {
 	Prisma,
 	Purchase,
 	Wishlist,
+	WishlistImage,
 } from "@/generated/prisma/client";
 import { WishlistStatus } from "@/generated/prisma/client";
 import { mapPublicWishlist } from "@/server/mappers/public-wishlist.mapper";
@@ -12,7 +13,6 @@ import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 export type PublicArchivedViewModel = {
 	slug: string;
 	title: string;
-	displayName: string | null;
 };
 
 export type PublicWishlistResult =
@@ -26,6 +26,7 @@ type CategoryRow = Category & { gifts: GiftRow[] };
 type WishlistPublicRow = Wishlist & {
 	categories: CategoryRow[];
 	gifts: GiftRow[];
+	images: WishlistImage[];
 	owner: { clerkId: string };
 };
 
@@ -56,6 +57,9 @@ export async function getPublicWishlistBySlug(
 			gifts: {
 				include: { purchases: true },
 			},
+			images: {
+				orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+			},
 			owner: {
 				select: { clerkId: true },
 			},
@@ -76,7 +80,6 @@ export async function getPublicWishlistBySlug(
 			archived: {
 				slug: row.slug,
 				title: row.title,
-				displayName: row.displayName,
 			},
 		};
 	}

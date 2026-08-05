@@ -33,9 +33,6 @@ describe("marketing example preview", () => {
 		render(<ExamplePreview />);
 
 		expect(screen.getByText("Esperando a Mateo")).toBeInTheDocument();
-		expect(
-			screen.getByText("Ana & Diego · 13 de septiembre · Jardín Las Acacias"),
-		).toBeInTheDocument();
 
 		const highPriorityCount = DEMO_WISHLIST.gifts.filter(
 			(gift) => gift.priority === "high",

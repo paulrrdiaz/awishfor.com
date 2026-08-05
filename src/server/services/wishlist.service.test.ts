@@ -32,20 +32,15 @@ const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	eventType: EventType.wedding,
 	language: Locale.es,
 	currency: Currency.PEN,
-	heroTitle: null,
 	welcomeMessage: null,
 	thankYouMessage: null,
-	displayName: null,
 	eventDate: null,
 	eventTime: null,
 	eventLocation: null,
 	dressCode: null,
-	coverImageUrl: null,
-	coverImageUrls: [],
 	themeId: null,
 	layoutId: null,
 	buttonStyle: null,
-	fontPairing: null,
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -73,19 +68,17 @@ const makeDraftInput = (
 	eventType: EventType.wedding,
 	language: Locale.es,
 	currency: Currency.PEN,
-	heroTitle: "Nuestra boda",
 	welcomeMessage: "Gracias por acompañarnos",
 	thankYouMessage: "Con cariño",
-	displayName: "Ana y Luis",
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
 	eventLocation: "Barranco",
-	coverImageUrl: "https://example.com/cover.jpg",
-	coverImageUrls: ["https://example.com/cover.jpg"],
+	coverImages: [
+		{ url: "https://example.com/cover.jpg", width: 1600, height: 900 },
+	],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
-	fontPairing: "serif-soft",
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -154,10 +147,22 @@ type TestGift = {
 	updatedAt: Date;
 };
 
+type TestImage = {
+	id: string;
+	wishlistId: string;
+	url: string;
+	width: number;
+	height: number;
+	orientation: string;
+	sortOrder: number;
+	createdAt: Date;
+};
+
 type MockDbState = {
 	wishlists: Wishlist[];
 	categories: TestCategory[];
 	gifts: TestGift[];
+	images: TestImage[];
 	clockMs: number;
 };
 
@@ -165,6 +170,7 @@ const cloneState = (state: MockDbState): MockDbState => ({
 	wishlists: state.wishlists.map((wishlist) => ({ ...wishlist })),
 	categories: state.categories.map((category) => ({ ...category })),
 	gifts: state.gifts.map((gift) => ({ ...gift })),
+	images: state.images.map((image) => ({ ...image })),
 	clockMs: state.clockMs,
 });
 
@@ -173,6 +179,7 @@ const createMockDatabase = (
 		wishlists?: Wishlist[];
 		categories?: TestCategory[];
 		gifts?: TestGift[];
+		images?: TestImage[];
 		visibleGiftCount?: number;
 	} = {},
 ) => {
@@ -184,6 +191,7 @@ const createMockDatabase = (
 			? opts.categories.map((category) => ({ ...category }))
 			: [],
 		gifts: opts.gifts ? opts.gifts.map((gift) => ({ ...gift })) : [],
+		images: opts.images ? opts.images.map((image) => ({ ...image })) : [],
 		clockMs: BASE_DATE.getTime(),
 	};
 	const visibleGiftCount = opts.visibleGiftCount;
@@ -232,6 +240,13 @@ const createMockDatabase = (
 					a.sortOrder - b.sortOrder ||
 					a.createdAt.getTime() - b.createdAt.getTime(),
 			);
+		const images = state.images
+			.filter((image) => image.wishlistId === wishlist.id)
+			.sort(
+				(a, b) =>
+					a.sortOrder - b.sortOrder ||
+					a.createdAt.getTime() - b.createdAt.getTime(),
+			);
 		const gifts = state.gifts
 			.filter((gift) => gift.wishlistId === wishlist.id)
 			.sort(
@@ -255,6 +270,7 @@ const createMockDatabase = (
 		return {
 			...wishlist,
 			categories,
+			images,
 			gifts,
 		};
 	};
@@ -273,23 +289,18 @@ const createMockDatabase = (
 			eventType: args.data.eventType as EventType,
 			language: (args.data.language as Locale | undefined) ?? Locale.es,
 			currency: (args.data.currency as Currency | undefined) ?? Currency.PEN,
-			heroTitle: (args.data.heroTitle as string | null | undefined) ?? null,
 			welcomeMessage:
 				(args.data.welcomeMessage as string | null | undefined) ?? null,
 			thankYouMessage:
 				(args.data.thankYouMessage as string | null | undefined) ?? null,
-			displayName: (args.data.displayName as string | null | undefined) ?? null,
 			eventDate: (args.data.eventDate as Date | null | undefined) ?? null,
 			eventTime: (args.data.eventTime as string | null | undefined) ?? null,
 			eventLocation:
 				(args.data.eventLocation as string | null | undefined) ?? null,
 			dressCode: (args.data.dressCode as string | null | undefined) ?? null,
-			coverImageUrl:
-				(args.data.coverImageUrl as string | null | undefined) ?? null,
 			themeId: (args.data.themeId as string | null | undefined) ?? null,
 			layoutId: (args.data.layoutId as string | null | undefined) ?? null,
 			buttonStyle: (args.data.buttonStyle as string | null | undefined) ?? null,
-			fontPairing: (args.data.fontPairing as string | null | undefined) ?? null,
 			showHowItWorks: (args.data.showHowItWorks as boolean | undefined) ?? true,
 			status:
 				(args.data.status as WishlistStatus | undefined) ??
@@ -301,6 +312,26 @@ const createMockDatabase = (
 		});
 
 		state.wishlists.push(wishlist);
+
+		const imagesToCreate = args.data.images as
+			| { create?: Array<Record<string, unknown>> }
+			| undefined;
+		if (imagesToCreate?.create) {
+			for (const image of imagesToCreate.create) {
+				const now2 = nextDate();
+				state.images.push({
+					id: `image_${state.images.length + 1}`,
+					wishlistId: wishlist.id,
+					url: image.url as string,
+					width: image.width as number,
+					height: image.height as number,
+					orientation: image.orientation as string,
+					sortOrder: image.sortOrder as number,
+					createdAt: now2,
+				});
+			}
+		}
+
 		return wishlist;
 	});
 
@@ -450,6 +481,36 @@ const createMockDatabase = (
 		}).length;
 	});
 
+	const imageCreateMany = vi.fn(
+		async (args: Prisma.WishlistImageCreateManyArgs) => {
+			const rows = Array.isArray(args.data) ? args.data : [args.data];
+			for (const data of rows) {
+				const now = nextDate();
+				state.images.push({
+					id: `image_${state.images.length + 1}`,
+					wishlistId: data.wishlistId,
+					url: data.url,
+					width: data.width,
+					height: data.height,
+					orientation: data.orientation as string,
+					sortOrder: data.sortOrder ?? 0,
+					createdAt: now,
+				});
+			}
+			return { count: rows.length };
+		},
+	);
+
+	const imageDeleteMany = vi.fn(
+		async (args: Prisma.WishlistImageDeleteManyArgs) => {
+			const before = state.images.length;
+			state.images = state.images.filter(
+				(image) => image.wishlistId !== args.where?.wishlistId,
+			);
+			return { count: before - state.images.length };
+		},
+	);
+
 	const db: WishlistDatabase = {
 		wishlist: {
 			create,
@@ -467,6 +528,10 @@ const createMockDatabase = (
 			createMany,
 			deleteMany: giftDeleteMany,
 		},
+		wishlistImage: {
+			createMany: imageCreateMany,
+			deleteMany: imageDeleteMany,
+		},
 		$transaction: async (callback) => {
 			const snapshot = cloneState(state);
 			try {
@@ -475,6 +540,7 @@ const createMockDatabase = (
 				state.wishlists = snapshot.wishlists;
 				state.categories = snapshot.categories;
 				state.gifts = snapshot.gifts;
+				state.images = snapshot.images;
 				state.clockMs = snapshot.clockMs;
 				throw error;
 			}
@@ -494,6 +560,8 @@ const createMockDatabase = (
 		createMany,
 		giftDeleteMany,
 		count,
+		imageCreateMany,
+		imageDeleteMany,
 	};
 };
 
@@ -540,18 +608,17 @@ describe("wishlist service", () => {
 			eventType: EventType.birthday,
 			language: Locale.en,
 			currency: Currency.USD,
-			heroTitle: "Celebra con nosotros",
 			welcomeMessage: "Gracias por ser parte de este dia.",
 			thankYouMessage: "Nos vemos pronto.",
-			displayName: "Ana y Luis",
 			eventDate,
 			eventTime: "18:30",
 			eventLocation: "Miraflores, Lima",
-			coverImageUrls: ["https://example.com/cover.jpg"],
+			coverImages: [
+				{ url: "https://example.com/cover.jpg", width: 1600, height: 900 },
+			],
 			themeId: "cielo-suave",
 			layoutId: "editorial",
 			buttonStyle: "pill",
-			fontPairing: "serif-soft",
 			showHowItWorks: false,
 		});
 
@@ -562,19 +629,25 @@ describe("wishlist service", () => {
 				eventType: EventType.birthday,
 				language: Locale.en,
 				currency: Currency.USD,
-				heroTitle: "Celebra con nosotros",
 				welcomeMessage: "Gracias por ser parte de este dia.",
 				thankYouMessage: "Nos vemos pronto.",
-				displayName: "Ana y Luis",
 				eventDate,
 				eventTime: "18:30",
 				eventLocation: "Miraflores, Lima",
-				coverImageUrl: "https://example.com/cover.jpg",
-				coverImageUrls: ["https://example.com/cover.jpg"],
+				images: {
+					create: [
+						{
+							url: "https://example.com/cover.jpg",
+							width: 1600,
+							height: 900,
+							orientation: "landscape",
+							sortOrder: 0,
+						},
+					],
+				},
 				themeId: "cielo-suave",
 				layoutId: "editorial",
 				buttonStyle: "pill",
-				fontPairing: "serif-soft",
 				showHowItWorks: false,
 			}),
 		});

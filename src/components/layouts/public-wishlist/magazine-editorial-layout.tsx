@@ -17,12 +17,12 @@ type Props = {
 
 export function MagazineEditorialLayout({ wishlist, layout, mode }: Props) {
 	const isCompact = mode === "compact";
-	const heading = wishlist.heroTitle ?? wishlist.title;
+	const heading = wishlist.title;
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
 	const monogram = heading.trim().charAt(0).toUpperCase() || "?";
-	const stripImages = wishlist.coverImageUrls.slice(0, 5);
+	const stripImages = wishlist.images.slice(0, 5);
 
 	return (
 		<div className="flex flex-col">
@@ -43,11 +43,6 @@ export function MagazineEditorialLayout({ wishlist, layout, mode }: Props) {
 						<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 							{heading}
 						</h1>
-						{wishlist.displayName && (
-							<p className="mt-3 text-muted-foreground text-sm">
-								{wishlist.displayName}
-							</p>
-						)}
 						<GuestWelcomeSection
 							className="mt-3"
 							guest={wishlist.guest}
@@ -62,19 +57,19 @@ export function MagazineEditorialLayout({ wishlist, layout, mode }: Props) {
 				)}
 				{stripImages.length > 0 && (
 					<div className="mt-6 grid grid-cols-3 gap-2 pb-8 sm:grid-cols-5">
-						{stripImages.map((src, index) => (
+						{stripImages.map((image, index) => (
 							<div
 								className={cn(
 									"relative aspect-square overflow-hidden rounded-md bg-accent/50",
 									index >= 3 && "hidden sm:block",
 								)}
-								key={src}
+								key={image.url}
 							>
 								<Image
 									alt={`${heading} ${index + 1}`}
 									className="object-cover"
 									fill
-									src={src}
+									src={image.url}
 								/>
 							</div>
 						))}

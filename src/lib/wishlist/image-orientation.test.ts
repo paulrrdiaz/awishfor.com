@@ -4,7 +4,7 @@ import {
 	getImageOrientation,
 	hasImageOrientationMismatch,
 	IMAGE_ORIENTATION_SQUARE_DEADBAND,
-} from "./multi-image-upload";
+} from "./image-orientation";
 
 describe("getImageOrientation", () => {
 	it("derives landscape, portrait, and square orientations", () => {
@@ -18,6 +18,14 @@ describe("getImageOrientation", () => {
 		expect(getImageOrientation(1120, 1000)).toBe("square");
 		expect(getImageOrientation(1160, 1000)).toBe("landscape");
 		expect(getImageOrientation(0, 1000)).toBeNull();
+	});
+
+	it("classifies a wide image as landscape", () => {
+		expect(getImageOrientation(1000, 1050)).toBe("square");
+	});
+
+	it("classifies a tall image as portrait outside the deadband", () => {
+		expect(getImageOrientation(900, 1600)).toBe("portrait");
 	});
 });
 

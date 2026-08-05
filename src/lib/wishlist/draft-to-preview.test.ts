@@ -8,21 +8,17 @@ function makeDraft(overrides: Partial<WishlistDraft> = {}): WishlistDraft {
 		eventType: "baby_shower",
 		title: "Baby shower de Ana",
 		slug: "baby-shower-de-ana",
-		displayName: "Ana García",
 		eventDate: null,
 		eventTime: null,
 		eventLocation: "",
 		dressCode: "",
-		coverImageUrl: null,
-		coverImageUrls: [],
-		heroTitle: "¡Bienvenidos al baby shower de Ana!",
+		images: [],
 		welcomeMessage: "Gracias por venir",
 		thankYouMessage: "Gracias por el regalo",
 		categories: ["Pañales", "Ropa", "Otros"],
 		themeId: "cielo-suave",
-		layoutId: "grid",
+		layoutId: "magazine-editorial",
 		buttonStyle: "rounded",
-		fontPairing: "serif-soft",
 		headingFont: null,
 		bodyFont: null,
 		showHowItWorks: true,
@@ -148,8 +144,7 @@ describe("draftToPreview", () => {
 			expect(vm.title).toBe("Baby shower de Ana");
 			expect(vm.slug).toBe("baby-shower-de-ana");
 			expect(vm.themeId).toBe("cielo-suave");
-			expect(vm.layoutId).toBe("grid");
-			expect(vm.fontPairing).toBe("serif-soft");
+			expect(vm.layoutId).toBe("magazine-editorial");
 			expect(vm.buttonStyle).toBe("rounded");
 			expect(vm.showHowItWorks).toBe(true);
 		});

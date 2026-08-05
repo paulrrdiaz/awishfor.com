@@ -117,8 +117,10 @@ function GalleryControls({ total }: { total: number }) {
 	);
 }
 
+type HeroCoverImage = { url: string };
+
 type HeroCarouselGalleryProps = {
-	images: string[];
+	images: HeroCoverImage[];
 	alt: string;
 	className?: string;
 	maxImages?: number;
@@ -145,7 +147,7 @@ export function HeroCarouselGallery({
 				alt={alt}
 				className={className}
 				priority={priority}
-				src={visibleImages[0] ?? null}
+				src={visibleImages[0]?.url ?? null}
 			/>
 		);
 	}
@@ -153,15 +155,15 @@ export function HeroCarouselGallery({
 	return (
 		<Carousel className={cn("relative", className)} opts={{ loop: true }}>
 			<CarouselContent className="-ml-0 h-full">
-				{visibleImages.map((src, index) => (
-					<CarouselItem className="h-full pl-0" key={src}>
+				{visibleImages.map((image, index) => (
+					<CarouselItem className="h-full pl-0" key={image.url}>
 						<div className="relative h-full w-full overflow-hidden">
 							<Image
 								alt={`${alt} ${index + 1}`}
 								className="object-cover"
 								fill
 								priority={priority && index === 0}
-								src={src}
+								src={image.url}
 							/>
 						</div>
 					</CarouselItem>

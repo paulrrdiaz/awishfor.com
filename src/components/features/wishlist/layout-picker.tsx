@@ -37,24 +37,11 @@ function Block({ className }: { className?: string }) {
 }
 
 const LAYOUT_THUMBNAILS: Record<string, ReactNode> = {
-	"hero-cinematic": (
-		<Thumb>
-			<Block className="inset-0" />
-			<div className="absolute inset-x-3 bottom-2.5 h-1.5 rounded-full bg-background/80" />
-		</Thumb>
-	),
 	"split-image-right": (
 		<Thumb>
 			<Block className="top-2 right-2 bottom-2 left-[58%]" />
 			<div className="absolute top-3 left-2.5 h-1.5 w-8 rounded-full bg-foreground/25" />
 			<div className="absolute top-6 left-2.5 h-1.5 w-6 rounded-full bg-foreground/15" />
-		</Thumb>
-	),
-	"arch-split": (
-		<Thumb>
-			<div className="absolute top-3 left-2.5 h-1.5 w-8 rounded-full bg-foreground/25" />
-			<div className="absolute top-6 left-2.5 h-1.5 w-6 rounded-full bg-foreground/15" />
-			<div className="absolute top-2 right-3 bottom-2 w-6 rounded-t-full bg-foreground/25" />
 		</Thumb>
 	),
 	"collage-staggered": (
@@ -99,21 +86,6 @@ const LAYOUT_THUMBNAILS: Record<string, ReactNode> = {
 			<div className="absolute top-4 right-3 h-1.5 w-6 rounded-full bg-foreground/20" />
 		</Thumb>
 	),
-	"wedding-formal": (
-		<Thumb>
-			<div className="absolute inset-x-3 top-3 h-px bg-foreground/20" />
-			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold text-[15px] text-primary/70">
-				A&B
-			</div>
-			<div className="absolute inset-x-3 bottom-3 h-px bg-foreground/20" />
-		</Thumb>
-	),
-	"panoramic-band": (
-		<Thumb>
-			<Block className="top-1.5 right-1.5 left-1.5 h-8" />
-			<div className="absolute right-3 bottom-2 left-3 h-4 rounded-sm bg-background shadow-sm" />
-		</Thumb>
-	),
 	"carousel-hero": (
 		<Thumb>
 			<Block className="inset-0" />
@@ -122,20 +94,6 @@ const LAYOUT_THUMBNAILS: Record<string, ReactNode> = {
 				<span className="size-1 rounded-full bg-background/50" />
 				<span className="size-1 rounded-full bg-background/50" />
 			</div>
-		</Thumb>
-	),
-	"diagonal-duo": (
-		<Thumb>
-			<div
-				className="absolute inset-0"
-				style={{
-					background:
-						"linear-gradient(135deg, var(--muted) 0% 46%, var(--foreground) 46% 100%)",
-					opacity: 0.18,
-				}}
-			/>
-			<Block className="top-3 left-3 size-5 rounded-full" />
-			<Block className="right-3 bottom-2 h-6 w-5" />
 		</Thumb>
 	),
 	"scrapbook-polaroids": (
@@ -152,41 +110,10 @@ const LAYOUT_THUMBNAILS: Record<string, ReactNode> = {
 			<div className="absolute top-6 left-9 h-1.5 w-6 rounded-full bg-foreground/15" />
 		</Thumb>
 	),
-	grid: (
-		<Thumb>
-			<div className="absolute inset-2 grid grid-cols-3 gap-1">
-				{Array.from({ length: 6 }).map((_, i) => (
-					<div
-						className="rounded-[2px] bg-foreground/20"
-						// biome-ignore lint/suspicious/noArrayIndexKey: static decorative grid
-						key={i}
-					/>
-				))}
-			</div>
-		</Thumb>
-	),
-	editorial: (
-		<Thumb>
-			<div className="absolute inset-x-6 top-2 h-3 rounded-sm bg-foreground/20" />
-			<div className="absolute inset-x-8 top-6 h-1.5 rounded-full bg-foreground/15" />
-			<div className="absolute inset-x-8 bottom-2.5 h-1.5 rounded-full bg-foreground/15" />
-		</Thumb>
-	),
-	minimal: (
-		<Thumb>
-			<div className="absolute inset-x-2 top-2 flex flex-col gap-1.5">
-				<div className="h-2 rounded-[2px] bg-foreground/20" />
-				<div className="h-2 rounded-[2px] bg-foreground/20" />
-				<div className="h-2 rounded-[2px] bg-foreground/20" />
-			</div>
-		</Thumb>
-	),
 };
 
 export function LayoutPicker({ options, selected, onSelect }: Props) {
 	const [open, setOpen] = useState(false);
-	const activeOptions = options.filter((option) => !option.deprecated);
-	const legacyOptions = options.filter((option) => option.deprecated);
 	const currentLayout =
 		options.find((option) => option.id === selected) ??
 		options.find((option) => option.id === resolveLayout(selected).id) ??
@@ -246,18 +173,8 @@ export function LayoutPicker({ options, selected, onSelect }: Props) {
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-					{activeOptions.map(renderOption)}
+					{options.map(renderOption)}
 				</div>
-				{legacyOptions.length > 0 && (
-					<div className="space-y-2 pt-1">
-						<p className="font-medium text-[11px] text-muted-foreground uppercase tracking-wide">
-							Clásico (se retirará)
-						</p>
-						<div className="grid grid-cols-2 gap-2.5 opacity-70 sm:grid-cols-3">
-							{legacyOptions.map(renderOption)}
-						</div>
-					</div>
-				)}
 			</DialogContent>
 		</Dialog>
 	);

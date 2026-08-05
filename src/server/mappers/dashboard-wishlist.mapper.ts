@@ -1,4 +1,9 @@
-import type { Gift, Purchase, Wishlist } from "@/generated/prisma/client";
+import type {
+	Gift,
+	Purchase,
+	Wishlist,
+	WishlistImage,
+} from "@/generated/prisma/client";
 import type { PublishReadinessResult } from "@/lib/wishlist/publish-readiness";
 import { mapDashboardGift } from "@/server/mappers/dashboard-gift.mapper";
 import type {
@@ -6,10 +11,23 @@ import type {
 	DashboardWishlistOverviewViewModel,
 	DashboardWishlistSummaryViewModel,
 	RecentPurchaseViewModel,
+	WishlistImageViewModel,
 } from "@/server/mappers/view-models";
 
 type GiftWithPurchases = Gift & { purchases: Purchase[] };
-type WishlistWithGifts = Wishlist & { gifts: GiftWithPurchases[] };
+type WishlistWithGifts = Wishlist & {
+	gifts: GiftWithPurchases[];
+	images?: WishlistImage[];
+};
+
+function mapImages(images: WishlistImage[] = []): WishlistImageViewModel[] {
+	return images.map((image) => ({
+		url: image.url,
+		width: image.width,
+		height: image.height,
+		orientation: image.orientation,
+	}));
+}
 type PurchaseWithGiftName = Purchase & { gift: Pick<Gift, "id" | "name"> };
 
 type DashboardWishlistOverviewOptions = {
@@ -85,20 +103,16 @@ export function mapDashboardWishlist(
 		eventType: wishlist.eventType,
 		language: wishlist.language,
 		currency: wishlist.currency,
-		heroTitle: wishlist.heroTitle,
 		welcomeMessage: wishlist.welcomeMessage,
 		thankYouMessage: wishlist.thankYouMessage,
-		displayName: wishlist.displayName,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
 		eventLocation: wishlist.eventLocation,
 		dressCode: wishlist.dressCode,
-		coverImageUrl: wishlist.coverImageUrl,
-		coverImageUrls: wishlist.coverImageUrls,
+		images: mapImages(wishlist.images),
 		themeId: wishlist.themeId,
 		layoutId: wishlist.layoutId,
 		buttonStyle: wishlist.buttonStyle,
-		fontPairing: wishlist.fontPairing,
 		headingFont: wishlist.headingFont,
 		bodyFont: wishlist.bodyFont,
 		showHowItWorks: wishlist.showHowItWorks,
@@ -124,7 +138,6 @@ export function mapDashboardWishlistSummary(
 		eventType: wishlist.eventType,
 		status: wishlist.status,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
-		coverImageUrl: wishlist.coverImageUrl,
 		totalUnits: aggregates.totalUnits,
 		purchasedUnits: aggregates.purchasedUnits,
 		availableGiftCount: aggregates.availableGiftCount,

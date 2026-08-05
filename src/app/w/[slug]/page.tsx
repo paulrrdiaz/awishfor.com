@@ -60,11 +60,6 @@ export default async function WishlistSlugPage({ params }: Props) {
 		return (
 			<main className="flex min-h-svh flex-col items-center justify-center p-8">
 				<h1 className="font-semibold text-2xl">{result.archived.title}</h1>
-				{result.archived.displayName && (
-					<p className="mt-2 text-muted-foreground">
-						{result.archived.displayName}
-					</p>
-				)}
 				<p className="mt-6 text-muted-foreground">
 					Esta lista ya no está disponible.
 				</p>

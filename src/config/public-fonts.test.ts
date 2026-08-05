@@ -22,24 +22,6 @@ describe("resolveHeadingFont", () => {
 			DEFAULT_HEADING_FONT_ID,
 		);
 	});
-
-	it("resolves the legacy serif-soft pairing to Lora", () => {
-		expect(resolveHeadingFont(null, "serif-soft").id).toBe("lora");
-	});
-
-	it("resolves the legacy sans-modern pairing to Inter", () => {
-		expect(resolveHeadingFont(null, "sans-modern").id).toBe("inter");
-	});
-
-	it("resolves the legacy rounded-friendly pairing to Nunito", () => {
-		expect(resolveHeadingFont(null, "rounded-friendly").id).toBe("nunito");
-	});
-
-	it("prefers an explicit heading font over a legacy pairing", () => {
-		expect(resolveHeadingFont("cormorant-garamond", "sans-modern").id).toBe(
-			"cormorant-garamond",
-		);
-	});
 });
 
 describe("resolveBodyFont", () => {
@@ -51,14 +33,8 @@ describe("resolveBodyFont", () => {
 		expect(resolveBodyFont(null).id).toBe(DEFAULT_BODY_FONT_ID);
 	});
 
-	it("resolves the legacy rounded-friendly pairing to Nunito for both fonts", () => {
-		expect(resolveBodyFont(null, "rounded-friendly").id).toBe("nunito");
-	});
-
-	it("falls back to the default when the legacy pairing is unknown", () => {
-		expect(resolveBodyFont(null, "not-a-real-pairing").id).toBe(
-			DEFAULT_BODY_FONT_ID,
-		);
+	it("falls back to the default when the id is unknown", () => {
+		expect(resolveBodyFont("not-a-real-font").id).toBe(DEFAULT_BODY_FONT_ID);
 	});
 });
 

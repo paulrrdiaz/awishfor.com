@@ -42,11 +42,11 @@ function Polaroid({
 
 export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
 	const isCompact = mode === "compact";
-	const heading = wishlist.heroTitle ?? wishlist.title;
+	const heading = wishlist.title;
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
-	const slots = resolveHeroSlots(wishlist.coverImageUrls, 3);
+	const slots = resolveHeroSlots(wishlist.images, 3);
 
 	return (
 		<div className="flex flex-col">
@@ -58,11 +58,6 @@ export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
 					<h1 className="mt-3 font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
-					{wishlist.displayName && (
-						<p className="mt-2 text-muted-foreground text-sm">
-							{wishlist.displayName}
-						</p>
-					)}
 					<GuestWelcomeSection
 						className="mt-3"
 						guest={wishlist.guest}

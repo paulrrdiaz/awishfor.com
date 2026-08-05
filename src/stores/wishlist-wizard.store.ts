@@ -1,6 +1,7 @@
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createStore } from "zustand/vanilla";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
+import type { ImageOrientation } from "@/config/public-layouts";
 import type { EventType, GiftPriority } from "@/generated/prisma/enums";
 import { slugify } from "@/lib/slug";
 import type { WishlistShareMetadata } from "@/lib/wishlist/share";
@@ -8,20 +9,16 @@ import type { WishlistShareMetadata } from "@/lib/wishlist/share";
 const STALE_DAYS = 30;
 export const WISHLIST_WIZARD_STORAGE_KEY = "wishlist-wizard-draft";
 
-const NAME_PLACEHOLDER = "{name}";
-
-const resolveHeroTitle = (template: string, displayName: string): string => {
-	const trimmedName = displayName.trim();
-	if (trimmedName) {
-		return template.replaceAll(NAME_PLACEHOLDER, trimmedName);
-	}
-	return template.replace(/\s*de\s*\{name\}\s*$/, "");
-};
-
 type CopyTouched = {
-	heroTitle: boolean;
 	welcomeMessage: boolean;
 	thankYouMessage: boolean;
+};
+
+export type DraftCoverImage = {
+	url: string;
+	width: number;
+	height: number;
+	orientation: ImageOrientation;
 };
 
 export type DraftGift = {
@@ -43,21 +40,17 @@ export type WishlistDraft = {
 	eventType: EventType | null;
 	title: string;
 	slug: string;
-	displayName: string;
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string;
 	dressCode: string;
-	coverImageUrl: string | null;
-	coverImageUrls: string[];
-	heroTitle: string;
+	images: DraftCoverImage[];
 	welcomeMessage: string;
 	thankYouMessage: string;
 	categories: string[];
 	themeId: string | null;
 	layoutId: string | null;
 	buttonStyle: string | null;
-	fontPairing: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
 	showHowItWorks: boolean;
@@ -118,21 +111,17 @@ const emptyDraft = (): WishlistDraft => ({
 	eventType: null,
 	title: "",
 	slug: "",
-	displayName: "",
 	eventDate: null,
 	eventTime: null,
 	eventLocation: "",
 	dressCode: "",
-	coverImageUrl: null,
-	coverImageUrls: [],
-	heroTitle: "",
+	images: [],
 	welcomeMessage: "",
 	thankYouMessage: "",
 	categories: [],
 	themeId: null,
 	layoutId: null,
 	buttonStyle: null,
-	fontPairing: null,
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -140,7 +129,6 @@ const emptyDraft = (): WishlistDraft => ({
 });
 
 const emptyCopyTouched = (): CopyTouched => ({
-	heroTitle: false,
 	welcomeMessage: false,
 	thankYouMessage: false,
 });
@@ -161,7 +149,7 @@ const isStale = (updatedAt: number | null): boolean => {
 	return updatedAt < cutoff;
 };
 
-export const WISHLIST_WIZARD_STORE_VERSION = 1;
+export const WISHLIST_WIZARD_STORE_VERSION = 2;
 
 const LEGACY_FONT_PAIRING_TO_FONTS: Record<
 	string,
@@ -173,12 +161,16 @@ const LEGACY_FONT_PAIRING_TO_FONTS: Record<
 };
 
 type LegacyPersistedDraft = Partial<WishlistDraft> & {
-	coverImageUrl?: string | null;
+	displayName?: string;
+	heroTitle?: string;
 	fontPairing?: string | null;
+	coverImageUrl?: string | null;
+	coverImageUrls?: string[];
 };
 
 type LegacyPersistedWishlistWizardState = {
 	draft?: LegacyPersistedDraft;
+	copyTouched?: { welcomeMessage?: boolean; thankYouMessage?: boolean };
 	[key: string]: unknown;
 };
 
@@ -188,25 +180,36 @@ export const migratePersistedWishlistWizardState = (
 ): WishlistWizardState => {
 	const state = persistedState as LegacyPersistedWishlistWizardState;
 
-	if (version < 1 && state?.draft) {
-		const legacyCoverImageUrl = state.draft.coverImageUrl ?? null;
-		const legacyFontPairing = state.draft.fontPairing ?? null;
+	if (version < 2 && state?.draft) {
+		const legacyDraft = state.draft;
+		const legacyFontPairing = legacyDraft.fontPairing ?? null;
 		const fontsFromPairing = legacyFontPairing
 			? LEGACY_FONT_PAIRING_TO_FONTS[legacyFontPairing]
 			: undefined;
+		const {
+			displayName: _displayName,
+			heroTitle: _heroTitle,
+			fontPairing: _fontPairing,
+			coverImageUrl: _coverImageUrl,
+			coverImageUrls: _coverImageUrls,
+			...restDraft
+		} = legacyDraft;
 
 		return {
 			...state,
 			draft: {
-				...state.draft,
-				coverImageUrls:
-					state.draft.coverImageUrls ??
-					(legacyCoverImageUrl ? [legacyCoverImageUrl] : []),
+				...emptyDraft(),
+				...restDraft,
+				images: [],
 				headingFont:
-					state.draft.headingFont ?? fontsFromPairing?.headingFont ?? null,
-				bodyFont: state.draft.bodyFont ?? fontsFromPairing?.bodyFont ?? null,
+					legacyDraft.headingFont ?? fontsFromPairing?.headingFont ?? null,
+				bodyFont: legacyDraft.bodyFont ?? fontsFromPairing?.bodyFont ?? null,
 			},
-		} as WishlistWizardState;
+			copyTouched: {
+				welcomeMessage: Boolean(state.copyTouched?.welcomeMessage),
+				thankYouMessage: Boolean(state.copyTouched?.thankYouMessage),
+			},
+		} as unknown as WishlistWizardState;
 	}
 
 	return state as WishlistWizardState;
@@ -230,10 +233,8 @@ export const createWishlistWizardStore = () =>
 				setField: (key, value) => {
 					const isCopyField = (
 						k: keyof WishlistDraft,
-					): k is "heroTitle" | "welcomeMessage" | "thankYouMessage" =>
-						k === "heroTitle" ||
-						k === "welcomeMessage" ||
-						k === "thankYouMessage";
+					): k is "welcomeMessage" | "thankYouMessage" =>
+						k === "welcomeMessage" || k === "thankYouMessage";
 
 					set((state) => {
 						const nextDraft = { ...state.draft, [key]: value };
@@ -245,17 +246,6 @@ export const createWishlistWizardStore = () =>
 						}
 						if (key === "slug") {
 							nextSlugTouched = true;
-						}
-						if (
-							key === "displayName" &&
-							!state.copyTouched.heroTitle &&
-							state.draft.eventType
-						) {
-							const preset = EVENT_TYPE_PRESETS[state.draft.eventType];
-							nextDraft.heroTitle = resolveHeroTitle(
-								preset.defaultHeroTitleTemplate,
-								value as string,
-							);
 						}
 
 						return {
@@ -280,12 +270,6 @@ export const createWishlistWizardStore = () =>
 							categories: preset.defaultCategories,
 							themeId: preset.defaultThemeId,
 							layoutId: preset.defaultLayoutId,
-							heroTitle: copyTouched.heroTitle
-								? state.draft.heroTitle
-								: resolveHeroTitle(
-										preset.defaultHeroTitleTemplate,
-										state.draft.displayName,
-									),
 							welcomeMessage: copyTouched.welcomeMessage
 								? state.draft.welcomeMessage
 								: preset.defaultWelcomeMessage,
@@ -305,10 +289,6 @@ export const createWishlistWizardStore = () =>
 					set({
 						draft: {
 							...draft,
-							heroTitle: resolveHeroTitle(
-								preset.defaultHeroTitleTemplate,
-								draft.displayName,
-							),
 							welcomeMessage: preset.defaultWelcomeMessage,
 							thankYouMessage: preset.defaultThankYouMessage,
 						},
@@ -500,7 +480,6 @@ export const createWishlistWizardStore = () =>
 					set({
 						draft,
 						copyTouched: {
-							heroTitle: draft.heroTitle.trim().length > 0,
 							welcomeMessage: draft.welcomeMessage.trim().length > 0,
 							thankYouMessage: draft.thankYouMessage.trim().length > 0,
 						},

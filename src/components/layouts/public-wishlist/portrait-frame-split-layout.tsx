@@ -16,7 +16,7 @@ type Props = {
 
 export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 	const isCompact = mode === "compact";
-	const heading = wishlist.heroTitle ?? wishlist.title;
+	const heading = wishlist.title;
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
@@ -29,7 +29,7 @@ export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 						alt={heading}
 						className="aspect-[3/4] w-full max-w-56 rounded-sm border-8 border-card shadow-xl"
 						priority={!isCompact}
-						src={wishlist.coverImageUrls[0] ?? null}
+						src={wishlist.images[0]?.url ?? null}
 					/>
 				</div>
 				<div className="flex flex-col justify-center gap-3 px-6 py-10 sm:px-10">
@@ -39,11 +39,6 @@ export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 					<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
-					{wishlist.displayName && (
-						<p className="text-muted-foreground text-sm">
-							{wishlist.displayName}
-						</p>
-					)}
 					<GuestWelcomeSection
 						guest={wishlist.guest}
 						wishlistSlug={wishlist.slug}

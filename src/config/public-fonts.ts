@@ -102,29 +102,12 @@ const defaultBodyFont = bodyFontsById.get(
 	DEFAULT_BODY_FONT_ID,
 ) as PublicFontOption;
 
-/** Legacy `fontPairing` values map to a heading/body font pair. */
-export const LEGACY_FONT_PAIRING_TO_FONTS: Record<
-	string,
-	{ headingFont: PublicHeadingFontId; bodyFont: PublicBodyFontId }
-> = {
-	"serif-soft": { headingFont: "lora", bodyFont: "inter" },
-	"sans-modern": { headingFont: "inter", bodyFont: "inter" },
-	"rounded-friendly": { headingFont: "nunito", bodyFont: "nunito" },
-};
-
 export function resolveHeadingFont(
 	headingFont: string | null | undefined,
-	fontPairing?: string | null,
 ): PublicFontOption {
 	if (headingFont) {
 		const found = headingFontsById.get(headingFont);
 		if (found) return found;
-	}
-
-	if (fontPairing) {
-		const mapped = LEGACY_FONT_PAIRING_TO_FONTS[fontPairing];
-		if (mapped)
-			return headingFontsById.get(mapped.headingFont) ?? defaultHeadingFont;
 	}
 
 	return defaultHeadingFont;
@@ -132,16 +115,10 @@ export function resolveHeadingFont(
 
 export function resolveBodyFont(
 	bodyFont: string | null | undefined,
-	fontPairing?: string | null,
 ): PublicFontOption {
 	if (bodyFont) {
 		const found = bodyFontsById.get(bodyFont);
 		if (found) return found;
-	}
-
-	if (fontPairing) {
-		const mapped = LEGACY_FONT_PAIRING_TO_FONTS[fontPairing];
-		if (mapped) return bodyFontsById.get(mapped.bodyFont) ?? defaultBodyFont;
 	}
 
 	return defaultBodyFont;

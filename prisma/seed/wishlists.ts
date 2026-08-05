@@ -38,14 +38,22 @@ export async function seedBirthdayWishlist(db: SeedClient, ownerId: number) {
 			slug: "cumpleanos-de-paula-2026",
 			eventType: "birthday",
 			currency: "PEN",
-			heroTitle: "¡Celebra conmigo mi cumpleaños! 🎂",
 			welcomeMessage:
 				"Gracias por querer hacerme este día especial. Cada regalo, grande o pequeño, significa mucho para mí.",
 			thankYouMessage:
 				"¡Muchísimas gracias por tu regalo! Me hace muy feliz contar contigo en mi cumpleaños.",
-			displayName: "Paula Díaz",
 			eventDate: new Date("2026-08-15"),
-			coverImageUrl: coverImg("birthday-flowers"),
+			images: {
+				create: [
+					{
+						url: coverImg("birthday-flowers"),
+						width: 1200,
+						height: 500,
+						orientation: "landscape",
+						sortOrder: 0,
+					},
+				],
+			},
 			publishedAt: new Date(),
 		}),
 	);
@@ -249,14 +257,22 @@ export async function seedBabyShowerWishlist(db: SeedClient, ownerId: number) {
 			slug: "baby-shower-de-ana-2026",
 			eventType: "baby_shower",
 			currency: "USD",
-			heroTitle: "¡Bienvenido al mundo, pequeño! 👶",
 			welcomeMessage:
 				"Estamos emocionados de compartir este momento especial con ustedes. ¡Gracias por acompañarnos!",
 			thankYouMessage:
 				"¡Gracias de corazón por tu regalo para nuestro bebé! Cada detalle cuenta.",
-			displayName: "Ana Ramírez",
 			eventDate: new Date("2026-09-20"),
-			coverImageUrl: coverImg("baby-nursery-soft"),
+			images: {
+				create: [
+					{
+						url: coverImg("baby-nursery-soft"),
+						width: 1200,
+						height: 500,
+						orientation: "landscape",
+						sortOrder: 0,
+					},
+				],
+			},
 			publishedAt: new Date(),
 		}),
 	);
@@ -452,12 +468,20 @@ export async function seedWeddingWishlist(db: SeedClient, ownerId: number) {
 			slug: "boda-2026",
 			eventType: "wedding",
 			currency: "PEN",
-			heroTitle: "¡Nos casamos! 💍",
 			welcomeMessage:
 				"Queremos celebrar este día especial rodeados de las personas que más queremos.",
-			displayName: "Paula & Rodrigo",
 			eventDate: new Date("2026-12-12"),
-			coverImageUrl: coverImg("wedding-flowers-arch"),
+			images: {
+				create: [
+					{
+						url: coverImg("wedding-flowers-arch"),
+						width: 1200,
+						height: 500,
+						orientation: "landscape",
+						sortOrder: 0,
+					},
+				],
+			},
 			status: "draft",
 		}),
 	);

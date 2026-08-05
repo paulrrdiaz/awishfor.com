@@ -83,10 +83,6 @@ export const wishlistSlugSchema = z
 		wishlistSlugPattern,
 		"Slug must be 3-60 characters of lowercase letters, numbers, or hyphens, and cannot start or end with a hyphen",
 	);
-export const wishlistHeroTitleSchema = optionalNullableTrimmedString(
-	"Hero title",
-	160,
-);
 export const wishlistWelcomeMessageSchema = optionalNullableTrimmedString(
 	"Welcome message",
 	2_000,
@@ -94,10 +90,6 @@ export const wishlistWelcomeMessageSchema = optionalNullableTrimmedString(
 export const wishlistThankYouMessageSchema = optionalNullableTrimmedString(
 	"Thank-you message",
 	2_000,
-);
-export const wishlistDisplayNameSchema = optionalNullableTrimmedString(
-	"Display name",
-	120,
 );
 export const wishlistEventTimeSchema = z.preprocess((value) => {
 	if (value === undefined) {
@@ -127,29 +119,21 @@ export const wishlistDressCodeSchema = optionalNullableTrimmedString(
 	"Dress code",
 	240,
 );
-export const wishlistCoverImageUrlSchema = z.preprocess((value) => {
-	if (value === undefined) {
-		return undefined;
-	}
-
-	if (value === null) {
-		return null;
-	}
-
-	if (typeof value === "string") {
-		const trimmed = value.trim();
-		return trimmed === "" ? null : trimmed;
-	}
-
-	return value;
-}, z.url("Cover image URL must be a valid URL").nullable().optional());
+export const wishlistCoverImageInputSchema = z.object({
+	url: z.url("Cover image URL must be a valid URL"),
+	width: z.number().int().positive("Width must be a positive integer"),
+	height: z.number().int().positive("Height must be a positive integer"),
+});
 export const WISHLIST_MAX_COVER_IMAGES = 6;
-export const wishlistCoverImageUrlsSchema = z
-	.array(z.url("Cover image URL must be a valid URL"))
+export const wishlistCoverImagesSchema = z
+	.array(wishlistCoverImageInputSchema)
 	.max(
 		WISHLIST_MAX_COVER_IMAGES,
 		`You can add at most ${WISHLIST_MAX_COVER_IMAGES} cover images`,
 	);
+export type WishlistCoverImageInput = z.infer<
+	typeof wishlistCoverImageInputSchema
+>;
 export const wishlistThemeIdSchema = optionalNullableTrimmedString(
 	"Theme id",
 	64,
@@ -160,10 +144,6 @@ export const wishlistLayoutIdSchema = optionalNullableTrimmedString(
 );
 export const wishlistButtonStyleSchema = optionalNullableTrimmedString(
 	"Button style",
-	64,
-);
-export const wishlistFontPairingSchema = optionalNullableTrimmedString(
-	"Font pairing",
 	64,
 );
 export const wishlistHeadingFontSchema = optionalNullableTrimmedString(
@@ -181,20 +161,16 @@ const wishlistCreateUpdateShape = {
 	eventType: eventTypeSchema,
 	language: localeSchema.default(Locale.es),
 	currency: currencySchema.default(Currency.PEN),
-	heroTitle: wishlistHeroTitleSchema,
 	welcomeMessage: wishlistWelcomeMessageSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
-	displayName: wishlistDisplayNameSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
-	coverImageUrl: wishlistCoverImageUrlSchema,
-	coverImageUrls: wishlistCoverImageUrlsSchema.default([]),
+	coverImages: wishlistCoverImagesSchema.default([]),
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
 	buttonStyle: wishlistButtonStyleSchema,
-	fontPairing: wishlistFontPairingSchema,
 	headingFont: wishlistHeadingFontSchema,
 	bodyFont: wishlistBodyFontSchema,
 	showHowItWorks: z.boolean().default(true),
@@ -213,20 +189,16 @@ export const updateWishlistSchema = z.object({
 	eventType: eventTypeSchema.optional(),
 	language: localeSchema.optional(),
 	currency: currencySchema.optional(),
-	heroTitle: wishlistHeroTitleSchema,
 	welcomeMessage: wishlistWelcomeMessageSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
-	displayName: wishlistDisplayNameSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
-	coverImageUrl: wishlistCoverImageUrlSchema,
-	coverImageUrls: wishlistCoverImageUrlsSchema.optional(),
+	coverImages: wishlistCoverImagesSchema.optional(),
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
 	buttonStyle: wishlistButtonStyleSchema,
-	fontPairing: wishlistFontPairingSchema,
 	headingFont: wishlistHeadingFontSchema,
 	bodyFont: wishlistBodyFontSchema,
 	showHowItWorks: z.boolean().optional(),
@@ -252,20 +224,16 @@ export type CreateWishlistInput = {
 	eventType: EventType;
 	language?: Locale;
 	currency?: Currency;
-	heroTitle?: string | null;
 	welcomeMessage?: string | null;
 	thankYouMessage?: string | null;
-	displayName?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
 	eventLocation?: string | null;
 	dressCode?: string | null;
-	coverImageUrl?: string | null;
-	coverImageUrls?: string[];
+	coverImages?: WishlistCoverImageInput[];
 	themeId?: string | null;
 	layoutId?: string | null;
 	buttonStyle?: string | null;
-	fontPairing?: string | null;
 	headingFont?: string | null;
 	bodyFont?: string | null;
 	showHowItWorks?: boolean;
@@ -278,20 +246,16 @@ export type UpdateWishlistInput = {
 	eventType?: EventType;
 	language?: Locale;
 	currency?: Currency;
-	heroTitle?: string | null;
 	welcomeMessage?: string | null;
 	thankYouMessage?: string | null;
-	displayName?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
 	eventLocation?: string | null;
 	dressCode?: string | null;
-	coverImageUrl?: string | null;
-	coverImageUrls?: string[];
+	coverImages?: WishlistCoverImageInput[];
 	themeId?: string | null;
 	layoutId?: string | null;
 	buttonStyle?: string | null;
-	fontPairing?: string | null;
 	headingFont?: string | null;
 	bodyFont?: string | null;
 	showHowItWorks?: boolean;
@@ -305,12 +269,10 @@ export const updateWishlistSettingsSchema = z.object({
 	id: wishlistIdSchema,
 	title: wishlistTitleSchema,
 	slug: wishlistSlugSchema,
-	displayName: wishlistDisplayNameSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
-	heroTitle: wishlistHeroTitleSchema,
 	welcomeMessage: wishlistWelcomeMessageSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
 	language: localeSchema,
@@ -322,12 +284,10 @@ export const updateWishlistDesignSchema = z.object({
 	id: wishlistIdSchema,
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
-	fontPairing: wishlistFontPairingSchema,
 	headingFont: wishlistHeadingFontSchema,
 	bodyFont: wishlistBodyFontSchema,
 	buttonStyle: wishlistButtonStyleSchema,
-	coverImageUrl: wishlistCoverImageUrlSchema,
-	coverImageUrls: wishlistCoverImageUrlsSchema.default([]),
+	coverImages: wishlistCoverImagesSchema.default([]),
 });
 
 export type PublishWishlistInput = z.infer<typeof publishWishlistSchema>;

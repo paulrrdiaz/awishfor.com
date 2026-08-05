@@ -9,21 +9,24 @@ function makePersistedWishlist(
 		eventType: "wedding",
 		title: "Lista de Ana y Luis",
 		slug: "ana-y-luis",
-		displayName: "Ana y Luis",
 		eventDate: "2026-12-24T00:00:00.000Z",
 		eventTime: "18:30",
 		eventLocation: "Barranco",
 		dressCode: "Formal",
-		coverImageUrl: "https://example.com/cover.jpg",
-		coverImageUrls: ["https://example.com/cover.jpg"],
-		heroTitle: "Nuestra boda",
+		images: [
+			{
+				url: "https://example.com/cover.jpg",
+				width: 1600,
+				height: 900,
+				orientation: "landscape",
+			},
+		],
 		welcomeMessage: "Gracias por acompañarnos",
 		thankYouMessage: "Con cariño",
 		categories: [{ name: "Hogar" }, { name: "Cocina" }],
 		themeId: "cielo-suave",
-		layoutId: "grid",
+		layoutId: "magazine-editorial",
 		buttonStyle: "rounded",
-		fontPairing: "serif-soft",
 		headingFont: null,
 		bodyFont: null,
 		showHowItWorks: true,
@@ -57,8 +60,7 @@ describe("persistedWishlistToPreviewDraft", () => {
 			eventType: "wedding",
 			categories: ["Hogar", "Cocina"],
 			themeId: "cielo-suave",
-			layoutId: "grid",
-			fontPairing: "serif-soft",
+			layoutId: "magazine-editorial",
 			buttonStyle: "rounded",
 		});
 		expect(draft.gifts[0]).toMatchObject({
@@ -75,17 +77,15 @@ describe("persistedWishlistToPreviewDraft", () => {
 		const persisted = makePersistedWishlist();
 		const draft = persistedWishlistToPreviewDraft(persisted, {
 			themeId: "crema-elegante",
-			layoutId: "editorial",
-			fontPairing: "sans-modern",
+			layoutId: "carousel-hero",
 			buttonStyle: "pill",
-			coverImageUrl: null,
+			images: [],
 		});
 
 		expect(draft.themeId).toBe("crema-elegante");
-		expect(draft.layoutId).toBe("editorial");
-		expect(draft.fontPairing).toBe("sans-modern");
+		expect(draft.layoutId).toBe("carousel-hero");
 		expect(draft.buttonStyle).toBe("pill");
-		expect(draft.coverImageUrl).toBeNull();
+		expect(draft.images).toEqual([]);
 		expect(draft.title).toBe("Lista de Ana y Luis");
 	});
 

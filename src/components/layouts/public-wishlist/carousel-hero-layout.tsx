@@ -16,11 +16,11 @@ type Props = {
 
 export function CarouselHeroLayout({ wishlist, layout, mode }: Props) {
 	const isCompact = mode === "compact";
-	const heading = wishlist.heroTitle ?? wishlist.title;
+	const heading = wishlist.title;
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
-	const imageCount = wishlist.coverImageUrls.length;
+	const imageCount = wishlist.images.length;
 
 	return (
 		<div className="flex flex-col">
@@ -28,7 +28,7 @@ export function CarouselHeroLayout({ wishlist, layout, mode }: Props) {
 				<HeroCarouselGallery
 					alt={heading}
 					className="absolute inset-0 h-full w-full"
-					images={wishlist.coverImageUrls}
+					images={wishlist.images}
 					priority={!isCompact}
 				/>
 				<div className="absolute inset-0 bg-black/45" />
@@ -39,9 +39,6 @@ export function CarouselHeroLayout({ wishlist, layout, mode }: Props) {
 					<h1 className="mt-4 font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
-					{wishlist.displayName && (
-						<p className="mt-2 text-sm opacity-90">{wishlist.displayName}</p>
-					)}
 					<GuestWelcomeSection
 						className="mt-4"
 						guest={wishlist.guest}

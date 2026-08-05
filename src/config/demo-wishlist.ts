@@ -15,27 +15,36 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	eventType: "baby_shower",
 	language: "es",
 	currency: "PEN",
-	heroTitle: "Esperando a Mateo",
 	welcomeMessage:
 		"Gracias por acompañarnos en la llegada de Mateo. Aquí encontrarás algunas ideas para consentirlo.",
 	thankYouMessage: "¡Gracias por tu cariño y por celebrar con nosotros!",
-	// Shown as the preview subtitle: hosts, date and venue in one line.
-	displayName: "Ana & Diego · 13 de septiembre · Jardín Las Acacias",
 	eventDate: "2026-09-13",
 	eventTime: "16:00",
 	eventLocation: "Jardín Las Acacias",
 	dressCode: null,
-	coverImageUrl:
-		"https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=1200&h=480&fit=crop&auto=format",
-	coverImageUrls: [
-		"https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=280&h=200&fit=crop&auto=format",
-		"https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=320&h=280&fit=crop&auto=format",
-		"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=280&h=200&fit=crop&auto=format",
+	images: [
+		{
+			url: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9",
+			width: 1600,
+			height: 1000,
+			orientation: "landscape",
+		},
+		{
+			url: "https://images.unsplash.com/photo-1492725764893-90b379c2b6e7",
+			width: 1600,
+			height: 1000,
+			orientation: "landscape",
+		},
+		{
+			url: "https://images.unsplash.com/photo-1519689680058-324335c77eba",
+			width: 1600,
+			height: 1000,
+			orientation: "landscape",
+		},
 	],
 	themeId: "cielo-suave",
-	layoutId: "grid",
+	layoutId: "collage-staggered",
 	buttonStyle: "pill",
-	fontPairing: "serif-soft",
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,

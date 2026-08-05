@@ -54,18 +54,9 @@ export const sampleProgress: PublicWishlistProgress = {
 
 export const sampleWishlist: Pick<
 	PublicWishlistViewModel,
-	| "heroTitle"
-	| "title"
-	| "displayName"
-	| "coverImageUrl"
-	| "eventDate"
-	| "eventTime"
-	| "eventLocation"
+	"title" | "eventDate" | "eventTime" | "eventLocation"
 > = {
-	heroTitle: "Baby shower de Emilia",
-	title: "Wishlist de Emilia",
-	displayName: "Ana y Paulo",
-	coverImageUrl: null,
+	title: "Baby shower de Emilia",
 	eventDate: "2026-09-12",
 	eventTime: "16:00",
 	eventLocation: "Miraflores, Lima",

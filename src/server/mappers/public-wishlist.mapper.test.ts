@@ -4,12 +4,15 @@ import type {
 	Gift,
 	Purchase,
 	Wishlist,
+	WishlistImage,
 } from "@/generated/prisma/client";
 import { mapPublicWishlist } from "@/server/mappers/public-wishlist.mapper";
 
 const now = new Date("2026-06-26T12:00:00Z");
 
-function makeWishlist(overrides: Partial<Wishlist> = {}): Wishlist {
+function makeWishlist(
+	overrides: Partial<Wishlist> = {},
+): Wishlist & { images: WishlistImage[] } {
 	return {
 		id: "wl-1",
 		ownerId: 1,
@@ -18,20 +21,15 @@ function makeWishlist(overrides: Partial<Wishlist> = {}): Wishlist {
 		eventType: "birthday",
 		language: "es",
 		currency: "PEN",
-		heroTitle: null,
 		welcomeMessage: null,
 		thankYouMessage: null,
-		displayName: null,
 		eventDate: null,
 		eventTime: null,
 		eventLocation: null,
 		dressCode: null,
-		coverImageUrl: null,
-		coverImageUrls: [],
 		themeId: null,
 		layoutId: null,
 		buttonStyle: null,
-		fontPairing: null,
 		headingFont: null,
 		bodyFont: null,
 		showHowItWorks: true,
@@ -41,6 +39,7 @@ function makeWishlist(overrides: Partial<Wishlist> = {}): Wishlist {
 		createdAt: now,
 		updatedAt: now,
 		...overrides,
+		images: [],
 	};
 }
 
@@ -348,6 +347,43 @@ describe("mapPublicWishlist", () => {
 			expect(result.progress.totalUnits).toBe(3);
 			expect(result.progress.availableGiftCount).toBe(1);
 		});
+	});
+
+	it("maps ordered cover images with dimensions and orientation", () => {
+		const result = mapPublicWishlist({
+			...makeWishlist(),
+			categories: [],
+			gifts: [],
+			images: [
+				{
+					id: "img-1",
+					wishlistId: "wl-1",
+					url: "https://example.com/a.jpg",
+					width: 1600,
+					height: 900,
+					orientation: "landscape",
+					sortOrder: 0,
+					createdAt: now,
+				},
+			],
+		});
+		expect(result.images).toEqual([
+			{
+				url: "https://example.com/a.jpg",
+				width: 1600,
+				height: 900,
+				orientation: "landscape",
+			},
+		]);
+	});
+
+	it("maps an empty image collection when the wishlist has no cover images", () => {
+		const result = mapPublicWishlist({
+			...makeWishlist(),
+			categories: [],
+			gifts: [],
+		});
+		expect(result.images).toEqual([]);
 	});
 
 	it("maps categories", () => {

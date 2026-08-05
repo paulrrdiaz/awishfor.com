@@ -72,11 +72,6 @@ export function ExamplePreview() {
 					<div className="m-serif font-semibold text-[26px] text-[var(--fg)] leading-[1.05] lg:text-[40px]">
 						{preview.title}
 					</div>
-					{preview.displayName && (
-						<div className="mt-[5px] text-[11px] text-[var(--muted-fg)] lg:mt-[6px] lg:text-[13px]">
-							{preview.displayName}
-						</div>
-					)}
 				</div>
 
 				<div className="grid grid-cols-[1fr_1.1fr_1fr] items-end gap-2 bg-[linear-gradient(180deg,var(--card),var(--bg))] px-[18px] pb-5 lg:grid-cols-[1fr_1.15fr_1fr] lg:gap-3 lg:px-8 lg:pb-[30px]">

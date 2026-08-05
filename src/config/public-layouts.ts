@@ -22,7 +22,6 @@ export type PublicLayoutPreset = {
 	supportsCarousel: boolean;
 	/** Recommended source-image shape for this layout's hero composition. */
 	imageGuidance: LayoutImageGuidance;
-	deprecated?: boolean;
 };
 
 export const IMAGE_ORIENTATION_GLYPHS: Record<ImageOrientation, string> = {
@@ -51,17 +50,6 @@ export function buildImageGuidanceHint(layout: PublicLayoutPreset): string {
 
 const layoutList: PublicLayoutPreset[] = [
 	{
-		id: "hero-cinematic",
-		label: "Cinematográfico",
-		description: "Portada cinematográfica a pantalla completa",
-		giftColumns: 2,
-		giftCardStyle: "card",
-		showCategoryDividers: true,
-		heroImageSlots: 6,
-		supportsCarousel: true,
-		imageGuidance: { ratio: "16:9", orientation: "landscape" },
-	},
-	{
 		id: "split-image-right",
 		label: "Imagen Fija",
 		description: "Texto a la izquierda, imagen fija a la derecha",
@@ -71,17 +59,6 @@ const layoutList: PublicLayoutPreset[] = [
 		heroImageSlots: 1,
 		supportsCarousel: false,
 		imageGuidance: { ratio: "3:4", orientation: "portrait" },
-	},
-	{
-		id: "arch-split",
-		label: "Arco Dividido",
-		description: "Título grande con imagen en arco",
-		giftColumns: 3,
-		giftCardStyle: "card",
-		showCategoryDividers: true,
-		heroImageSlots: 6,
-		supportsCarousel: true,
-		imageGuidance: { ratio: "2:3", orientation: "portrait" },
 	},
 	{
 		id: "collage-staggered",
@@ -147,29 +124,6 @@ const layoutList: PublicLayoutPreset[] = [
 		},
 	},
 	{
-		id: "wedding-formal",
-		label: "Boda Formal",
-		description: "Monograma con divisores ornamentales",
-		giftColumns: 2,
-		giftCardStyle: "card",
-		showCategoryDividers: true,
-		heroImageSlots: 1,
-		supportsCarousel: false,
-		// Known heroImageSlots/no-render mismatch is intentionally out of scope.
-		imageGuidance: { ratio: "1:1", orientation: "square" },
-	},
-	{
-		id: "panoramic-band",
-		label: "Banda Panorámica",
-		description: "Banner panorámico con tarjeta flotante",
-		giftColumns: 3,
-		giftCardStyle: "card",
-		showCategoryDividers: true,
-		heroImageSlots: 6,
-		supportsCarousel: true,
-		imageGuidance: { ratio: "16:9", orientation: "landscape" },
-	},
-	{
 		id: "carousel-hero",
 		label: "Carrusel Principal",
 		description: "Galería de portada con carrusel",
@@ -179,21 +133,6 @@ const layoutList: PublicLayoutPreset[] = [
 		heroImageSlots: 6,
 		supportsCarousel: true,
 		imageGuidance: { ratio: "16:9", orientation: "landscape" },
-	},
-	{
-		id: "diagonal-duo",
-		label: "Dúo Diagonal",
-		description: "Bloques diagonales con fotos circular y enmarcada",
-		giftColumns: 2,
-		giftCardStyle: "card",
-		showCategoryDividers: true,
-		heroImageSlots: 3,
-		supportsCarousel: false,
-		imageGuidance: {
-			ratio: "3:4",
-			orientation: "portrait",
-			centeredSubject: true,
-		},
 	},
 	{
 		id: "scrapbook-polaroids",
@@ -216,42 +155,6 @@ const layoutList: PublicLayoutPreset[] = [
 		heroImageSlots: 1,
 		supportsCarousel: false,
 		imageGuidance: { ratio: "3:4", orientation: "portrait" },
-	},
-	{
-		id: "grid",
-		label: "Grid",
-		description: "Clásico: héroe compacto y grid denso de regalos",
-		giftColumns: 3,
-		giftCardStyle: "card",
-		showCategoryDividers: true,
-		heroImageSlots: 1,
-		supportsCarousel: false,
-		imageGuidance: { ratio: "16:9", orientation: "landscape" },
-		deprecated: true,
-	},
-	{
-		id: "editorial",
-		label: "Editorial",
-		description: "Clásico: columna angosta centrada, más espacio en blanco",
-		giftColumns: 2,
-		giftCardStyle: "card",
-		showCategoryDividers: true,
-		heroImageSlots: 1,
-		supportsCarousel: false,
-		imageGuidance: { ratio: "16:9", orientation: "landscape" },
-		deprecated: true,
-	},
-	{
-		id: "minimal",
-		label: "Minimal",
-		description: "Clásico: columna única de filas horizontales",
-		giftColumns: 1,
-		giftCardStyle: "row",
-		showCategoryDividers: false,
-		heroImageSlots: 1,
-		supportsCarousel: false,
-		imageGuidance: { ratio: "16:9", orientation: "landscape" },
-		deprecated: true,
 	},
 ];
 

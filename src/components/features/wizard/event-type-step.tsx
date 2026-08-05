@@ -3,8 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import { resolveTheme } from "@/config/public-themes";
 import { EventType } from "@/generated/prisma/enums";
@@ -24,10 +22,6 @@ const EVENT_TYPE_ICONS: Record<EventType, string> = {
 export function EventTypeStep() {
 	const selectedType = useWizardStore((s) => s.draft.eventType);
 	const setEventType = useWizardStore((s) => s.setEventType);
-	const heroTitle = useWizardStore((s) => s.draft.heroTitle);
-	const heroTitleTouched = useWizardStore((s) => s.copyTouched.heroTitle);
-	const setField = useWizardStore((s) => s.setField);
-	const regenerateCopy = useWizardStore((s) => s.regenerateCopy);
 	const searchParams = useSearchParams();
 
 	useEffect(() => {
@@ -83,36 +77,6 @@ export function EventTypeStep() {
 						);
 					})}
 				</div>
-
-				{selectedType && (
-					<Field className="mt-6">
-						<div className="flex items-center justify-between gap-2">
-							<FieldLabel htmlFor="heroTitle">Título de la wishlist</FieldLabel>
-							{heroTitleTouched && (
-								<Button
-									className="h-auto p-0 text-xs"
-									onClick={regenerateCopy}
-									type="button"
-									variant="link"
-								>
-									Restablecer sugerencia
-								</Button>
-							)}
-						</div>
-						<Input
-							className="min-h-11"
-							id="heroTitle"
-							onChange={(e) => setField("heroTitle", e.target.value)}
-							placeholder="Ej. Baby shower de María"
-							type="text"
-							value={heroTitle}
-						/>
-						<FieldDescription className="text-xs">
-							Encabezado principal de tu página pública. Se sugiere
-							automáticamente según la ocasión.
-						</FieldDescription>
-					</Field>
-				)}
 			</div>
 
 			<div className="hidden flex-1 flex-col justify-center bg-background px-10 py-9 lg:flex">
@@ -127,7 +91,7 @@ export function EventTypeStep() {
 								: "Tu ocasión"}
 						</p>
 						<h2 className="mt-2 font-serif text-2xl text-foreground">
-							{heroTitle || "Tu wishlist especial"}
+							Tu wishlist especial
 						</h2>
 						<p className="mt-3 text-muted-foreground text-sm">
 							Un encabezado cálido y listo para personalizar.

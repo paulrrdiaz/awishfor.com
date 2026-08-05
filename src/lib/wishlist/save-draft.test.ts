@@ -10,21 +10,24 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	eventType: "wedding",
 	title: "Lista de boda",
 	slug: "lista-de-boda",
-	displayName: "",
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
 	eventLocation: "",
 	dressCode: "",
-	coverImageUrl: null,
-	coverImageUrls: [],
-	heroTitle: "Nuestra boda",
+	images: [
+		{
+			url: "https://example.com/cover.jpg",
+			width: 1600,
+			height: 900,
+			orientation: "landscape",
+		},
+	],
 	welcomeMessage: "Bienvenidos",
 	thankYouMessage: "Gracias",
 	categories: ["Hogar", "Viaje"],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
-	fontPairing: "serif-soft",
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -69,20 +72,18 @@ const makeServerDraft = (
 	eventType: "wedding",
 	language: "es",
 	currency: "PEN",
-	heroTitle: null,
 	welcomeMessage: "Bienvenidos",
 	thankYouMessage: null,
-	displayName: null,
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
 	eventLocation: null,
 	dressCode: null,
-	coverImageUrl: null,
-	coverImageUrls: [],
+	coverImages: [
+		{ url: "https://example.com/cover.jpg", width: 1600, height: 900 },
+	],
 	themeId: "soft",
 	layoutId: "editorial",
 	buttonStyle: "pill",
-	fontPairing: "serif-soft",
 	headingFont: null,
 	bodyFont: null,
 	showHowItWorks: true,
@@ -141,10 +142,16 @@ describe("save draft mapping", () => {
 
 		expect(result.savedWishlistId).toBe("wishlist_123");
 		expect(result.lastSavedAt).toBe(123456789);
-		expect(result.draft.displayName).toBe("");
 		expect(result.draft.eventLocation).toBe("");
-		expect(result.draft.heroTitle).toBe("");
 		expect(result.draft.thankYouMessage).toBe("");
+		expect(result.draft.images).toEqual([
+			{
+				url: "https://example.com/cover.jpg",
+				width: 1600,
+				height: 900,
+				orientation: "landscape",
+			},
+		]);
 		expect(result.draft.gifts).toEqual([
 			expect.objectContaining({
 				id: "generated_1",
