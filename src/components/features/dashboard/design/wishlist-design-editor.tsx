@@ -204,7 +204,7 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 					</div>
 				</section>
 
-				<section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+				<section className="self-start overflow-hidden rounded-2xl border bg-card shadow-sm">
 					<div className="flex items-center justify-between gap-3 border-b bg-muted/40 px-4 py-3">
 						<div>
 							<p className="font-medium text-sm">Vista previa</p>

@@ -75,15 +75,14 @@ describe("getAllLayouts", () => {
 		}
 	});
 
-	it("gives fixed-slot layouts the right slot counts without carousel support", () => {
+	it("gives fixed-slot layouts the right slot counts and capabilities", () => {
 		const byId = Object.fromEntries(layouts.map((l) => [l.id, l]));
 		expect(byId["overlap-duo"]?.heroImageSlots).toBe(2);
 		expect(byId["overlap-duo"]?.supportsCarousel).toBe(false);
-		for (const id of [
-			"collage-staggered",
-			"arch-trio",
-			"scrapbook-polaroids",
-		]) {
+		expect(byId["collage-staggered"]?.heroImageSlots).toBe(3);
+		expect(byId["collage-staggered"]?.supportsCarousel).toBe(true);
+		expect(byId["collage-staggered"]?.giftCardStyle).toBe("collage");
+		for (const id of ["arch-trio", "scrapbook-polaroids"]) {
 			expect(byId[id]?.heroImageSlots).toBe(3);
 			expect(byId[id]?.supportsCarousel).toBe(false);
 		}

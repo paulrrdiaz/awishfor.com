@@ -20,7 +20,7 @@ const priorityBadgeVariants = cva(
 const PRIORITY_LABELS = {
 	low: "Opcional",
 	medium: "Sugerido",
-	high: "Infaltable",
+	high: "★ Infaltable",
 } as const;
 
 type Props = VariantProps<typeof priorityBadgeVariants> & {

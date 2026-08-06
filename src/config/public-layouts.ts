@@ -14,7 +14,7 @@ export type PublicLayoutPreset = {
 	label: string;
 	description: string;
 	giftColumns: number;
-	giftCardStyle: "card" | "row" | "minimal";
+	giftCardStyle: "card" | "row" | "minimal" | "collage";
 	showCategoryDividers: boolean;
 	/** How many cover images the hero composition displays at once. */
 	heroImageSlots: number;
@@ -65,10 +65,10 @@ const layoutList: PublicLayoutPreset[] = [
 		label: "Collage Escalonado",
 		description: "Collage escalonado de 3 imágenes",
 		giftColumns: 2,
-		giftCardStyle: "card",
+		giftCardStyle: "collage",
 		showCategoryDividers: true,
 		heroImageSlots: 3,
-		supportsCarousel: false,
+		supportsCarousel: true,
 		imageGuidance: {
 			ratio: "3:4",
 			orientation: "portrait",

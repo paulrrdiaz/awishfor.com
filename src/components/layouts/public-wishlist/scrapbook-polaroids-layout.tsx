@@ -97,7 +97,7 @@ export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
 				</div>
 				{!isCompact && (
 					<div className="pb-8 text-center">
-						<HeroCtas />
+						<HeroCtas showHowItWorks={wishlist.showHowItWorks} />
 					</div>
 				)}
 			</header>

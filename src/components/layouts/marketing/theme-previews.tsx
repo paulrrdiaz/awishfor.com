@@ -24,7 +24,7 @@ export function ThemePreviews() {
 		themes.find((theme) => theme.id === selectedThemeId) ?? themes[0];
 	if (!selectedTheme) return null;
 
-	const previewPrimary = mixWithWhite(selectedTheme.preview.primary, 0.35);
+	const previewPrimary = mixWithWhite(selectedTheme.preview.primary, 0.12);
 
 	return (
 		<section

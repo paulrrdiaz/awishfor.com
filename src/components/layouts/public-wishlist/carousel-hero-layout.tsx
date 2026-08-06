@@ -53,7 +53,7 @@ export function CarouselHeroLayout({ wishlist, layout, mode }: Props) {
 					)}
 					{!isCompact && (
 						<div className="mt-6">
-							<HeroCtas />
+							<HeroCtas showHowItWorks={wishlist.showHowItWorks} />
 						</div>
 					)}
 				</div>

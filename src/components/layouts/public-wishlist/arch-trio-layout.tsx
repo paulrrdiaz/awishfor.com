@@ -62,7 +62,10 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 						wishlistSlug={wishlist.slug}
 					/>
 					{!isCompact && (
-						<HeroCtas className="justify-center lg:justify-start" />
+						<HeroCtas
+							className="justify-center lg:justify-start"
+							showHowItWorks={wishlist.showHowItWorks}
+						/>
 					)}
 				</div>
 			</header>

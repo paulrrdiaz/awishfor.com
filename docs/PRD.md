@@ -272,9 +272,8 @@ Optional CTA:
 3. Countdown
 4. Welcome message
 5. Gift list
-6. How it works
-7. Thank-you message
-8. Footer
+6. Thank-you message
+7. Footer
 
 ### Event details
 
@@ -311,9 +310,9 @@ Place countdown below event details and above welcome/gifts.
 
 > Puedes comprar el regalo donde prefieras. Solo recuerda marcarlo como comprado para evitar duplicados.
 
-### How it works
+### How it works drawer
 
-Shown by default.
+Shown by default from a `Cómo funciona` hero button when `showHowItWorks` is enabled. It opens a dismissible, theme-aware bottom drawer; it is not an inline public-page section.
 
 Field:
 
@@ -323,10 +322,11 @@ showHowItWorks Boolean @default(true)
 
 Default copy:
 
-> ¿Cómo funciona?  
-> 1. Elige un regalo disponible.  
-> 2. Puedes comprarlo en la tienda sugerida o donde prefieras.  
-> 3. Marca el regalo como comprado para evitar duplicados.
+> ¿Cómo funciona?
+>
+> 1. Elige un regalo — Explora la lista y elige el regalo que quieres dar.
+> 2. Márcalo como regalado — Haz clic en el botón y confirma tu regalo.
+> 3. ¡Listo! — Queda reservado para que nadie más lo repita — el anfitrión también lo verá.
 
 ### Gift CTA behavior
 

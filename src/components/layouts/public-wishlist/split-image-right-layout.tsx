@@ -35,7 +35,12 @@ export function SplitImageRightLayout({ wishlist, layout, mode }: Props) {
 						guest={wishlist.guest}
 						wishlistSlug={wishlist.slug}
 					/>
-					{!isCompact && <HeroCtas className="justify-start" />}
+					{!isCompact && (
+						<HeroCtas
+							className="justify-start"
+							showHowItWorks={wishlist.showHowItWorks}
+						/>
+					)}
 				</div>
 				<div className="relative h-56 sm:h-72 lg:h-auto">
 					<HeroImageSlot

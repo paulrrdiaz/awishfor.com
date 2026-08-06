@@ -11,12 +11,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	args: {
+		showHowItWorks: true,
 		variant: "default",
 	},
 };
 
 export const OnPhoto: Story = {
 	args: {
+		showHowItWorks: true,
 		variant: "on-photo",
 	},
 	decorators: [

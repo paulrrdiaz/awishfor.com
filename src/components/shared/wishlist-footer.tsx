@@ -1,12 +1,47 @@
 import { SUPPORT_EMAIL } from "@/config/contact";
+import { cn } from "@/lib/utils";
 
 type Props = {
 	thankYouMessage?: string | null;
+	className?: string;
+	variant?: "default" | "compact";
+	wishlistSlug?: string;
 };
 
-export function WishlistFooter({ thankYouMessage }: Props) {
+export function WishlistFooter({
+	thankYouMessage,
+	className,
+	variant = "default",
+	wishlistSlug,
+}: Props) {
+	if (variant === "compact") {
+		return (
+			<footer
+				className={cn(
+					"flex min-h-[50px] items-center justify-center border-border border-t px-5 py-3 text-center",
+					className,
+				)}
+			>
+				<p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.22em]">
+					Hecho con cariño en A Wish For
+					{wishlistSlug && (
+						<>
+							<span aria-hidden="true"> · </span>
+							<a
+								className="transition-colors hover:text-foreground"
+								href={`/w/${wishlistSlug}`}
+							>
+								awishfor.com/w/{wishlistSlug}
+							</a>
+						</>
+					)}
+				</p>
+			</footer>
+		);
+	}
+
 	return (
-		<footer className="mt-auto border-t py-10 text-center">
+		<footer className={cn("mt-auto border-t py-10 text-center", className)}>
 			{thankYouMessage && (
 				<p className="mx-auto mb-6 max-w-xl text-base leading-relaxed">
 					{thankYouMessage}

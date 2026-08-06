@@ -1,7 +1,8 @@
 "use client";
 
+import Autoplay from "embla-carousel-autoplay";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Carousel,
 	CarouselContent,
@@ -19,7 +20,7 @@ export function HeroPlaceholder({ className }: PlaceholderProps) {
 	return (
 		<div
 			aria-hidden
-			className={cn("bg-accent/50", className)}
+			className={cn("bg-ph-tint", className)}
 			style={{
 				backgroundImage:
 					"repeating-linear-gradient(135deg, rgba(0,0,0,.05) 0 8px, transparent 8px 16px)",
@@ -74,10 +75,16 @@ export function HeroImageSlot({
 	);
 }
 
-function GalleryControls({ total }: { total: number }) {
+type GalleryControlsProps = {
+	total: number;
+	variant?: "default" | "compact";
+};
+
+function GalleryControls({ total, variant = "default" }: GalleryControlsProps) {
 	const { scrollPrev, scrollNext, canScrollPrev, canScrollNext, api } =
 		useCarousel();
 	const [selectedIndex, setSelectedIndex] = useState(0);
+	const isCompact = variant === "compact";
 
 	useEffect(() => {
 		if (!api) return;
@@ -95,7 +102,10 @@ function GalleryControls({ total }: { total: number }) {
 		<>
 			<button
 				aria-label="Foto anterior"
-				className="absolute top-1/2 left-3 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-md transition-opacity disabled:opacity-40"
+				className={cn(
+					"absolute top-1/2 z-10 flex -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground transition-[opacity,transform] hover:scale-105 disabled:opacity-40",
+					isCompact ? "left-1.5 size-7 shadow-sm" : "left-3 size-8 shadow-md",
+				)}
 				disabled={!canScrollPrev}
 				onClick={scrollPrev}
 				type="button"
@@ -104,14 +114,22 @@ function GalleryControls({ total }: { total: number }) {
 			</button>
 			<button
 				aria-label="Foto siguiente"
-				className="absolute top-1/2 right-3 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-md transition-opacity disabled:opacity-40"
+				className={cn(
+					"absolute top-1/2 z-10 flex -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground transition-[opacity,transform] hover:scale-105 disabled:opacity-40",
+					isCompact ? "right-1.5 size-7 shadow-sm" : "right-3 size-8 shadow-md",
+				)}
 				disabled={!canScrollNext}
 				onClick={scrollNext}
 				type="button"
 			>
 				›
 			</button>
-			<div className="absolute right-0 bottom-3 left-0 z-10 flex flex-col items-center gap-1.5">
+			<div
+				className={cn(
+					"absolute right-0 left-0 z-10 flex flex-col items-center gap-1.5",
+					isCompact ? "bottom-2" : "bottom-3",
+				)}
+			>
 				<div className="flex gap-1.5">
 					{Array.from({ length: total }).map((_, index) => (
 						<span
@@ -124,9 +142,11 @@ function GalleryControls({ total }: { total: number }) {
 						/>
 					))}
 				</div>
-				<span className="rounded-full bg-black/30 px-2.5 py-1 font-mono text-[10px] text-white tracking-wide">
-					Galería · foto {selectedIndex + 1}/{total}
-				</span>
+				{!isCompact && (
+					<span className="rounded-full bg-black/30 px-2.5 py-1 font-mono text-[10px] text-white tracking-wide">
+						Galería · foto {selectedIndex + 1}/{total}
+					</span>
+				)}
 			</div>
 		</>
 	);
@@ -138,9 +158,11 @@ type HeroCarouselGalleryProps = {
 	images: HeroCoverImage[];
 	alt: string;
 	className?: string;
+	controlsVariant?: "default" | "compact";
 	maxImages?: number;
 	priority: boolean;
 	sizes?: string;
+	startIndex?: number;
 };
 
 /**
@@ -152,10 +174,13 @@ export function HeroCarouselGallery({
 	images,
 	alt,
 	className,
+	controlsVariant = "default",
 	maxImages = 6,
 	priority,
 	sizes = "100vw",
+	startIndex = 0,
 }: HeroCarouselGalleryProps) {
+	const autoplay = useRef(Autoplay({ delay: 5000 }));
 	const visibleImages = images.slice(0, maxImages);
 
 	if (visibleImages.length <= 1) {
@@ -172,7 +197,11 @@ export function HeroCarouselGallery({
 	}
 
 	return (
-		<Carousel className={cn("relative", className)} opts={{ loop: true }}>
+		<Carousel
+			className={cn("relative", className)}
+			opts={{ duration: 28, loop: true, startIndex, active: true }}
+			plugins={[autoplay.current]}
+		>
 			<CarouselContent className="-ml-0 h-full">
 				{visibleImages.map((image, index) => (
 					<CarouselItem className="h-full pl-0" key={image.url}>
@@ -190,7 +219,7 @@ export function HeroCarouselGallery({
 					</CarouselItem>
 				))}
 			</CarouselContent>
-			<GalleryControls total={visibleImages.length} />
+			<GalleryControls total={visibleImages.length} variant={controlsVariant} />
 		</Carousel>
 	);
 }

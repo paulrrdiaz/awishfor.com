@@ -6,9 +6,9 @@ const statusBadgeVariants = cva(
 	{
 		variants: {
 			status: {
-				available: "bg-secondary text-secondary-foreground",
-				partial: "bg-primary/15 text-primary",
-				purchased: "bg-muted text-muted-foreground",
+				available: "bg-[#e4f3e8] text-[#2f7d43]",
+				partial: "bg-[#fbf1dc] text-[#9a6f1e]",
+				purchased: "bg-[#eaecef] text-[#71798a]",
 				hidden: "bg-muted text-muted-foreground",
 			},
 		},
@@ -21,7 +21,7 @@ const statusBadgeVariants = cva(
 const STATUS_LABELS = {
 	available: "Disponible",
 	partial: "Parcial",
-	purchased: "Comprado",
+	purchased: "✓ Comprado",
 	hidden: "Oculto",
 } as const;
 

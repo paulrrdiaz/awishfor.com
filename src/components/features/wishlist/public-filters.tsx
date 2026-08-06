@@ -1,11 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import gsap from "gsap";
+import {
+	type ReactNode,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { PurchaseGiftModal } from "@/components/features/wishlist/purchase-gift-modal";
 import { EmptyState } from "@/components/shared/empty-state";
 import { GiftGrid } from "@/components/shared/gift-grid";
+import {
+	type GiftGridColumns,
+	GiftGridToggle,
+} from "@/components/shared/gift-grid-toggle";
 import { GiftList } from "@/components/shared/gift-list";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
+import { useReducedMotion } from "@/lib/gsap/use-reduced-motion";
 import {
 	buildCategoryFilters,
 	countByStatusFilter,
@@ -26,6 +38,12 @@ type Props = {
 	categories: PublicCategoryViewModel[];
 	layout: PublicLayoutPreset;
 	actionsEnabled?: boolean;
+	compact?: boolean;
+	showCategories?: boolean;
+	showCounts?: boolean;
+	showGridToggle?: boolean;
+	showSort?: boolean;
+	toolbarLeading?: ReactNode;
 };
 
 type EmptyStateCopy = { copy: string; ctaLabel: string };
@@ -76,17 +94,33 @@ export function PublicGiftFilters({
 	categories,
 	layout,
 	actionsEnabled = false,
+	compact = false,
+	showCategories = true,
+	showCounts = true,
+	showGridToggle = false,
+	showSort = true,
+	toolbarLeading,
 }: Props) {
 	const [activeFilter, setActiveFilter] = useState<GiftFilter>(DEFAULT_FILTER);
 	const [sortMode, setSortMode] = useState<GiftSortMode>(DEFAULT_SORT_MODE);
+	const [gridColumns, setGridColumns] = useState<GiftGridColumns>(3);
 	const [selectedGift, setSelectedGift] = useState<PublicGiftViewModel | null>(
 		null,
 	);
+	const resultsRef = useRef<HTMLDivElement>(null);
+	const reducedMotion = useReducedMotion();
 
 	const counts = useMemo(() => countByStatusFilter(gifts), [gifts]);
 	const categoryFilters = useMemo(
 		() => buildCategoryFilters(categories, gifts),
 		[categories, gifts],
+	);
+	const categoryNames = useMemo(
+		() =>
+			Object.fromEntries(
+				categories.map((category) => [category.id, category.name]),
+			),
+		[categories],
 	);
 
 	const filteredGifts = useMemo(() => {
@@ -112,41 +146,88 @@ export function PublicGiftFilters({
 		setActiveFilter({ kind: "category", categoryId });
 	}
 
-	const chipBase =
-		"shrink-0 snap-start rounded-full border px-3 py-1 text-sm font-medium transition-colors cursor-pointer";
+	const activeFilterKey =
+		activeFilter.kind === "status"
+			? activeFilter.value
+			: activeFilter.categoryId;
+	const resultsRenderKey = `${activeFilterKey}|${filteredGifts.map((gift) => gift.id).join(":")}|${gridColumns}|${layout.giftCardStyle}`;
+
+	useLayoutEffect(() => {
+		const resultsElement = resultsRef.current;
+		if (!resultsElement) return;
+
+		gsap.killTweensOf(resultsElement);
+		if (reducedMotion) {
+			gsap.set(resultsElement, { clearProps: "opacity,visibility" });
+			return;
+		}
+
+		gsap.fromTo(
+			resultsElement,
+			{ autoAlpha: 0 },
+			{
+				autoAlpha: 1,
+				duration: 0.24,
+				ease: "power1.out",
+				id: `gift-results-${resultsRenderKey}`,
+			},
+		);
+
+		return () => {
+			gsap.killTweensOf(resultsElement);
+			gsap.set(resultsElement, { clearProps: "opacity,visibility" });
+		};
+	}, [reducedMotion, resultsRenderKey]);
+
+	const chipBase = compact
+		? "shrink-0 snap-start cursor-pointer rounded-full border px-3 py-1.5 font-medium text-xs transition-colors"
+		: "shrink-0 snap-start cursor-pointer rounded-full border px-3 py-1 font-medium text-sm transition-colors";
 
 	function chipClass(active: boolean): string {
 		return active
 			? "border-foreground bg-foreground text-background"
-			: "border-border bg-transparent text-foreground hover:bg-foreground/5";
+			: "border-border bg-card text-foreground hover:bg-foreground/5";
 	}
 
 	return (
 		<div>
-			<div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-start">
+			<div
+				className={
+					compact
+						? "flex items-start gap-3 pb-4"
+						: "flex flex-col gap-3 pb-4 sm:flex-row sm:items-start"
+				}
+			>
+				{toolbarLeading}
 				<fieldset
 					aria-label="Filtros de regalos"
-					className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1"
+					className={`flex snap-x snap-mandatory gap-2 overflow-x-auto ${compact ? "min-w-0 flex-1" : "pb-1"}`}
 				>
 					{(
 						[
 							{
-								label: `Todos (${counts.all})`,
+								label: showCounts ? `Todos (${counts.all})` : "Todos",
 								filter: { kind: "status", value: "all" } as const,
 								onClick: () => setStatusFilter("all"),
 							},
 							{
-								label: `Disponibles (${counts.available})`,
+								label: showCounts
+									? `Disponibles (${counts.available})`
+									: "Disponibles",
 								filter: { kind: "status", value: "available" } as const,
 								onClick: () => setStatusFilter("available"),
 							},
 							{
-								label: `Comprados (${counts.purchased})`,
+								label: showCounts
+									? `Comprados (${counts.purchased})`
+									: "Comprados",
 								filter: { kind: "status", value: "purchased" } as const,
 								onClick: () => setStatusFilter("purchased"),
 							},
 							{
-								label: `Infaltables (${counts.infaltable})`,
+								label: showCounts
+									? `Infaltables (${counts.infaltable})`
+									: "★ Infaltables",
 								filter: { kind: "status", value: "infaltable" } as const,
 								onClick: () => setStatusFilter("infaltable"),
 							},
@@ -170,75 +251,94 @@ export function PublicGiftFilters({
 						);
 					})}
 
-					{categoryFilters.map((cat) => {
-						const active = isFilterActive(activeFilter, {
-							kind: "category",
-							categoryId: cat.id,
-						});
-						return (
-							<button
-								aria-pressed={active}
-								className={`${chipBase} ${chipClass(active)}`}
-								key={cat.id}
-								onClick={() => setCategoryFilter(cat.id)}
-								type="button"
-							>
-								{cat.name}
-							</button>
-						);
-					})}
+					{showCategories &&
+						categoryFilters.map((cat) => {
+							const active = isFilterActive(activeFilter, {
+								kind: "category",
+								categoryId: cat.id,
+							});
+							return (
+								<button
+									aria-pressed={active}
+									className={`${chipBase} ${chipClass(active)}`}
+									key={cat.id}
+									onClick={() => setCategoryFilter(cat.id)}
+									type="button"
+								>
+									{cat.name}
+								</button>
+							);
+						})}
 				</fieldset>
 
-				<div className="sm:ml-auto">
-					<select
-						className="rounded-lg border border-border bg-card px-3 py-1 text-card-foreground text-sm"
-						onChange={(e) => setSortMode(e.target.value as GiftSortMode)}
-						value={sortMode}
-					>
-						<option value="recommended">Recomendado</option>
-						<option value="price-asc">Precio: menor a mayor</option>
-						<option value="price-desc">Precio: mayor a menor</option>
-					</select>
-				</div>
+				{showSort && (
+					<div className="sm:ml-auto">
+						<select
+							className="rounded-lg border border-border bg-card px-3 py-1 text-card-foreground text-sm"
+							onChange={(e) => setSortMode(e.target.value as GiftSortMode)}
+							value={sortMode}
+						>
+							<option value="recommended">Recomendado</option>
+							<option value="price-asc">Precio: menor a mayor</option>
+							<option value="price-desc">Precio: mayor a menor</option>
+						</select>
+					</div>
+				)}
+
+				{showGridToggle && (
+					<GiftGridToggle
+						className="hidden sm:flex"
+						onChange={setGridColumns}
+						value={gridColumns}
+					/>
+				)}
 			</div>
 
-			{/* Gift list or empty state */}
-			{isEmpty ? (
-				<EmptyState
-					action={
-						!isAllFilter && (
-							<button
-								className="public-btn border border-primary px-4 py-2 text-primary text-sm transition-colors hover:bg-primary/10"
-								onClick={() => setActiveFilter(emptyState.resetTo)}
-								type="button"
-							>
-								{emptyState.ctaLabel}
-							</button>
-						)
-					}
-					description={isAllFilter ? undefined : emptyState.copy}
-					title={
-						isAllFilter
-							? "Esta lista aún no tiene regalos."
-							: "No hay regalos para mostrar."
-					}
-				/>
-			) : layout.id === "minimal" ? (
-				<GiftList
-					actionsEnabled={actionsEnabled}
-					giftCardStyle={layout.giftCardStyle}
-					gifts={filteredGifts}
-					onGiftAction={setSelectedGift}
-				/>
-			) : (
-				<GiftGrid
-					actionsEnabled={actionsEnabled}
-					giftCardStyle={layout.giftCardStyle}
-					giftColumns={layout.giftColumns}
-					gifts={filteredGifts}
-					onGiftAction={setSelectedGift}
-				/>
-			)}
+			<div ref={resultsRef}>
+				{/* Gift list or empty state */}
+				{isEmpty ? (
+					<EmptyState
+						action={
+							!isAllFilter && (
+								<button
+									className="public-btn border border-primary px-4 py-2 text-primary text-sm transition-colors hover:bg-primary/10"
+									onClick={() => setActiveFilter(emptyState.resetTo)}
+									type="button"
+								>
+									{emptyState.ctaLabel}
+								</button>
+							)
+						}
+						description={isAllFilter ? undefined : emptyState.copy}
+						title={
+							isAllFilter
+								? "Esta lista aún no tiene regalos."
+								: "No hay regalos para mostrar."
+						}
+					/>
+				) : layout.id === "minimal" ? (
+					<GiftList
+						actionsEnabled={actionsEnabled}
+						giftCardStyle={layout.giftCardStyle}
+						gifts={filteredGifts}
+						onGiftAction={setSelectedGift}
+					/>
+				) : (
+					<GiftGrid
+						actionsEnabled={actionsEnabled}
+						categoryNames={categoryNames}
+						columnsAtSmallBreakpoint={showGridToggle}
+						giftCardStyle={
+							showGridToggle && gridColumns === 1
+								? "collage-row"
+								: layout.giftCardStyle
+						}
+						giftColumns={showGridToggle ? gridColumns : layout.giftColumns}
+						gifts={filteredGifts}
+						onGiftAction={setSelectedGift}
+					/>
+				)}
+			</div>
 			{actionsEnabled && selectedGift && (
 				<PurchaseGiftModal
 					gift={selectedGift}

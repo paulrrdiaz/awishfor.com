@@ -5,9 +5,10 @@ import { formatCountdown } from "@/lib/format/countdown";
 
 type Props = {
 	eventDate: string;
+	variant?: "default" | "chip";
 };
 
-export function Countdown({ eventDate }: Props) {
+export function Countdown({ eventDate, variant = "default" }: Props) {
 	const [now, setNow] = useState(() => new Date());
 	const text = formatCountdown(eventDate, now);
 
@@ -15,6 +16,15 @@ export function Countdown({ eventDate }: Props) {
 		const interval = window.setInterval(() => setNow(new Date()), 60_000);
 		return () => window.clearInterval(interval);
 	}, []);
+
+	if (variant === "chip") {
+		return (
+			<div className="inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 font-semibold text-foreground text-xs">
+				<span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+				{text}
+			</div>
+		);
+	}
 
 	return (
 		<div className="px-6 py-4 text-center">

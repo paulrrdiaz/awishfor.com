@@ -797,7 +797,7 @@ Tasks:
 - [x] Add `Countdown`.
 - [x] Add `GiftCard`.
 - [x] Add `GiftGrid/GiftList`.
-- [x] Add `HowItWorks`.
+- [x] Add optional shared `HowItWorksDrawer`.
 - [x] Add `WishlistFooter`.
 - [x] Support `full | preview | compact` render modes.
 - [x] Add event-details section: 3 cards (Fecha · Lugar · Código de vestimenta), hiding empty cards.
@@ -806,7 +806,7 @@ Tasks:
 
 Acceptance criteria:
 
-- Public page renders all required sections in correct brief order (hero → details → countdown → welcome → gifts → how it works → thank-you → footer).
+- Public page renders all required inline sections in correct brief order (hero → details → countdown → welcome → gifts → thank-you → footer); enabled how-it-works guidance opens from the shared hero drawer control.
 - Components support preview mode with disabled actions.
 - Compact mode works for landing preview.
 - Page is mobile-first (designed at 390px).

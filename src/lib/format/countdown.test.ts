@@ -32,4 +32,9 @@ describe("formatCountdown", () => {
 		const now = new Date("2024-01-01T00:00:00");
 		expect(formatCountdown("2024-01-01T00:00:00", now)).toBe("Es hoy");
 	});
+
+	it("treats a date-only string as a local calendar date", () => {
+		const now = new Date(2026, 7, 6, 12);
+		expect(formatCountdown("2026-08-20", now)).toBe("Faltan 14 días");
+	});
 });

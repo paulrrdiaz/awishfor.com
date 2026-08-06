@@ -27,15 +27,20 @@ function DrawerClose({
 function DrawerContent({
 	className,
 	children,
+	overlayClassName,
 	showCloseButton = true,
 	...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content> & {
+	overlayClassName?: string;
 	showCloseButton?: boolean;
 }) {
 	return (
 		<DrawerPrimitive.Portal>
 			<DrawerPrimitive.Overlay
-				className="fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+				className={cn(
+					"fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs",
+					overlayClassName,
+				)}
 				data-slot="drawer-overlay"
 			/>
 			<div
@@ -71,6 +76,22 @@ function DrawerContent({
 				</DrawerPrimitive.Content>
 			</div>
 		</DrawerPrimitive.Portal>
+	);
+}
+
+function DrawerHandle({
+	className,
+	...props
+}: React.ComponentProps<typeof DrawerPrimitive.Handle>) {
+	return (
+		<DrawerPrimitive.Handle
+			className={cn(
+				"mx-auto mt-3 h-1.5 w-12 rounded-full bg-border",
+				className,
+			)}
+			data-slot="drawer-handle"
+			{...props}
+		/>
 	);
 }
 
@@ -126,6 +147,7 @@ export {
 	DrawerContent,
 	DrawerDescription,
 	DrawerFooter,
+	DrawerHandle,
 	DrawerHeader,
 	DrawerTitle,
 	DrawerTrigger,

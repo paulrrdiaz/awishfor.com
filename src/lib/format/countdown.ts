@@ -1,8 +1,25 @@
+const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+function parseEventDate(eventDate: Date | string): Date {
+	if (eventDate instanceof Date) return eventDate;
+
+	const dateOnly = DATE_ONLY_PATTERN.exec(eventDate);
+	if (dateOnly) {
+		return new Date(
+			Number(dateOnly[1]),
+			Number(dateOnly[2]) - 1,
+			Number(dateOnly[3]),
+		);
+	}
+
+	return new Date(eventDate);
+}
+
 export function formatCountdown(
 	eventDate: Date | string,
 	now: Date = new Date(),
 ): string {
-	const event = typeof eventDate === "string" ? new Date(eventDate) : eventDate;
+	const event = parseEventDate(eventDate);
 
 	const eventMidnight = new Date(
 		event.getFullYear(),

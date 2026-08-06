@@ -45,7 +45,12 @@ export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 						guest={wishlist.guest}
 						wishlistSlug={wishlist.slug}
 					/>
-					{!isCompact && <HeroCtas className="justify-start" />}
+					{!isCompact && (
+						<HeroCtas
+							className="justify-start"
+							showHowItWorks={wishlist.showHowItWorks}
+						/>
+					)}
 				</div>
 			</header>
 			<PublicWishlistBody layout={layout} mode={mode} wishlist={wishlist} />

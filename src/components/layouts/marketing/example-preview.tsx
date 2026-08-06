@@ -103,7 +103,7 @@ export function ExamplePreview() {
 
 				<div className="px-[18px] pt-4 pb-5 lg:px-8 lg:pt-[26px] lg:pb-[30px]">
 					{countdown && (
-						<div className="mb-[10px] rounded-xl bg-[var(--accent)] p-3 text-center lg:mb-5 lg:rounded-[var(--radius)] lg:p-4">
+						<div className="mb-[10px] rounded-xl bg-[var(--accent)] p-3 text-center text-[var(--accent-fg)] lg:mb-5 lg:rounded-[var(--radius)] lg:p-4">
 							<div className="m-eyebrow mb-[3px] text-[9px] opacity-70">
 								Cuenta regresiva
 							</div>
@@ -148,7 +148,7 @@ export function ExamplePreview() {
 												src={sizedImage(gift.imageUrl, 300, 150)}
 											/>
 											{gift.priority === "high" && (
-												<span className="absolute top-1.5 left-1.5 inline-flex items-center rounded-full bg-[var(--accent)] px-[10px] py-1 font-semibold text-[#7A7162] text-[8px] lg:top-2 lg:left-2 lg:text-[9px]">
+												<span className="absolute top-1.5 left-1.5 inline-flex items-center rounded-full bg-[var(--accent)] px-[10px] py-1 font-semibold text-[8px] text-[var(--accent-fg)] lg:top-2 lg:left-2 lg:text-[9px]">
 													★ Infaltable
 												</span>
 											)}

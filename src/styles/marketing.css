@@ -199,13 +199,14 @@
 	box-shadow: 0 18px 44px rgba(20, 80, 20, 0.11);
 }
 
-/* ---- example-preview theme (canvas theme-cielo, scoped to the preview card only) ---- */
+/* ---- example-preview theme (synced from cielo-suave in public-themes.ts) ---- */
 .marketing-theme .m-preview-theme {
 	--bg: #eef5fb;
 	--fg: #33425c;
 	--card: #ffffff;
 	--primary: #8fbee0;
-	--accent: #f1eee7;
+	--accent: #dceaf6;
+	--accent-fg: #496781;
 	--border: #dce7f2;
 	--muted-fg: #6c7c95;
 	--ph-tint: #dceaf6;

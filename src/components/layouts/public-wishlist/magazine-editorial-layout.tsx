@@ -53,7 +53,10 @@ export function MagazineEditorialLayout({ wishlist, layout, mode }: Props) {
 				</div>
 				{!isCompact && (
 					<div className="mt-6">
-						<HeroCtas className="justify-start" />
+						<HeroCtas
+							className="justify-start"
+							showHowItWorks={wishlist.showHowItWorks}
+						/>
 					</div>
 				)}
 				{stripImages.length > 0 && (
