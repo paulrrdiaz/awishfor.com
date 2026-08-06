@@ -43,6 +43,7 @@ export function SplitImageRightLayout({ wishlist, layout, mode }: Props) {
 						className="absolute inset-0 h-full w-full"
 						isSample={wishlist.images[0]?.isSample}
 						priority={!isCompact}
+						sizes="(min-width: 1024px) 340px, 100vw"
 						src={wishlist.images[0]?.url ?? null}
 					/>
 				</div>

@@ -129,6 +129,12 @@ function SortableThumbnail({
 							: "aspect-square w-[120px]",
 				)
 			: "size-24 rounded-lg";
+	const imageSizes =
+		variant === "inline"
+			? orientation === "landscape"
+				? "200px"
+				: "120px"
+			: "96px";
 
 	return (
 		<div
@@ -144,6 +150,7 @@ function SortableThumbnail({
 				alt="Imagen de portada"
 				className="object-cover"
 				fill
+				sizes={imageSizes}
 				src={image.url}
 			/>
 			{isPrincipal && (

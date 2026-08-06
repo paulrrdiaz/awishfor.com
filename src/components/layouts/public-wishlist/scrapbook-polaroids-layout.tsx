@@ -41,6 +41,7 @@ function Polaroid({
 				alt={alt}
 				className="aspect-[4/3]"
 				isSample={isSample}
+				sizes="144px"
 				src={src}
 			/>
 		</div>

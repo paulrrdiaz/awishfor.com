@@ -32,18 +32,21 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 						className="absolute top-4 left-0 size-[72%] rounded-full border-4 border-card shadow-lg"
 						isSample={slots[0]?.isSample}
 						priority={!isCompact}
+						sizes="173px"
 						src={slots[0]?.url ?? null}
 					/>
 					<HeroImageSlot
 						alt={`${heading} 2`}
 						className="absolute right-0 bottom-0 size-[52%] rounded-full border-4 border-card shadow-md"
 						isSample={slots[1]?.isSample}
+						sizes="125px"
 						src={slots[1]?.url ?? null}
 					/>
 					<HeroImageSlot
 						alt={`${heading} 3`}
 						className="absolute top-0 right-2 size-[38%] rounded-full border-4 border-card shadow-md"
 						isSample={slots[2]?.isSample}
+						sizes="91px"
 						src={slots[2]?.url ?? null}
 					/>
 				</div>

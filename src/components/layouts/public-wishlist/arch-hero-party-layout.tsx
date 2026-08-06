@@ -42,6 +42,7 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 							className="h-full w-full"
 							images={wishlist.images}
 							priority={!isCompact}
+							sizes="260px"
 						/>
 					</div>
 				</div>

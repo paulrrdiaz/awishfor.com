@@ -32,12 +32,14 @@ export function OverlapDuoLayout({ wishlist, layout, mode }: Props) {
 						className="absolute top-6 left-5 aspect-[3/4] w-[58%] -rotate-3 rounded-lg border-4 border-card shadow-xl"
 						isSample={slots[0]?.isSample}
 						priority={!isCompact}
+						sizes="58vw"
 						src={slots[0]?.url ?? null}
 					/>
 					<HeroImageSlot
 						alt={`${heading} 2`}
 						className="absolute right-4 bottom-5 aspect-[4/5] w-[52%] rotate-3 rounded-lg border-4 border-card shadow-xl"
 						isSample={slots[1]?.isSample}
+						sizes="52vw"
 						src={slots[1]?.url ?? null}
 					/>
 				</div>

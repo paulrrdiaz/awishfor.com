@@ -30,6 +30,7 @@ export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 						className="aspect-[3/4] w-full max-w-56 rounded-sm border-8 border-card shadow-xl"
 						isSample={wishlist.images[0]?.isSample}
 						priority={!isCompact}
+						sizes="224px"
 						src={wishlist.images[0]?.url ?? null}
 					/>
 				</div>

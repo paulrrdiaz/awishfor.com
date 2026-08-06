@@ -43,6 +43,7 @@ type HeroImageSlotProps = {
 	className?: string;
 	priority?: boolean;
 	isSample?: boolean;
+	sizes?: string;
 };
 
 /** A single hero slot: a real cover image, or the tinted placeholder when none is set. */
@@ -52,6 +53,7 @@ export function HeroImageSlot({
 	className,
 	priority,
 	isSample,
+	sizes = "100vw",
 }: HeroImageSlotProps) {
 	if (!src) {
 		return <HeroPlaceholder className={className} />;
@@ -64,6 +66,7 @@ export function HeroImageSlot({
 				className="object-cover"
 				fill
 				priority={priority}
+				sizes={sizes}
 				src={src}
 			/>
 			{isSample && <SampleImageMarker />}
@@ -137,6 +140,7 @@ type HeroCarouselGalleryProps = {
 	className?: string;
 	maxImages?: number;
 	priority: boolean;
+	sizes?: string;
 };
 
 /**
@@ -150,6 +154,7 @@ export function HeroCarouselGallery({
 	className,
 	maxImages = 6,
 	priority,
+	sizes = "100vw",
 }: HeroCarouselGalleryProps) {
 	const visibleImages = images.slice(0, maxImages);
 
@@ -160,6 +165,7 @@ export function HeroCarouselGallery({
 				className={className}
 				isSample={visibleImages[0]?.isSample}
 				priority={priority}
+				sizes={sizes}
 				src={visibleImages[0]?.url ?? null}
 			/>
 		);
@@ -176,6 +182,7 @@ export function HeroCarouselGallery({
 								className="object-cover"
 								fill
 								priority={priority && index === 0}
+								sizes={sizes}
 								src={image.url}
 							/>
 							{image.isSample && <SampleImageMarker />}

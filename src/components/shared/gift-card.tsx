@@ -131,6 +131,7 @@ export function GiftCard({
 							alt={gift.name}
 							className="object-contain"
 							fill
+							sizes="64px"
 							src={gift.imageUrl}
 						/>
 					</div>
@@ -177,6 +178,7 @@ export function GiftCard({
 						alt={gift.name}
 						className="object-contain"
 						fill
+						sizes="(min-width: 1024px) 480px, (min-width: 640px) 50vw, 100vw"
 						src={gift.imageUrl}
 					/>
 				</div>

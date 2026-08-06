@@ -44,6 +44,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 						alt={`${heading} 1`}
 						className="mt-11 aspect-square rounded-xl shadow-lg"
 						isSample={slots[0]?.isSample}
+						sizes="33vw"
 						src={slots[0]?.url ?? null}
 					/>
 					<HeroImageSlot
@@ -51,12 +52,14 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 						className="aspect-[3/4] rounded-xl shadow-xl"
 						isSample={slots[1]?.isSample}
 						priority={!isCompact}
+						sizes="33vw"
 						src={slots[1]?.url ?? null}
 					/>
 					<HeroImageSlot
 						alt={`${heading} 3`}
 						className="mt-11 aspect-square rounded-xl shadow-lg"
 						isSample={slots[2]?.isSample}
+						sizes="33vw"
 						src={slots[2]?.url ?? null}
 					/>
 				</div>
