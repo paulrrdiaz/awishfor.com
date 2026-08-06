@@ -30,6 +30,7 @@ export const config = {
 		"/dashboard(.*)",
 		"/sign-in(.*)",
 		"/sign-up(.*)",
+		"/w(.*)",
 		"/(api|trpc)(.*)",
 	],
 };
