@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 export const MiddleStep: Story = {
 	args: {
 		isFirst: false,
-		isLast: false,
+		variant: "default",
 		onBack: () => undefined,
 		onNext: () => undefined,
 		saveDraftSlot: <Button variant="outline">Guardar borrador</Button>,
@@ -37,9 +37,9 @@ export const InCardFooter: Story = {
 	},
 };
 
-export const LastStep: Story = {
+export const ReviewStep: Story = {
 	args: {
 		...MiddleStep.args,
-		isLast: true,
+		variant: "review",
 	},
 };

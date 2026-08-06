@@ -129,7 +129,7 @@ export function GiftCard({
 					<div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
 						<Image
 							alt={gift.name}
-							className="object-cover"
+							className="object-contain"
 							fill
 							src={gift.imageUrl}
 						/>
@@ -175,7 +175,7 @@ export function GiftCard({
 				<div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
 					<Image
 						alt={gift.name}
-						className="object-cover"
+						className="object-contain"
 						fill
 						src={gift.imageUrl}
 					/>

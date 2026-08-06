@@ -49,6 +49,10 @@ function portrait(id: string): SampleCoverImage {
 	};
 }
 
+function giftImage(id: string): string {
+	return `https://images.unsplash.com/photo-${id}?w=400&h=300&fit=crop&auto=format`;
+}
+
 export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 	baby_shower: {
 		eventType: "baby_shower",
@@ -67,10 +71,26 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			"Otros",
 		],
 		sampleGifts: [
-			{ name: "Pack de pañales talla RN", price: 45 },
-			{ name: "Mameluco de algodón orgánico", price: 30 },
-			{ name: "Cojín de lactancia", price: 60 },
-			{ name: "Bañera plegable", price: 55 },
+			{
+				name: "Pack de pañales talla RN",
+				price: 45,
+				imageUrl: giftImage("1519689680058-324335c77eba"),
+			},
+			{
+				name: "Mameluco de algodón orgánico",
+				price: 30,
+				imageUrl: giftImage("1492725764893-90b379c2b6e7"),
+			},
+			{
+				name: "Cojín de lactancia",
+				price: 60,
+				imageUrl: giftImage("1555252333-9f8e92e65df9"),
+			},
+			{
+				name: "Bañera plegable",
+				price: 55,
+				imageUrl: giftImage("1522771930-78848d9293e8"),
+			},
 		],
 		sampleCoverImages: {
 			landscape: [
@@ -109,10 +129,26 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			"Otros",
 		],
 		sampleGifts: [
-			{ name: "Set de juegos de mesa", price: 40 },
-			{ name: "Libro de aventuras", price: 20 },
-			{ name: "Auriculares inalámbricos", price: 80 },
-			{ name: "Experiencia de cocina", price: 70 },
+			{
+				name: "Set de juegos de mesa",
+				price: 40,
+				imageUrl: giftImage("1464349095431-e9a21285b5f3"),
+			},
+			{
+				name: "Libro de aventuras",
+				price: 20,
+				imageUrl: giftImage("1530103862676-de8c9debad1d"),
+			},
+			{
+				name: "Auriculares inalámbricos",
+				price: 80,
+				imageUrl: giftImage("1558636508-e0db3814bd1d"),
+			},
+			{
+				name: "Experiencia de cocina",
+				price: 70,
+				imageUrl: giftImage("1513151233558-d860c5398176"),
+			},
 		],
 		sampleCoverImages: {
 			landscape: [
@@ -151,10 +187,26 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			"Otros",
 		],
 		sampleGifts: [
-			{ name: "Juego de sartenes antiadherentes", price: 120 },
-			{ name: "Set de sábanas de lino", price: 90 },
-			{ name: "Cafetera espresso", price: 150 },
-			{ name: "Noche en hotel boutique", price: 200 },
+			{
+				name: "Juego de sartenes antiadherentes",
+				price: 120,
+				imageUrl: giftImage("1519741497674-611481863552"),
+			},
+			{
+				name: "Set de sábanas de lino",
+				price: 90,
+				imageUrl: giftImage("1519225421980-715cb0215aed"),
+			},
+			{
+				name: "Cafetera espresso",
+				price: 150,
+				imageUrl: giftImage("1465495976277-4387d4b0b4c6"),
+			},
+			{
+				name: "Noche en hotel boutique",
+				price: 200,
+				imageUrl: giftImage("1583939003579-730e3918a45a"),
+			},
 		],
 		sampleCoverImages: {
 			landscape: [
@@ -193,10 +245,26 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			"Otros",
 		],
 		sampleGifts: [
-			{ name: "Juego de utensilios de cocina", price: 55 },
-			{ name: "Lámpara de piso", price: 85 },
-			{ name: "Set de herramientas básicas", price: 65 },
-			{ name: "Aspiradora inalámbrica", price: 130 },
+			{
+				name: "Juego de utensilios de cocina",
+				price: 55,
+				imageUrl: giftImage("1493552152660-f915ab47ae9d"),
+			},
+			{
+				name: "Lámpara de piso",
+				price: 85,
+				imageUrl: giftImage("1600585154340-be6161a56a0c"),
+			},
+			{
+				name: "Set de herramientas básicas",
+				price: 65,
+				imageUrl: giftImage("1583847268964-b28dc8f51f92"),
+			},
+			{
+				name: "Aspiradora inalámbrica",
+				price: 130,
+				imageUrl: giftImage("1518291344630-4857135fb581"),
+			},
 		],
 		sampleCoverImages: {
 			landscape: [
@@ -234,10 +302,26 @@ export const EVENT_TYPE_PRESETS: Record<EventType, EventTypePreset> = {
 			"Otros",
 		],
 		sampleGifts: [
-			{ name: "Libro recomendado", price: 25 },
-			{ name: "Vela aromática", price: 30 },
-			{ name: "Experiencia gastronómica", price: 90 },
-			{ name: "Accesorio favorito", price: 50 },
+			{
+				name: "Libro recomendado",
+				price: 25,
+				imageUrl: giftImage("1607344645866-009c320b63e0"),
+			},
+			{
+				name: "Vela aromática",
+				price: 30,
+				imageUrl: giftImage("1513885535751-8b9238bd345a"),
+			},
+			{
+				name: "Experiencia gastronómica",
+				price: 90,
+				imageUrl: giftImage("1544005313-94ddf0286df2"),
+			},
+			{
+				name: "Accesorio favorito",
+				price: 50,
+				imageUrl: giftImage("1519689373023-dd07c7988603"),
+			},
 		],
 		sampleCoverImages: {
 			landscape: [

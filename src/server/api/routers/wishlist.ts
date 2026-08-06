@@ -192,6 +192,9 @@ export const wishlistRouter = createTRPCRouter({
 			const visibleGiftCount = wishlist.gifts.filter(
 				(gift) => gift.deletedAt === null && gift.visibilityStatus !== "hidden",
 			).length;
+			const imageCount = await ctx.db.wishlistImage.count({
+				where: { wishlistId: input.wishlistId },
+			});
 			const readiness = evaluatePublishReadiness({
 				title: wishlist.title,
 				eventType: wishlist.eventType,
@@ -199,6 +202,8 @@ export const wishlistRouter = createTRPCRouter({
 				language: wishlist.language,
 				currency: wishlist.currency,
 				visibleGiftCount,
+				layoutId: wishlist.layoutId,
+				imageCount,
 			});
 			const publicUrlPath = `/w/${wishlist.slug}`;
 			const publicUrl = toCanonicalWishlistUrl(publicUrlPath);

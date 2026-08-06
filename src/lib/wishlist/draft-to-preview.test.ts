@@ -181,4 +181,95 @@ describe("draftToPreview", () => {
 			expect(vm.gifts[0]?.priceAmount).toBeNull();
 		});
 	});
+
+	describe("sample cover image compositing", () => {
+		it("fills all hero slots with samples for a draft with no cover images", () => {
+			const draft = makeDraft({
+				eventType: "wedding",
+				layoutId: "collage-staggered",
+				images: [],
+			});
+			const vm = draftToPreview(draft);
+
+			expect(vm.images).toHaveLength(3);
+			expect(vm.images.every((image) => image.isSample)).toBe(true);
+		});
+
+		it("keeps the creator's images in the earliest slots and fills the rest with samples", () => {
+			const realImage = {
+				url: "https://cdn.test/real.jpg",
+				width: 1600,
+				height: 900,
+				orientation: "landscape" as const,
+			};
+			const draft = makeDraft({
+				eventType: "wedding",
+				layoutId: "collage-staggered",
+				images: [realImage],
+			});
+			const vm = draftToPreview(draft);
+
+			expect(vm.images).toHaveLength(3);
+			expect(vm.images[0]).toEqual({ ...realImage, isSample: undefined });
+			expect(vm.images[0]?.isSample).toBeFalsy();
+			expect(vm.images[1]?.isSample).toBe(true);
+			expect(vm.images[2]?.isSample).toBe(true);
+		});
+
+		it("uses only the creator's images when the draft already has enough", () => {
+			const images = Array.from({ length: 3 }, (_, i) => ({
+				url: `https://cdn.test/real-${i}.jpg`,
+				width: 1600,
+				height: 900,
+				orientation: "landscape" as const,
+			}));
+			const draft = makeDraft({ layoutId: "collage-staggered", images });
+			const vm = draftToPreview(draft);
+
+			expect(vm.images).toHaveLength(3);
+			expect(vm.images.every((image) => !image.isSample)).toBe(true);
+			expect(vm.images.map((image) => image.url)).toEqual(
+				images.map((image) => image.url),
+			);
+		});
+
+		it("pulls samples from the draft's event type", () => {
+			const preset = EVENT_TYPE_PRESETS.wedding;
+			const draft = makeDraft({
+				eventType: "wedding",
+				layoutId: "collage-staggered",
+				images: [],
+			});
+			const vm = draftToPreview(draft);
+
+			expect(vm.images[0]?.url).toBe(preset.sampleCoverImages.portrait[0]?.url);
+		});
+
+		it("matches the layout's recommended orientation", () => {
+			const preset = EVENT_TYPE_PRESETS.wedding;
+			const draft = makeDraft({
+				eventType: "wedding",
+				layoutId: "carousel-hero",
+				images: [],
+			});
+			const vm = draftToPreview(draft);
+
+			expect(vm.images[0]?.url).toBe(
+				preset.sampleCoverImages.landscape[0]?.url,
+			);
+		});
+
+		it("never mutates the draft's own image collection", () => {
+			const draft = makeDraft({
+				eventType: "wedding",
+				layoutId: "collage-staggered",
+				images: [],
+			});
+			const before = [...draft.images];
+			draftToPreview(draft);
+
+			expect(draft.images).toEqual(before);
+			expect(draft.images).toHaveLength(0);
+		});
+	});
 });

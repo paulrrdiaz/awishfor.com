@@ -11,6 +11,7 @@ const CHECK_LABELS: Record<
 	language: "Tiene idioma",
 	currency: "Tiene moneda",
 	visibleGift: "Tiene al menos un regalo visible",
+	images: "Tiene suficientes fotos de portada para su disposición",
 };
 
 type Props = {

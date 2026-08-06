@@ -1,4 +1,5 @@
 import type { ImageOrientation } from "@/config/public-layouts";
+import type { PublishReadinessChecks } from "@/lib/wishlist/publish-readiness";
 import type { GiftPublicStatus } from "@/server/services/purchase.service";
 
 export type WishlistImageViewModel = {
@@ -6,6 +7,12 @@ export type WishlistImageViewModel = {
 	width: number;
 	height: number;
 	orientation: ImageOrientation;
+	/**
+	 * Set only by wizard/dashboard preview compositing (`draftToPreview`) to
+	 * mark a placeholder sample image. Never set for persisted images, so it
+	 * is always absent on a published page.
+	 */
+	isSample?: boolean;
 };
 
 export type PublicWishlistProgress = {
@@ -152,14 +159,7 @@ export type DashboardWishlistOverviewViewModel = {
 	};
 	readiness: {
 		ready: boolean;
-		checks: {
-			title: boolean;
-			eventType: boolean;
-			slug: boolean;
-			language: boolean;
-			currency: boolean;
-			visibleGift: boolean;
-		};
+		checks: PublishReadinessChecks;
 	};
 	recentPurchases: RecentPurchaseViewModel[];
 };

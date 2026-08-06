@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_LAYOUT_ID, resolveLayout } from "@/config/public-layouts";
 import { Currency, EventType, Locale } from "@/generated/prisma/client";
 import {
 	evaluatePublishReadiness,
@@ -12,6 +13,8 @@ const completeInput = (): PublishReadinessInput => ({
 	language: Locale.es,
 	currency: Currency.PEN,
 	visibleGiftCount: 1,
+	layoutId: "magazine-editorial",
+	imageCount: 1,
 });
 
 describe("evaluatePublishReadiness", () => {
@@ -26,6 +29,7 @@ describe("evaluatePublishReadiness", () => {
 			language: true,
 			currency: true,
 			visibleGift: true,
+			images: true,
 		});
 	});
 
@@ -126,9 +130,10 @@ describe("evaluatePublishReadiness", () => {
 		expect(result.checks.visibleGift).toBe(true);
 	});
 
-	it("missing design settings do not affect readiness", () => {
-		// Design settings (theme, layout, fonts, button style, cover image) are
-		// not part of the input — their absence never blocks publishing.
+	it("missing style settings still ready", () => {
+		// Theme, fonts and button style are not part of the input — their
+		// absence never blocks publishing. Layout is required only because it
+		// determines the images requirement below.
 		const result = evaluatePublishReadiness(completeInput());
 
 		expect(result.ready).toBe(true);
@@ -142,6 +147,8 @@ describe("evaluatePublishReadiness", () => {
 			language: null,
 			currency: null,
 			visibleGiftCount: 0,
+			layoutId: "magazine-editorial",
+			imageCount: 0,
 		});
 
 		expect(result.ready).toBe(false);
@@ -152,6 +159,82 @@ describe("evaluatePublishReadiness", () => {
 			language: false,
 			currency: false,
 			visibleGift: false,
+			images: false,
+		});
+	});
+
+	describe("cover images satisfy the selected layout", () => {
+		it("enough images for the layout's slots satisfies the requirement", () => {
+			const layout = resolveLayout("collage-staggered");
+			const result = evaluatePublishReadiness({
+				...completeInput(),
+				layoutId: "collage-staggered",
+				imageCount: layout.heroImageSlots,
+			});
+
+			expect(result.checks.images).toBe(true);
+			expect(result.ready).toBe(true);
+		});
+
+		it("more images than the layout needs still satisfies the requirement", () => {
+			const layout = resolveLayout("collage-staggered");
+			const result = evaluatePublishReadiness({
+				...completeInput(),
+				layoutId: "collage-staggered",
+				imageCount: layout.heroImageSlots + 2,
+			});
+
+			expect(result.checks.images).toBe(true);
+		});
+
+		it("too few images blocks readiness", () => {
+			const result = evaluatePublishReadiness({
+				...completeInput(),
+				layoutId: "collage-staggered",
+				imageCount: 2,
+			});
+
+			expect(result.checks.images).toBe(false);
+			expect(result.ready).toBe(false);
+		});
+
+		it("no images blocks readiness", () => {
+			const result = evaluatePublishReadiness({
+				...completeInput(),
+				layoutId: "collage-staggered",
+				imageCount: 0,
+			});
+
+			expect(result.checks.images).toBe(false);
+			expect(result.ready).toBe(false);
+		});
+
+		it("a null layoutId is measured against the default layout's slot count", () => {
+			const defaultLayout = resolveLayout(DEFAULT_LAYOUT_ID);
+			const shortOfDefault = evaluatePublishReadiness({
+				...completeInput(),
+				layoutId: null,
+				imageCount: defaultLayout.heroImageSlots - 1,
+			});
+			const meetsDefault = evaluatePublishReadiness({
+				...completeInput(),
+				layoutId: null,
+				imageCount: defaultLayout.heroImageSlots,
+			});
+
+			expect(shortOfDefault.checks.images).toBe(false);
+			expect(meetsDefault.checks.images).toBe(true);
+		});
+
+		it("an unknown layoutId is measured against the default layout's slot count", () => {
+			const defaultLayout = resolveLayout(DEFAULT_LAYOUT_ID);
+			const result = evaluatePublishReadiness({
+				...completeInput(),
+				layoutId: "not-a-real-layout",
+				imageCount: defaultLayout.heroImageSlots,
+			});
+
+			expect(result.checks.images).toBe(true);
 		});
 	});
 });

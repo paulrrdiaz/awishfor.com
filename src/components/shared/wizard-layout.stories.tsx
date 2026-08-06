@@ -20,9 +20,12 @@ type Story = StoryObj<typeof meta>;
 const steps = [
 	{ id: "event-type", label: "Ocasión" },
 	{ id: "details", label: "Detalles" },
-	{ id: "design", label: "Diseño" },
+	{ id: "layout", label: "Disposición" },
+	{ id: "theme", label: "Tema" },
+	{ id: "images", label: "Imágenes" },
 	{ id: "gifts", label: "Regalos" },
-	{ id: "publish", label: "Publicar" },
+	{ id: "review", label: "Revisar" },
+	{ id: "published", label: "Publicada" },
 ];
 
 export const Desktop: Story = {
@@ -36,10 +39,10 @@ export const Desktop: Story = {
 			actions={
 				<WizardNav
 					isFirst={false}
-					isLast={false}
 					onBack={() => undefined}
 					onNext={() => undefined}
 					saveDraftSlot={<Button variant="outline">Guardar borrador</Button>}
+					variant="default"
 				/>
 			}
 			desktopActions={
@@ -50,16 +53,13 @@ export const Desktop: Story = {
 			stepper={
 				<WizardStepper
 					completedSteps={["event-type", "details"]}
-					currentStep="design"
+					currentStep="layout"
 					steps={steps}
 				/>
 			}
 		>
 			<div className="flex h-[calc(100dvh-184px)]">
 				<div className="w-[420px] border-border border-r px-8 py-7">
-					<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-						Paso 3 de 5
-					</p>
 					<Card>
 						<CardHeader>
 							<CardTitle>Diseña tu página</CardTitle>

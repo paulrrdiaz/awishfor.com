@@ -20,6 +20,13 @@ type Props = {
 	options: PublicLayoutPreset[];
 	selected: string | null;
 	onSelect: (id: string) => void;
+	/**
+	 * "compact" (default) is a trigger + modal for design surfaces where the
+	 * layout is one control among several. "inline" renders the full grid in
+	 * place for the wizard's Layout step, where choosing a layout is the
+	 * step's entire purpose.
+	 */
+	variant?: "compact" | "inline";
 };
 
 function Thumb({ children }: { children: ReactNode }) {
@@ -112,7 +119,12 @@ const LAYOUT_THUMBNAILS: Record<string, ReactNode> = {
 	),
 };
 
-export function LayoutPicker({ options, selected, onSelect }: Props) {
+export function LayoutPicker({
+	options,
+	selected,
+	onSelect,
+	variant = "compact",
+}: Props) {
 	const [open, setOpen] = useState(false);
 	const currentLayout =
 		options.find((option) => option.id === selected) ??
@@ -125,9 +137,14 @@ export function LayoutPicker({ options, selected, onSelect }: Props) {
 			<button
 				aria-pressed={isSelected}
 				className={cn(
-					"rounded-xl border-2 bg-card p-2.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm",
+					"bg-card text-left transition-all hover:-translate-y-0.5 hover:shadow-sm",
+					variant === "inline"
+						? "rounded-[14px] border p-2.5"
+						: "rounded-xl border-2 p-2.5",
 					isSelected
-						? "border-primary shadow-sm ring-1 ring-primary/20"
+						? variant === "inline"
+							? "border-primary ring-1 ring-primary"
+							: "border-primary shadow-sm ring-1 ring-primary/20"
 						: "border-border",
 				)}
 				key={option.id}
@@ -138,12 +155,27 @@ export function LayoutPicker({ options, selected, onSelect }: Props) {
 				type="button"
 			>
 				{LAYOUT_THUMBNAILS[option.id]}
-				<span className="mt-2 block font-medium text-foreground text-xs">
+				<span
+					className={cn(
+						"block text-foreground",
+						variant === "inline"
+							? "mt-1.5 font-semibold text-[10px]"
+							: "mt-2 font-medium text-xs",
+					)}
+				>
 					{option.label}
 				</span>
 			</button>
 		);
 	};
+
+	if (variant === "inline") {
+		return (
+			<div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+				{options.map(renderOption)}
+			</div>
+		);
+	}
 
 	return (
 		<Dialog onOpenChange={setOpen} open={open}>

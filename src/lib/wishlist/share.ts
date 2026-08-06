@@ -43,3 +43,21 @@ export const toWhatsAppShareUrl = (
 	const message = whatsAppMessageForEvent(eventType, publicUrl);
 	return `https://wa.me/?text=${encodeURIComponent(message)}`;
 };
+
+const EMAIL_SUBJECTS: Record<string, string> = {
+	baby_shower: "Mi lista de deseos para el baby shower",
+	birthday: "Mi wishlist de cumpleaños",
+	wedding: "Nuestra lista de boda",
+	housewarming: "Nuestra lista de deseos para el nuevo hogar",
+	general: "Mi wishlist",
+};
+
+export const toEmailShareUrl = (
+	publicUrl: string,
+	eventType?: string | null,
+) => {
+	const subject =
+		(eventType && EMAIL_SUBJECTS[eventType]) ?? EMAIL_SUBJECTS.general;
+	const body = whatsAppMessageForEvent(eventType, publicUrl);
+	return `mailto:?subject=${encodeURIComponent(subject as string)}&body=${encodeURIComponent(body)}`;
+};

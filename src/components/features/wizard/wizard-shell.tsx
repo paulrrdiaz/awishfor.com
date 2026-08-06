@@ -1,16 +1,20 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { WizardLayout } from "@/components/shared/wizard-layout";
 import { WizardNav } from "@/components/shared/wizard-nav";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
-import { DesignStep } from "./design-step";
 import { DetailsStep } from "./details-step";
 import { EventTypeStep } from "./event-type-step";
 import { GiftsStep } from "./gifts-step";
-import { PublishStep } from "./publish-step";
+import { ImagesStep } from "./images-step";
+import { LayoutStep } from "./layout-step";
+import { PublishedStep } from "./published-step";
 import { RecoveryPrompt } from "./recovery-prompt";
+import { ReviewStep } from "./review-step";
 import { SaveDraftControls } from "./save-draft-controls";
+import { ThemeStep } from "./theme-step";
 import { useWizardStore } from "./wizard-provider";
 import {
 	getNextWizardStep,
@@ -24,9 +28,12 @@ import {
 function StepContent({ step }: { step: WizardStep }) {
 	if (step === "event-type") return <EventTypeStep />;
 	if (step === "details") return <DetailsStep />;
-	if (step === "design") return <DesignStep />;
+	if (step === "layout") return <LayoutStep />;
+	if (step === "theme") return <ThemeStep />;
+	if (step === "images") return <ImagesStep />;
 	if (step === "gifts") return <GiftsStep />;
-	if (step === "publish") return <PublishStep />;
+	if (step === "review") return <ReviewStep />;
+	if (step === "published") return <PublishedStep />;
 	return null;
 }
 
@@ -40,7 +47,7 @@ export function WizardShell() {
 
 	const currentIndex = WIZARD_STEPS.indexOf(step);
 	const isFirst = currentIndex === 0;
-	const isLast = currentIndex === WIZARD_STEPS.length - 1;
+	const isPublished = step === "published";
 	const completedSteps = WIZARD_STEPS.slice(0, currentIndex);
 	const stepperSteps = WIZARD_STEPS.map((wizardStep) => ({
 		id: wizardStep,
@@ -62,12 +69,18 @@ export function WizardShell() {
 	}
 
 	function goNext() {
-		if (isLast) return;
 		const nextStep = getNextWizardStep(step);
 		if (nextStep) {
 			navigate(nextStep);
 		}
 	}
+
+	useEffect(() => {
+		if (!hasHydrated || !isPublished || publishSuccess) return;
+		const params = new URLSearchParams(searchParams.toString());
+		params.set("step", "review");
+		router.push(`?${params.toString()}`);
+	}, [hasHydrated, isPublished, publishSuccess, router, searchParams]);
 
 	if (!hasHydrated) {
 		return (
@@ -77,16 +90,22 @@ export function WizardShell() {
 		);
 	}
 
+	if (isPublished && !publishSuccess) {
+		return null;
+	}
+
 	return (
 		<WizardLayout
 			actions={
-				<WizardNav
-					isFirst={isFirst}
-					isLast={isLast}
-					onBack={goBack}
-					onNext={goNext}
-					saveDraftSlot={!publishSuccess && <SaveDraftControls />}
-				/>
+				!isPublished && (
+					<WizardNav
+						isFirst={isFirst}
+						onBack={goBack}
+						onNext={goNext}
+						saveDraftSlot={!publishSuccess && <SaveDraftControls />}
+						variant={step === "review" ? "review" : "default"}
+					/>
+				)
 			}
 			desktopActions={!publishSuccess && <SaveDraftControls />}
 			stepper={

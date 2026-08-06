@@ -1,9 +1,12 @@
 export const WIZARD_STEPS = [
 	"event-type",
 	"details",
-	"design",
+	"layout",
+	"theme",
+	"images",
 	"gifts",
-	"publish",
+	"review",
+	"published",
 ] as const;
 
 export type WizardStep = (typeof WIZARD_STEPS)[number];
@@ -13,9 +16,12 @@ export const DEFAULT_WIZARD_STEP: WizardStep = "event-type";
 export const WIZARD_STEP_LABELS: Record<WizardStep, string> = {
 	"event-type": "Ocasión",
 	details: "Detalles",
-	design: "Diseño",
+	layout: "Disposición",
+	theme: "Tema",
+	images: "Imágenes",
 	gifts: "Regalos",
-	publish: "Publicar",
+	review: "Revisar",
+	published: "Publicada",
 };
 
 export function isWizardStep(step: string | null): step is WizardStep {

@@ -181,6 +181,7 @@ const createMockDatabase = (
 		gifts?: TestGift[];
 		images?: TestImage[];
 		visibleGiftCount?: number;
+		imageCount?: number;
 	} = {},
 ) => {
 	const state: MockDbState = {
@@ -195,6 +196,7 @@ const createMockDatabase = (
 		clockMs: BASE_DATE.getTime(),
 	};
 	const visibleGiftCount = opts.visibleGiftCount;
+	const imageCountOverride = opts.imageCount;
 
 	const nextDate = () => {
 		state.clockMs += 1_000;
@@ -511,6 +513,16 @@ const createMockDatabase = (
 		},
 	);
 
+	const imageCount = vi.fn(async (args: Prisma.WishlistImageCountArgs) => {
+		if (imageCountOverride !== undefined) {
+			return imageCountOverride;
+		}
+
+		return state.images.filter(
+			(image) => image.wishlistId === args.where?.wishlistId,
+		).length;
+	});
+
 	const db: WishlistDatabase = {
 		wishlist: {
 			create,
@@ -529,6 +541,7 @@ const createMockDatabase = (
 			deleteMany: giftDeleteMany,
 		},
 		wishlistImage: {
+			count: imageCount,
 			createMany: imageCreateMany,
 			deleteMany: imageDeleteMany,
 		},
@@ -562,6 +575,7 @@ const createMockDatabase = (
 		count,
 		imageCreateMany,
 		imageDeleteMany,
+		imageCount,
 	};
 };
 
@@ -939,8 +953,9 @@ describe("wishlist service", () => {
 	});
 
 	it("publishes a ready wishlist and sets publishedAt while clearing archivedAt", async () => {
-		const { db, findFirst, count, update } = createMockDatabase({
+		const { db, findFirst, count, imageCount, update } = createMockDatabase({
 			visibleGiftCount: 1,
+			imageCount: 1,
 		});
 		const now = new Date("2026-06-25T10:00:00.000Z");
 
@@ -965,6 +980,11 @@ describe("wishlist service", () => {
 				}),
 			}),
 		);
+		expect(imageCount).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: expect.objectContaining({ wishlistId: "wishlist_123" }),
+			}),
+		);
 		expect(update).toHaveBeenCalledWith({
 			where: { id: "wishlist_123" },
 			data: {
@@ -979,7 +999,10 @@ describe("wishlist service", () => {
 	});
 
 	it("rejects an unready wishlist without updating its status", async () => {
-		const { db, update } = createMockDatabase({ visibleGiftCount: 0 });
+		const { db, update } = createMockDatabase({
+			visibleGiftCount: 0,
+			imageCount: 1,
+		});
 
 		await expect(
 			publishWishlist(db, { ownerId: 42, wishlistId: "wishlist_123" }),
@@ -996,6 +1019,7 @@ describe("wishlist service", () => {
 				}),
 			],
 			visibleGiftCount: 0,
+			imageCount: 1,
 		});
 
 		const error = await publishWishlist(db, {
@@ -1007,6 +1031,35 @@ describe("wishlist service", () => {
 		expect(error.result.ready).toBe(false);
 		expect(error.result.checks.title).toBe(false);
 		expect(error.result.checks.visibleGift).toBe(false);
+	});
+
+	it("rejects a wishlist with fewer cover images than its layout needs", async () => {
+		const { db, update } = createMockDatabase({
+			wishlists: [createWishlistRecord({ layoutId: "collage-staggered" })],
+			visibleGiftCount: 1,
+			imageCount: 2,
+		});
+
+		const error = await publishWishlist(db, {
+			ownerId: 42,
+			wishlistId: "wishlist_123",
+		}).catch((e) => e);
+
+		expect(error).toBeInstanceOf(PublishReadinessError);
+		expect(error.result.checks.images).toBe(false);
+		expect(update).not.toHaveBeenCalled();
+	});
+
+	it("publishes a wishlist whose layout is satisfied by its cover images", async () => {
+		const { db, update } = createMockDatabase({
+			wishlists: [createWishlistRecord({ layoutId: "collage-staggered" })],
+			visibleGiftCount: 1,
+			imageCount: 3,
+		});
+
+		await publishWishlist(db, { ownerId: 42, wishlistId: "wishlist_123" });
+
+		expect(update).toHaveBeenCalled();
 	});
 
 	it("returns not found when an authenticated owner tries to publish another owner's wishlist", async () => {

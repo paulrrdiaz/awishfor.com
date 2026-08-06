@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
+import { SampleImageMarker } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
@@ -71,6 +72,7 @@ export function MagazineEditorialLayout({ wishlist, layout, mode }: Props) {
 									fill
 									src={image.url}
 								/>
+								{image.isSample && <SampleImageMarker />}
 							</div>
 						))}
 					</div>

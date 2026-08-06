@@ -18,7 +18,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import type { LayoutImageGuidance } from "@/config/public-layouts";
+import { Badge } from "@/components/ui/badge";
+import type {
+	ImageOrientation,
+	LayoutImageGuidance,
+} from "@/config/public-layouts";
 import { useUploadThing } from "@/lib/uploadthing/client";
 import { cn } from "@/lib/utils";
 import {
@@ -28,7 +32,19 @@ import {
 } from "@/lib/wishlist/image-orientation";
 import type { DraftCoverImage } from "@/stores/wishlist-wizard.store";
 
-const MAX_IMAGES = 6;
+const MAX_IMAGES = 8;
+
+const ORIENTATION_GROUP_LABELS: Record<ImageOrientation, string> = {
+	landscape: "Horizontales",
+	portrait: "Verticales",
+	square: "Cuadradas",
+};
+
+const ORIENTATION_GROUP_ORDER: ImageOrientation[] = [
+	"landscape",
+	"portrait",
+	"square",
+];
 
 type Props = {
 	value: DraftCoverImage[];
@@ -36,6 +52,12 @@ type Props = {
 	endpoint: "coverImage";
 	hint?: string;
 	guidance?: LayoutImageGuidance;
+	/**
+	 * "compact" (default) is the dashboard design-editor sizing. "inline"
+	 * matches the wizard's Images step: a prominent dropzone and
+	 * orientation-shaped thumbnails.
+	 */
+	variant?: "compact" | "inline";
 };
 
 function friendlyError(message: string): string {
@@ -73,10 +95,14 @@ function SortableThumbnail({
 	image,
 	isPrincipal,
 	onRemove,
+	orientation,
+	variant,
 }: {
 	image: DraftCoverImage;
 	isPrincipal: boolean;
 	onRemove: () => void;
+	orientation: ImageOrientation;
+	variant: "compact" | "inline";
 }) {
 	const {
 		attributes,
@@ -92,10 +118,23 @@ function SortableThumbnail({
 		transition,
 	};
 
+	const sizeClasses =
+		variant === "inline"
+			? cn(
+					"rounded-[10px]",
+					orientation === "portrait"
+						? "aspect-[3/4] w-[120px]"
+						: orientation === "landscape"
+							? "aspect-[16/10] min-w-[140px] flex-1"
+							: "aspect-square w-[120px]",
+				)
+			: "size-24 rounded-lg";
+
 	return (
 		<div
 			className={cn(
-				"group relative size-24 shrink-0 overflow-hidden rounded-lg border border-border bg-muted",
+				"group relative shrink-0 overflow-hidden border border-border bg-muted",
+				sizeClasses,
 				isDragging && "opacity-50",
 			)}
 			ref={setNodeRef}
@@ -139,15 +178,19 @@ export function MultiImageUpload({
 	endpoint,
 	hint,
 	guidance,
+	variant = "compact",
 }: Props) {
-	const [error, setError] = useState<string | null>(null);
+	const isInline = variant === "inline";
+	const [errors, setErrors] = useState<string[]>([]);
+	const [skippedMessage, setSkippedMessage] = useState<string | null>(null);
 	const [isHandlingUpload, setIsHandlingUpload] = useState(false);
+	const [isDraggingOver, setIsDraggingOver] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const sensors = useSensors(useSensor(PointerSensor));
 
 	const { startUpload, isUploading } = useUploadThing(endpoint, {
 		onUploadError: (err) => {
-			setError(friendlyError(err.message));
+			setErrors((prev) => [...prev, friendlyError(err.message)]);
 		},
 	});
 
@@ -168,23 +211,37 @@ export function MultiImageUpload({
 		];
 	});
 
-	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const files = Array.from(e.target.files ?? []);
-		e.target.value = "";
+	const groupedByOrientation = ORIENTATION_GROUP_ORDER.map((orientation) => ({
+		orientation,
+		images: value.filter((image) => image.orientation === orientation),
+	})).filter((group) => group.images.length > 0);
+
+	async function processFiles(files: File[]) {
 		if (files.length === 0) return;
 
 		const remainingSlots = MAX_IMAGES - value.length;
 		const filesToUpload = files.slice(0, remainingSlots);
+		const skippedCount = files.length - filesToUpload.length;
+
+		setSkippedMessage(
+			skippedCount > 0
+				? `${skippedCount} ${skippedCount === 1 ? "imagen no se agregó" : "imágenes no se agregaron"} porque ya tienes el máximo de ${MAX_IMAGES} fotos.`
+				: null,
+		);
+
 		if (filesToUpload.length === 0) return;
 
-		setError(null);
+		setErrors([]);
 		setIsHandlingUpload(true);
 
 		const uploadedImages: DraftCoverImage[] = [];
 		for (const file of filesToUpload) {
 			const dimensions = await measureImageDimensions(file);
 			if (!dimensions) {
-				setError("No pudimos leer esta imagen. Inténtalo de nuevo.");
+				setErrors((prev) => [
+					...prev,
+					`${file.name}: no pudimos leer esta imagen. Inténtalo de nuevo.`,
+				]);
 				continue;
 			}
 
@@ -203,7 +260,10 @@ export function MultiImageUpload({
 				}
 			} catch (err) {
 				const message = err instanceof Error ? err.message : "Upload failed";
-				setError(friendlyError(message));
+				setErrors((prev) => [
+					...prev,
+					`${file.name}: ${friendlyError(message)}`,
+				]);
 			}
 		}
 
@@ -211,6 +271,33 @@ export function MultiImageUpload({
 			onChange([...value, ...uploadedImages]);
 		}
 		setIsHandlingUpload(false);
+	}
+
+	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const files = Array.from(e.target.files ?? []);
+		e.target.value = "";
+		await processFiles(files);
+	}
+
+	function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+		if (!canAddMore || isBusy) return;
+		e.preventDefault();
+		setIsDraggingOver(true);
+	}
+
+	function handleDragLeave() {
+		setIsDraggingOver(false);
+	}
+
+	async function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+		e.preventDefault();
+		setIsDraggingOver(false);
+		if (!canAddMore || isBusy) return;
+
+		const files = Array.from(e.dataTransfer.files ?? []).filter((file) =>
+			file.type.startsWith("image/"),
+		);
+		await processFiles(files);
 	}
 
 	function handleRemove(url: string) {
@@ -229,7 +316,34 @@ export function MultiImageUpload({
 	}
 
 	return (
-		<div className="space-y-2">
+		// biome-ignore lint/a11y/noStaticElementInteractions: native HTML5 drag-and-drop file zone has no equivalent interactive ARIA role; file selection remains available via the "Agregar" button and file input
+		<div
+			className={cn(
+				"space-y-3 rounded-lg",
+				isDraggingOver && "ring-2 ring-primary ring-offset-2",
+			)}
+			onDragLeave={handleDragLeave}
+			onDragOver={handleDragOver}
+			onDrop={handleDrop}
+		>
+			{isInline && (
+				<button
+					className="w-full rounded-[14px] border-2 border-border border-dashed bg-[#FBFAF5] px-5 py-9 text-center text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60"
+					disabled={isBusy || !canAddMore}
+					onClick={() => inputRef.current?.click()}
+					type="button"
+				>
+					<div aria-hidden className="mb-2 text-2xl">
+						📷
+					</div>
+					<div className="font-semibold text-[14.5px] text-foreground">
+						{isBusy ? "Subiendo..." : "Arrastra tus fotos aquí"}
+					</div>
+					<div className="mt-1 text-[12px]">
+						o haz clic para buscar en tu equipo · sugerido 4–8 fotos
+					</div>
+				</button>
+			)}
 			<DndContext
 				collisionDetection={closestCenter}
 				onDragEnd={handleDragEnd}
@@ -239,14 +353,35 @@ export function MultiImageUpload({
 					items={value.map((image) => image.url)}
 					strategy={horizontalListSortingStrategy}
 				>
-					<div className="flex flex-wrap gap-3">
-						{value.map((image, index) => (
-							<SortableThumbnail
-								image={image}
-								isPrincipal={index === 0}
-								key={image.url}
-								onRemove={() => handleRemove(image.url)}
-							/>
+					<div className="space-y-3">
+						{groupedByOrientation.map((group) => (
+							<div key={group.orientation}>
+								{isInline ? (
+									<div className="mb-2.5 flex items-center justify-between">
+										<span className="font-semibold text-[13.5px] text-foreground">
+											{ORIENTATION_GROUP_LABELS[group.orientation]}
+										</span>
+										<Badge variant="published">{group.images.length}</Badge>
+									</div>
+								) : (
+									<p className="mb-1.5 text-muted-foreground text-xs">
+										{ORIENTATION_GROUP_LABELS[group.orientation]} ·{" "}
+										{group.images.length}
+									</p>
+								)}
+								<div className="flex flex-wrap gap-2.5">
+									{group.images.map((image) => (
+										<SortableThumbnail
+											image={image}
+											isPrincipal={value[0]?.url === image.url}
+											key={image.url}
+											onRemove={() => handleRemove(image.url)}
+											orientation={group.orientation}
+											variant={variant}
+										/>
+									))}
+								</div>
+							</div>
 						))}
 						{canAddMore && (
 							<button
@@ -277,7 +412,16 @@ export function MultiImageUpload({
 					{message}
 				</p>
 			))}
-			{error && <p className="text-destructive text-xs">{error}</p>}
+			{skippedMessage && (
+				<p className="text-muted-foreground text-xs" role="status">
+					{skippedMessage}
+				</p>
+			)}
+			{errors.map((message) => (
+				<p className="text-destructive text-xs" key={message}>
+					{message}
+				</p>
+			))}
 		</div>
 	);
 }

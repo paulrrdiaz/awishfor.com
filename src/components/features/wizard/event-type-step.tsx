@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
-import { resolveTheme } from "@/config/public-themes";
 import { EventType } from "@/generated/prisma/enums";
 import { cn } from "@/lib/utils";
 import { useWizardStore } from "./wizard-provider";
@@ -36,84 +35,41 @@ export function EventTypeStep() {
 	}, [searchParams, selectedType, setEventType]);
 
 	return (
-		<div className="mx-auto w-full max-w-2xl lg:flex lg:h-full lg:max-w-none">
-			<div className="lg:w-[540px] lg:shrink-0 lg:border-border lg:border-r lg:px-10 lg:py-9">
-				<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-					Paso 1 de 5
-				</p>
-				<h1 className="mb-2 text-center font-semibold text-2xl text-foreground lg:text-left lg:font-serif lg:text-3xl">
+		<div className="mx-auto w-full max-w-3xl px-4 py-10 lg:h-full lg:max-w-none lg:overflow-y-auto lg:px-8 lg:py-16">
+			<div className="mx-auto mb-8 max-w-[560px] text-center lg:mb-10">
+				<h1 className="mb-2 font-semibold text-2xl text-foreground lg:font-serif lg:text-[32px] lg:tracking-tight">
 					¿Qué vas a celebrar?
 				</h1>
-				<p className="mb-8 text-center text-muted-foreground text-sm lg:text-left">
-					Elige el tipo de evento para tu wishlist
+				<p className="text-muted-foreground text-sm">
+					Elige el tipo de evento para tu wishlist. Podrás afinar todo lo demás
+					en los siguientes pasos.
 				</p>
-
-				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-					{EVENT_TYPES.map((type) => {
-						const preset = EVENT_TYPE_PRESETS[type];
-						const theme = resolveTheme(preset.defaultThemeId);
-						const isSelected = selectedType === type;
-
-						return (
-							<Button
-								className={cn(
-									"flex h-auto min-h-28 flex-col items-center justify-center gap-2 whitespace-normal rounded-xl border-2 bg-card px-4 py-5 text-center text-card-foreground transition-all hover:border-primary/50 hover:bg-accent",
-									isSelected &&
-										"border-primary bg-card text-card-foreground shadow-[0_0_0_2px_var(--primary)] hover:border-primary hover:bg-card",
-								)}
-								key={type}
-								onClick={() => setEventType(type)}
-								type="button"
-								variant="outline"
-							>
-								<span aria-hidden className="text-2xl">
-									{EVENT_TYPE_ICONS[type]}
-								</span>
-								<span className="font-medium text-sm">{preset.label}</span>
-								<span className="hidden text-[11px] text-muted-foreground leading-tight lg:block">
-									{theme.label}
-								</span>
-							</Button>
-						);
-					})}
-				</div>
 			</div>
 
-			<div className="hidden flex-1 flex-col justify-center bg-background px-10 py-9 lg:flex">
-				<p className="mb-4 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-					Diseño inicial sugerido
-				</p>
-				<div className="rounded-[18px] border border-border bg-card p-5 shadow-sm">
-					<div className="rounded-xl bg-muted/50 p-5">
-						<p className="text-muted-foreground text-xs uppercase tracking-wide">
-							{selectedType
-								? EVENT_TYPE_PRESETS[selectedType].label
-								: "Tu ocasión"}
-						</p>
-						<h2 className="mt-2 font-serif text-2xl text-foreground">
-							Tu wishlist especial
-						</h2>
-						<p className="mt-3 text-muted-foreground text-sm">
-							Un encabezado cálido y listo para personalizar.
-						</p>
-					</div>
-					<div className="mt-4 rounded-xl border border-border p-4">
-						<div className="flex items-center justify-between gap-4">
-							<div>
-								<p className="font-medium text-foreground text-sm">
-									Regalo sugerido
-								</p>
-								<p className="text-muted-foreground text-xs">Tienda · S/ 120</p>
-							</div>
-							<span className="rounded-full bg-primary px-3 py-1 font-medium text-primary-foreground text-xs">
-								Reservar
+			<div className="mx-auto grid max-w-[1080px] grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4">
+				{EVENT_TYPES.map((type) => {
+					const preset = EVENT_TYPE_PRESETS[type];
+					const isSelected = selectedType === type;
+
+					return (
+						<Button
+							className={cn(
+								"flex h-auto flex-col items-center justify-center gap-3 whitespace-normal rounded-xl border-2 bg-card px-4 py-7 text-center text-card-foreground transition-all hover:border-primary/50 hover:bg-accent",
+								isSelected &&
+									"border-primary bg-primary/5 hover:border-primary hover:bg-primary/5",
+							)}
+							key={type}
+							onClick={() => setEventType(type)}
+							type="button"
+							variant="outline"
+						>
+							<span aria-hidden className="text-[32px] leading-none">
+								{EVENT_TYPE_ICONS[type]}
 							</span>
-						</div>
-					</div>
-				</div>
-				<p className="mt-4 text-muted-foreground text-sm">
-					Podrás ajustar colores, tipografía y portada en el paso 3.
-				</p>
+							<span className="font-semibold text-[15px]">{preset.label}</span>
+						</Button>
+					);
+				})}
 			</div>
 		</div>
 	);

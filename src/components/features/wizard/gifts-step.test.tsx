@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GiftsStep } from "@/components/features/wizard/gifts-step";
@@ -25,81 +25,6 @@ vi.mock("next/image", () => ({
 	}) => (
 		/* biome-ignore lint/performance/noImgElement: jsdom test mock for next/image */
 		<img alt={alt} src={src} {...props} />
-	),
-}));
-
-vi.mock("nuqs", async () => {
-	const React = await vi.importActual<typeof import("react")>("react");
-
-	return {
-		useQueryState: (key: string) => {
-			const readValue = () =>
-				new URLSearchParams(window.location.search).get(key);
-			const [value, setValue] = React.useState<string | null>(() =>
-				readValue(),
-			);
-
-			React.useEffect(() => {
-				const sync = () => setValue(readValue());
-				window.addEventListener("querychange", sync);
-				window.addEventListener("popstate", sync);
-				return () => {
-					window.removeEventListener("querychange", sync);
-					window.removeEventListener("popstate", sync);
-				};
-			}, [key]);
-
-			const setQueryState = async (
-				nextValue: string | null | ((oldValue: string | null) => string | null),
-			) => {
-				const currentValue = readValue();
-				const resolvedValue =
-					typeof nextValue === "function" ? nextValue(currentValue) : nextValue;
-				const params = new URLSearchParams(window.location.search);
-
-				if (resolvedValue === null || resolvedValue === "") {
-					params.delete(key);
-				} else {
-					params.set(key, resolvedValue);
-				}
-
-				const query = params.toString();
-				window.history.replaceState(
-					{},
-					"",
-					`${window.location.pathname}${query ? `?${query}` : ""}`,
-				);
-				window.dispatchEvent(new Event("querychange"));
-
-				return params;
-			};
-
-			return [value, setQueryState] as const;
-		},
-	};
-});
-
-vi.mock("@/components/ui/drawer", () => ({
-	Drawer: ({
-		children,
-		open,
-	}: {
-		children: React.ReactNode;
-		open?: boolean;
-	}) => (open ? <div>{children}</div> : null),
-	DrawerContent: ({ children, ...props }: React.ComponentProps<"div">) => (
-		<div data-testid="edit-drawer" {...props}>
-			{children}
-		</div>
-	),
-	DrawerDescription: ({ children }: { children: React.ReactNode }) => (
-		<p>{children}</p>
-	),
-	DrawerHeader: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-	DrawerTitle: ({ children }: { children: React.ReactNode }) => (
-		<h2>{children}</h2>
 	),
 }));
 
@@ -192,93 +117,98 @@ describe("GiftsStep", () => {
 	beforeEach(() => {
 		cleanup();
 		vi.clearAllMocks();
-		window.history.replaceState({}, "", "/create?step=gifts");
 	});
 
 	afterEach(() => {
 		cleanup();
 	});
 
-	it("opens the edit drawer from the giftId query param and keeps the list visible", async () => {
-		window.history.replaceState({}, "", "/create?step=gifts&giftId=gift_1");
+	it("offers no edit, hide, or reorder control for an existing gift", () => {
 		renderStep();
 
-		expect(
-			await screen.findByRole("heading", { name: /editar regalo/i }),
-		).toBeTruthy();
-		expect(screen.getAllByText("Lámpara de mesa").length).toBeGreaterThan(0);
-		expect(screen.getAllByText("Juego de copas").length).toBeGreaterThan(0);
-
-		const params = new URLSearchParams(window.location.search);
-		expect(params.get("step")).toBe("gifts");
-		expect(params.get("giftId")).toBe("gift_1");
-	});
-
-	it("saves drawer edits through the store and clears giftId while preserving step", async () => {
-		const user = userEvent.setup();
-		const { store } = renderStep();
-		const [firstEditButton] = screen.getAllByRole("button", { name: "Editar" });
-
-		expect(firstEditButton).toBeTruthy();
-		if (!firstEditButton) throw new Error("Expected at least one edit button");
-		await user.click(firstEditButton);
-		expect(await screen.findByTestId("edit-drawer")).toBeTruthy();
-
-		const nameInput = screen.getByLabelText(/nombre del regalo/i);
-		await user.clear(nameInput);
-		await user.type(nameInput, "Lámpara actualizada");
-		await user.click(
-			screen.getByRole("button", { name: /actualizar regalo/i }),
-		);
-
-		await waitFor(() => {
-			expect(screen.queryByTestId("edit-drawer")).toBeNull();
-		});
-
-		expect(store.getState().draft.gifts[0]?.name).toBe("Lámpara actualizada");
-		const params = new URLSearchParams(window.location.search);
-		expect(params.get("step")).toBe("gifts");
-		expect(params.get("giftId")).toBeNull();
-	});
-
-	it("cancels drawer edits without mutating the draft and clears giftId", async () => {
-		const user = userEvent.setup();
-		const { store } = renderStep();
-		const [firstEditButton] = screen.getAllByRole("button", { name: "Editar" });
-
-		expect(firstEditButton).toBeTruthy();
-		if (!firstEditButton) throw new Error("Expected at least one edit button");
-		await user.click(firstEditButton);
-		expect(await screen.findByTestId("edit-drawer")).toBeTruthy();
-
-		const nameInput = screen.getByLabelText(/nombre del regalo/i);
-		await user.clear(nameInput);
-		await user.type(nameInput, "Cambio temporal");
-		await user.click(screen.getByRole("button", { name: /cancelar/i }));
-
-		await waitFor(() => {
-			expect(screen.queryByTestId("edit-drawer")).toBeNull();
-		});
-
-		expect(store.getState().draft.gifts[0]?.name).toBe("Lámpara de mesa");
-		const params = new URLSearchParams(window.location.search);
-		expect(params.get("step")).toBe("gifts");
-		expect(params.get("giftId")).toBeNull();
-	});
-
-	it("clears stale giftId values without opening the drawer or changing gifts", async () => {
-		window.history.replaceState({}, "", "/create?step=gifts&giftId=missing");
-		const { store } = renderStep();
-
-		await waitFor(() => {
-			const params = new URLSearchParams(window.location.search);
-			expect(params.get("giftId")).toBeNull();
-		});
-
+		expect(screen.queryByRole("button", { name: /^editar$/i })).toBeNull();
+		expect(screen.queryByRole("button", { name: /^ocultar$/i })).toBeNull();
+		expect(screen.queryByRole("button", { name: /^mostrar$/i })).toBeNull();
 		expect(screen.queryByTestId("edit-drawer")).toBeNull();
+		expect(screen.getAllByRole("button", { name: /^eliminar$/i }).length).toBe(
+			2,
+		);
+	});
+
+	it("removes a gift via delete and updates the draft", async () => {
+		const user = userEvent.setup();
+		const { store } = renderStep();
+
+		const [firstDeleteButton] = screen.getAllByRole("button", {
+			name: /^eliminar$/i,
+		});
+		expect(firstDeleteButton).toBeTruthy();
+		if (!firstDeleteButton) throw new Error("Expected a delete button");
+		await user.click(firstDeleteButton);
+
 		expect(store.getState().draft.gifts.map((gift) => gift.name)).toEqual([
-			"Lámpara de mesa",
 			"Juego de copas",
+		]);
+		expect(screen.queryByText("Lámpara de mesa")).toBeNull();
+	});
+
+	it("adds a manual gift without a product URL", async () => {
+		const user = userEvent.setup();
+		const { store } = renderStep(makeDraft({ gifts: [] }));
+
+		await user.click(
+			screen.getByRole("button", { name: /agregar regalo manualmente/i }),
+		);
+		await user.type(
+			screen.getByLabelText(/nombre del regalo/i),
+			"Set de toallas",
+		);
+		await user.click(screen.getByRole("button", { name: /guardar regalo/i }));
+
+		expect(store.getState().draft.gifts.map((gift) => gift.name)).toEqual([
+			"Set de toallas",
+		]);
+	});
+
+	it("assigns a category and quantity to a new gift", async () => {
+		const user = userEvent.setup();
+		const { store } = renderStep(makeDraft({ gifts: [] }));
+
+		await user.click(
+			screen.getByRole("button", { name: /agregar regalo manualmente/i }),
+		);
+		await user.type(screen.getByLabelText(/nombre del regalo/i), "Vajilla");
+		const quantityInput = screen.getByLabelText(/^cantidad$/i);
+		await user.tripleClick(quantityInput);
+		await user.keyboard("3");
+		await user.click(screen.getByRole("button", { name: /guardar regalo/i }));
+
+		const gift = store.getState().draft.gifts[0];
+		expect(gift?.name).toBe("Vajilla");
+		expect(gift?.quantityNeeded).toBe(3);
+	});
+
+	it("imports a gift from a URL", async () => {
+		importFromUrlMock.mockResolvedValue({
+			ok: true,
+			draft: {
+				name: "Cafetera",
+				productUrl: "https://tienda.com/cafetera",
+				imageUrl: null,
+				priceAmount: 90,
+			},
+		});
+		const user = userEvent.setup();
+		const { store } = renderStep(makeDraft({ gifts: [] }));
+
+		await user.type(
+			screen.getByPlaceholderText(/tienda.com/i),
+			"https://tienda.com/cafetera",
+		);
+		await user.click(screen.getByRole("button", { name: /^importar$/i }));
+
+		expect(store.getState().draft.gifts.map((gift) => gift.name)).toEqual([
+			"Cafetera",
 		]);
 	});
 
@@ -293,5 +223,12 @@ describe("GiftsStep", () => {
 		expect(
 			screen.getByRole("button", { name: "Quitar categoría Hogar" }),
 		).toBeTruthy();
+	});
+
+	it("renders the preview pane with guest-styled gift cards", () => {
+		renderStep();
+
+		expect(screen.getByText(/así los verán tus invitados/i)).toBeTruthy();
+		expect(screen.getAllByText("Lámpara de mesa").length).toBeGreaterThan(0);
 	});
 });

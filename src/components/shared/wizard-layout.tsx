@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,25 @@ type WizardLayoutProps = {
 	desktopActions?: ReactNode;
 	className?: string;
 	contentClassName?: string;
+};
+
+type WizardThemeStyle = CSSProperties & Record<`--${string}`, string>;
+
+/**
+ * Scoped to the wizard only (not the rest of the dashboard): the design's
+ * warm green palette (wzink/wzmut/wzline/wzlime) vs. the dashboard's cooler
+ * blue-gray tokens. Cascades to every step plus the header/stepper/footer;
+ * PublicThemeProvider's own inline vars inside step preview panels still win
+ * locally over this.
+ */
+const WIZARD_THEME_STYLE: WizardThemeStyle = {
+	"--foreground": "#173E29",
+	"--muted-foreground": "#6E7C71",
+	"--border": "#E3E2D6",
+	"--input": "#E3E2D6",
+	"--primary": "#BCE25A",
+	"--primary-foreground": "#1B3A12",
+	"--ring": "#BCE25A",
 };
 
 export function WizardLayout({
@@ -26,21 +45,18 @@ export function WizardLayout({
 				"flex min-h-screen flex-col bg-background text-foreground lg:h-dvh lg:overflow-hidden",
 				className,
 			)}
+			style={WIZARD_THEME_STYLE}
 		>
-			<section className="flex min-h-screen w-full flex-1 flex-col bg-background lg:min-h-0 lg:overflow-hidden lg:bg-card">
+			<section className="flex min-h-screen w-full flex-1 flex-col bg-background lg:min-h-0 lg:overflow-hidden">
 				<div className="hidden h-[58px] shrink-0 items-center gap-[7px] border-border border-b bg-card px-9 lg:flex">
 					<Image
-						alt=""
-						aria-hidden
+						alt="A Wish For"
 						className="h-[26px] w-auto"
 						height={26}
 						priority
 						src="/assets/isotype.svg"
 						width={26}
 					/>
-					<span className="font-bold font-serif text-foreground text-lg">
-						A Wish For
-					</span>
 					<div className="ml-auto">{desktopActions}</div>
 				</div>
 

@@ -33,6 +33,10 @@ const config: NextConfig = {
 				protocol: "https",
 				hostname: "media.falabella.com",
 			},
+			{
+				protocol: "https",
+				hostname: "images.**.buscalibre.com",
+			},
 		],
 	},
 	async headers() {

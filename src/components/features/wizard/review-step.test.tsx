@@ -4,9 +4,8 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PublishStep } from "@/components/features/wizard/publish-step";
+import { ReviewStep } from "@/components/features/wizard/review-step";
 import { WizardProvider } from "@/components/features/wizard/wizard-provider";
-import { toCanonicalWishlistUrl } from "@/lib/wishlist/share";
 import type { WishlistDraft } from "@/stores/wishlist-wizard.store";
 import { createWishlistWizardStore } from "@/stores/wishlist-wizard.store";
 
@@ -14,11 +13,15 @@ const useUserMock = vi.hoisted(() => vi.fn());
 const mutateAsyncMock = vi.hoisted(() => vi.fn());
 const checkSlugAvailabilityMock = vi.hoisted(() => vi.fn());
 const toastSuccessMock = vi.hoisted(() => vi.fn());
-const toastErrorMock = vi.hoisted(() => vi.fn());
-const downloadQrCodePngMock = vi.hoisted(() => vi.fn());
+const pushMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@clerk/nextjs", () => ({
 	useUser: useUserMock,
+}));
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({ push: pushMock }),
+	useSearchParams: () => new URLSearchParams("step=review"),
 }));
 
 vi.mock("next/link", () => ({
@@ -62,12 +65,8 @@ vi.mock("next/font/google", () => {
 vi.mock("sonner", () => ({
 	toast: {
 		success: toastSuccessMock,
-		error: toastErrorMock,
+		error: vi.fn(),
 	},
-}));
-
-vi.mock("@/lib/qr", () => ({
-	downloadQrCodePng: downloadQrCodePngMock,
 }));
 
 vi.mock("@/trpc/react", () => ({
@@ -97,7 +96,14 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	eventTime: "18:30",
 	eventLocation: "Barranco",
 	dressCode: "",
-	images: [],
+	images: [
+		{
+			url: "https://cdn.test/cover.jpg",
+			width: 1600,
+			height: 900,
+			orientation: "landscape",
+		},
+	],
 	welcomeMessage: "Bienvenidos",
 	thankYouMessage: "Gracias",
 	categories: ["Hogar"],
@@ -132,19 +138,12 @@ const renderStep = ({
 	savedWishlistId = "wishlist_123",
 	savedSlug = draft.slug,
 	lastSavedAt = 123456789,
-	publishSuccess = null,
 }: {
 	isSignedIn?: boolean;
 	draft?: WishlistDraft;
 	savedWishlistId?: string | null;
 	savedSlug?: string | null;
 	lastSavedAt?: number | null;
-	publishSuccess?: {
-		wishlistId: string;
-		slug: string;
-		publicUrlPath: string;
-		dashboardUrlPath: string;
-	} | null;
 } = {}) => {
 	useUserMock.mockReturnValue({ isSignedIn });
 	const store = createWishlistWizardStore();
@@ -154,20 +153,24 @@ const renderStep = ({
 		lastSavedAt,
 	});
 
-	if (publishSuccess) {
-		store.getState().completePublish(publishSuccess);
-	}
+	// ReviewStep portals its publish button into a slot that WizardNav renders
+	// in the real app; provide it here so the button is reachable in
+	// isolation, matching how it actually mounts in production.
+	document.getElementById("publish-cta-slot-desktop")?.remove();
+	const desktopSlot = document.createElement("div");
+	desktopSlot.id = "publish-cta-slot-desktop";
+	document.body.appendChild(desktopSlot);
 
 	const result = render(
 		<WizardProvider store={store}>
-			<PublishStep />
+			<ReviewStep />
 		</WizardProvider>,
 	);
 
 	return { store, ...result };
 };
 
-describe("PublishStep", () => {
+describe("ReviewStep", () => {
 	beforeEach(() => {
 		cleanup();
 		vi.clearAllMocks();
@@ -175,7 +178,7 @@ describe("PublishStep", () => {
 		vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {});
 	});
 
-	it("renders the final preview, enables publish for a ready draft, and keeps purchase actions disabled", async () => {
+	it("renders the labeled preview, enables publish for a ready draft, and keeps purchase actions disabled", async () => {
 		renderStep();
 
 		await waitFor(() => {
@@ -185,17 +188,45 @@ describe("PublishStep", () => {
 			});
 		});
 
+		expect(screen.getByText(/así lo verán tus invitados/i)).toBeTruthy();
 		expect(
 			screen
 				.getByRole("button", { name: /publicar wishlist/i })
 				.getAttribute("disabled"),
 		).toBeNull();
+		expect(screen.queryByRole("button", { name: /regalar/i })).toBeNull();
+	});
+
+	it("shows the specific name and occasion once the draft is ready", async () => {
+		renderStep();
+
+		await waitFor(() => {
+			expect(screen.getByText("Lista de boda · Boda")).toBeTruthy();
+		});
+	});
+
+	it("blocks publish when the draft has fewer cover images than its layout needs", async () => {
+		renderStep({
+			draft: makeDraft({ images: [], layoutId: "collage-staggered" }),
+		});
+
+		await waitFor(() => {
+			expect(
+				screen.getByText(/te faltan 3 fotos para "collage escalonado"/i),
+			).toBeTruthy();
+		});
 		expect(
 			screen
-				.getByRole("link", { name: /abrir vista completa/i })
-				.getAttribute("href"),
-		).toBe("/w/lista-de-boda");
-		expect(screen.queryByRole("button", { name: /regalar/i })).toBeNull();
+				.getByRole("button", { name: /publicar wishlist/i })
+				.getAttribute("disabled"),
+		).toBeNull();
+
+		const user = userEvent.setup();
+		await user.click(
+			screen.getByRole("button", { name: /publicar wishlist/i }),
+		);
+
+		expect(mutateAsyncMock).not.toHaveBeenCalled();
 	});
 
 	it("prompts signed-out users to authenticate without sending a publish mutation", async () => {
@@ -218,11 +249,11 @@ describe("PublishStep", () => {
 			screen
 				.getByRole("link", { name: /iniciar sesión/i })
 				.getAttribute("href"),
-		).toBe("/sign-in?redirect_url=%2Fcreate%3Fstep%3Dpublish");
+		).toBe("/sign-in?redirect_url=%2Fcreate%3Fstep%3Dreview");
 		expect(store.getState().draft.title).toBe("Lista de boda");
 	});
 
-	it("stores publish success state, clears the local draft, and shows share actions after a successful publish", async () => {
+	it("publishes, clears the local draft, and navigates to the published step", async () => {
 		mutateAsyncMock.mockResolvedValue({
 			status: "published",
 			wishlistId: "wishlist_123",
@@ -245,7 +276,9 @@ describe("PublishStep", () => {
 		);
 
 		await waitFor(() => {
-			expect(screen.getByText(/tu wishlist está publicada/i)).toBeTruthy();
+			expect(pushMock).toHaveBeenCalledWith(
+				expect.stringContaining("step=published"),
+			);
 		});
 
 		expect(store.getState().draft.title).toBe("");
@@ -260,40 +293,5 @@ describe("PublishStep", () => {
 			"wishlist-wizard-draft",
 		);
 		expect(toastSuccessMock).toHaveBeenCalledWith("Wishlist publicada");
-	});
-
-	it("supports copy, WhatsApp, and QR actions from the publish success state", async () => {
-		const user = userEvent.setup();
-		renderStep({
-			publishSuccess: {
-				wishlistId: "wishlist_123",
-				slug: "lista-de-boda",
-				publicUrlPath: "/w/lista-de-boda",
-				dashboardUrlPath: "/dashboard",
-			},
-		});
-
-		const publicUrl = toCanonicalWishlistUrl("/w/lista-de-boda");
-
-		expect(screen.getByRole("button", { name: /copiar enlace/i })).toBeTruthy();
-
-		await user.click(screen.getByRole("button", { name: /descargar qr/i }));
-
-		expect(downloadQrCodePngMock).toHaveBeenCalledWith({
-			text: publicUrl,
-			fileName: "lista-de-boda-qr.png",
-		});
-
-		expect(
-			screen
-				.getByRole("link", { name: /compartir por whatsapp/i })
-				.getAttribute("href"),
-		).toContain(encodeURIComponent(publicUrl));
-		expect(
-			screen
-				.getByRole("link", { name: /gestionar en dashboard/i })
-				.getAttribute("href"),
-		).toBe("/dashboard");
-		expect(screen.getByText(publicUrl)).toBeTruthy();
 	});
 });

@@ -68,6 +68,7 @@ type GiftDelegate = {
 };
 
 type WishlistImageDelegate = {
+	count(args: Prisma.WishlistImageCountArgs): Promise<number>;
 	createMany(
 		args: Prisma.WishlistImageCreateManyArgs,
 	): Promise<Prisma.BatchPayload>;
@@ -523,6 +524,10 @@ export const publishWishlist = async (
 		},
 	});
 
+	const imageCount = await db.wishlistImage.count({
+		where: { wishlistId },
+	});
+
 	const readiness = evaluatePublishReadiness({
 		title: wishlist.title,
 		eventType: wishlist.eventType,
@@ -530,6 +535,8 @@ export const publishWishlist = async (
 		language: wishlist.language,
 		currency: wishlist.currency,
 		visibleGiftCount,
+		layoutId: wishlist.layoutId,
+		imageCount,
 	});
 
 	if (!readiness.ready) {

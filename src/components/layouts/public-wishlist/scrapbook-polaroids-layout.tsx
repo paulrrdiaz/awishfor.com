@@ -21,11 +21,13 @@ function Polaroid({
 	alt,
 	rotation,
 	className,
+	isSample,
 }: {
 	src: string | null;
 	alt: string;
 	rotation: string;
 	className?: string;
+	isSample?: boolean;
 }) {
 	return (
 		<div
@@ -35,7 +37,12 @@ function Polaroid({
 				className,
 			)}
 		>
-			<HeroImageSlot alt={alt} className="aspect-[4/3]" src={src} />
+			<HeroImageSlot
+				alt={alt}
+				className="aspect-[4/3]"
+				isSample={isSample}
+				src={src}
+			/>
 		</div>
 	);
 }
@@ -68,20 +75,23 @@ export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
 					<Polaroid
 						alt={`${heading} 1`}
 						className="z-[1] -mr-3"
+						isSample={slots[0]?.isSample}
 						rotation="-rotate-6"
-						src={slots[0] ?? null}
+						src={slots[0]?.url ?? null}
 					/>
 					<Polaroid
 						alt={`${heading} 2`}
 						className="z-[3] w-36 sm:w-40"
+						isSample={slots[1]?.isSample}
 						rotation="rotate-3"
-						src={slots[1] ?? null}
+						src={slots[1]?.url ?? null}
 					/>
 					<Polaroid
 						alt={`${heading} 3`}
 						className="z-[2] -ml-3"
+						isSample={slots[2]?.isSample}
 						rotation="-rotate-2"
-						src={slots[2] ?? null}
+						src={slots[2]?.url ?? null}
 					/>
 				</div>
 				{!isCompact && (

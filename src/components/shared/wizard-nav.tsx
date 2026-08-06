@@ -5,7 +5,11 @@ import { cn } from "@/lib/utils";
 
 type WizardNavProps = {
 	isFirst: boolean;
-	isLast: boolean;
+	/**
+	 * "default" shows a Next button; "review" swaps it for the publish CTA
+	 * portal target, since the publish action lives in the review step body.
+	 */
+	variant: "default" | "review";
 	onBack: () => void;
 	onNext: () => void;
 	saveDraftSlot?: ReactNode;
@@ -14,12 +18,14 @@ type WizardNavProps = {
 
 export function WizardNav({
 	isFirst,
-	isLast,
+	variant,
 	onBack,
 	onNext,
 	saveDraftSlot,
 	className,
 }: WizardNavProps) {
+	const isReview = variant === "review";
+
 	return (
 		<>
 			<div
@@ -41,12 +47,12 @@ export function WizardNav({
 					{saveDraftSlot}
 				</div>
 
-				{!isLast && (
+				{!isReview && (
 					<Button className="min-h-11 px-5" onClick={onNext} type="button">
 						Siguiente
 					</Button>
 				)}
-				{isLast && <div id="publish-cta-slot-mobile" />}
+				{isReview && <div id="publish-cta-slot-mobile" />}
 			</div>
 
 			<div
@@ -67,7 +73,7 @@ export function WizardNav({
 					</Button>
 				)}
 
-				{!isLast && (
+				{!isReview && (
 					<Button
 						className="min-h-11 px-8 py-[13px]"
 						onClick={onNext}
@@ -76,7 +82,7 @@ export function WizardNav({
 						Continuar →
 					</Button>
 				)}
-				{isLast && <div id="publish-cta-slot-desktop" />}
+				{isReview && <div id="publish-cta-slot-desktop" />}
 			</div>
 		</>
 	);

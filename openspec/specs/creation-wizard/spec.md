@@ -5,7 +5,7 @@ TBD - update purpose after archive.
 ## Requirements
 ### Requirement: Wizard route with step routing
 
-The system SHALL serve the creation wizard at `/create` and render the active step based on a query parameter (e.g. `?step=event-type`). The route SHALL be publicly accessible without authentication.
+The system SHALL serve the creation wizard at `/create` and render the active step based on a query parameter (e.g. `?step=event-type`). The recognized steps SHALL be `event-type`, `details`, `layout`, `theme`, `images`, `gifts`, `review`, and `published`, in that order. The route SHALL be publicly accessible without authentication.
 
 #### Scenario: Unauthenticated user opens the wizard
 
@@ -16,6 +16,11 @@ The system SHALL serve the creation wizard at `/create` and render the active st
 
 - **WHEN** the URL contains a recognized `step` query param
 - **THEN** the wizard renders that step; for a missing or unknown value it falls back to the first (event-type) step
+
+#### Scenario: Retired step ids fall back
+
+- **WHEN** the URL carries a step id from the previous flow such as `design` or `publish`
+- **THEN** the wizard treats it as unknown and renders the first step rather than erroring
 
 ### Requirement: Local draft store with persistence
 
@@ -74,23 +79,33 @@ The store SHALL track, local-only, whether each seeded copy field (welcome messa
 - **THEN** the typed name is untouched
 
 ### Requirement: Multi-step wizard navigation
-The wizard SHALL route between the steps `event-type`, `details`, `design`, `gifts`, and `publish` via the `?step=` query param, falling back to the first step for a missing or unknown value, and SHALL provide Back/Next controls that move between adjacent steps in that order.
+
+The wizard SHALL route between the steps `event-type`, `details`, `layout`, `theme`, `images`, `gifts`, `review`, and `published` via the `?step=` query param, falling back to the first step for a missing or unknown value, and SHALL provide Back/Next controls that move between adjacent steps in that order. The `published` step SHALL be terminal: it SHALL offer no Back control and SHALL NOT be reachable by forward navigation from `review` except as the result of a successful publish.
 
 #### Scenario: Navigating forward and back
+
 - **WHEN** the user is on the `details` step and activates Next, then Back
-- **THEN** the wizard renders the `design` step, then returns to the `details` step, with the `?step=` query param reflecting the active step
+- **THEN** the wizard renders the `layout` step, then returns to the `details` step, with the `?step=` query param reflecting the active step
 
-#### Scenario: Gifts step advances to publish
+#### Scenario: Gifts step advances to review
+
 - **WHEN** the user is on the `gifts` step and activates Next
-- **THEN** the wizard renders the `publish` step with `?step=publish`
+- **THEN** the wizard renders the `review` step with `?step=review`
 
-#### Scenario: Publish step navigates back to gifts
-- **WHEN** the user is on the `publish` step and activates Back
+#### Scenario: Review step navigates back to gifts
+
+- **WHEN** the user is on the `review` step and activates Back
 - **THEN** the wizard renders the `gifts` step with `?step=gifts`
 
-#### Scenario: Unknown step falls back
-- **WHEN** the URL contains a `step` value that is not one of the known steps
-- **THEN** the wizard renders the first (`event-type`) step
+#### Scenario: Published step offers no back navigation
+
+- **WHEN** the `published` step renders after a successful publish
+- **THEN** no Back control is presented and the footer offers only the forward actions
+
+#### Scenario: Direct visit to published without a publish redirects
+
+- **WHEN** a user navigates to `?step=published` with no publish success in the wizard store
+- **THEN** the wizard redirects to the `review` step instead of rendering an empty success screen
 
 ### Requirement: Event Details step
 
@@ -159,58 +174,6 @@ The system SHALL expose the slug-availability check as a publicly callable proce
 - **WHEN** the user enters a slug that fails client-side validation
 - **THEN** the slug shows `✕ Solo letras, números y guiones` and no availability request is required
 
-### Requirement: Design & Preview step
-
-The Design & Preview step SHALL let the user select a theme, layout, heading font, body font, and button style from the public config presets, manage up to six cover images, write each selection to the draft, and render a live preview using the public wishlist layout in preview mode with purchase actions disabled. Layout selection SHALL use the modal layout picker: a compact trigger showing the current layout that opens a dialog of all layout thumbnails, rather than an inline grid. The "Imágenes de portada" section SHALL appear directly below the "Disposición" selection and SHALL display the selected layout's cover-image guidance. The embedded preview SHALL be labeled "Vista previa con ejemplos".
-
-The controls SHALL be:
-
-- **Tema de color**: a fixed-column swatch grid (6 columns on desktop, 4 on mobile) showing all seven theme swatches.
-- **Disposición**: a compact trigger that displays the selected layout's thumbnail and Spanish label, opens a modal grid of the nine active layouts with no legacy grouping, and updates the draft when a layout is selected.
-- **Imágenes de portada**: the multi-image manager (add, remove, reorder, max six) directly below the layout trigger, persisting each image with its dimensions and orientation, with selected-layout guidance showing the recommended photo count, orientation, aspect ratio, and any circle-crop centering advice.
-- **Tipografía**: two selects — heading font ("Títulos") and body font ("Texto") — listing the heading/body font presets, each option rendered in its own font.
-- **Estilo de botón**: four chips where each chip renders in its own preset's shape (radius, border, weight) as a live self-preview.
-
-#### Scenario: Selecting design options updates the preview
-
-- **WHEN** the user selects a different theme, layout, heading font, body font, or button style
-- **THEN** the draft stores the selected ids and the embedded preview re-renders with those choices
-
-#### Scenario: All seven theme swatches are shown in a grid
-
-- **WHEN** the Design & Preview step renders the theme selector
-- **THEN** all seven theme swatches are shown in the fixed-column grid
-
-#### Scenario: Layout is chosen through the modal picker
-
-- **WHEN** the user opens the layout picker and selects a layout in the modal
-- **THEN** the draft's `layoutId` updates, the modal closes, and the trigger reflects the new selection
-
-#### Scenario: Cover images follow the layout selection
-
-- **WHEN** the Design & Preview step renders
-- **THEN** the "Imágenes de portada" section appears directly below the layout selection and shows the selected layout's image guidance
-
-#### Scenario: Added cover image records its orientation
-
-- **WHEN** the user adds a cover image in this step
-- **THEN** the draft holds that image with its url, dimensions and derived orientation
-
-#### Scenario: Button style chips preview themselves
-
-- **WHEN** the Design & Preview step renders the Estilo de botón options
-- **THEN** each chip renders with its own preset's radius, border, and weight (e.g. the Contorno chip renders as an outline pill)
-
-#### Scenario: Embedded preview is labeled
-
-- **WHEN** the Design & Preview step renders the embedded preview
-- **THEN** the preview is labeled "Vista previa con ejemplos"
-
-#### Scenario: Preview does not mutate purchase state
-
-- **WHEN** the preview renders gifts
-- **THEN** purchase actions are disabled and no purchase state can be changed from the preview
-
 ### Requirement: Preview uses sample gifts before real gifts exist
 
 The Design & Preview step SHALL render the selected event type's preset `sampleGifts` as placeholder gifts when the draft has no visible user-created gifts, so the preview is never empty.
@@ -227,7 +190,7 @@ The Design & Preview step SHALL render the selected event type's preset `sampleG
 
 ### Requirement: Gifts step with local draft gifts
 
-The Gifts step SHALL let the user add, edit, and remove gifts that are stored in the wizard draft store as local draft gifts (no database write). Each gift SHALL support a name, optional product URL, optional image, optional price, a category assignment, a quantity, a priority, public and internal notes, and a hide toggle. The edit action SHALL open a drawer for the selected draft gift while preserving the Gifts step list and preview context. The selected draft gift id SHALL be represented in the URL query string so the drawer state is addressable and clearable. A URL-import entry point SHALL be present as a placeholder.
+The Gifts step SHALL let the user import, add, and remove gifts that are stored in the wizard draft store as local draft gifts (no database write). Each gift SHALL support a name, optional product URL, optional image, optional price, a category assignment, a quantity, a priority, and public and internal notes. The step SHALL provide a URL-import entry point, category management, and a manual add action, and SHALL offer a delete action for each gift. Editing an existing gift, toggling its visibility, and reordering gifts SHALL NOT be offered in the wizard; those actions live in `/dashboard/wishlists/[id]/gifts` after the wishlist exists.
 
 #### Scenario: Add a manual gift without a product URL
 
@@ -239,47 +202,15 @@ The Gifts step SHALL let the user add, edit, and remove gifts that are stored in
 - **WHEN** the user assigns a gift to one of the draft categories and sets a quantity
 - **THEN** the draft gift stores that category and quantity
 
-#### Scenario: Edit a draft gift from the list
-
-- **WHEN** the user activates `Editar` for a draft gift in the Gifts step list
-- **THEN** the system opens a drawer containing that gift's editable fields without replacing the whole Gifts step
-- **AND** the URL contains the selected draft gift id as a query param
-
-#### Scenario: Save edited draft gift from the drawer
-
-- **WHEN** the user changes draft gift fields in the drawer and saves
-- **THEN** the wizard draft store updates that gift
-- **AND** the drawer closes
-- **AND** the gift id query param is cleared
-- **AND** the list and guest preview reflect the updated values
-
-#### Scenario: Close edit drawer without saving
-
-- **WHEN** the edit drawer is open and the user cancels or dismisses it
-- **THEN** the drawer closes
-- **AND** the gift id query param is cleared
-- **AND** the draft gift remains unchanged
-
-#### Scenario: Open drawer from gift id query param
-
-- **WHEN** the user is on the Gifts step with a gift id query param matching an existing draft gift
-- **THEN** the edit drawer opens for that gift
-
-#### Scenario: Unknown gift id query param
-
-- **WHEN** the user is on the Gifts step with a gift id query param that does not match an existing draft gift
-- **THEN** no edit drawer opens
-- **AND** no draft gift is modified
-
-#### Scenario: Hidden gifts are excluded from the visible list and preview
-
-- **WHEN** the user toggles a gift to hidden
-- **THEN** that gift is excluded from the public preview and does not count toward visible-gift readiness
-
 #### Scenario: Remove a gift
 
-- **WHEN** the user removes a gift
-- **THEN** the gift is deleted from the draft store and the list
+- **WHEN** the user activates delete for a gift in the Gifts step
+- **THEN** the gift is removed from the draft store and disappears from the list and the preview
+
+#### Scenario: No edit affordance in the wizard
+
+- **WHEN** the Gifts step renders its gift list
+- **THEN** it offers no edit, hide, or reorder control for an existing gift
 
 ### Requirement: Draft store holds detail, design, and gift fields
 
@@ -346,111 +277,119 @@ with the local draft; it SHALL not silently discard either version.
 - **THEN** the wizard presents the server and local resolution choices before making another write
 
 ### Requirement: Final publish step preview
-The wizard SHALL provide a final publish step that renders an embedded preview of the current local draft using the public wishlist preview mode, labeled "Vista previa de tu wishlist", and SHALL provide a full-page owner preview action before publish.
 
-#### Scenario: Final preview renders current draft
-- **WHEN** the user opens `/create?step=publish` with a local draft
-- **THEN** the step renders an embedded public wishlist preview labeled "Vista previa de tu wishlist" using the current draft content, design selections, categories, and visible gifts
+The `review` step SHALL render an embedded preview of the current local draft using the public wishlist preview mode, labeled "Así lo verán tus invitados", together with a banner marking the list as not yet public, and SHALL provide a full-page owner preview action before publish.
 
-#### Scenario: Final preview disables guest actions
-- **WHEN** the final embedded preview renders gifts
+#### Scenario: Review preview renders current draft
+
+- **WHEN** the user opens `/create?step=review` with a local draft
+- **THEN** the step renders an embedded public wishlist preview labeled "Así lo verán tus invitados" using the current draft content, design selections, categories, and visible gifts
+
+#### Scenario: Preview is marked as not public
+
+- **WHEN** the review preview renders
+- **THEN** a banner states that the list is not yet public
+
+#### Scenario: Review preview disables guest actions
+
+- **WHEN** the review embedded preview renders gifts
 - **THEN** guest purchase actions are disabled and no purchase mutation can be triggered from the preview
 
 #### Scenario: Full page preview is available before publish
-- **WHEN** the user opens the final publish step before the wishlist is published
+
+- **WHEN** the user opens the review step before the wishlist is published
 - **THEN** the step provides a full-page preview action for the owner without exposing the draft as a public wishlist to non-owners
 
 ### Requirement: Publish readiness checklist on final step
-The final publish step SHALL show a checklist-friendly readiness result for title, event type, slug, language, currency, and at least one visible gift, and SHALL block publish while any required item is unsatisfied.
+
+The `review` step SHALL show a checklist-friendly readiness result grouped into the four items the design presents — name and occasion, cover images, layout and theme, and visible gifts — and SHALL block publish while any required item is unsatisfied. Each item SHALL name the specific value or shortfall rather than only its state.
 
 #### Scenario: Ready draft enables publish
-- **WHEN** the local draft has a title, event type, valid available slug, language, currency, and at least one visible gift
+
+- **WHEN** the local draft satisfies every readiness requirement including its layout's cover-image slots
 - **THEN** the checklist shows every item satisfied and the publish action is enabled for an authenticated user
 
 #### Scenario: Missing readiness item blocks publish
+
 - **WHEN** any required readiness item is missing, invalid, unavailable, or unsatisfied
 - **THEN** the checklist identifies the failed item and the publish action remains disabled
 
+#### Scenario: Checklist items are specific
+
+- **WHEN** the checklist renders a satisfied name-and-occasion item
+- **THEN** it shows the draft's name and occasion rather than a bare check
+
+#### Scenario: Insufficient images block publish
+
+- **WHEN** the draft has fewer cover images than the selected layout renders
+- **THEN** the cover-images checklist item is unsatisfied and publish remains blocked
+
 #### Scenario: Hidden gifts do not satisfy readiness
+
 - **WHEN** the draft has gifts but all of them are hidden
 - **THEN** the visible gift checklist item is unsatisfied and publish remains blocked
 
 ### Requirement: Publish authentication gate
-The final publish step SHALL require authentication before sending a publish mutation. Signed-out users SHALL be prompted to sign in with reassurance copy that "tu progreso ya está guardado", and the local draft SHALL remain intact.
+
+The `review` step SHALL require authentication before sending a publish mutation. Signed-out users SHALL be prompted to sign in with reassurance copy that "tu progreso ya está guardado", and the local draft SHALL remain intact.
 
 #### Scenario: Signed-out user tries to publish
-- **WHEN** a signed-out user activates the publish action from the final step
+
+- **WHEN** a signed-out user activates the publish action from the review step
 - **THEN** the wizard shows an authentication prompt including the copy "tu progreso ya está guardado" and sends no publish mutation
 
 #### Scenario: Signed-out draft is preserved through auth prompt
+
 - **WHEN** a signed-out user is prompted to authenticate before publishing
-- **THEN** the local wizard draft remains persisted so the user can return to `/create?step=publish`
+- **THEN** the local wizard draft remains persisted so the user can return to `/create?step=review`
 
 #### Scenario: Signed-in user can publish
+
 - **WHEN** a signed-in user activates publish for a ready draft
 - **THEN** the wizard sends one publish request and prevents duplicate publish activation until the request finishes
 
 ### Requirement: Publish success and share state
-After a successful publish, the wizard SHALL remain on the final step and render a success/share state containing the public wishlist URL and five actions with the exact labels: "Copiar enlace", "Compartir por WhatsApp", "Descargar QR", "Ver lista pública", and "Gestionar en dashboard".
 
-#### Scenario: Successful publish stays on final step
+After a successful publish the wizard SHALL advance to the `published` step and render a confirmation containing the public wishlist URL with a copy action, three share actions labeled "WhatsApp", "QR" and "Email", a primary "Ver mi página" action, and a secondary action leading to the wishlist's dashboard. The dashboard action SHALL be present because the published step is terminal and gift editing lives in the dashboard.
+
+#### Scenario: Successful publish advances to the published step
+
 - **WHEN** the publish request succeeds
-- **THEN** the wizard remains on `/create?step=publish` and shows the published success/share state
+- **THEN** the wizard navigates to `/create?step=published` and shows the confirmation
 
-#### Scenario: Success state shows the five labeled actions
-- **WHEN** the success/share state renders
-- **THEN** it shows the actions "Copiar enlace", "Compartir por WhatsApp", "Descargar QR", "Ver lista pública", and "Gestionar en dashboard"
+#### Scenario: Confirmation shows the URL and its actions
+
+- **WHEN** the published step renders
+- **THEN** it shows the public URL with a copy action, the "WhatsApp", "QR" and "Email" share actions, a primary "Ver mi página" action, and a secondary action to manage the wishlist in the dashboard
 
 #### Scenario: Share actions use public URL
-- **WHEN** the success/share state renders
-- **THEN** copy-link, WhatsApp, QR download, and public wishlist actions all use the canonical `/w/[slug]` public wishlist URL returned for the published wishlist
+
+- **WHEN** the published step renders
+- **THEN** copy-link, WhatsApp, QR download, email, and public wishlist actions all use the canonical `/w/[slug]` public wishlist URL returned for the published wishlist
 
 #### Scenario: WhatsApp share uses Spanish invitation copy
+
 - **WHEN** the user activates the WhatsApp share action
 - **THEN** the system opens a WhatsApp share URL containing Spanish invitation text and the public wishlist URL
 
-### Requirement: Final publish step matches Claude Design step 5
-The `/create?step=publish` final wizard step SHALL match the imported Claude Design `A Wish For.dc.html` step 5 frames for layout, typography, spacing, surfaces, visual hierarchy, and interaction states while preserving the existing publish behavior.
+#### Scenario: Email share opens a prefilled message
 
-#### Scenario: Desktop final publish layout matches design
-- **WHEN** the wizard is viewed at a desktop viewport width (`lg` and up) on `/create?step=publish`
-- **THEN** the final step renders in the Claude Design step 5 desktop composition, including the designed wizard card treatment, two-pane preview/action layout, canvas backdrop, spacing, border radius, typography scale, and primary/secondary action hierarchy
-- **AND** the embedded preview remains labeled "Vista previa de tu wishlist"
-
-#### Scenario: Mobile final publish layout matches design
-- **WHEN** the wizard is viewed at a mobile viewport width on `/create?step=publish`
-- **THEN** the final step renders in the Claude Design step 5 mobile composition, including the designed single-column order, compact preview/action sections, sticky wizard navigation behavior, spacing, and touch target sizing
-
-#### Scenario: Draft readiness states match design without changing rules
-- **WHEN** the local draft is missing one or more publish readiness requirements
-- **THEN** the final step shows the Claude Design blocked-readiness visual state
-- **AND** publishing remains disabled or blocked until title, event type, available slug, language, currency, and at least one visible gift are satisfied
-
-#### Scenario: Signed-out publish gate matches design
-- **WHEN** a signed-out user activates publish from the final step
-- **THEN** the auth gate appears in the Claude Design signed-out step 5 treatment
-- **AND** the gate preserves the copy "tu progreso ya está guardado"
-- **AND** no publish mutation is sent
-
-#### Scenario: Success share state matches design
-- **WHEN** publishing succeeds from the wizard
-- **THEN** the final step stays on `/create?step=publish` and renders the Claude Design success/share treatment
-- **AND** it includes the public URL and the exact actions "Copiar enlace", "Compartir por WhatsApp", "Descargar QR", "Ver lista pública", and "Gestionar en dashboard"
-
-#### Scenario: Preview remains non-mutating
-- **WHEN** the embedded final preview renders gifts on the final step
-- **THEN** guest purchase actions remain disabled and no purchase mutation can be triggered from the preview
+- **WHEN** the user activates the Email share action
+- **THEN** the system opens a mail composition URL with Spanish invitation text and the public wishlist URL
 
 ### Requirement: Local draft clears after successful publish
-The wizard SHALL clear the persisted local draft, saved draft metadata, stale recovery state, and wizard store content after a successful publish, while preserving the publish success/share state for the current page session.
+
+The wizard SHALL clear the persisted local draft, saved draft metadata, stale recovery state, and wizard store content after a successful publish, while preserving the publish success state that the `published` step renders for the current page session.
 
 #### Scenario: Local storage clears after publish
+
 - **WHEN** a wishlist is successfully published from the wizard
 - **THEN** the Zustand/localStorage draft data and saved-draft metadata are cleared
 
-#### Scenario: Success state remains after clearing draft
+#### Scenario: Published step survives the clearing
+
 - **WHEN** the local draft is cleared after publish
-- **THEN** the user still sees the current publish success/share state until leaving or restarting the wizard
+- **THEN** the `published` step still renders its confirmation and share actions until the user leaves or restarts the wizard
 
 ### Requirement: Wizard renders with app theme tokens
 
@@ -504,14 +443,19 @@ The wizard SHALL provide a deliberate mobile-first layout and a distinct desktop
 
 ### Requirement: Desktop wizard header shows the product wordmark
 
-The desktop (`lg` and up) wizard card header SHALL display the `isotype.svg` mark together with the "A Wish For" serif wordmark, matching every `Desktop Step` canvas frame. The mobile wizard chrome SHALL NOT show this wordmark (not present in any mobile canvas frame).
+The desktop (`lg` and up) wizard card header SHALL display the `isotype.svg` mark on its left and the "Guardar borrador" action on its right, on every step except `published`. The header SHALL NOT render the "A Wish For" serif wordmark alongside the mark. The mobile wizard chrome SHALL NOT show the mark.
 
-#### Scenario: Desktop header wordmark
+#### Scenario: Desktop header shows the isotype and save action
 
-- **WHEN** the wizard is viewed at a desktop viewport width (`lg` and up)
-- **THEN** the card header's left side shows the isotype mark (26px tall) followed by "A Wish For" in the serif font, and the right side shows the "Guardar borrador" action
+- **WHEN** the wizard is viewed at a desktop viewport width (`lg` and up) on any step before `published`
+- **THEN** the card header's left side shows the isotype mark (26px tall) with no wordmark text, and the right side shows the "Guardar borrador" action
 
-#### Scenario: Mobile header has no wordmark
+#### Scenario: Published step drops the save action
+
+- **WHEN** the `published` step renders
+- **THEN** the header shows no "Guardar borrador" action, because the draft has already been published and cleared
+
+#### Scenario: Mobile header has no mark
 
 - **WHEN** the wizard is viewed at a mobile viewport width
 - **THEN** the sticky mobile chrome does not render the isotype mark or "A Wish For" wordmark
@@ -534,3 +478,90 @@ The Gifts step guest preview SHALL render gift images so the complete product im
 
 - **WHEN** the Gifts step preview pane is too narrow for three gift cards
 - **THEN** the preview falls back to fewer columns without overlapping card content or clipping text
+
+### Requirement: Segmented step progress indicator
+
+The wizard chrome SHALL present progress as a row of eight equal segments — one per step — above a caption reading "Paso N de 8 · <Label>" with the label emphasized, at every breakpoint. Completed steps SHALL render filled in the ink tone, the active step in the accent tone, and upcoming steps in the border tone. A completed segment SHALL be activatable to navigate back to that step; the active and upcoming segments SHALL NOT be.
+
+#### Scenario: Segments reflect position
+
+- **WHEN** the wizard renders the fourth step
+- **THEN** three segments render as completed, the fourth as active, four as upcoming, and the caption reads "Paso 4 de 8" with that step's label
+
+#### Scenario: Completed segment navigates back
+
+- **WHEN** the user activates a segment for an already-completed step
+- **THEN** the wizard navigates to that step and the `?step=` query param updates
+
+#### Scenario: Upcoming segment is inert
+
+- **WHEN** the user activates a segment for a step they have not reached
+- **THEN** no navigation occurs
+
+#### Scenario: Indicator is identical across breakpoints
+
+- **WHEN** the wizard renders at mobile and at desktop widths
+- **THEN** both show the same eight-segment bar and caption rather than a separate numbered-circle treatment
+
+### Requirement: Layout step
+
+The `layout` step SHALL present the nine layout presets as an inline grid of labeled thumbnails alongside a live preview of the selected layout, captioned with that layout's name. Selecting a layout SHALL write `layoutId` to the draft and re-render the preview immediately. The preview SHALL composite whatever cover images the draft already holds with occasion-appropriate samples, so no layout is ever previewed empty.
+
+#### Scenario: Layouts render as an inline grid
+
+- **WHEN** the layout step renders
+- **THEN** all nine layouts appear as selectable labeled thumbnails without requiring a modal
+
+#### Scenario: Selection updates the preview
+
+- **WHEN** the user selects a layout
+- **THEN** the draft's `layoutId` updates and the preview pane re-renders in that layout, captioned with its name
+
+#### Scenario: Preview is never empty
+
+- **WHEN** the layout step previews a layout for a draft with no cover images
+- **THEN** the composition renders with the occasion's sample imagery rather than empty frames
+
+### Requirement: Theme step
+
+The `theme` step SHALL let the user select a color theme from the seven presets, a heading font, a body font, and a button style, alongside a live preview reflecting every selection. Each control SHALL preview itself: theme swatches render their own palette, font options render in their own family, and button-style options render in their own shape.
+
+#### Scenario: Seven theme swatches are offered
+
+- **WHEN** the theme step renders the color selector
+- **THEN** all seven theme swatches are shown, each rendering its own palette
+
+#### Scenario: Selections update the live preview
+
+- **WHEN** the user changes the theme, heading font, body font, or button style
+- **THEN** the draft stores the selected id and the preview re-renders with that choice applied
+
+#### Scenario: Controls preview themselves
+
+- **WHEN** the theme step renders the font and button-style options
+- **THEN** each font option renders in its own family and each button-style option renders in its own radius, border and weight
+
+### Requirement: Images step
+
+The `images` step SHALL accept multiple image files in one drop or file selection, classify each by its persisted orientation, and present the uploaded set grouped into horizontal and vertical columns with a per-group count against what the selected layout needs. The step SHALL state the selected layout's requirement in words. Falling short SHALL surface an advisory state without blocking forward navigation; the shortfall is enforced at publish instead.
+
+#### Scenario: Multi-file drop is accepted
+
+- **WHEN** the user drops several images at once
+- **THEN** each valid file uploads and is added to the draft with its dimensions and orientation
+
+#### Scenario: Uploads group by orientation
+
+- **WHEN** the step renders uploaded images
+- **THEN** horizontal and vertical images appear in separate groups, each showing its count against the layout's requirement
+
+#### Scenario: Requirement comes from the selected layout
+
+- **WHEN** the selected layout renders three landscape images
+- **THEN** the step states that three horizontal photos are needed rather than a fixed generic minimum
+
+#### Scenario: Shortfall warns without blocking
+
+- **WHEN** the draft has fewer images than the layout needs
+- **THEN** the step shows an advisory state and the user can still continue to the next step
+

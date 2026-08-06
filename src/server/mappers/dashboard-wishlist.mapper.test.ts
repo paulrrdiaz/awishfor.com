@@ -229,6 +229,7 @@ describe("mapDashboardWishlistOverview", () => {
 			language: true,
 			currency: true,
 			visibleGift: true,
+			images: true,
 		},
 	};
 

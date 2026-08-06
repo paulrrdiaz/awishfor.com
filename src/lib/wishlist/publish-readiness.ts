@@ -1,3 +1,4 @@
+import { resolveLayout } from "@/config/public-layouts";
 import type { Currency, EventType, Locale } from "@/generated/prisma/enums";
 import { wishlistSlugPattern } from "@/server/validators/wishlist.schema";
 
@@ -8,6 +9,8 @@ export type PublishReadinessInput = {
 	language: Locale | null;
 	currency: Currency | null;
 	visibleGiftCount: number;
+	layoutId: string | null;
+	imageCount: number;
 };
 
 export type PublishReadinessChecks = {
@@ -17,6 +20,7 @@ export type PublishReadinessChecks = {
 	language: boolean;
 	currency: boolean;
 	visibleGift: boolean;
+	images: boolean;
 };
 
 export type PublishReadinessResult = {
@@ -34,6 +38,8 @@ export class PublishReadinessError extends Error {
 export const evaluatePublishReadiness = (
 	input: PublishReadinessInput,
 ): PublishReadinessResult => {
+	const requiredImageCount = resolveLayout(input.layoutId).heroImageSlots;
+
 	const checks: PublishReadinessChecks = {
 		title: input.title != null && input.title.trim().length > 0,
 		eventType: input.eventType != null,
@@ -41,6 +47,7 @@ export const evaluatePublishReadiness = (
 		language: input.language != null,
 		currency: input.currency != null,
 		visibleGift: input.visibleGiftCount > 0,
+		images: input.imageCount >= requiredImageCount,
 	};
 
 	return {

@@ -1,10 +1,13 @@
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
+import { resolveLayout } from "@/config/public-layouts";
 import type {
 	PublicCategoryViewModel,
 	PublicGiftViewModel,
 	PublicWishlistViewModel,
+	WishlistImageViewModel,
 } from "@/server/mappers/view-models";
 import type { DraftGift, WishlistDraft } from "@/stores/wishlist-wizard.store";
+import { resolveSampleCoverImages } from "./sample-cover-images";
 
 function sampleGiftToViewModel(
 	gift: { name: string; imageUrl?: string; price?: number },
@@ -27,6 +30,32 @@ function sampleGiftToViewModel(
 		status: "available",
 		remainingQuantity: 1,
 	};
+}
+
+/**
+ * Fills a layout's unfilled hero slots with occasion-appropriate samples,
+ * marking each so it never reads as one of the creator's own photos. Real
+ * images always occupy the earliest slots in their stored order and are
+ * never displaced. Preview-only: this never mutates the draft.
+ */
+function compositeCoverImages(draft: WishlistDraft): WishlistImageViewModel[] {
+	const layout = resolveLayout(draft.layoutId);
+	const shortfall = layout.heroImageSlots - draft.images.length;
+
+	if (shortfall <= 0) {
+		return draft.images;
+	}
+
+	const samples = resolveSampleCoverImages(
+		draft.eventType,
+		layout.imageGuidance.orientation,
+	);
+
+	const sampleImages: WishlistImageViewModel[] = samples
+		.slice(0, shortfall)
+		.map((sample) => ({ ...sample, isSample: true }));
+
+	return [...draft.images, ...sampleImages];
 }
 
 function draftGiftToViewModel(gift: DraftGift): PublicGiftViewModel {
@@ -89,7 +118,7 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		eventTime: draft.eventTime,
 		eventLocation: draft.eventLocation || null,
 		dressCode: draft.dressCode || null,
-		images: draft.images,
+		images: compositeCoverImages(draft),
 		themeId: draft.themeId,
 		layoutId: draft.layoutId,
 		buttonStyle: draft.buttonStyle,

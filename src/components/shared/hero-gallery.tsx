@@ -28,11 +28,21 @@ export function HeroPlaceholder({ className }: PlaceholderProps) {
 	);
 }
 
+/** Marks a preview slot filled with occasion sample photography, never the creator's own upload. */
+export function SampleImageMarker() {
+	return (
+		<span className="absolute top-1.5 left-1.5 z-10 rounded-full bg-foreground/80 px-2 py-0.5 font-medium text-[10px] text-background">
+			Ejemplo
+		</span>
+	);
+}
+
 type HeroImageSlotProps = {
 	src: string | null;
 	alt: string;
 	className?: string;
 	priority?: boolean;
+	isSample?: boolean;
 };
 
 /** A single hero slot: a real cover image, or the tinted placeholder when none is set. */
@@ -41,6 +51,7 @@ export function HeroImageSlot({
 	alt,
 	className,
 	priority,
+	isSample,
 }: HeroImageSlotProps) {
 	if (!src) {
 		return <HeroPlaceholder className={className} />;
@@ -55,6 +66,7 @@ export function HeroImageSlot({
 				priority={priority}
 				src={src}
 			/>
+			{isSample && <SampleImageMarker />}
 		</div>
 	);
 }
@@ -117,7 +129,7 @@ function GalleryControls({ total }: { total: number }) {
 	);
 }
 
-type HeroCoverImage = { url: string };
+type HeroCoverImage = { url: string; isSample?: boolean };
 
 type HeroCarouselGalleryProps = {
 	images: HeroCoverImage[];
@@ -146,6 +158,7 @@ export function HeroCarouselGallery({
 			<HeroImageSlot
 				alt={alt}
 				className={className}
+				isSample={visibleImages[0]?.isSample}
 				priority={priority}
 				src={visibleImages[0]?.url ?? null}
 			/>
@@ -165,6 +178,7 @@ export function HeroCarouselGallery({
 								priority={priority && index === 0}
 								src={image.url}
 							/>
+							{image.isSample && <SampleImageMarker />}
 						</div>
 					</CarouselItem>
 				))}

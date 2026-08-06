@@ -2,26 +2,23 @@
 
 import { LoaderCircle, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { GiftForm } from "@/components/features/wishlist/gift-form";
+import { PublicThemeProvider } from "@/components/layouts/public-wishlist/public-theme-provider";
+import { GiftCard } from "@/components/shared/gift-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-	Drawer,
-	DrawerContent,
-	DrawerDescription,
-	DrawerHeader,
-	DrawerTitle,
-} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { resolveButtonStyle } from "@/config/public-button-styles";
+import { resolveBodyFont, resolveHeadingFont } from "@/config/public-fonts";
+import { resolveTheme } from "@/config/public-themes";
 import { cn } from "@/lib/utils";
+import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
 import type { DraftGift } from "@/stores/wishlist-wizard.store";
 import { api } from "@/trpc/react";
 import { useWizardStore } from "./wizard-provider";
@@ -44,15 +41,16 @@ const IMPORT_ERROR_MESSAGES: Record<string, string> = {
 	invalid_url: "Ingresa un enlace válido que empiece con http o https.",
 };
 
+const EYEBROW = "font-mono text-[11px] font-medium uppercase tracking-[0.14em]";
+const CARD = "rounded-[14px] border border-border bg-card p-4";
+
 export function GiftsStep() {
 	const draft = useWizardStore((s) => s.draft);
 	const addCategory = useWizardStore((s) => s.addCategory);
 	const renameCategory = useWizardStore((s) => s.renameCategory);
 	const removeCategory = useWizardStore((s) => s.removeCategory);
 	const addGift = useWizardStore((s) => s.addGift);
-	const updateGift = useWizardStore((s) => s.updateGift);
 	const removeGift = useWizardStore((s) => s.removeGift);
-	const [giftId, setGiftId] = useQueryState("giftId");
 
 	const [isAddingGift, setIsAddingGift] = useState(false);
 	const [newCategoryName, setNewCategoryName] = useState("");
@@ -65,50 +63,11 @@ export function GiftsStep() {
 
 	const visibleGifts = draft.gifts.filter((g) => !g.hidden);
 	const hiddenCount = draft.gifts.length - visibleGifts.length;
-	const editingGift = giftId
-		? (draft.gifts.find((gift) => gift.id === giftId) ?? null)
-		: null;
-	const previewGifts =
-		visibleGifts.length > 0
-			? visibleGifts
-			: [
-					{
-						id: "sample-1",
-						name: "Regalo de ejemplo",
-						priceAmount: 120,
-						imageUrl: null,
-						category: "Favoritos",
-					},
-					{
-						id: "sample-2",
-						name: "Detalle especial",
-						priceAmount: 80,
-						imageUrl: null,
-						category: "Hogar",
-					},
-				];
-
-	useEffect(() => {
-		if (!giftId || editingGift) return;
-		void setGiftId(null);
-	}, [editingGift, giftId, setGiftId]);
+	const previewGifts = draftToPreview(draft).gifts;
 
 	function handleAdd(values: GiftFormValues) {
 		addGift(values);
 		setIsAddingGift(false);
-	}
-
-	function handleUpdate(id: string, values: GiftFormValues) {
-		updateGift(id, values);
-		void setGiftId(null);
-	}
-
-	function openEditDrawer(id: string) {
-		void setGiftId(id, { history: "push" });
-	}
-
-	function closeEditDrawer() {
-		void setGiftId(null);
 	}
 
 	async function handleImport(event: React.FormEvent) {
@@ -146,11 +105,6 @@ export function GiftsStep() {
 		} catch {
 			setImportError("No pudimos importar ese enlace.");
 		}
-	}
-
-	function getInitialValues(gift: DraftGift): GiftFormValues {
-		const { id: _id, sortOrder: _sortOrder, ...rest } = gift;
-		return rest;
 	}
 
 	function categoryExists(name: string, exceptName?: string) {
@@ -207,360 +161,271 @@ export function GiftsStep() {
 	}
 
 	return (
-		<>
-			<div className="mx-auto w-full max-w-2xl lg:flex lg:h-full lg:max-w-none">
-				<div className="lg:w-[520px] lg:shrink-0 lg:overflow-y-auto lg:border-border lg:border-r lg:px-8 lg:py-7">
-					<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-						Paso 4 de 5
-					</p>
-					<h1 className="mb-2 text-center font-semibold text-2xl text-foreground lg:text-left lg:font-serif lg:text-3xl">
-						Agrega tus regalos
-					</h1>
-					<p className="mb-8 text-center text-muted-foreground text-sm lg:text-left">
-						Agrega los regalos que deseas recibir
-					</p>
+		<div className="mx-auto w-full max-w-2xl lg:flex lg:h-full lg:max-w-none">
+			<div className="lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:border-border lg:border-r lg:px-8 lg:py-8">
+				<h1 className="mb-2 text-center font-semibold text-2xl text-foreground lg:mb-1.5 lg:text-left lg:font-serif lg:text-[24px]">
+					Agrega tus regalos
+				</h1>
 
-					<Card className="mb-6 border-dashed bg-muted/30">
-						<CardContent className="p-4">
-							<div className="mb-3">
-								<p className="font-medium text-foreground text-sm">
-									Importar desde URL
-								</p>
-								<p className="text-muted-foreground text-xs">
-									Pega un enlace de producto para prellenar el regalo.
-								</p>
-							</div>
-							<form
-								className="flex flex-col gap-2 sm:flex-row"
-								onSubmit={handleImport}
-							>
-								<Input
-									className="min-h-11 min-w-0 flex-1"
-									onChange={(event) => setImportUrl(event.target.value)}
-									placeholder="https://tienda.com/producto"
-									type="url"
-									value={importUrl}
-								/>
-								<Button
-									className="min-h-11"
-									disabled={!importUrl.trim() || importMutation.isPending}
-									type="submit"
-									variant="outline"
-								>
-									{importMutation.isPending ? (
-										<LoaderCircle className="size-4 animate-spin" />
-									) : null}
-									Importar
-								</Button>
-							</form>
-							{importError && (
-								<p className="mt-2 text-destructive text-sm">{importError}</p>
-							)}
-						</CardContent>
-					</Card>
+				<div className={cn(CARD, "mb-3.5")}>
+					<p className="mb-[3px] font-semibold text-[13.5px] text-foreground">
+						Importar desde URL
+					</p>
+					<p className="mb-2.5 text-[11.5px] text-muted-foreground">
+						Pega un enlace de producto para prellenar el regalo.
+					</p>
+					<form className="flex gap-2" onSubmit={handleImport}>
+						<Input
+							className="min-h-11 min-w-0 flex-1 rounded-[10px] text-[13.5px]"
+							onChange={(event) => setImportUrl(event.target.value)}
+							placeholder="https://tienda.com/producto"
+							type="url"
+							value={importUrl}
+						/>
+						<Button
+							className="min-h-11 shrink-0 whitespace-nowrap rounded-full px-[22px]"
+							disabled={!importUrl.trim() || importMutation.isPending}
+							type="submit"
+							variant="outline"
+						>
+							{importMutation.isPending ? (
+								<LoaderCircle className="size-4 animate-spin" />
+							) : null}
+							Importar
+						</Button>
+					</form>
+					{importError && (
+						<p className="mt-2 text-destructive text-xs">{importError}</p>
+					)}
+				</div>
 
-					<Card className="mb-6">
-						<CardHeader>
-							<CardTitle className="text-sm">Categorías</CardTitle>
-							<p className="text-muted-foreground text-xs">
-								Crea opciones para organizar tus regalos antes de publicarlos.
-							</p>
-						</CardHeader>
-						<CardContent>
-							{draft.categories.length > 0 && (
-								<div className="mb-4 flex flex-wrap gap-2">
-									{draft.categories.map((category) =>
-										editingCategory === category ? (
-											<form
-												className="flex flex-wrap items-center gap-2 rounded-full border border-border bg-muted px-3 py-2"
-												key={category}
-												onSubmit={(event) =>
-													handleRenameCategory(event, category)
-												}
-											>
-												<Input
-													className="h-7 w-28 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
-													maxLength={80}
-													onChange={(event) =>
-														setEditingCategoryName(event.target.value)
-													}
-													value={editingCategoryName}
-												/>
+				<div className={cn(CARD, "mb-3.5")}>
+					<p className="mb-[3px] font-semibold text-[13.5px] text-foreground">
+						Categorías
+					</p>
+					<p className="mb-2.5 text-[11.5px] text-muted-foreground">
+						Crea opciones para organizar tus regalos antes de publicarlos.
+					</p>
+					{draft.categories.length > 0 && (
+						<div className="mb-2.5 flex flex-wrap gap-2">
+							{draft.categories.map((category) =>
+								editingCategory === category ? (
+									<form
+										className="flex flex-wrap items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"
+										key={category}
+										onSubmit={(event) => handleRenameCategory(event, category)}
+									>
+										<Input
+											className="h-6 w-24 border-0 bg-transparent px-0 text-[12.5px] shadow-none focus-visible:ring-0"
+											maxLength={80}
+											onChange={(event) =>
+												setEditingCategoryName(event.target.value)
+											}
+											value={editingCategoryName}
+										/>
+										<Button
+											className="h-6 px-1.5 text-xs"
+											type="submit"
+											variant="ghost"
+										>
+											Guardar
+										</Button>
+										<Button
+											className="h-6 px-1.5 text-xs"
+											onClick={() => setEditingCategory(null)}
+											type="button"
+											variant="ghost"
+										>
+											Cancelar
+										</Button>
+									</form>
+								) : (
+									<div
+										className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 font-semibold text-[12.5px] text-foreground"
+										key={category}
+									>
+										<span>{category}</span>
+										<Tooltip>
+											<TooltipTrigger asChild>
 												<Button
-													className="h-7 px-2 text-xs"
-													type="submit"
-													variant="ghost"
-												>
-													Guardar
-												</Button>
-												<Button
-													className="h-7 px-2 text-xs"
-													onClick={() => setEditingCategory(null)}
+													aria-label={`Renombrar categoría ${category}`}
+													onClick={() => startRenameCategory(category)}
+													size="icon-xs"
 													type="button"
 													variant="ghost"
 												>
-													Cancelar
+													<Pencil />
 												</Button>
-											</form>
-										) : (
-											<div
-												className="flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-2"
-												key={category}
-											>
-												<span className="text-foreground text-xs">
-													{category}
-												</span>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<Button
-															aria-label={`Renombrar categoría ${category}`}
-															onClick={() => startRenameCategory(category)}
-															size="icon-xs"
-															type="button"
-															variant="ghost"
-														>
-															<Pencil />
-														</Button>
-													</TooltipTrigger>
-													<TooltipContent>Renombrar</TooltipContent>
-												</Tooltip>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<Button
-															aria-label={`Quitar categoría ${category}`}
-															onClick={() => removeCategory(category)}
-															size="icon-xs"
-															type="button"
-															variant="destructive"
-														>
-															<Trash2 />
-														</Button>
-													</TooltipTrigger>
-													<TooltipContent>Quitar</TooltipContent>
-												</Tooltip>
-											</div>
-										),
-									)}
-								</div>
-							)}
-
-							<form
-								className="flex flex-col gap-2 sm:flex-row"
-								onSubmit={handleAddCategory}
-							>
-								<Input
-									className="min-h-11 min-w-0 flex-1"
-									maxLength={80}
-									onChange={(event) => setNewCategoryName(event.target.value)}
-									placeholder="Nueva categoría"
-									value={newCategoryName}
-								/>
-								<Button
-									className="min-h-11"
-									disabled={!newCategoryName.trim()}
-									type="submit"
-								>
-									Agregar
-								</Button>
-							</form>
-							{categoryError && (
-								<p className="mt-2 text-destructive text-sm">{categoryError}</p>
-							)}
-						</CardContent>
-					</Card>
-
-					{draft.gifts.length > 0 && (
-						<div className="mb-6 space-y-3">
-							<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-								Tus regalos · {visibleGifts.length}
-							</p>
-							{draft.gifts.map((gift) => (
-								<Card
-									className={cn(
-										"p-0",
-										gift.hidden
-											? "border-border bg-muted/50 opacity-60"
-											: "border-border bg-card",
-									)}
-									key={gift.id}
-								>
-									<CardContent className="flex items-start gap-3 p-4">
-										{gift.imageUrl && (
-											<div className="relative size-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
-												<Image
-													alt=""
-													className="object-cover"
-													fill
-													src={gift.imageUrl}
-													unoptimized
-												/>
-											</div>
-										)}
-										<div className="min-w-0 flex-1">
-											<div className="flex items-center gap-2">
-												<p
-													className={cn(
-														"font-medium text-sm",
-														gift.hidden
-															? "text-muted-foreground"
-															: "text-foreground",
-													)}
+											</TooltipTrigger>
+											<TooltipContent>Renombrar</TooltipContent>
+										</Tooltip>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Button
+													aria-label={`Quitar categoría ${category}`}
+													className="text-muted-foreground hover:text-destructive"
+													onClick={() => removeCategory(category)}
+													size="icon-xs"
+													type="button"
+													variant="ghost"
 												>
-													{gift.name}
-												</p>
-												{gift.hidden && (
-													<Badge variant="secondary">Oculto</Badge>
-												)}
-											</div>
-											<div className="mt-1 flex flex-wrap gap-2 text-muted-foreground text-xs">
-												{gift.category && <span>{gift.category}</span>}
-												{gift.priceAmount != null && (
-													<span>S/ {gift.priceAmount}</span>
-												)}
-												{gift.quantityNeeded > 1 && (
-													<span>×{gift.quantityNeeded}</span>
-												)}
-												<span>
-													{PRIORITY_LABELS[gift.priority] ?? gift.priority}
-												</span>
-											</div>
-										</div>
-										<div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-											<Button
-												className="h-7 px-2 text-xs"
-												onClick={() => openEditDrawer(gift.id)}
-												type="button"
-												variant="ghost"
-											>
-												Editar
-											</Button>
-											<Button
-												className="h-7 px-2 text-xs"
-												onClick={() => removeGift(gift.id)}
-												type="button"
-												variant="destructive"
-											>
-												Eliminar
-											</Button>
-										</div>
-									</CardContent>
-								</Card>
-							))}
+													<Trash2 />
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>Quitar</TooltipContent>
+										</Tooltip>
+									</div>
+								),
+							)}
 						</div>
 					)}
 
-					{hiddenCount > 0 && (
-						<p className="mb-4 text-center text-muted-foreground text-xs">
-							{hiddenCount}{" "}
-							{hiddenCount === 1 ? "regalo oculto" : "regalos ocultos"} (no
-							aparecen en la vista pública)
-						</p>
-					)}
-
-					{isAddingGift ? (
-						<Card>
-							<CardContent className="p-4">
-								<p className="mb-4 font-medium text-foreground text-sm">
-									Nuevo regalo
-								</p>
-								<GiftForm
-									categories={draft.categories}
-									onCancel={() => setIsAddingGift(false)}
-									onSubmit={handleAdd}
-								/>
-							</CardContent>
-						</Card>
-					) : (
+					<form className="flex gap-2" onSubmit={handleAddCategory}>
+						<Input
+							className="min-h-11 min-w-0 flex-1 rounded-[10px] text-[13.5px]"
+							maxLength={80}
+							onChange={(event) => setNewCategoryName(event.target.value)}
+							placeholder="Nueva categoría"
+							value={newCategoryName}
+						/>
 						<Button
-							className="flex min-h-14 w-full items-center justify-center gap-2 border-2 border-dashed"
-							onClick={() => setIsAddingGift(true)}
-							type="button"
-							variant="outline"
+							className="min-h-11 shrink-0 whitespace-nowrap rounded-full px-[22px]"
+							disabled={!newCategoryName.trim()}
+							type="submit"
 						>
-							<span aria-hidden>+</span> Agregar regalo manualmente
+							Agregar
 						</Button>
-					)}
-
-					{visibleGifts.length === 0 && draft.gifts.length === 0 && (
-						<p className="mt-6 text-center text-muted-foreground text-sm">
-							Todavía no tienes regalos. La vista previa mostrará ejemplos hasta
-							que agregues el primero.
-						</p>
+					</form>
+					{categoryError && (
+						<p className="mt-2 text-destructive text-xs">{categoryError}</p>
 					)}
 				</div>
 
-				<div className="mt-8 hidden flex-1 flex-col bg-background px-8 py-7 lg:mt-0 lg:flex">
-					<p className="mb-4 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-						Así los verán tus invitados
-					</p>
-					<div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-						{previewGifts.slice(0, 6).map((gift) => (
-							<Card className="overflow-hidden" key={gift.id}>
-								<div className="relative aspect-[4/3] bg-muted/40 p-4">
-									{"imageUrl" in gift && gift.imageUrl ? (
-										<Image
-											alt=""
-											className="object-contain"
-											fill
-											src={gift.imageUrl}
-											unoptimized
-										/>
-									) : (
-										<div className="flex h-full items-center justify-center rounded-xl bg-background/70 text-2xl">
-											🎁
+				{draft.gifts.length > 0 && (
+					<div className="mt-3.5 space-y-3">
+						<p className={cn(EYEBROW, "text-muted-foreground")}>
+							Tus regalos · {visibleGifts.length}
+						</p>
+						{draft.gifts.map((gift) => (
+							<div
+								className={cn(
+									"rounded-[14px] border p-4",
+									gift.hidden
+										? "border-border bg-muted/50 opacity-60"
+										: "border-border bg-card",
+								)}
+								key={gift.id}
+							>
+								<div className="flex items-start gap-3">
+									{gift.imageUrl && (
+										<div className="relative size-14 shrink-0 overflow-hidden rounded-[10px] border border-border bg-muted">
+											<Image
+												alt=""
+												className="object-cover"
+												fill
+												src={gift.imageUrl}
+												unoptimized
+											/>
 										</div>
 									)}
+									<div className="min-w-0 flex-1">
+										<div className="flex items-center gap-2">
+											<p
+												className={cn(
+													"font-medium text-sm",
+													gift.hidden
+														? "text-muted-foreground"
+														: "text-foreground",
+												)}
+											>
+												{gift.name}
+											</p>
+											{gift.hidden && <Badge variant="secondary">Oculto</Badge>}
+										</div>
+										<div className="mt-1 flex flex-wrap gap-2 text-muted-foreground text-xs">
+											{gift.category && <span>{gift.category}</span>}
+											{gift.priceAmount != null && (
+												<span>S/ {gift.priceAmount}</span>
+											)}
+											{gift.quantityNeeded > 1 && (
+												<span>×{gift.quantityNeeded}</span>
+											)}
+											<span>
+												{PRIORITY_LABELS[gift.priority] ?? gift.priority}
+											</span>
+										</div>
+									</div>
+									<Button
+										className="h-7 shrink-0 rounded-full px-2 text-xs"
+										onClick={() => removeGift(gift.id)}
+										type="button"
+										variant="destructive"
+									>
+										Eliminar
+									</Button>
 								</div>
-								<CardContent className="space-y-1 p-3">
-									<p className="line-clamp-2 break-words font-medium text-foreground text-sm">
-										{gift.name}
-									</p>
-									<p className="break-words text-muted-foreground text-xs">
-										{gift.category || "Sin categoría"}
-									</p>
-									<p className="pt-2 font-semibold text-foreground text-sm">
-										{gift.priceAmount != null
-											? `S/ ${gift.priceAmount}`
-											: "Precio por definir"}
-									</p>
-								</CardContent>
-							</Card>
+							</div>
 						))}
 					</div>
+				)}
+
+				{hiddenCount > 0 && (
+					<p className="mt-4 text-center text-muted-foreground text-xs">
+						{hiddenCount}{" "}
+						{hiddenCount === 1 ? "regalo oculto" : "regalos ocultos"} (no
+						aparecen en la vista pública)
+					</p>
+				)}
+
+				<div className={cn(draft.gifts.length > 0 && "mt-3.5")}>
+					{isAddingGift ? (
+						<div className={CARD}>
+							<p className="mb-4 font-semibold text-[13.5px] text-foreground">
+								Nuevo regalo
+							</p>
+							<GiftForm
+								categories={draft.categories}
+								onCancel={() => setIsAddingGift(false)}
+								onSubmit={handleAdd}
+							/>
+						</div>
+					) : (
+						<button
+							className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border-2 border-border border-dashed font-semibold text-[13.5px] text-foreground transition-colors hover:border-primary/50 hover:bg-accent"
+							onClick={() => setIsAddingGift(true)}
+							type="button"
+						>
+							<span aria-hidden>+</span> Agregar regalo manualmente
+						</button>
+					)}
 				</div>
+
+				{visibleGifts.length === 0 && draft.gifts.length === 0 && (
+					<p className="mt-5 text-center text-muted-foreground text-sm">
+						Todavía no tienes regalos. La vista previa mostrará ejemplos hasta
+						que agregues el primero.
+					</p>
+				)}
 			</div>
 
-			<Drawer
-				onOpenChange={(open) => {
-					if (!open) {
-						closeEditDrawer();
-					}
-				}}
-				open={Boolean(editingGift)}
-			>
-				<DrawerContent className="ml-auto max-h-[92svh] w-full lg:mr-6 lg:mb-6 lg:max-w-[640px] lg:rounded-2xl">
-					{editingGift ? (
-						<div className="flex max-h-[92svh] min-h-0 flex-col">
-							<DrawerHeader className="pr-12">
-								<DrawerTitle>Editar regalo</DrawerTitle>
-								<DrawerDescription>
-									Ajusta los detalles sin salir de la vista previa.
-								</DrawerDescription>
-							</DrawerHeader>
-							<div className="min-h-0 overflow-y-auto px-4 pb-4">
-								<GiftForm
-									categories={draft.categories}
-									initialValues={getInitialValues(editingGift)}
-									key={editingGift.id}
-									onCancel={closeEditDrawer}
-									onSubmit={(values) => handleUpdate(editingGift.id, values)}
-									submitLabel="Actualizar regalo"
-								/>
-							</div>
-						</div>
-					) : null}
-				</DrawerContent>
-			</Drawer>
-		</>
+			<div className="mt-8 hidden flex-1 flex-col bg-background px-8 py-8 lg:mt-0 lg:flex">
+				<p className={cn(EYEBROW, "mb-3.5 text-muted-foreground")}>
+					Así los verán tus invitados
+				</p>
+				<PublicThemeProvider
+					bodyFont={resolveBodyFont(draft.bodyFont)}
+					buttonStyle={resolveButtonStyle(draft.buttonStyle)}
+					className="min-h-0 bg-transparent"
+					headingFont={resolveHeadingFont(draft.headingFont)}
+					theme={resolveTheme(draft.themeId)}
+				>
+					<div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+						{previewGifts.slice(0, 6).map((gift) => (
+							<GiftCard cardStyle="card" gift={gift} key={gift.id} />
+						))}
+					</div>
+				</PublicThemeProvider>
+			</div>
+		</div>
 	);
 }

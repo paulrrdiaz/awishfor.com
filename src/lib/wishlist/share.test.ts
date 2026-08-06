@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { toWhatsAppShareUrl, whatsAppMessageForEvent } from "./share";
+import {
+	toEmailShareUrl,
+	toWhatsAppShareUrl,
+	whatsAppMessageForEvent,
+} from "./share";
 
 describe("whatsAppMessageForEvent", () => {
 	it("returns baby_shower template", () => {
@@ -89,5 +93,26 @@ describe("toWhatsAppShareUrl", () => {
 		const decoded = decodeURIComponent(url.replace("https://wa.me/?text=", ""));
 		expect(decoded).toContain("awishfor");
 		expect(decoded).toContain("https://awishfor.com/w/test");
+	});
+});
+
+describe("toEmailShareUrl", () => {
+	it("produces a mailto link with a subject and the WhatsApp invitation copy", () => {
+		const url = toEmailShareUrl("https://awishfor.com/w/boda", "wedding");
+
+		expect(url).toMatch(/^mailto:\?subject=/);
+		const [, query] = url.split("?");
+		const params = new URLSearchParams(query);
+		expect(params.get("subject")).toBe("Nuestra lista de boda");
+		expect(params.get("body")).toContain("casamos");
+		expect(params.get("body")).toContain("https://awishfor.com/w/boda");
+	});
+
+	it("falls back to the general subject and copy for an unknown event type", () => {
+		const url = toEmailShareUrl("https://awishfor.com/w/test");
+		const [, query] = url.split("?");
+		const params = new URLSearchParams(query);
+		expect(params.get("subject")).toBe("Mi wishlist");
+		expect(params.get("body")).toContain("awishfor");
 	});
 });
