@@ -21,7 +21,7 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	eventDate: "2026-09-13",
 	eventTime: "16:00",
 	eventLocation: "Jardín Las Acacias",
-	dressCode: null,
+	dressCode: "Casual chic, tonos pastel",
 	images: [
 		{
 			url: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9",

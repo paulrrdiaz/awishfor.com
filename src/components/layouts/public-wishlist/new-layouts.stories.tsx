@@ -53,128 +53,127 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Story names below mirror the "disposición" labels in
+// src/config/public-layouts.ts (the layout picker shown to users).
+
 export const SplitImageRight: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("split-image-right") },
+	args: { mode: "full", wishlist: wishlistWithLayout("split-image-right") },
+	name: "Imagen Fija",
 };
 export const SplitImageRightNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("split-image-right", ZERO_IMAGES),
 	},
+	name: "Imagen Fija — sin fotos",
 };
 
 export const CollageStaggered: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("collage-staggered") },
+	args: {
+		mode: "full",
+		wishlist: wishlistWithLayout("collage-staggered", MANY_IMAGES),
+	},
+	name: "Collage Escalonado",
 };
 export const CollageStaggeredNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("collage-staggered", ZERO_IMAGES),
 	},
-};
-export const CollageStaggeredManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("collage-staggered", MANY_IMAGES),
-	},
+	name: "Collage Escalonado — sin fotos",
 };
 
 export const MagazineEditorial: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("magazine-editorial") },
+	args: { mode: "full", wishlist: wishlistWithLayout("magazine-editorial") },
+	name: "Editorial Revista",
 };
 export const MagazineEditorialNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("magazine-editorial", ZERO_IMAGES),
 	},
+	name: "Editorial Revista — sin fotos",
 };
 
 export const OverlapDuo: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("overlap-duo") },
+	args: {
+		mode: "full",
+		wishlist: wishlistWithLayout("overlap-duo", MANY_IMAGES),
+	},
+	name: "Dúo Superpuesto",
 };
 export const OverlapDuoNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("overlap-duo", ZERO_IMAGES),
 	},
-};
-export const OverlapDuoManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("overlap-duo", MANY_IMAGES),
-	},
+	name: "Dúo Superpuesto — sin fotos",
 };
 
 export const ArchHeroParty: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("arch-hero-party") },
-};
-export const ArchHeroPartyManyImages: Story = {
 	args: {
-		mode: "compact",
+		mode: "full",
 		wishlist: wishlistWithLayout("arch-hero-party", MANY_IMAGES),
 	},
+	name: "Arco Festivo",
 };
 
 export const ArchTrio: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("arch-trio") },
+	args: {
+		mode: "full",
+		wishlist: wishlistWithLayout("arch-trio", MANY_IMAGES),
+	},
+	name: "Trío en Arco",
 };
 export const ArchTrioNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("arch-trio", ZERO_IMAGES),
 	},
-};
-export const ArchTrioManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("arch-trio", MANY_IMAGES),
-	},
+	name: "Trío en Arco — sin fotos",
 };
 
 export const CarouselHero: Story = {
-	args: { mode: "compact", wishlist: wishlistWithLayout("carousel-hero") },
+	args: {
+		mode: "full",
+		wishlist: wishlistWithLayout("carousel-hero", MANY_IMAGES),
+	},
+	name: "Carrusel Principal",
 };
 export const CarouselHeroNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("carousel-hero", ZERO_IMAGES),
 	},
-};
-export const CarouselHeroManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("carousel-hero", MANY_IMAGES),
-	},
+	name: "Carrusel Principal — sin fotos",
 };
 
 export const ScrapbookPolaroids: Story = {
 	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("scrapbook-polaroids"),
+		mode: "full",
+		wishlist: wishlistWithLayout("scrapbook-polaroids", MANY_IMAGES),
 	},
+	name: "Polaroids",
 };
 export const ScrapbookPolaroidsNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("scrapbook-polaroids", ZERO_IMAGES),
 	},
-};
-export const ScrapbookPolaroidsManyImages: Story = {
-	args: {
-		mode: "compact",
-		wishlist: wishlistWithLayout("scrapbook-polaroids", MANY_IMAGES),
-	},
+	name: "Polaroids — sin fotos",
 };
 
 export const PortraitFrameSplit: Story = {
 	args: {
-		mode: "compact",
+		mode: "full",
 		wishlist: wishlistWithLayout("portrait-frame-split"),
 	},
+	name: "Retrato Enmarcado",
 };
 export const PortraitFrameSplitNoImages: Story = {
 	args: {
 		mode: "compact",
 		wishlist: wishlistWithLayout("portrait-frame-split", ZERO_IMAGES),
 	},
+	name: "Retrato Enmarcado — sin fotos",
 };
