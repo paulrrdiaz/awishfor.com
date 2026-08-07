@@ -64,6 +64,7 @@ const makeWishlist = (overrides: Partial<MockRow> = {}): MockRow => ({
 	language: Locale.es,
 	currency: Currency.PEN,
 	welcomeMessage: null,
+	welcomeMessageAttribution: null,
 	thankYouMessage: null,
 	eventDate: null,
 	eventTime: null,

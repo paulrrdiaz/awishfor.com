@@ -52,3 +52,11 @@ export const Row: Story = {
 		actionsEnabled: true,
 	},
 };
+
+export const CollageRow: Story = {
+	args: {
+		gift: sampleGift,
+		cardStyle: "collage-row",
+		actionsEnabled: true,
+	},
+};

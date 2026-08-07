@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	createWishlistSchema,
 	restoreWishlistSchema,
+	updateWishlistSettingsSchema,
 	wishlistCoverImagesSchema,
 	wishlistRestoreTargetStatusSchema,
 } from "@/server/validators/wishlist.schema";
@@ -86,6 +87,42 @@ describe("wishlist creation validation", () => {
 			eventTime: "08:15",
 			eventLocation: "Barranco, Lima",
 		});
+	});
+});
+
+describe("wishlist message attribution validation", () => {
+	const validSettings = {
+		id: "wishlist_123",
+		title: "Lista de boda",
+		slug: "lista-de-boda",
+		language: "es",
+		currency: "PEN",
+		showHowItWorks: true,
+	};
+
+	it("trims an attribution and turns an empty value into null", () => {
+		expect(
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				welcomeMessageAttribution: "  Lucía y Marco  ",
+			}).welcomeMessageAttribution,
+		).toBe("Lucía y Marco");
+
+		expect(
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				welcomeMessageAttribution: "   ",
+			}).welcomeMessageAttribution,
+		).toBeNull();
+	});
+
+	it("limits the attribution to 120 characters", () => {
+		expect(() =>
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				welcomeMessageAttribution: "a".repeat(121),
+			}),
+		).toThrow("Welcome message attribution must be at most 120 characters");
 	});
 });
 

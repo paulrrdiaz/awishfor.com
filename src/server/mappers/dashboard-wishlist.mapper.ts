@@ -104,6 +104,7 @@ export function mapDashboardWishlist(
 		language: wishlist.language,
 		currency: wishlist.currency,
 		welcomeMessage: wishlist.welcomeMessage,
+		welcomeMessageAttribution: wishlist.welcomeMessageAttribution,
 		thankYouMessage: wishlist.thankYouMessage,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,

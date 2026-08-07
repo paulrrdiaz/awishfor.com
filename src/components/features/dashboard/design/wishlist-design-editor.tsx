@@ -95,7 +95,7 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 	};
 
 	return (
-		<div className="mx-auto w-full max-w-6xl px-4 py-8">
+		<div className="w-full px-4 py-8">
 			<div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 				<div>
 					<div className="mb-2 flex flex-wrap items-center gap-2">
@@ -144,7 +144,7 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 			</div>
 
 			<div className="grid gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
-				<section className="space-y-6 rounded-2xl border bg-card p-5 shadow-sm">
+				<section className="space-y-6 self-start rounded-2xl border bg-card p-5 shadow-sm lg:sticky lg:top-4 lg:max-h-[calc(100svh-7.5rem)] lg:overflow-y-auto">
 					<div className="space-y-3">
 						<p className="font-medium text-foreground text-sm">Tema de color</p>
 						<ThemeSwatchPicker
@@ -204,7 +204,7 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 					</div>
 				</section>
 
-				<section className="self-start overflow-hidden rounded-2xl border bg-card shadow-sm">
+				<section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm">
 					<div className="flex items-center justify-between gap-3 border-b bg-muted/40 px-4 py-3">
 						<div>
 							<p className="font-medium text-sm">Vista previa</p>
@@ -218,7 +218,7 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 							<Badge variant="secondary">Actual</Badge>
 						)}
 					</div>
-					<div className="max-h-[720px] overflow-y-auto bg-background">
+					<div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-background">
 						<PublicWishlistPage mode="preview" wishlist={previewViewModel} />
 					</div>
 				</section>

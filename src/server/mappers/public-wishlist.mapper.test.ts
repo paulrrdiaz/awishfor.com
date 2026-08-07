@@ -22,6 +22,7 @@ function makeWishlist(
 		language: "es",
 		currency: "PEN",
 		welcomeMessage: null,
+		welcomeMessageAttribution: null,
 		thankYouMessage: null,
 		eventDate: null,
 		eventTime: null,
@@ -98,6 +99,16 @@ function makeCategory(overrides: Partial<Category> = {}): Category {
 }
 
 describe("mapPublicWishlist", () => {
+	it("includes the welcome message attribution", () => {
+		const result = mapPublicWishlist({
+			...makeWishlist({ welcomeMessageAttribution: "Lucía y Marco" }),
+			categories: [],
+			gifts: [],
+		});
+
+		expect(result.welcomeMessageAttribution).toBe("Lucía y Marco");
+	});
+
 	it("includes visible gifts", () => {
 		const gift = makeGift({
 			id: "gift-visible",

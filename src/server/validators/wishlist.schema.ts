@@ -87,6 +87,8 @@ export const wishlistWelcomeMessageSchema = optionalNullableTrimmedString(
 	"Welcome message",
 	2_000,
 );
+export const wishlistWelcomeMessageAttributionSchema =
+	optionalNullableTrimmedString("Welcome message attribution", 120);
 export const wishlistThankYouMessageSchema = optionalNullableTrimmedString(
 	"Thank-you message",
 	2_000,
@@ -162,6 +164,7 @@ const wishlistCreateUpdateShape = {
 	language: localeSchema.default(Locale.es),
 	currency: currencySchema.default(Currency.PEN),
 	welcomeMessage: wishlistWelcomeMessageSchema,
+	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
@@ -190,6 +193,7 @@ export const updateWishlistSchema = z.object({
 	language: localeSchema.optional(),
 	currency: currencySchema.optional(),
 	welcomeMessage: wishlistWelcomeMessageSchema,
+	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
@@ -225,6 +229,7 @@ export type CreateWishlistInput = {
 	language?: Locale;
 	currency?: Currency;
 	welcomeMessage?: string | null;
+	welcomeMessageAttribution?: string | null;
 	thankYouMessage?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
@@ -247,6 +252,7 @@ export type UpdateWishlistInput = {
 	language?: Locale;
 	currency?: Currency;
 	welcomeMessage?: string | null;
+	welcomeMessageAttribution?: string | null;
 	thankYouMessage?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
@@ -274,6 +280,7 @@ export const updateWishlistSettingsSchema = z.object({
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
 	welcomeMessage: wishlistWelcomeMessageSchema,
+	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
 	language: localeSchema,
 	currency: currencySchema,

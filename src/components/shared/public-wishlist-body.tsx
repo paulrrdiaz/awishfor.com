@@ -43,6 +43,11 @@ export function PublicWishlistBody({
 					<p className="font-serif text-base italic leading-relaxed">
 						{wishlist.welcomeMessage}
 					</p>
+					{wishlist.welcomeMessageAttribution && (
+						<p className="mt-3 font-mono text-[9px] text-muted-foreground uppercase tracking-[0.24em]">
+							— {wishlist.welcomeMessageAttribution}
+						</p>
+					)}
 				</div>
 			)}
 

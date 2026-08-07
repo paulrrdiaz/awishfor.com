@@ -113,6 +113,7 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		language: "es",
 		currency: "PEN",
 		welcomeMessage: draft.welcomeMessage || null,
+		welcomeMessageAttribution: null,
 		thankYouMessage: draft.thankYouMessage || null,
 		eventDate: draft.eventDate,
 		eventTime: draft.eventTime,

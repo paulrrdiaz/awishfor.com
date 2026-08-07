@@ -17,6 +17,7 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	currency: "PEN",
 	welcomeMessage:
 		"Gracias por acompañarnos en la llegada de Mateo. Aquí encontrarás algunas ideas para consentirlo.",
+	welcomeMessageAttribution: "Familia de Mateo",
 	thankYouMessage: "¡Gracias por tu cariño y por celebrar con nosotros!",
 	eventDate: "2026-09-13",
 	eventTime: "16:00",

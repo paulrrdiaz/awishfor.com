@@ -355,6 +355,7 @@ export const createWishlist = async (
 			language: input.language ?? Locale.es,
 			currency: input.currency ?? Currency.PEN,
 			welcomeMessage: input.welcomeMessage ?? null,
+			welcomeMessageAttribution: input.welcomeMessageAttribution ?? null,
 			thankYouMessage: input.thankYouMessage ?? null,
 			eventDate: input.eventDate ?? null,
 			eventTime: input.eventTime ?? null,

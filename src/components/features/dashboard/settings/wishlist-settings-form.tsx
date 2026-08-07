@@ -149,6 +149,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [welcomeMessage, setWelcomeMessage] = useState(
 		wishlist.welcomeMessage ?? "",
 	);
+	const [welcomeMessageAttribution, setWelcomeMessageAttribution] = useState(
+		wishlist.welcomeMessageAttribution ?? "",
+	);
 	const [thankYouMessage, setThankYouMessage] = useState(
 		wishlist.thankYouMessage ?? "",
 	);
@@ -237,6 +240,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			eventLocation: eventLocation || null,
 			dressCode: dressCode || null,
 			welcomeMessage: welcomeMessage || null,
+			welcomeMessageAttribution: welcomeMessageAttribution || null,
 			thankYouMessage: thankYouMessage || null,
 			language: language as Locale,
 			currency: currency as Currency,
@@ -363,6 +367,20 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							rows={4}
 							value={welcomeMessage}
 						/>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label htmlFor="welcomeMessageAttribution">Firma del mensaje</Label>
+						<Input
+							id="welcomeMessageAttribution"
+							maxLength={120}
+							onChange={(e) => setWelcomeMessageAttribution(e.target.value)}
+							placeholder="Ej. Lucía y Marco"
+							value={welcomeMessageAttribution}
+						/>
+						<p className="text-muted-foreground text-xs">
+							Aparecerá debajo del mensaje en tu lista pública.
+						</p>
 					</div>
 
 					<div className="space-y-1.5">

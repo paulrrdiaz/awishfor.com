@@ -26,6 +26,7 @@ const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	language: "es",
 	currency: "PEN",
 	welcomeMessage: null,
+	welcomeMessageAttribution: null,
 	thankYouMessage: null,
 	eventDate: null,
 	eventTime: null,

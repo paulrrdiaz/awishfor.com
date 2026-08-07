@@ -188,7 +188,10 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 								))}
 						</section>
 						{wishlist.welcomeMessage && (
-							<WishlistMessage message={wishlist.welcomeMessage} />
+							<WishlistMessage
+								attribution={wishlist.welcomeMessageAttribution}
+								message={wishlist.welcomeMessage}
+							/>
 						)}
 					</>
 				)}

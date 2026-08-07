@@ -70,6 +70,7 @@ function makeStoredWishlist(overrides: Record<string, unknown> = {}) {
 		language: "es",
 		currency: "PEN",
 		welcomeMessage: "Gracias por acompañarnos",
+		welcomeMessageAttribution: "Lucía y Marco",
 		thankYouMessage: "Con cariño",
 		eventDate: null,
 		eventTime: null,
@@ -342,6 +343,7 @@ describe("wishlistRouter.getById", () => {
 		expect(result).toMatchObject({
 			id: "wishlist_123",
 			slug: "lista-de-boda",
+			welcomeMessageAttribution: "Lucía y Marco",
 			themeId: "cielo-suave",
 			layoutId: "magazine-editorial",
 			images: [
@@ -388,6 +390,49 @@ describe("wishlistRouter.getById", () => {
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
 		});
+	});
+});
+
+describe("wishlistRouter.updateSettings", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		authMock.mockResolvedValue({ userId: "clerk_123" });
+	});
+
+	it("persists the welcome message attribution for the owner", async () => {
+		const wishlistUpdate = vi.fn().mockResolvedValue({
+			id: "wishlist_123",
+			slug: "lista-de-boda",
+			updatedAt: now,
+		});
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "lista-de-boda",
+			}),
+			wishlistUpdate,
+		});
+		const caller = makeCaller(db);
+
+		await caller.updateSettings({
+			id: "wishlist_123",
+			title: "Lista de boda",
+			slug: "lista-de-boda",
+			welcomeMessage: "Gracias por acompañarnos",
+			welcomeMessageAttribution: "Lucía y Marco",
+			language: "es",
+			currency: "PEN",
+			showHowItWorks: true,
+		});
+
+		expect(wishlistUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					welcomeMessageAttribution: "Lucía y Marco",
+				}),
+			}),
+		);
+		expect(revalidatePathMock).toHaveBeenCalledWith("/w/lista-de-boda");
 	});
 });
 

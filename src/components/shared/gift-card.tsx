@@ -1,6 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
+import { Check, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
 import { useHoverLift } from "@/lib/gsap/use-hover-lift";
@@ -34,7 +35,7 @@ const giftCardVariants = cva(
 				card: "flex flex-col overflow-hidden rounded-xl",
 				collage: "flex flex-col overflow-hidden rounded-[16px] shadow-none",
 				"collage-row":
-					"relative flex min-h-[90px] items-center gap-3 overflow-hidden rounded-[10px] border-l-[8px] border-l-primary p-3 shadow-none",
+					"relative grid min-h-[90px] grid-cols-[4rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 overflow-hidden rounded-[10px] border-l-[8px] border-l-primary p-3 shadow-none sm:flex sm:gap-3",
 				row: "flex items-center gap-4 rounded-lg p-4",
 				minimal: "flex items-center gap-4 rounded-lg p-4 shadow-none",
 			},
@@ -195,12 +196,29 @@ export function GiftCard({
 					)}
 				</div>
 				{showAction && (
-					<button
-						aria-label={`Marcar comprado: ${gift.name}`}
-						className="absolute inset-0 z-10 cursor-pointer rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-						onClick={() => onGiftAction?.(gift)}
-						type="button"
-					/>
+					<div className="col-span-3 col-start-1 flex w-full shrink-0 items-center justify-end gap-2 self-center sm:col-auto sm:w-auto">
+						{gift.productUrl && (
+							<a
+								aria-label={`Abrir ${gift.name} en una nueva pestaña`}
+								className="public-btn inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap border border-border bg-card px-3 font-medium text-foreground text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+								href={gift.productUrl}
+								rel="noopener noreferrer"
+								target="_blank"
+							>
+								<ExternalLink aria-hidden="true" className="size-3.5" />
+								<span>Ver regalo</span>
+							</a>
+						)}
+						<button
+							aria-label={`Marcar como comprado: ${gift.name}`}
+							className="public-btn inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap bg-primary px-3 font-medium text-primary-foreground text-xs transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							onClick={() => onGiftAction?.(gift)}
+							type="button"
+						>
+							<Check aria-hidden="true" className="size-3.5" />
+							<span>Marcar comprado</span>
+						</button>
+					</div>
 				)}
 			</article>
 		);

@@ -22,12 +22,7 @@ export function ThemeSwatchPicker({
 }: Props) {
 	const isInline = variant === "inline";
 	return (
-		<div
-			className={cn(
-				"grid grid-cols-4 gap-2",
-				!isInline && "gap-2.5 sm:grid-cols-6",
-			)}
-		>
+		<div className={cn("grid grid-cols-4 gap-2", !isInline && "gap-2.5")}>
 			{options.map((theme) => {
 				const isSelected = selected === theme.id;
 				return (

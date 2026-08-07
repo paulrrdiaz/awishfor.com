@@ -63,6 +63,7 @@ export type PublicWishlistViewModel = {
 	language: string;
 	currency: string;
 	welcomeMessage: string | null;
+	welcomeMessageAttribution: string | null;
 	thankYouMessage: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
@@ -193,6 +194,7 @@ export type DashboardWishlistCardViewModel = {
 	language: string;
 	currency: string;
 	welcomeMessage: string | null;
+	welcomeMessageAttribution: string | null;
 	thankYouMessage: string | null;
 	eventDate: string | null;
 	eventTime: string | null;

@@ -84,6 +84,7 @@ model Wishlist {
   language        Locale         @default(es)
   currency        Currency       @default(PEN)
   welcomeMessage  String?
+  welcomeMessageAttribution String?
   thankYouMessage String?
   eventDate       DateTime?
   eventTime       String?
