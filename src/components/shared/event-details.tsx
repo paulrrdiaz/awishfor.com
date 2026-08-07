@@ -1,30 +1,27 @@
+import { formatEventDate } from "@/lib/format/dates";
+
 type EventDetailsWishlist = {
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
+	language: string;
 };
 
 type Props = {
 	wishlist: EventDetailsWishlist;
 };
 
-function formatEventDate(eventDate: string, eventTime: string | null): string {
-	const formattedDate = new Date(eventDate).toLocaleDateString("es-PE", {
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-	});
-
-	return eventTime ? `${formattedDate} · ${eventTime}` : formattedDate;
-}
-
 export function EventDetails({ wishlist }: Props) {
 	const details = [
 		wishlist.eventDate
 			? {
 					label: "Fecha",
-					value: formatEventDate(wishlist.eventDate, wishlist.eventTime),
+					value: formatEventDate(
+						wishlist.eventDate,
+						wishlist.language as "es" | "en",
+						wishlist.eventTime,
+					),
 				}
 			: null,
 		wishlist.eventLocation

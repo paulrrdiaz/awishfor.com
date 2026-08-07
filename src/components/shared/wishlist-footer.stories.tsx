@@ -3,15 +3,24 @@ import { WishlistFooter } from "./wishlist-footer";
 
 const meta = {
 	component: WishlistFooter,
+	parameters: {
+		layout: "fullscreen",
+	},
 	title: "Shared/WishlistFooter",
 } satisfies Meta<typeof WishlistFooter>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Expanded: Story = {
 	args: {
-		thankYouMessage:
-			"Gracias por acompañarnos y por hacer parte de esta llegada tan especial.",
+		variant: "expanded",
+	},
+};
+
+export const Compact: Story = {
+	args: {
+		variant: "compact",
+		wishlistSlug: "esperando-a-mateo",
 	},
 };

@@ -57,6 +57,7 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 	return (
 		<PublicWishlistPage
 			mode="full"
+			surface="standalone"
 			wishlist={{ ...result.wishlist, guest: inviteResult.guest }}
 		/>
 	);

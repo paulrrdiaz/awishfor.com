@@ -56,7 +56,7 @@ const layoutList: PublicLayoutPreset[] = [
 		giftColumns: 2,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
-		heroImageSlots: 1,
+		heroImageSlots: 2,
 		supportsCarousel: false,
 		imageGuidance: { ratio: "3:4", orientation: "portrait" },
 	},

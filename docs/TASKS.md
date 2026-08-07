@@ -2197,6 +2197,7 @@ Tasks:
 - [x] Add public footer links ("Hecho con cariño en A Wish For").
 - [x] Add report mailto link.
 - [x] Add support email `hola@awishfor.com`.
+- [x] Reuse the themed marketing footer body on standalone public wishlists while keeping embedded previews compact.
 
 Acceptance criteria:
 

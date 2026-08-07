@@ -79,6 +79,8 @@ describe("getAllLayouts", () => {
 		const byId = Object.fromEntries(layouts.map((l) => [l.id, l]));
 		expect(byId["overlap-duo"]?.heroImageSlots).toBe(2);
 		expect(byId["overlap-duo"]?.supportsCarousel).toBe(false);
+		expect(byId["split-image-right"]?.heroImageSlots).toBe(2);
+		expect(byId["split-image-right"]?.supportsCarousel).toBe(false);
 		expect(byId["collage-staggered"]?.heroImageSlots).toBe(3);
 		expect(byId["collage-staggered"]?.supportsCarousel).toBe(true);
 		expect(byId["collage-staggered"]?.giftCardStyle).toBe("collage");
@@ -86,11 +88,7 @@ describe("getAllLayouts", () => {
 			expect(byId[id]?.heroImageSlots).toBe(3);
 			expect(byId[id]?.supportsCarousel).toBe(false);
 		}
-		for (const id of [
-			"split-image-right",
-			"magazine-editorial",
-			"portrait-frame-split",
-		]) {
+		for (const id of ["magazine-editorial", "portrait-frame-split"]) {
 			expect(byId[id]?.heroImageSlots).toBe(1);
 			expect(byId[id]?.supportsCarousel).toBe(false);
 		}

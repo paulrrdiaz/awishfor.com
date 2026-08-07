@@ -10,10 +10,27 @@ function image(url: string): WishlistImageViewModel {
 	return { url, width: 1200, height: 800, orientation: "landscape" };
 }
 
+function portraitImage(url: string): WishlistImageViewModel {
+	return { url, width: 900, height: 1200, orientation: "portrait" };
+}
+
 const ZERO_IMAGES: WishlistImageViewModel[] = [];
 const ONE_IMAGE = [
 	image(
 		"https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop",
+	),
+];
+const ONE_PORTRAIT_IMAGE = [
+	portraitImage(
+		"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&h=1200&fit=crop",
+	),
+];
+const TWO_PORTRAIT_IMAGES = [
+	portraitImage(
+		"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&h=1200&fit=crop",
+	),
+	portraitImage(
+		"https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=900&h=1200&fit=crop",
 	),
 ];
 const MANY_IMAGES = [
@@ -43,6 +60,9 @@ function wishlistWithLayout(
 }
 
 const meta = {
+	args: {
+		surface: "standalone",
+	},
 	component: PublicWishlistPage,
 	parameters: {
 		layout: "fullscreen",
@@ -57,8 +77,26 @@ type Story = StoryObj<typeof meta>;
 // src/config/public-layouts.ts (the layout picker shown to users).
 
 export const SplitImageRight: Story = {
-	args: { mode: "full", wishlist: wishlistWithLayout("split-image-right") },
+	args: {
+		mode: "full",
+		wishlist: wishlistWithLayout("split-image-right", TWO_PORTRAIT_IMAGES),
+	},
 	name: "Imagen Fija",
+};
+export const SplitImageRightEmbeddedPreview: Story = {
+	args: {
+		mode: "preview",
+		surface: "embedded",
+		wishlist: wishlistWithLayout("split-image-right", TWO_PORTRAIT_IMAGES),
+	},
+	name: "Imagen Fija — vista previa incrustada",
+};
+export const SplitImageRightOneImage: Story = {
+	args: {
+		mode: "full",
+		wishlist: wishlistWithLayout("split-image-right", ONE_PORTRAIT_IMAGE),
+	},
+	name: "Imagen Fija — una foto",
 };
 export const SplitImageRightNoImages: Story = {
 	args: {

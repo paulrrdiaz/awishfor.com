@@ -1,3 +1,4 @@
+import { WishlistFooter } from "@/components/shared/wishlist-footer";
 import { resolveButtonStyle } from "@/config/public-button-styles";
 import { resolveBodyFont, resolveHeadingFont } from "@/config/public-fonts";
 import { resolveLayout } from "@/config/public-layouts";
@@ -12,16 +13,24 @@ import { OverlapDuoLayout } from "./overlap-duo-layout";
 import { PortraitFrameSplitLayout } from "./portrait-frame-split-layout";
 import { PublicThemeProvider } from "./public-theme-provider";
 import { ScrapbookPolaroidsLayout } from "./scrapbook-polaroids-layout";
+import { SELF_CONTAINED_LAYOUT_IDS } from "./self-contained-layouts";
 import { SplitImageRightLayout } from "./split-image-right-layout";
 
 export type PublicWishlistMode = "full" | "preview" | "compact";
+export type PublicWishlistSurface = "standalone" | "embedded";
 
 type Props = {
 	wishlist: PublicWishlistViewModel;
 	mode: PublicWishlistMode;
+	surface?: PublicWishlistSurface;
 };
 
-type LayoutComponentType = typeof MagazineEditorialLayout;
+type LayoutComponentType = (props: {
+	wishlist: PublicWishlistViewModel;
+	layout: ReturnType<typeof resolveLayout>;
+	mode: PublicWishlistMode;
+	surface?: PublicWishlistSurface;
+}) => ReturnType<typeof MagazineEditorialLayout>;
 
 const LAYOUT_COMPONENTS: Record<string, LayoutComponentType> = {
 	"split-image-right": SplitImageRightLayout,
@@ -35,7 +44,11 @@ const LAYOUT_COMPONENTS: Record<string, LayoutComponentType> = {
 	"portrait-frame-split": PortraitFrameSplitLayout,
 };
 
-export function PublicWishlistPage({ wishlist, mode }: Props) {
+export function PublicWishlistPage({
+	wishlist,
+	mode,
+	surface = "embedded",
+}: Props) {
 	const theme = resolveTheme(wishlist.themeId);
 	const layout = resolveLayout(wishlist.layoutId);
 	const headingFont = resolveHeadingFont(wishlist.headingFont);
@@ -49,15 +62,15 @@ export function PublicWishlistPage({ wishlist, mode }: Props) {
 		<PublicThemeProvider
 			bodyFont={bodyFont}
 			buttonStyle={buttonStyle}
-			// Compact and preview are embedded previews (marketing example, wizard
-			// steps); they must not stretch to the full viewport height like a
-			// standalone page — only "full" (the real public route) should.
+			// Embedded previews must not stretch to the full viewport height.
+			// Standalone owner previews still use mode="preview", so render surface
+			// determines page sizing independently of interaction mode.
 			className={
-				layout.id === "collage-staggered"
-					? mode !== "full"
+				SELF_CONTAINED_LAYOUT_IDS.has(layout.id)
+					? surface === "embedded"
 						? "min-h-0 bg-background"
 						: "bg-background"
-					: mode !== "full"
+					: surface === "embedded"
 						? "min-h-0"
 						: undefined
 			}
@@ -69,7 +82,18 @@ export function PublicWishlistPage({ wishlist, mode }: Props) {
 					Vista previa — esta lista aún no es pública
 				</div>
 			)}
-			<LayoutComponent layout={layout} mode={mode} wishlist={wishlist} />
+			<LayoutComponent
+				layout={layout}
+				mode={mode}
+				surface={surface}
+				wishlist={wishlist}
+			/>
+			{mode !== "compact" && (
+				<WishlistFooter
+					variant={surface === "standalone" ? "expanded" : "compact"}
+					wishlistSlug={wishlist.slug}
+				/>
+			)}
 		</PublicThemeProvider>
 	);
 }

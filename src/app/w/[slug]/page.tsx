@@ -70,5 +70,7 @@ export default async function WishlistSlugPage({ params }: Props) {
 	const { wishlist } = result;
 	const mode = result.kind === "preview" ? "preview" : "full";
 
-	return <PublicWishlistPage mode={mode} wishlist={wishlist} />;
+	return (
+		<PublicWishlistPage mode={mode} surface="standalone" wishlist={wishlist} />
+	);
 }

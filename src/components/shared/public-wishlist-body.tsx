@@ -4,7 +4,7 @@ import { Countdown } from "@/components/shared/countdown";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
 import { ProgressSummary } from "@/components/shared/progress-summary";
-import { WishlistFooter } from "@/components/shared/wishlist-footer";
+import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import { sortGifts } from "@/lib/wishlist/gift-filters";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
@@ -18,7 +18,7 @@ type Props = {
 
 /**
  * Everything below the bespoke per-layout hero: event details, countdown,
- * welcome message, gift section, and footer. Identical across
+ * welcome message, gift section, and thank-you message. Identical across
  * every layout variant so only the hero composition needs to differ.
  */
 export function PublicWishlistBody({
@@ -70,9 +70,7 @@ export function PublicWishlistBody({
 				)}
 			</section>
 
-			{!isCompact && (
-				<WishlistFooter thankYouMessage={wishlist.thankYouMessage} />
-			)}
+			{!isCompact && <WishlistThankYou message={wishlist.thankYouMessage} />}
 		</>
 	);
 }

@@ -5,13 +5,32 @@ const INTL_LOCALE: Record<Locale, string> = {
 	en: "en-US",
 };
 
-export function formatEventDate(date: Date | string, locale: Locale): string {
-	const d = typeof date === "string" ? new Date(date) : date;
+/** Formats a stored "HH:mm" (24-hour) event time as a locale-appropriate 12-hour clock. */
+export function formatEventTime(time: string, locale: Locale): string {
+	const [hours, minutes] = time.split(":").map(Number);
+	const d = new Date(1970, 0, 1, hours, minutes);
 	return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+		hour: "numeric",
+		minute: "2-digit",
+		hour12: true,
+	}).format(d);
+}
+
+export function formatEventDate(
+	date: Date | string,
+	locale: Locale,
+	time?: string | null,
+): string {
+	const d = typeof date === "string" ? new Date(date) : date;
+	const formattedDate = new Intl.DateTimeFormat(INTL_LOCALE[locale], {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
 	}).format(d);
+
+	return time
+		? `${formattedDate} · ${formatEventTime(time, locale)}`
+		: formattedDate;
 }
 
 export function formatRelativeDate(
