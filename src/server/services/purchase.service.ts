@@ -90,7 +90,7 @@ export type CreatePurchaseResult = {
 	undoToken: string;
 };
 
-const OWNER_MANUAL_PURCHASE_DEFAULT_NAME = "Registrado por el creador";
+export const OWNER_MANUAL_PURCHASE_DEFAULT_NAME = "Registrado por el creador";
 
 export const listOwnerGiftPurchases = async (
 	db: OwnerPurchaseDatabase,

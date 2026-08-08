@@ -238,4 +238,64 @@ describe("saveDraftWishlistSchema", () => {
 		expect(result.lastSavedAt).toBeNull();
 		expect(result.force).toBe(true);
 	});
+
+	describe("message variant ids", () => {
+		it("accepts a valid id from each variant catalog", () => {
+			const result = saveDraftWishlistSchema.parse(
+				makeInput({
+					countdownVariant: "progress-bar",
+					welcomeMessageVariant: "avatars",
+					thankYouMessageVariant: "social-proof",
+				}),
+			);
+
+			expect(result.countdownVariant).toBe("progress-bar");
+			expect(result.welcomeMessageVariant).toBe("avatars");
+			expect(result.thankYouMessageVariant).toBe("social-proof");
+		});
+
+		it("normalizes an empty string to null", () => {
+			const result = saveDraftWishlistSchema.parse({
+				...makeInput(),
+				countdownVariant: "",
+			} as unknown);
+
+			expect(result.countdownVariant).toBeNull();
+		});
+
+		it("leaves an unset variant as null", () => {
+			const result = saveDraftWishlistSchema.parse(
+				makeInput({ welcomeMessageVariant: null }),
+			);
+
+			expect(result.welcomeMessageVariant).toBeNull();
+		});
+
+		it("rejects an id absent from the catalog", () => {
+			const result = saveDraftWishlistSchema.safeParse({
+				...makeInput(),
+				thankYouMessageVariant: "not-a-real-variant",
+			} as unknown);
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							path: ["thankYouMessageVariant"],
+						}),
+					]),
+				);
+			}
+		});
+
+		it("rejects a countdown variant id from a different catalog", () => {
+			const result = saveDraftWishlistSchema.safeParse({
+				...makeInput(),
+				countdownVariant: "postcard",
+			} as unknown);
+
+			expect(result.success).toBe(false);
+		});
+	});
 });

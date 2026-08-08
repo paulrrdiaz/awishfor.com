@@ -152,13 +152,14 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 						<WishlistMessage
 							attribution={wishlist.welcomeMessageAttribution}
 							message={wishlist.welcomeMessage}
+							variant={wishlist.welcomeMessageVariant}
 						/>
 					)}
 				</>
 			)}
 
 			<section
-				className="scroll-mt-[59px] px-5 pt-[18px] pb-6 sm:px-[22px]"
+				className="scroll-mt-[59px] px-5 pt-[18px] pb-16 sm:px-[22px]"
 				id="regalos"
 			>
 				<PublicGiftFilters
@@ -173,13 +174,25 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 					showSort={false}
 					toolbarLeading={
 						wishlist.eventDate ? (
-							<Countdown eventDate={wishlist.eventDate} variant="chip" />
+							<Countdown
+								className="p-0 text-left"
+								createdAt={wishlist.createdAt}
+								eventDate={wishlist.eventDate}
+								variant={wishlist.countdownVariant}
+							/>
 						) : undefined
 					}
 				/>
 			</section>
 
-			{!isCompact && <WishlistThankYou message={wishlist.thankYouMessage} />}
+			{!isCompact && (
+				<WishlistThankYou
+					attribution={wishlist.welcomeMessageAttribution}
+					contributors={wishlist.contributors}
+					message={wishlist.thankYouMessage}
+					variant={wishlist.thankYouMessageVariant}
+				/>
+			)}
 		</PublicLayoutShell>
 	);
 }

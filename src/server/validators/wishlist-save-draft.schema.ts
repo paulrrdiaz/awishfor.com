@@ -16,6 +16,7 @@ import {
 	giftPrioritySchema,
 	wishlistBodyFontSchema,
 	wishlistButtonStyleSchema,
+	wishlistCountdownVariantSchema,
 	wishlistCoverImagesSchema,
 	wishlistDressCodeSchema,
 	wishlistEventLocationSchema,
@@ -25,9 +26,11 @@ import {
 	wishlistLayoutIdSchema,
 	wishlistSlugSchema,
 	wishlistThankYouMessageSchema,
+	wishlistThankYouMessageVariantSchema,
 	wishlistThemeIdSchema,
 	wishlistTitleSchema,
 	wishlistWelcomeMessageSchema,
+	wishlistWelcomeMessageVariantSchema,
 } from "@/server/validators/wishlist.schema";
 
 export const SAVE_DRAFT_MAX_CATEGORIES = 50;
@@ -109,6 +112,9 @@ export const saveDraftDraftContentSchema = z.object({
 	currency: currencySchema.default(Currency.PEN),
 	welcomeMessage: wishlistWelcomeMessageSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
+	countdownVariant: wishlistCountdownVariantSchema,
+	welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
+	thankYouMessageVariant: wishlistThankYouMessageVariantSchema,
 	eventDate: z
 		.string()
 		.regex(ISO_DATE_PATTERN, "Event date must use YYYY-MM-DD format")

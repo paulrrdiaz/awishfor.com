@@ -1,4 +1,9 @@
 import { TRPCError } from "@trpc/server";
+import type {
+	CountdownVariantId,
+	ThankYouVariantId,
+	WelcomeVariantId,
+} from "@/config/public-message-variants";
 import type { Category, Prisma, Wishlist } from "@/generated/prisma/client";
 import {
 	Currency,
@@ -177,6 +182,9 @@ const wishlistDraftToData = (input: SaveDraftDraftContent) => ({
 	buttonStyle: input.buttonStyle ?? null,
 	headingFont: input.headingFont ?? null,
 	bodyFont: input.bodyFont ?? null,
+	countdownVariant: input.countdownVariant ?? null,
+	welcomeMessageVariant: input.welcomeMessageVariant ?? null,
+	thankYouMessageVariant: input.thankYouMessageVariant ?? null,
 	showHowItWorks: input.showHowItWorks ?? true,
 });
 
@@ -204,6 +212,11 @@ const mapServerDraft = (
 	buttonStyle: wishlist.buttonStyle,
 	headingFont: wishlist.headingFont,
 	bodyFont: wishlist.bodyFont,
+	countdownVariant: wishlist.countdownVariant as CountdownVariantId | null,
+	welcomeMessageVariant:
+		wishlist.welcomeMessageVariant as WelcomeVariantId | null,
+	thankYouMessageVariant:
+		wishlist.thankYouMessageVariant as ThankYouVariantId | null,
 	showHowItWorks: wishlist.showHowItWorks,
 	categories: wishlist.categories.map((category) => category.name),
 	gifts: wishlist.gifts.map((gift) => ({

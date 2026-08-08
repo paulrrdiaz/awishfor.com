@@ -174,6 +174,9 @@ const READY_DRAFT: WishlistDraft = {
 	buttonStyle: "pill",
 	headingFont: null,
 	bodyFont: null,
+	countdownVariant: null,
+	welcomeMessageVariant: null,
+	thankYouMessageVariant: null,
 	showHowItWorks: true,
 	gifts: [
 		{

@@ -58,6 +58,34 @@ function compositeCoverImages(draft: WishlistDraft): WishlistImageViewModel[] {
 	return [...draft.images, ...sampleImages];
 }
 
+const PREVIEW_CREATED_AT_OFFSET_DAYS = 45;
+
+/**
+ * A draft has no persisted creation date or real purchases. Seeding
+ * representative values here (rather than leaving them at their spec-correct
+ * "no data" defaults) keeps the `progress-bar` and `social-proof` variants
+ * showing their distinctive appearance in every preview surface that routes
+ * through this function — including the design editor's preview, via
+ * `persistedWishlistToPreviewDraft`, which has no `createdAt` of its own to
+ * seed from and so is overridden here too.
+ */
+function seedPreviewCreatedAt(eventDate: string | null): string {
+	if (!eventDate) {
+		return new Date(0).toISOString();
+	}
+
+	const event = new Date(`${eventDate.slice(0, 10)}T00:00:00.000Z`);
+	const created = new Date(
+		event.getTime() - PREVIEW_CREATED_AT_OFFSET_DAYS * 24 * 60 * 60 * 1000,
+	);
+	return created.toISOString();
+}
+
+const PREVIEW_CONTRIBUTORS: PublicWishlistViewModel["contributors"] = {
+	count: 5,
+	initials: ["A", "M", "L"],
+};
+
 function draftGiftToViewModel(gift: DraftGift): PublicGiftViewModel {
 	return {
 		id: gift.id,
@@ -125,6 +153,9 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		buttonStyle: draft.buttonStyle,
 		headingFont: draft.headingFont,
 		bodyFont: draft.bodyFont,
+		countdownVariant: draft.countdownVariant,
+		welcomeMessageVariant: draft.welcomeMessageVariant,
+		thankYouMessageVariant: draft.thankYouMessageVariant,
 		showHowItWorks: draft.showHowItWorks,
 		categories,
 		gifts,
@@ -133,5 +164,7 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 			purchasedUnits: 0,
 			totalUnits,
 		},
+		contributors: PREVIEW_CONTRIBUTORS,
+		createdAt: seedPreviewCreatedAt(draft.eventDate),
 	};
 }

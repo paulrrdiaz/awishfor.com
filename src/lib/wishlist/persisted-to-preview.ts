@@ -37,6 +37,9 @@ export type PersistedWishlistPreviewSource = {
 	buttonStyle: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
+	countdownVariant: string | null;
+	welcomeMessageVariant: string | null;
+	thankYouMessageVariant: string | null;
 	showHowItWorks: boolean;
 };
 
@@ -77,6 +80,9 @@ export function persistedWishlistToPreviewDraft(
 		buttonStyle: designValue("buttonStyle"),
 		headingFont: designValue("headingFont"),
 		bodyFont: designValue("bodyFont"),
+		countdownVariant: wishlist.countdownVariant,
+		welcomeMessageVariant: wishlist.welcomeMessageVariant,
+		thankYouMessageVariant: wishlist.thankYouMessageVariant,
 		showHowItWorks: wishlist.showHowItWorks,
 		gifts: wishlist.gifts.map((gift) => ({
 			id: gift.id,

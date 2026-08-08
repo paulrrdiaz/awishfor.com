@@ -20,7 +20,9 @@ The system SHALL serve a settings page at `/dashboard/wishlists/[id]/settings` t
 
 ### Requirement: Edit core wishlist content
 
-The settings form SHALL allow the owner to edit a single wishlist name (`title`), event date and time (chosen through a single `DateTimePicker` field combining a calendar popover and time input), event location, dress code, welcome and thank-you copy, language, currency, and the How-it-works toggle, and persist them via an owner-scoped mutation. The form SHALL NOT expose a separate display name or hero title, since the wishlist has one name that serves both the owner's dashboard and the public page.
+The settings form SHALL allow the owner to edit a single wishlist name (`title`), event date and time (chosen through a single `DateTimePicker` field combining a calendar popover and time input), event location, dress code, welcome and thank-you copy, the message signature, the presentation variant for the countdown, welcome message, and thank-you message, language, currency, and the How-it-works toggle, and persist them via an owner-scoped mutation. The form SHALL NOT expose a separate display name or hero title, since the wishlist has one name that serves both the owner's dashboard and the public page.
+
+The message signature field SHALL be presented as a single page-wide signature that appears beneath both the welcome and thank-you messages.
 
 #### Scenario: Save content changes
 
@@ -48,6 +50,17 @@ The settings form SHALL allow the owner to edit a single wishlist name (`title`)
 
 - **WHEN** the owner changes the wishlist name and saves
 - **THEN** the public page's hero heading reflects the new name after revalidation
+
+#### Scenario: Saving a variant selection
+
+- **WHEN** the owner changes a message variant selection and submits
+- **THEN** the mutation validates the id against the variant catalog and persists it
+- **AND** the public wishlist page renders the selected variant after revalidation
+
+#### Scenario: Signature applies to both messages
+
+- **WHEN** the owner sets the message signature and saves
+- **THEN** it appears beneath both the welcome message and the thank-you message on the public page
 
 ### Requirement: Slug editing with availability and published warning
 

@@ -95,6 +95,9 @@ model Wishlist {
   buttonStyle     String?
   headingFont     String?
   bodyFont        String?
+  countdownVariant       String?
+  welcomeMessageVariant  String?
+  thankYouMessageVariant String?
   showHowItWorks  Boolean        @default(true)
   status          WishlistStatus @default(draft)
   publishedAt     DateTime?

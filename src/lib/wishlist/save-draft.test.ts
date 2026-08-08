@@ -30,6 +30,9 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	buttonStyle: "pill",
 	headingFont: null,
 	bodyFont: null,
+	countdownVariant: null,
+	welcomeMessageVariant: null,
+	thankYouMessageVariant: null,
 	showHowItWorks: true,
 	gifts: [
 		{
@@ -86,6 +89,9 @@ const makeServerDraft = (
 	buttonStyle: "pill",
 	headingFont: null,
 	bodyFont: null,
+	countdownVariant: null,
+	welcomeMessageVariant: null,
+	thankYouMessageVariant: null,
 	showHowItWorks: true,
 	categories: ["Hogar"],
 	gifts: [

@@ -98,7 +98,12 @@ export function SplitImageRightLayout({
 
 							{wishlist.eventDate && (
 								<div className="mt-6 flex justify-center">
-									<Countdown eventDate={wishlist.eventDate} variant="chip" />
+									<Countdown
+										className="p-0"
+										createdAt={wishlist.createdAt}
+										eventDate={wishlist.eventDate}
+										variant={wishlist.countdownVariant}
+									/>
 								</div>
 							)}
 
@@ -107,6 +112,7 @@ export function SplitImageRightLayout({
 									attribution={wishlist.welcomeMessageAttribution}
 									className="mt-6 border-none px-0 pb-0"
 									message={wishlist.welcomeMessage}
+									variant={wishlist.welcomeMessageVariant}
 								/>
 							)}
 						</>
@@ -170,7 +176,14 @@ export function SplitImageRightLayout({
 				</div>
 			</div>
 
-			{!isCompact && <WishlistThankYou message={wishlist.thankYouMessage} />}
+			{!isCompact && (
+				<WishlistThankYou
+					attribution={wishlist.welcomeMessageAttribution}
+					contributors={wishlist.contributors}
+					message={wishlist.thankYouMessage}
+					variant={wishlist.thankYouMessageVariant}
+				/>
+			)}
 		</PublicLayoutShell>
 	);
 }

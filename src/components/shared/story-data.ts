@@ -1,4 +1,5 @@
 import type {
+	PublicContributorsViewModel,
 	PublicGiftViewModel,
 	PublicWishlistProgress,
 	PublicWishlistViewModel,
@@ -61,3 +62,12 @@ export const sampleWishlist: Pick<
 	eventTime: "16:00",
 	eventLocation: "Miraflores, Lima",
 };
+
+export const sampleCreatedAt = "2026-07-28T00:00:00.000Z";
+
+export const sampleContributors: PublicContributorsViewModel = {
+	count: 6,
+	initials: ["M", "J", "A", "R"],
+};
+
+export const sampleSignature = "Ana & Diego";

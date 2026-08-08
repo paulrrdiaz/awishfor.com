@@ -7,12 +7,60 @@ import type {
 } from "@/generated/prisma/client";
 import type {
 	PublicCategoryViewModel,
+	PublicContributorsViewModel,
 	PublicGiftViewModel,
 	PublicWishlistProgress,
 	PublicWishlistViewModel,
 	WishlistImageViewModel,
 } from "@/server/mappers/view-models";
-import { deriveGiftPublicStatus } from "@/server/services/purchase.service";
+import {
+	deriveGiftPublicStatus,
+	OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
+} from "@/server/services/purchase.service";
+
+const CONTRIBUTOR_INITIALS_CAP = 4;
+
+function normalizeGuestName(name: string): string {
+	return name.trim().toLocaleLowerCase();
+}
+
+/** Whitespace-based initials for one guest's own name — distinct from the
+ * owner signature's conjunction-only splitting in `lib/format/signature.ts`. */
+function guestInitials(name: string): string {
+	return name
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part[0]?.toUpperCase() ?? "")
+		.join("");
+}
+
+function computeContributors(
+	gifts: GiftWithPurchases[],
+): PublicContributorsViewModel {
+	const excludedKey = normalizeGuestName(OWNER_MANUAL_PURCHASE_DEFAULT_NAME);
+	const seenByKey = new Map<string, string>();
+
+	for (const gift of gifts) {
+		for (const purchase of gift.purchases) {
+			const key = normalizeGuestName(purchase.guestName);
+			if (key === excludedKey || key === "") {
+				continue;
+			}
+			if (!seenByKey.has(key)) {
+				seenByKey.set(key, purchase.guestName.trim());
+			}
+		}
+	}
+
+	const names = [...seenByKey.values()];
+
+	return {
+		count: names.length,
+		initials: names.slice(0, CONTRIBUTOR_INITIALS_CAP).map(guestInitials),
+	};
+}
 
 type GiftWithPurchases = Gift & { purchases: Purchase[] };
 type CategoryWithGifts = Category & { gifts: GiftWithPurchases[] };
@@ -110,9 +158,16 @@ export function mapPublicWishlist(
 		buttonStyle: wishlist.buttonStyle,
 		headingFont: wishlist.headingFont,
 		bodyFont: wishlist.bodyFont,
+		countdownVariant: wishlist.countdownVariant,
+		welcomeMessageVariant: wishlist.welcomeMessageVariant,
+		thankYouMessageVariant: wishlist.thankYouMessageVariant,
 		showHowItWorks: wishlist.showHowItWorks,
 		categories,
 		gifts: visibleGifts.map(mapPublicGift),
 		progress: computeProgress(visibleGifts),
+		// Contributors are scoped to visible gifts, matching every other public
+		// aggregate on this wishlist (progress, gift list).
+		contributors: computeContributors(visibleGifts),
+		createdAt: wishlist.createdAt.toISOString(),
 	};
 }

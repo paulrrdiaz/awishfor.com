@@ -84,12 +84,10 @@ describe("public wishlist footer integration", () => {
 			"utf8",
 		);
 
-		expect(bodySource).toContain(
-			"<WishlistThankYou message={wishlist.thankYouMessage}",
-		);
-		expect(collageSource).toContain(
-			"<WishlistThankYou message={wishlist.thankYouMessage}",
-		);
+		expect(bodySource).toContain("<WishlistThankYou");
+		expect(bodySource).toContain("message={wishlist.thankYouMessage}");
+		expect(collageSource).toContain("<WishlistThankYou");
+		expect(collageSource).toContain("message={wishlist.thankYouMessage}");
 		expect(bodySource).not.toContain("WishlistFooter");
 		expect(collageSource).not.toContain("WishlistFooter");
 	});

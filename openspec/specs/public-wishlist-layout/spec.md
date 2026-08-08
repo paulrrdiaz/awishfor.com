@@ -147,7 +147,7 @@ The shared shell SHALL own the mode-dependent outer wrapper, the page header (br
 
 ### Requirement: Shared section components
 
-The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `GiftGrid`/`GiftList`, `HowItWorksDrawer`, and `WishlistFooter` components consumed by every layout variant, each driven by the public wishlist view model. The `Countdown` component SHALL render its label and remaining-time text inside a tinted, rounded accent-card container rather than as plain unstyled text. The welcome-message block SHALL render `wishlist.welcomeMessage` in italic styling.
+The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `GiftGrid`/`GiftList`, `HowItWorksDrawer`, and `WishlistFooter` components consumed by every layout variant, each driven by the public wishlist view model. The `Countdown`, welcome-message, and thank-you-message components SHALL each render the presentation variant selected for the wishlist rather than a single fixed appearance, and SHALL derive all color from the active theme's tokens.
 
 #### Scenario: Gift card reflects status
 
@@ -159,14 +159,21 @@ The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `Gift
 - **WHEN** `HowItWorksDrawer` opens for a Spanish wishlist
 - **THEN** it shows the default three-step guest instructions
 
-#### Scenario: Countdown renders as a boxed accent card
+#### Scenario: Countdown renders its selected variant
 
 - **WHEN** a wishlist has an event date and the `Countdown` section renders
-- **THEN** the countdown label and remaining-time text render inside a tinted rounded accent-card container, not as a bare line of text
+- **THEN** it renders the countdown variant selected for that wishlist, not a fixed accent-card container
+
+#### Scenario: Welcome message renders its selected variant
+
+- **WHEN** a wishlist has a welcome message
+- **THEN** it renders the welcome variant selected for that wishlist, not a fixed italic block
 
 ### Requirement: Countdown formatting
 
 The system SHALL format the countdown from an event date into guest-facing copy: `Faltan N días` for more than one day remaining, `Falta 1 día` for exactly one day, `Es hoy` for the event day, and the post-event message `Gracias por celebrar con nosotros.` for past events. The countdown SHALL recompute client-side and flip to the post-event message at T-0.
+
+Because the post-event message is a full sentence rather than a short day count, it SHALL render in a variant-neutral container instead of being placed inside a pill or progress-bar presentation. A negative day count SHALL never be displayed in any variant.
 
 #### Scenario: Future event shows day count
 
@@ -187,6 +194,11 @@ The system SHALL format the countdown from an event date into guest-facing copy:
 
 - **WHEN** the event date has passed
 - **THEN** the countdown shows `Gracias por celebrar con nosotros.` rather than a negative day count
+
+#### Scenario: Post-event message is not forced into a pill
+
+- **WHEN** the event date has passed and the selected variant is `filled-pill`, `outline-pill`, or `progress-bar`
+- **THEN** the post-event message renders in a variant-neutral container rather than inside the pill or progress bar
 
 ### Requirement: Render modes
 
@@ -392,7 +404,7 @@ Links in the shared footer body that target marketing-page sections SHALL use ro
 
 The `split-image-right` layout SHALL render as a self-contained page rather than delegating its body to the shared public wishlist body component. It SHALL provide its own page header (brand isotype, published status badge, share control), a centered content wrapper constrained to a maximum width, and its own compact footer, matching the composition pattern established by `collage-staggered`.
 
-Its content SHALL be arranged as a two-column grid at the `lg` breakpoint and above: a flexible left column separated from the right column by a border, and a fixed-width right column of 340px. The left column SHALL present, in order, the event-type eyebrow, the wishlist title, the event summary line, the guest welcome section, the hero CTA group, a two-up event-details grid (date and location), a centered countdown chip, the quote block when a welcome message exists, a divider, the gift-list heading, and the filtered gift list. The right column SHALL hold exactly two cover-image slots.
+Its content SHALL be arranged as a two-column grid at the `lg` breakpoint and above: a flexible left column separated from the right column by a border, and a fixed-width right column of 340px. The left column SHALL present, in order, the event-type eyebrow, the wishlist title, the event summary line, the guest welcome section, the hero CTA group, a two-up event-details grid (date and location), the countdown in the variant selected for the wishlist, the welcome message in its selected variant when one exists, a divider, the gift-list heading, and the filtered gift list. The right column SHALL hold exactly two cover-image slots.
 
 Below the `lg` breakpoint the grid SHALL collapse to a single column with the two images rendered as a fixed-height stacked pair above the text content.
 
@@ -414,7 +426,7 @@ Below the `lg` breakpoint the grid SHALL collapse to a single column with the tw
 #### Scenario: Countdown appears in the left column
 
 - **WHEN** the `split-image-right` layout renders a wishlist with a future event date
-- **THEN** a centered countdown chip renders in the left column above the quote block, and no countdown is passed into the gift filter toolbar
+- **THEN** the countdown renders in the left column above the welcome message in the variant selected for that wishlist, and no countdown is passed into the gift filter toolbar
 
 ### Requirement: Split image right sticky photo rail
 

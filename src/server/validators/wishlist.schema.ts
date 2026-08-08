@@ -1,5 +1,10 @@
 import { z } from "zod";
 import {
+	COUNTDOWN_VARIANT_IDS,
+	THANK_YOU_VARIANT_IDS,
+	WELCOME_VARIANT_IDS,
+} from "@/config/public-message-variants";
+import {
 	Currency,
 	EventType,
 	GiftPriority,
@@ -61,6 +66,28 @@ const optionalNullableTrimmedString = (fieldName: string, maxLength: number) =>
 		.max(maxLength, `${fieldName} must be at most ${maxLength} characters`)
 		.nullable()
 		.optional());
+
+const optionalNullableVariantId = <
+	const T extends readonly [string, ...string[]],
+>(
+	ids: T,
+) =>
+	z.preprocess((value) => {
+		if (value === undefined) {
+			return undefined;
+		}
+
+		if (value === null) {
+			return null;
+		}
+
+		if (typeof value === "string") {
+			const trimmed = value.trim();
+			return trimmed === "" ? null : trimmed;
+		}
+
+		return value;
+	}, z.enum(ids).nullable().optional());
 
 const optionalNullableDate = z.preprocess((value) => {
 	if (value === undefined) {
@@ -155,6 +182,14 @@ export const wishlistHeadingFontSchema = optionalNullableTrimmedString(
 export const wishlistBodyFontSchema = optionalNullableTrimmedString(
 	"Body font",
 	64,
+);
+export const wishlistCountdownVariantSchema = optionalNullableVariantId(
+	COUNTDOWN_VARIANT_IDS,
+);
+export const wishlistWelcomeMessageVariantSchema =
+	optionalNullableVariantId(WELCOME_VARIANT_IDS);
+export const wishlistThankYouMessageVariantSchema = optionalNullableVariantId(
+	THANK_YOU_VARIANT_IDS,
 );
 
 const wishlistCreateUpdateShape = {
@@ -282,6 +317,9 @@ export const updateWishlistSettingsSchema = z.object({
 	welcomeMessage: wishlistWelcomeMessageSchema,
 	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
+	countdownVariant: wishlistCountdownVariantSchema,
+	welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
+	thankYouMessageVariant: wishlistThankYouMessageVariantSchema,
 	language: localeSchema,
 	currency: currencySchema,
 	showHowItWorks: z.boolean(),

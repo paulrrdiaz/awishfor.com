@@ -53,6 +53,9 @@ export type WishlistDraft = {
 	buttonStyle: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
+	countdownVariant: string | null;
+	welcomeMessageVariant: string | null;
+	thankYouMessageVariant: string | null;
 	showHowItWorks: boolean;
 	gifts: DraftGift[];
 };
@@ -124,6 +127,9 @@ const emptyDraft = (): WishlistDraft => ({
 	buttonStyle: null,
 	headingFont: null,
 	bodyFont: null,
+	countdownVariant: null,
+	welcomeMessageVariant: null,
+	thankYouMessageVariant: null,
 	showHowItWorks: true,
 	gifts: [],
 });

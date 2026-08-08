@@ -21,6 +21,9 @@ function makeDraft(overrides: Partial<WishlistDraft> = {}): WishlistDraft {
 		buttonStyle: "rounded",
 		headingFont: null,
 		bodyFont: null,
+		countdownVariant: null,
+		welcomeMessageVariant: null,
+		thankYouMessageVariant: null,
 		showHowItWorks: true,
 		gifts: [],
 		...overrides,
@@ -179,6 +182,20 @@ describe("draftToPreview", () => {
 			const draft = makeDraft({ gifts: [gift] });
 			const vm = draftToPreview(draft);
 			expect(vm.gifts[0]?.priceAmount).toBeNull();
+		});
+	});
+
+	describe("seeded createdAt", () => {
+		it("seeds a valid createdAt when eventDate is a bare date string", () => {
+			const draft = makeDraft({ eventDate: "2026-12-24" });
+			const vm = draftToPreview(draft);
+			expect(vm.createdAt).toBe("2026-11-09T00:00:00.000Z");
+		});
+
+		it("seeds a valid createdAt when eventDate is a full ISO datetime string", () => {
+			const draft = makeDraft({ eventDate: "2026-12-24T00:00:00.000Z" });
+			const vm = draftToPreview(draft);
+			expect(vm.createdAt).toBe("2026-11-09T00:00:00.000Z");
 		});
 	});
 

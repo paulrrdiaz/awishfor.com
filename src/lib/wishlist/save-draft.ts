@@ -87,6 +87,9 @@ export const serverDraftToLocalDraft = (
 		buttonStyle: serverDraft.buttonStyle ?? null,
 		headingFont: serverDraft.headingFont ?? null,
 		bodyFont: serverDraft.bodyFont ?? null,
+		countdownVariant: serverDraft.countdownVariant ?? null,
+		welcomeMessageVariant: serverDraft.welcomeMessageVariant ?? null,
+		thankYouMessageVariant: serverDraft.thankYouMessageVariant ?? null,
 		showHowItWorks: serverDraft.showHowItWorks,
 		gifts: sortDraftGifts(serverDraft.gifts).map((gift) => ({
 			id: createGiftId(),

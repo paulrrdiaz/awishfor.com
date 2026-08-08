@@ -55,6 +55,11 @@ export type PublicGuestViewModel = {
 	status: string;
 };
 
+export type PublicContributorsViewModel = {
+	count: number;
+	initials: string[];
+};
+
 export type PublicWishlistViewModel = {
 	id: string;
 	slug: string;
@@ -75,10 +80,15 @@ export type PublicWishlistViewModel = {
 	buttonStyle: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
+	countdownVariant: string | null;
+	welcomeMessageVariant: string | null;
+	thankYouMessageVariant: string | null;
 	showHowItWorks: boolean;
 	categories: PublicCategoryViewModel[];
 	gifts: PublicGiftViewModel[];
 	progress: PublicWishlistProgress;
+	contributors: PublicContributorsViewModel;
+	createdAt: string;
 	guest?: PublicGuestViewModel;
 };
 
@@ -206,6 +216,9 @@ export type DashboardWishlistCardViewModel = {
 	buttonStyle: string | null;
 	headingFont: string | null;
 	bodyFont: string | null;
+	countdownVariant: string | null;
+	welcomeMessageVariant: string | null;
+	thankYouMessageVariant: string | null;
 	showHowItWorks: boolean;
 	status: string;
 	visibleGiftCount: number;

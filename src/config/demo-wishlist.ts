@@ -48,6 +48,9 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	buttonStyle: "pill",
 	headingFont: null,
 	bodyFont: null,
+	countdownVariant: "progress-bar",
+	welcomeMessageVariant: "avatars",
+	thankYouMessageVariant: "social-proof",
 	showHowItWorks: true,
 	categories: [
 		{ id: "cat-alimentacion", name: "Alimentación", sortOrder: 0 },
@@ -200,4 +203,9 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 		purchasedUnits: 5,
 		totalUnits: 14,
 	},
+	contributors: {
+		count: 7,
+		initials: ["MG", "JL", "AS", "RT"],
+	},
+	createdAt: "2026-06-01T09:00:00.000Z",
 };

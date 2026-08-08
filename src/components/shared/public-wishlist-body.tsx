@@ -4,6 +4,7 @@ import { Countdown } from "@/components/shared/countdown";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
 import { ProgressSummary } from "@/components/shared/progress-summary";
+import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import { sortGifts } from "@/lib/wishlist/gift-filters";
@@ -35,23 +36,22 @@ export function PublicWishlistBody({
 			{!isCompact && <EventDetails wishlist={wishlist} />}
 
 			{!isCompact && wishlist.eventDate && (
-				<Countdown eventDate={wishlist.eventDate} />
+				<Countdown
+					createdAt={wishlist.createdAt}
+					eventDate={wishlist.eventDate}
+					variant={wishlist.countdownVariant}
+				/>
 			)}
 
 			{!isCompact && wishlist.welcomeMessage && (
-				<div className="mx-auto max-w-2xl px-6 py-6 text-center">
-					<p className="font-serif text-base italic leading-relaxed">
-						{wishlist.welcomeMessage}
-					</p>
-					{wishlist.welcomeMessageAttribution && (
-						<p className="mt-3 font-mono text-[9px] text-muted-foreground uppercase tracking-[0.24em]">
-							— {wishlist.welcomeMessageAttribution}
-						</p>
-					)}
-				</div>
+				<WishlistMessage
+					attribution={wishlist.welcomeMessageAttribution}
+					message={wishlist.welcomeMessage}
+					variant={wishlist.welcomeMessageVariant}
+				/>
 			)}
 
-			<section className={`mx-auto w-full ${maxWidth} px-6 py-10`} id="regalos">
+			<section className={`mx-auto w-full ${maxWidth} px-6 py-12`} id="regalos">
 				{isFull && <ProgressSummary progress={wishlist.progress} />}
 				{isFull ? (
 					<PublicGiftFilters
@@ -70,7 +70,14 @@ export function PublicWishlistBody({
 				)}
 			</section>
 
-			{!isCompact && <WishlistThankYou message={wishlist.thankYouMessage} />}
+			{!isCompact && (
+				<WishlistThankYou
+					attribution={wishlist.welcomeMessageAttribution}
+					contributors={wishlist.contributors}
+					message={wishlist.thankYouMessage}
+					variant={wishlist.thankYouMessageVariant}
+				/>
+			)}
 		</>
 	);
 }

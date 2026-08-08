@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
+import { MessageVariantPicker } from "@/components/features/wishlist/message-variant-picker";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -32,9 +33,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+	getAllCountdownVariants,
+	getAllThankYouVariants,
+	getAllWelcomeVariants,
+	resolveCountdownVariant,
+	resolveThankYouVariant,
+	resolveWelcomeVariant,
+} from "@/config/public-message-variants";
 import { Currency, Locale } from "@/generated/prisma/enums";
 import { isValidSlug } from "@/lib/slug";
 import { api, type RouterOutputs } from "@/trpc/react";
+
+const COUNTDOWN_VARIANTS = getAllCountdownVariants();
+const WELCOME_VARIANTS = getAllWelcomeVariants();
+const THANK_YOU_VARIANTS = getAllThankYouVariants();
 
 type WishlistDetail = RouterOutputs["wishlist"]["getById"];
 
@@ -155,6 +168,15 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [thankYouMessage, setThankYouMessage] = useState(
 		wishlist.thankYouMessage ?? "",
 	);
+	const [countdownVariant, setCountdownVariant] = useState(
+		resolveCountdownVariant(wishlist.countdownVariant).id,
+	);
+	const [welcomeMessageVariant, setWelcomeMessageVariant] = useState(
+		resolveWelcomeVariant(wishlist.welcomeMessageVariant).id,
+	);
+	const [thankYouMessageVariant, setThankYouMessageVariant] = useState(
+		resolveThankYouVariant(wishlist.thankYouMessageVariant).id,
+	);
 	const [language, setLanguage] = useState<string>(wishlist.language);
 	const [currency, setCurrency] = useState<string>(wishlist.currency);
 	const [showHowItWorks, setShowHowItWorks] = useState(wishlist.showHowItWorks);
@@ -242,6 +264,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			welcomeMessage: welcomeMessage || null,
 			welcomeMessageAttribution: welcomeMessageAttribution || null,
 			thankYouMessage: thankYouMessage || null,
+			countdownVariant,
+			welcomeMessageVariant,
+			thankYouMessageVariant,
 			language: language as Locale,
 			currency: currency as Currency,
 			showHowItWorks,
@@ -333,6 +358,15 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					</div>
 
 					<div className="space-y-1.5">
+						<Label>Estilo de la cuenta regresiva</Label>
+						<MessageVariantPicker
+							onSelect={setCountdownVariant}
+							options={COUNTDOWN_VARIANTS}
+							selected={countdownVariant}
+						/>
+					</div>
+
+					<div className="space-y-1.5">
 						<Label htmlFor="eventLocation">Lugar del evento</Label>
 						<Input
 							id="eventLocation"
@@ -370,6 +404,15 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					</div>
 
 					<div className="space-y-1.5">
+						<Label>Estilo del mensaje de bienvenida</Label>
+						<MessageVariantPicker
+							onSelect={setWelcomeMessageVariant}
+							options={WELCOME_VARIANTS}
+							selected={welcomeMessageVariant}
+						/>
+					</div>
+
+					<div className="space-y-1.5">
 						<Label htmlFor="welcomeMessageAttribution">Firma del mensaje</Label>
 						<Input
 							id="welcomeMessageAttribution"
@@ -379,7 +422,8 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							value={welcomeMessageAttribution}
 						/>
 						<p className="text-muted-foreground text-xs">
-							Aparecerá debajo del mensaje en tu lista pública.
+							Aparecerá debajo del mensaje de bienvenida y del mensaje de
+							agradecimiento en tu lista pública.
 						</p>
 					</div>
 
@@ -392,6 +436,15 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							placeholder="Escribe un mensaje de agradecimiento…"
 							rows={4}
 							value={thankYouMessage}
+						/>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label>Estilo del mensaje de agradecimiento</Label>
+						<MessageVariantPicker
+							onSelect={setThankYouMessageVariant}
+							options={THANK_YOU_VARIANTS}
+							selected={thankYouMessageVariant}
 						/>
 					</div>
 				</section>

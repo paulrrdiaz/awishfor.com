@@ -33,6 +33,9 @@ function makeWishlist(
 		buttonStyle: null,
 		headingFont: null,
 		bodyFont: null,
+		countdownVariant: null,
+		welcomeMessageVariant: null,
+		thankYouMessageVariant: null,
 		showHowItWorks: true,
 		status: "published",
 		publishedAt: null,
@@ -395,6 +398,142 @@ describe("mapPublicWishlist", () => {
 			gifts: [],
 		});
 		expect(result.images).toEqual([]);
+	});
+
+	it("maps the creation date to an ISO string", () => {
+		const result = mapPublicWishlist({
+			...makeWishlist(),
+			categories: [],
+			gifts: [],
+		});
+		expect(result.createdAt).toBe("2026-06-26T12:00:00.000Z");
+	});
+
+	it("maps the three selected message variants", () => {
+		const result = mapPublicWishlist({
+			...makeWishlist({
+				countdownVariant: "progress-bar",
+				welcomeMessageVariant: "avatars",
+				thankYouMessageVariant: "social-proof",
+			}),
+			categories: [],
+			gifts: [],
+		});
+		expect(result.countdownVariant).toBe("progress-bar");
+		expect(result.welcomeMessageVariant).toBe("avatars");
+		expect(result.thankYouMessageVariant).toBe("social-proof");
+	});
+
+	describe("contributors", () => {
+		it("counts a guest who bought several gifts once (dedupe by guest name, scoped to visible gifts)", () => {
+			const gift = makeGift();
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{
+						...gift,
+						purchases: [
+							makePurchase({ id: "p1", guestName: "María Gómez" }),
+							makePurchase({ id: "p2", guestName: "María Gómez" }),
+							makePurchase({ id: "p3", guestName: "María Gómez" }),
+						],
+					},
+				],
+			});
+			expect(result.contributors.count).toBe(1);
+			expect(result.contributors.initials).toEqual(["MG"]);
+		});
+
+		it("treats guest names differing only by case or padding as one contributor", () => {
+			const gift = makeGift();
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{
+						...gift,
+						purchases: [
+							makePurchase({ id: "p1", guestName: "Ana" }),
+							makePurchase({ id: "p2", guestName: "ana " }),
+						],
+					},
+				],
+			});
+			expect(result.contributors.count).toBe(1);
+		});
+
+		it("excludes the owner manual-purchase default name", () => {
+			const gift = makeGift();
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{
+						...gift,
+						purchases: [
+							makePurchase({
+								id: "p1",
+								guestName: "Registrado por el creador",
+							}),
+						],
+					},
+				],
+			});
+			expect(result.contributors.count).toBe(0);
+			expect(result.contributors.initials).toEqual([]);
+		});
+
+		it("counts purchases still inside their undo window", () => {
+			const gift = makeGift();
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{
+						...gift,
+						purchases: [
+							makePurchase({
+								id: "p1",
+								guestName: "Pendiente",
+								undoTokenHash: "hash",
+								undoExpiresAt: new Date(now.getTime() + 60_000),
+							}),
+						],
+					},
+				],
+			});
+			expect(result.contributors.count).toBe(1);
+		});
+
+		it("caps initials at four while the count stays authoritative, in first-purchase order", () => {
+			const gift = makeGift();
+			const names = ["Ana", "Beto", "Caro", "Dario", "Eva"];
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [
+					{
+						...gift,
+						purchases: names.map((guestName, i) =>
+							makePurchase({ id: `p${i}`, guestName }),
+						),
+					},
+				],
+			});
+			expect(result.contributors.count).toBe(5);
+			expect(result.contributors.initials).toEqual(["A", "B", "C", "D"]);
+		});
+
+		it("yields an empty summary when there are no qualifying purchases", () => {
+			const gift = makeGift();
+			const result = mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [{ ...gift, purchases: [] }],
+			});
+			expect(result.contributors).toEqual({ count: 0, initials: [] });
+		});
 	});
 
 	it("maps categories", () => {

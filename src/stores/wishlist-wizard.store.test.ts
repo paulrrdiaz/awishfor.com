@@ -211,6 +211,9 @@ describe("wishlist-wizard store", () => {
 					buttonStyle: "pill",
 					headingFont: null,
 					bodyFont: null,
+					countdownVariant: null,
+					welcomeMessageVariant: null,
+					thankYouMessageVariant: null,
 					showHowItWorks: true,
 					gifts: [
 						{
