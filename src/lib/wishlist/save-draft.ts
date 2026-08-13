@@ -90,6 +90,9 @@ export const serverDraftToLocalDraft = (
 		countdownVariant: serverDraft.countdownVariant ?? null,
 		welcomeMessageVariant: serverDraft.welcomeMessageVariant ?? null,
 		thankYouMessageVariant: serverDraft.thankYouMessageVariant ?? null,
+		motifId: serverDraft.motifId ?? null,
+		motifTreatment: serverDraft.motifTreatment ?? null,
+		motifPalette: serverDraft.motifPalette ?? null,
 		showHowItWorks: serverDraft.showHowItWorks,
 		gifts: sortDraftGifts(serverDraft.gifts).map((gift) => ({
 			id: createGiftId(),

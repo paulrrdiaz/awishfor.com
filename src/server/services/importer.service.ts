@@ -3,10 +3,22 @@ import type { ImportedGiftDraft } from "@/server/validators/importer.schema";
 export const MAX_REDIRECTS = 5;
 export const MAX_BODY_BYTES = 2 * 1024 * 1024;
 export const FETCH_TIMEOUT_MS = 5_000;
+export const SCRAPER_FETCH_TIMEOUT_MS = 30_000;
+
+const BROWSER_HEADERS = {
+	Accept:
+		"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+	"Accept-Language": "es-PE,es;q=0.9,en;q=0.8",
+	"User-Agent":
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+} as const;
+
+const BRIGHT_DATA_API_URL = "https://api.brightdata.com/request";
 
 export type ImportErrorKind =
 	| "timeout"
 	| "network"
+	| "blocked"
 	| "blocked_host"
 	| "too_many_redirects"
 	| "oversized"
@@ -128,6 +140,44 @@ async function readBodyCapped(response: Response): Promise<string> {
 
 type FetchFn = typeof globalThis.fetch;
 
+function brightDataCountryForUrl(url: string): string | undefined {
+	try {
+		return new URL(url).hostname.toLowerCase().endsWith(".pe")
+			? "pe"
+			: undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+export function isBlockedPage(html: string): boolean {
+	const normalized = html.toLowerCase();
+	return (
+		normalized.includes("<title>ups!... ripley.com perú | blocked</title>") ||
+		normalized.includes("¡alto, no puedes acceder!") ||
+		normalized.includes("attention required! | cloudflare") ||
+		normalized.includes("<title>just a moment...</title>") ||
+		normalized.includes("_pxcaptcha") ||
+		normalized.includes("pardon our interruption")
+	);
+}
+
+function assertUsableResponse(response: Response, html: string): void {
+	if (
+		response.status === 401 ||
+		response.status === 403 ||
+		response.status === 429
+	) {
+		throw new ImportFetchError("blocked");
+	}
+	if (!response.ok) {
+		throw new ImportFetchError("network");
+	}
+	if (isBlockedPage(html)) {
+		throw new ImportFetchError("blocked");
+	}
+}
+
 async function safeFetch(
 	url: string,
 	fetchFn: FetchFn,
@@ -145,7 +195,7 @@ async function safeFetch(
 			const response = await fetchFn(currentUrl, {
 				redirect: "manual",
 				signal: controller.signal,
-				headers: { "User-Agent": "awishfor-importer/1.0" },
+				headers: BROWSER_HEADERS,
 			});
 
 			if (response.status >= 300 && response.status < 400) {
@@ -161,8 +211,44 @@ async function safeFetch(
 
 			assertSafeUrl(currentUrl);
 			const html = await readBodyCapped(response);
+			assertUsableResponse(response, html);
 			return { html, finalUrl: currentUrl };
 		}
+	} finally {
+		clearTimeout(timer);
+	}
+}
+
+async function fetchViaBrightData(
+	targetUrl: string,
+	fetchFn: FetchFn,
+	apiKey: string,
+	zone: string,
+): Promise<{ html: string; finalUrl: string }> {
+	assertSafeUrl(targetUrl);
+	const country = brightDataCountryForUrl(targetUrl);
+
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), SCRAPER_FETCH_TIMEOUT_MS);
+
+	try {
+		const response = await fetchFn(BRIGHT_DATA_API_URL, {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				zone,
+				url: targetUrl,
+				format: "raw",
+				...(country ? { country } : {}),
+			}),
+			signal: controller.signal,
+		});
+		const html = await readBodyCapped(response);
+		assertUsableResponse(response, html);
+		return { html, finalUrl: targetUrl };
 	} finally {
 		clearTimeout(timer);
 	}
@@ -429,6 +515,8 @@ function mergeMetadata(sources: MetadataFields[]): MetadataFields {
 
 export type ImporterDeps = {
 	fetch?: FetchFn;
+	brightDataApiKey?: string;
+	brightDataWebUnlockerZone?: string;
 };
 
 export async function importGiftFromUrl(
@@ -438,7 +526,30 @@ export async function importGiftFromUrl(
 	const fetchFn = deps.fetch ?? globalThis.fetch;
 
 	try {
-		const { html, finalUrl } = await safeFetch(input.url, fetchFn);
+		let page: { html: string; finalUrl: string };
+		try {
+			page = await safeFetch(input.url, fetchFn);
+		} catch (err) {
+			const shouldUseBrightDataFallback =
+				err instanceof ImportFetchError && err.kind === "blocked";
+
+			if (
+				shouldUseBrightDataFallback &&
+				deps.brightDataApiKey &&
+				deps.brightDataWebUnlockerZone
+			) {
+				page = await fetchViaBrightData(
+					input.url,
+					fetchFn,
+					deps.brightDataApiKey,
+					deps.brightDataWebUnlockerZone,
+				);
+			} else {
+				throw err;
+			}
+		}
+
+		const { html, finalUrl } = page;
 
 		const jsonLd = extractJsonLd(html, finalUrl);
 		const og = extractOpenGraph(html);

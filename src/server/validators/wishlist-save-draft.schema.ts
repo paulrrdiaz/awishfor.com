@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { resolveMotif } from "@/config/motifs";
 import { Currency, Locale } from "@/generated/prisma/enums";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
@@ -24,6 +25,9 @@ import {
 	wishlistHeadingFontSchema,
 	wishlistIdSchema,
 	wishlistLayoutIdSchema,
+	wishlistMotifIdSchema,
+	wishlistMotifPaletteSchema,
+	wishlistMotifTreatmentSchema,
 	wishlistSlugSchema,
 	wishlistThankYouMessageSchema,
 	wishlistThankYouMessageVariantSchema,
@@ -115,6 +119,9 @@ export const saveDraftDraftContentSchema = z.object({
 	countdownVariant: wishlistCountdownVariantSchema,
 	welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
 	thankYouMessageVariant: wishlistThankYouMessageVariantSchema,
+	motifId: wishlistMotifIdSchema,
+	motifTreatment: wishlistMotifTreatmentSchema,
+	motifPalette: wishlistMotifPaletteSchema,
 	eventDate: z
 		.string()
 		.regex(ISO_DATE_PATTERN, "Event date must use YYYY-MM-DD format")
@@ -198,6 +205,17 @@ export const saveDraftWishlistSchema = saveDraftDraftContentSchema
 						path: ["gifts", index, "category"],
 					});
 				}
+			}
+		}
+
+		if (value.motifId) {
+			const motif = resolveMotif(value.motifId);
+			if (!motif?.eventTypes.includes(value.eventType)) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "Motif is not available for this event type",
+					path: ["motifId"],
+				});
 			}
 		}
 

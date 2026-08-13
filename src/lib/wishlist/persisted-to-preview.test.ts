@@ -32,6 +32,9 @@ function makePersistedWishlist(
 		countdownVariant: null,
 		welcomeMessageVariant: null,
 		thankYouMessageVariant: null,
+		motifId: null,
+		motifTreatment: null,
+		motifPalette: null,
 		showHowItWorks: true,
 		gifts: [
 			{

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { resolveMotif } from "@/config/motifs";
 import {
 	GiftVisibilityStatus,
 	type Prisma,
@@ -139,6 +140,9 @@ export const wishlistRouter = createTRPCRouter({
 				countdownVariant: wishlist.countdownVariant,
 				welcomeMessageVariant: wishlist.welcomeMessageVariant,
 				thankYouMessageVariant: wishlist.thankYouMessageVariant,
+				motifId: wishlist.motifId,
+				motifTreatment: wishlist.motifTreatment,
+				motifPalette: wishlist.motifPalette,
 				showHowItWorks: wishlist.showHowItWorks,
 				status: wishlist.status,
 				categories: wishlist.categories.map((category) => ({
@@ -369,11 +373,22 @@ export const wishlistRouter = createTRPCRouter({
 			const ownerId = await getLocalUserId(ctx);
 			const existing = await ctx.db.wishlist.findFirst({
 				where: { id: input.id, ownerId },
-				select: { id: true, slug: true },
+				select: { id: true, slug: true, eventType: true },
 			});
 
 			if (!existing) {
 				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			if (input.motifId) {
+				const motif = resolveMotif(input.motifId);
+				if (!motif?.eventTypes.includes(existing.eventType)) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message:
+							"El motivo elegido no está disponible para este tipo de evento",
+					});
+				}
 			}
 
 			let updated: { id: string; slug: string; updatedAt: Date };
@@ -393,6 +408,11 @@ export const wishlistRouter = createTRPCRouter({
 						countdownVariant: input.countdownVariant ?? null,
 						welcomeMessageVariant: input.welcomeMessageVariant ?? null,
 						thankYouMessageVariant: input.thankYouMessageVariant ?? null,
+						motifId: input.motifId ?? null,
+						motifTreatment: input.motifId
+							? (input.motifTreatment ?? null)
+							: null,
+						motifPalette: input.motifId ? (input.motifPalette ?? null) : null,
 						language: input.language,
 						currency: input.currency,
 						showHowItWorks: input.showHowItWorks,

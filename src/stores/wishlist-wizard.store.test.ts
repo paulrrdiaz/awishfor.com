@@ -31,6 +31,43 @@ describe("wishlist-wizard store", () => {
 			expect(draft.thankYouMessage).toBe(preset.defaultThankYouMessage);
 		});
 
+		it("clears the motif when the event type changes to one outside the gate", () => {
+			const store = makeStore();
+			store.getState().setEventType("baby_shower");
+			store.getState().setField("motifId", "bear-cloud");
+			store.getState().setField("motifTreatment", "band");
+			store.getState().setField("motifPalette", "themed");
+
+			store.getState().setEventType("wedding");
+
+			const { draft } = store.getState();
+			expect(draft.motifId).toBeNull();
+			expect(draft.motifTreatment).toBeNull();
+			expect(draft.motifPalette).toBeNull();
+		});
+
+		it("clears the motif when the new event type doesn't tag it", () => {
+			const store = makeStore();
+			store.getState().setEventType("baby_shower");
+			// bear-cloud is not tagged for birthday
+			store.getState().setField("motifId", "bear-cloud");
+
+			store.getState().setEventType("birthday");
+
+			expect(store.getState().draft.motifId).toBeNull();
+		});
+
+		it("keeps the motif when the new event type still tags it", () => {
+			const store = makeStore();
+			store.getState().setEventType("baby_shower");
+			// unicorn-rainbow is tagged for both baby_shower and birthday
+			store.getState().setField("motifId", "unicorn-rainbow");
+
+			store.getState().setEventType("birthday");
+
+			expect(store.getState().draft.motifId).toBe("unicorn-rainbow");
+		});
+
 		it("never writes a wishlist name when the event type changes", () => {
 			const store = makeStore();
 			store.getState().setField("title", "Mi lista");
@@ -214,6 +251,9 @@ describe("wishlist-wizard store", () => {
 					countdownVariant: null,
 					welcomeMessageVariant: null,
 					thankYouMessageVariant: null,
+					motifId: null,
+					motifTreatment: null,
+					motifPalette: null,
 					showHowItWorks: true,
 					gifts: [
 						{

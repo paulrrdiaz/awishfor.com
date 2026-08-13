@@ -2,4 +2,5 @@
 export const SELF_CONTAINED_LAYOUT_IDS = new Set([
 	"collage-staggered",
 	"split-image-right",
+	"arch-trio",
 ]);

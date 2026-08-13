@@ -1,4 +1,10 @@
+import { MotifBand } from "@/components/shared/motif/motif-band";
 import { WishlistFooter } from "@/components/shared/wishlist-footer";
+import {
+	resolveMotif,
+	resolveMotifPalette,
+	resolveMotifTreatment,
+} from "@/config/motifs";
 import { resolveButtonStyle } from "@/config/public-button-styles";
 import { resolveBodyFont, resolveHeadingFont } from "@/config/public-fonts";
 import { resolveLayout } from "@/config/public-layouts";
@@ -54,6 +60,9 @@ export function PublicWishlistPage({
 	const headingFont = resolveHeadingFont(wishlist.headingFont);
 	const bodyFont = resolveBodyFont(wishlist.bodyFont);
 	const buttonStyle = resolveButtonStyle(wishlist.buttonStyle);
+	const motif = resolveMotif(wishlist.motifId);
+	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
+	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
 
 	const LayoutComponent =
 		LAYOUT_COMPONENTS[layout.id] ?? MagazineEditorialLayout;
@@ -75,8 +84,19 @@ export function PublicWishlistPage({
 						: undefined
 			}
 			headingFont={headingFont}
+			motif={motif}
+			motifPalette={motifPalette}
+			motifTreatment={motifTreatment}
 			theme={theme}
 		>
+			{motif && (
+				<MotifBand
+					motif={motif}
+					palette={motifPalette}
+					position="header"
+					treatment={motifTreatment}
+				/>
+			)}
 			{mode === "preview" && (
 				<div className="sticky top-0 z-50 border-amber-200 border-b bg-amber-50 px-6 py-3 text-center font-medium text-amber-900 text-sm">
 					Vista previa — esta lista aún no es pública
@@ -90,6 +110,9 @@ export function PublicWishlistPage({
 			/>
 			{mode !== "compact" && (
 				<WishlistFooter
+					motif={motif}
+					motifPalette={motifPalette}
+					motifTreatment={motifTreatment}
 					variant={surface === "standalone" ? "expanded" : "compact"}
 					wishlistSlug={wishlist.slug}
 				/>

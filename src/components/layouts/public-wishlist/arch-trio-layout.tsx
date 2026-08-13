@@ -1,12 +1,34 @@
+"use client";
+
+import { useRef } from "react";
+import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
+import { Countdown } from "@/components/shared/countdown";
+import { EventDetails } from "@/components/shared/event-details";
 import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
-import { HeroImageSlot } from "@/components/shared/hero-gallery";
-import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
+import {
+	HeroCarouselGallery,
+	HeroImageSlot,
+} from "@/components/shared/hero-gallery";
+import { MotifDivider } from "@/components/shared/motif/motif-divider";
+import { MotifScatter } from "@/components/shared/motif/motif-scatter";
+import { MotifSeal } from "@/components/shared/motif/motif-seal";
+import { ProgressSummary } from "@/components/shared/progress-summary";
+import { WishlistMessage } from "@/components/shared/wishlist-message";
+import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
+import {
+	resolveMotif,
+	resolveMotifPalette,
+	resolveMotifTreatment,
+} from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
+import { formatEventDate } from "@/lib/format/dates";
+import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import { resolveHeroSlots } from "@/lib/hero-slots";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
+import { PublicLayoutShell } from "./public-layout-shell";
 import type { PublicWishlistMode } from "./public-wishlist-page";
 
 type Props = {
@@ -21,55 +43,166 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
+	// The medium and small arcs (slots 1 and 2) are static; slot 0 is owned by
+	// the carousel below and rendered from `wishlist.images` directly.
 	const slots = resolveHeroSlots(wishlist.images, 3);
+	const motif = resolveMotif(wishlist.motifId);
+	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
+	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
+	const heroRef = useRef<HTMLElement>(null);
+	useMotifTilt(heroRef);
+	const eventSummary = wishlist.eventDate
+		? [
+				wishlist.guest?.primaryName,
+				formatEventDate(wishlist.eventDate, wishlist.language as "es" | "en"),
+			]
+				.filter(Boolean)
+				.join(" · ")
+		: null;
 
 	return (
-		<div className="flex flex-col">
-			<header className="grid grid-cols-1 gap-8 bg-gradient-to-br from-accent to-card px-6 py-10 sm:px-10 lg:grid-cols-[280px_1fr] lg:items-center">
-				<div className="relative mx-auto aspect-square w-full max-w-[240px]">
-					<HeroImageSlot
-						alt={`${heading} 1`}
-						className="absolute top-4 left-0 size-[72%] rounded-full border-4 border-card shadow-lg"
-						isSample={slots[0]?.isSample}
-						priority={!isCompact}
-						sizes="173px"
-						src={slots[0]?.url ?? null}
+		<PublicLayoutShell heading={heading} mode={mode}>
+			<section
+				className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-gradient-to-b from-accent via-accent/60 to-background"
+				ref={heroRef}
+			>
+				{motif && (
+					<MotifScatter
+						motif={motif}
+						palette={motifPalette}
+						treatment={motifTreatment}
 					/>
-					<HeroImageSlot
-						alt={`${heading} 2`}
-						className="absolute right-0 bottom-0 size-[52%] rounded-full border-4 border-card shadow-md"
-						isSample={slots[1]?.isSample}
-						sizes="125px"
-						src={slots[1]?.url ?? null}
-					/>
-					<HeroImageSlot
-						alt={`${heading} 3`}
-						className="absolute top-0 right-2 size-[38%] rounded-full border-4 border-card shadow-md"
-						isSample={slots[2]?.isSample}
-						sizes="91px"
-						src={slots[2]?.url ?? null}
-					/>
+				)}
+				<div className="relative mx-auto flex w-full max-w-[1160px] gap-12 px-6 py-10 sm:px-10 lg:min-h-[420px]">
+					<div className="relative h-[360px] w-[460px]">
+						<HeroCarouselGallery
+							alt={`${heading} 1`}
+							className="absolute top-4 left-0 z-[2] size-[320px] overflow-hidden rounded-full shadow-[0_16px_40px_rgba(80,30,60,.18)]"
+							controlsVariant="compact"
+							images={wishlist.images}
+							priority={!isCompact}
+							sizes="320px"
+							startIndex={0}
+						/>
+						<HeroImageSlot
+							alt={`${heading} 2`}
+							className="absolute -right-6 bottom-0 z-[1] size-[200px] rounded-full border-[5px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)]"
+							isSample={slots[1]?.isSample}
+							sizes="200px"
+							src={slots[1]?.url ?? null}
+						/>
+						<HeroImageSlot
+							alt={`${heading} 3`}
+							className="absolute -top-4 right-6 z-[3] size-[160px] rounded-full border-[5px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)]"
+							isSample={slots[2]?.isSample}
+							sizes="160px"
+							src={slots[2]?.url ?? null}
+						/>
+					</div>
+					<div className="relative flex flex-col justify-center gap-4 text-center lg:text-left">
+						{motif && (
+							<MotifSeal
+								className="lg:mx-0"
+								motif={motif}
+								treatment={motifTreatment}
+							/>
+						)}
+						<p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.2em]">
+							{eventLabel}
+						</p>
+						<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
+							{heading}
+						</h1>
+						{eventSummary && (
+							<p className="text-muted-foreground text-sm">{eventSummary}</p>
+						)}
+						<GuestWelcomeSection
+							guest={wishlist.guest}
+							wishlistSlug={wishlist.slug}
+						/>
+						{!isCompact && (
+							<HeroCtas
+								className="justify-center lg:justify-start"
+								showHowItWorks={wishlist.showHowItWorks}
+							/>
+						)}
+					</div>
 				</div>
-				<div className="flex flex-col justify-center gap-4 text-center lg:text-left">
-					<p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.2em]">
-						{eventLabel}
-					</p>
-					<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
-						{heading}
-					</h1>
-					<GuestWelcomeSection
-						guest={wishlist.guest}
-						wishlistSlug={wishlist.slug}
-					/>
-					{!isCompact && (
-						<HeroCtas
-							className="justify-center lg:justify-start"
-							showHowItWorks={wishlist.showHowItWorks}
+			</section>
+
+			{!isCompact && (
+				<>
+					{wishlist.welcomeMessage ? (
+						<div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:px-7">
+							<WishlistMessage
+								attribution={wishlist.welcomeMessageAttribution}
+								className="flex-1 border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
+								message={wishlist.welcomeMessage}
+								variant={wishlist.welcomeMessageVariant}
+							/>
+							<EventDetails
+								className="w-full shrink-0 sm:w-56 sm:grid-cols-1"
+								variant="compact"
+								wishlist={wishlist}
+							/>
+						</div>
+					) : (
+						<EventDetails
+							className="px-5 py-5 sm:px-7"
+							variant="compact"
+							wishlist={wishlist}
 						/>
 					)}
-				</div>
-			</header>
-			<PublicWishlistBody layout={layout} mode={mode} wishlist={wishlist} />
-		</div>
+					{wishlist.eventDate && (
+						<Countdown
+							createdAt={wishlist.createdAt}
+							eventDate={wishlist.eventDate}
+							variant={wishlist.countdownVariant}
+						/>
+					)}
+					{motif && (
+						<MotifDivider
+							motif={motif}
+							palette={motifPalette}
+							treatment={motifTreatment}
+						/>
+					)}
+					<div className="mx-5 h-px bg-border sm:mx-7" />
+				</>
+			)}
+
+			<div className="mt-6 flex flex-wrap items-center justify-between gap-2 px-5 sm:px-7">
+				<h2 className="font-heading font-semibold text-xl">Lista de regalos</h2>
+				<ProgressSummary progress={wishlist.progress} variant="inline" />
+			</div>
+
+			<section
+				className="mt-3 scroll-mt-[59px] px-5 pb-16 sm:px-7"
+				id="regalos"
+			>
+				<PublicGiftFilters
+					actionsEnabled={mode === "full"}
+					categories={wishlist.categories}
+					compact
+					gifts={wishlist.gifts}
+					layout={layout}
+					motif={motif}
+					motifTreatment={motifTreatment}
+					showCategories={false}
+					showCounts={false}
+					showGridToggle
+					showSort={false}
+				/>
+			</section>
+
+			{!isCompact && (
+				<WishlistThankYou
+					attribution={wishlist.welcomeMessageAttribution}
+					contributors={wishlist.contributors}
+					message={wishlist.thankYouMessage}
+					variant={wishlist.thankYouMessageVariant}
+				/>
+			)}
+		</PublicLayoutShell>
 	);
 }

@@ -1,6 +1,7 @@
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createStore } from "zustand/vanilla";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
+import { isMotifGatedEventType, resolveMotif } from "@/config/motifs";
 import type { ImageOrientation } from "@/config/public-layouts";
 import type { EventType, GiftPriority } from "@/generated/prisma/enums";
 import { slugify } from "@/lib/slug";
@@ -56,6 +57,9 @@ export type WishlistDraft = {
 	countdownVariant: string | null;
 	welcomeMessageVariant: string | null;
 	thankYouMessageVariant: string | null;
+	motifId: string | null;
+	motifTreatment: string | null;
+	motifPalette: string | null;
 	showHowItWorks: boolean;
 	gifts: DraftGift[];
 };
@@ -130,6 +134,9 @@ const emptyDraft = (): WishlistDraft => ({
 	countdownVariant: null,
 	welcomeMessageVariant: null,
 	thankYouMessageVariant: null,
+	motifId: null,
+	motifTreatment: null,
+	motifPalette: null,
 	showHowItWorks: true,
 	gifts: [],
 });
@@ -269,23 +276,38 @@ export const createWishlistWizardStore = () =>
 				setEventType: (eventType) => {
 					const preset = EVENT_TYPE_PRESETS[eventType];
 					const { copyTouched } = get();
-					set((state) => ({
-						draft: {
-							...state.draft,
-							eventType,
-							categories: preset.defaultCategories,
-							themeId: preset.defaultThemeId,
-							layoutId: preset.defaultLayoutId,
-							welcomeMessage: copyTouched.welcomeMessage
-								? state.draft.welcomeMessage
-								: preset.defaultWelcomeMessage,
-							thankYouMessage: copyTouched.thankYouMessage
-								? state.draft.thankYouMessage
-								: preset.defaultThankYouMessage,
-						},
-						publishSuccess: null,
-						updatedAt: Date.now(),
-					}));
+					set((state) => {
+						const currentMotif = resolveMotif(state.draft.motifId);
+						const motifStillAllowed =
+							currentMotif !== null &&
+							isMotifGatedEventType(eventType) &&
+							currentMotif.eventTypes.includes(eventType);
+
+						return {
+							draft: {
+								...state.draft,
+								eventType,
+								categories: preset.defaultCategories,
+								themeId: preset.defaultThemeId,
+								layoutId: preset.defaultLayoutId,
+								welcomeMessage: copyTouched.welcomeMessage
+									? state.draft.welcomeMessage
+									: preset.defaultWelcomeMessage,
+								thankYouMessage: copyTouched.thankYouMessage
+									? state.draft.thankYouMessage
+									: preset.defaultThankYouMessage,
+								motifId: motifStillAllowed ? state.draft.motifId : null,
+								motifTreatment: motifStillAllowed
+									? state.draft.motifTreatment
+									: null,
+								motifPalette: motifStillAllowed
+									? state.draft.motifPalette
+									: null,
+							},
+							publishSuccess: null,
+							updatedAt: Date.now(),
+						};
+					});
 				},
 
 				regenerateCopy: () => {

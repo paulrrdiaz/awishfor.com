@@ -177,6 +177,9 @@ const READY_DRAFT: WishlistDraft = {
 	countdownVariant: null,
 	welcomeMessageVariant: null,
 	thankYouMessageVariant: null,
+	motifId: null,
+	motifTreatment: null,
+	motifPalette: null,
 	showHowItWorks: true,
 	gifts: [
 		{

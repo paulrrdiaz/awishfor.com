@@ -1,11 +1,20 @@
 import { FooterBody } from "@/components/shared/footer-body";
+import { MotifBand } from "@/components/shared/motif/motif-band";
 import { SUPPORT_EMAIL } from "@/config/contact";
+import type {
+	MotifPalette,
+	MotifPreset,
+	MotifTreatment,
+} from "@/config/motifs";
 import { cn } from "@/lib/utils";
 
 type Props = {
 	className?: string;
 	variant?: "expanded" | "compact";
 	wishlistSlug?: string;
+	motif?: MotifPreset | null;
+	motifTreatment?: MotifTreatment;
+	motifPalette?: MotifPalette;
 };
 
 const reportHref = `mailto:${SUPPORT_EMAIL}?subject=Reporte%20de%20lista`;
@@ -14,6 +23,9 @@ export function WishlistFooter({
 	className,
 	variant = "expanded",
 	wishlistSlug,
+	motif = null,
+	motifTreatment = "scene",
+	motifPalette = "fixed",
 }: Props) {
 	if (variant === "compact") {
 		return (
@@ -24,6 +36,13 @@ export function WishlistFooter({
 				)}
 				data-variant="compact"
 			>
+				{motif && (
+					<MotifBand
+						motif={motif}
+						palette={motifPalette}
+						treatment={motifTreatment}
+					/>
+				)}
 				<p className="font-mono text-[9px] text-card-foreground/70 uppercase tracking-[0.22em]">
 					Hecho con cariño en{" "}
 					<a
@@ -68,6 +87,13 @@ export function WishlistFooter({
 			className={cn("mt-auto bg-accent text-accent-foreground", className)}
 			data-variant="expanded"
 		>
+			{motif && (
+				<MotifBand
+					motif={motif}
+					palette={motifPalette}
+					treatment={motifTreatment}
+				/>
+			)}
 			<FooterBody variant="public-wishlist" />
 			<div className="border-accent-foreground/20 border-t bg-accent px-[22px] py-4 text-accent-foreground lg:px-8">
 				<div className="mx-auto flex max-w-[1160px] flex-col gap-2 text-[11px] sm:flex-row sm:items-center sm:justify-between lg:text-[12px]">

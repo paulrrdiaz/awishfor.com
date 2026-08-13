@@ -37,6 +37,30 @@ const config: NextConfig = {
 				protocol: "https",
 				hostname: "images.**.buscalibre.com",
 			},
+			{
+				protocol: "https",
+				hostname: "carestino.cc",
+			},
+			{
+				protocol: "https",
+				hostname: "www.maternelle.pe",
+			},
+			{
+				protocol: "https",
+				hostname: "nua.pe",
+			},
+			{
+				protocol: "http",
+				hostname: "nua.pe",
+			},
+			{
+				protocol: "https",
+				hostname: "www.mellowthebabybrand.com",
+			},
+			{
+				protocol: "https",
+				hostname: "www.rikury.pe",
+			},
 		],
 	},
 	async headers() {

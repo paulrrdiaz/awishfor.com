@@ -437,6 +437,99 @@ describe("wishlistRouter.updateSettings", () => {
 		);
 		expect(revalidatePathMock).toHaveBeenCalledWith("/w/lista-de-boda");
 	});
+
+	it("persists a valid motif, treatment and palette and revalidates", async () => {
+		const wishlistUpdate = vi.fn().mockResolvedValue({
+			id: "wishlist_123",
+			slug: "baby-shower",
+			updatedAt: now,
+		});
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "baby-shower",
+				eventType: "baby_shower",
+			}),
+			wishlistUpdate,
+		});
+		const caller = makeCaller(db);
+
+		await caller.updateSettings({
+			id: "wishlist_123",
+			title: "Baby shower",
+			slug: "baby-shower",
+			motifId: "bear-cloud",
+			motifPalette: "themed",
+			motifTreatment: "band",
+			language: "es",
+			currency: "PEN",
+			showHowItWorks: true,
+		});
+
+		expect(wishlistUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					motifId: "bear-cloud",
+					motifPalette: "themed",
+					motifTreatment: "band",
+				}),
+			}),
+		);
+		expect(revalidatePathMock).toHaveBeenCalledWith("/w/baby-shower");
+	});
+
+	it("rejects a motif id absent from the catalog", async () => {
+		const wishlistUpdate = vi.fn();
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "baby-shower",
+				eventType: "baby_shower",
+			}),
+			wishlistUpdate,
+		});
+		const caller = makeCaller(db);
+
+		await expect(
+			caller.updateSettings({
+				id: "wishlist_123",
+				title: "Baby shower",
+				slug: "baby-shower",
+				motifId: "not-a-real-motif",
+				language: "es",
+				currency: "PEN",
+				showHowItWorks: true,
+			}),
+		).rejects.toThrow();
+		expect(wishlistUpdate).not.toHaveBeenCalled();
+	});
+
+	it("rejects a motif not tagged for the wishlist's event type", async () => {
+		const wishlistUpdate = vi.fn();
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "cumple",
+				eventType: "birthday",
+			}),
+			wishlistUpdate,
+		});
+		const caller = makeCaller(db);
+
+		// bear-cloud is tagged for baby_shower only, not birthday
+		await expect(
+			caller.updateSettings({
+				id: "wishlist_123",
+				title: "Cumple",
+				slug: "cumple",
+				motifId: "bear-cloud",
+				language: "es",
+				currency: "PEN",
+				showHowItWorks: true,
+			}),
+		).rejects.toThrow(TRPCError);
+		expect(wishlistUpdate).not.toHaveBeenCalled();
+	});
 });
 
 describe("wishlistRouter.updateDesign", () => {

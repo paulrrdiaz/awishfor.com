@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { MessageVariantPicker } from "@/components/features/wishlist/message-variant-picker";
+import { MotifPicker } from "@/components/features/wishlist/motif-picker";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -33,6 +34,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { isMotifGatedEventType } from "@/config/motifs";
 import {
 	getAllCountdownVariants,
 	getAllThankYouVariants,
@@ -177,6 +179,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [thankYouMessageVariant, setThankYouMessageVariant] = useState(
 		resolveThankYouVariant(wishlist.thankYouMessageVariant).id,
 	);
+	const [motifId, setMotifId] = useState(wishlist.motifId);
+	const [motifTreatment, setMotifTreatment] = useState(wishlist.motifTreatment);
+	const [motifPalette, setMotifPalette] = useState(wishlist.motifPalette);
 	const [language, setLanguage] = useState<string>(wishlist.language);
 	const [currency, setCurrency] = useState<string>(wishlist.currency);
 	const [showHowItWorks, setShowHowItWorks] = useState(wishlist.showHowItWorks);
@@ -267,6 +272,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			countdownVariant,
 			welcomeMessageVariant,
 			thankYouMessageVariant,
+			motifId,
+			motifPalette,
+			motifTreatment,
 			language: language as Locale,
 			currency: currency as Currency,
 			showHowItWorks,
@@ -447,6 +455,22 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							selected={thankYouMessageVariant}
 						/>
 					</div>
+
+					{isMotifGatedEventType(wishlist.eventType) && (
+						<div className="space-y-1.5">
+							<Label>Motivo</Label>
+							<MotifPicker
+								eventType={wishlist.eventType}
+								motifId={motifId}
+								motifPalette={motifPalette}
+								motifTreatment={motifTreatment}
+								onSelectMotif={setMotifId}
+								onSelectPalette={setMotifPalette}
+								onSelectTreatment={setMotifTreatment}
+								themeId={wishlist.themeId}
+							/>
+						</div>
+					)}
 				</section>
 
 				{/* Configuración */}

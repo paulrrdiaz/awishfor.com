@@ -84,10 +84,11 @@ describe("getAllLayouts", () => {
 		expect(byId["collage-staggered"]?.heroImageSlots).toBe(3);
 		expect(byId["collage-staggered"]?.supportsCarousel).toBe(true);
 		expect(byId["collage-staggered"]?.giftCardStyle).toBe("collage");
-		for (const id of ["arch-trio", "scrapbook-polaroids"]) {
-			expect(byId[id]?.heroImageSlots).toBe(3);
-			expect(byId[id]?.supportsCarousel).toBe(false);
-		}
+		expect(byId["scrapbook-polaroids"]?.heroImageSlots).toBe(3);
+		expect(byId["scrapbook-polaroids"]?.supportsCarousel).toBe(false);
+		expect(byId["arch-trio"]?.heroImageSlots).toBe(3);
+		expect(byId["arch-trio"]?.supportsCarousel).toBe(true);
+		expect(byId["arch-trio"]?.giftCardStyle).toBe("tilted");
 		for (const id of ["magazine-editorial", "portrait-frame-split"]) {
 			expect(byId[id]?.heroImageSlots).toBe(1);
 			expect(byId[id]?.supportsCarousel).toBe(false);

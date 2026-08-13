@@ -1,19 +1,30 @@
 "use client";
 
+import { useRef } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
+import { EventDetails } from "@/components/shared/event-details";
 import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroCarouselGallery,
 	HeroImageSlot,
 } from "@/components/shared/hero-gallery";
+import { MotifDivider } from "@/components/shared/motif/motif-divider";
+import { MotifScatter } from "@/components/shared/motif/motif-scatter";
+import { MotifSeal } from "@/components/shared/motif/motif-seal";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
+import {
+	resolveMotif,
+	resolveMotifPalette,
+	resolveMotifTreatment,
+} from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
+import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import { resolveHeroSlots } from "@/lib/hero-slots";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import { PublicLayoutShell } from "./public-layout-shell";
@@ -32,6 +43,11 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
 	const slots = resolveHeroSlots(wishlist.images, 3);
+	const motif = resolveMotif(wishlist.motifId);
+	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
+	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
+	const heroRef = useRef<HTMLElement>(null);
+	useMotifTilt(heroRef);
 	const carouselImages =
 		wishlist.images.length > 0 ? wishlist.images : slots[1] ? [slots[1]] : [];
 	const eventSummary = wishlist.eventDate
@@ -45,8 +61,19 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
-			<section className="relative left-1/2 w-screen -translate-x-1/2 bg-[linear-gradient(180deg,var(--accent)_0%,var(--card)_30%,var(--background)_72%,var(--background)_100%)]">
+			<section
+				className="relative left-1/2 w-screen -translate-x-1/2 bg-[linear-gradient(180deg,var(--accent)_0%,var(--card)_30%,var(--background)_72%,var(--background)_100%)]"
+				ref={heroRef}
+			>
+				{motif && (
+					<MotifScatter
+						motif={motif}
+						palette={motifPalette}
+						treatment={motifTreatment}
+					/>
+				)}
 				<div className="mx-auto w-full max-w-[1160px] pt-9 text-center">
+					{motif && <MotifSeal motif={motif} treatment={motifTreatment} />}
 					<p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
 						{eventLabel}
 					</p>
@@ -118,36 +145,18 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 
 			{!isCompact && (
 				<>
-					<section className="grid grid-cols-1 gap-3 px-5 py-5 sm:grid-cols-3 sm:px-7">
-						{[
-							[
-								"Fecha",
-								wishlist.eventDate
-									? formatEventDate(
-											wishlist.eventDate,
-											wishlist.language as "es" | "en",
-											wishlist.eventTime,
-										)
-									: null,
-							],
-							["Lugar", wishlist.eventLocation],
-							["Dresscode", wishlist.dressCode],
-						]
-							.filter(([, value]) => value)
-							.map(([label, value]) => (
-								<div
-									className="rounded-[14px] border border-border bg-card px-4 py-3 text-center"
-									key={label}
-								>
-									<p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.16em]">
-										{label}
-									</p>
-									<p className="mt-1 font-heading font-semibold text-[15px]">
-										{value}
-									</p>
-								</div>
-							))}
-					</section>
+					<EventDetails
+						className="px-5 py-5 sm:px-7"
+						variant="compact"
+						wishlist={wishlist}
+					/>
+					{motif && (
+						<MotifDivider
+							motif={motif}
+							palette={motifPalette}
+							treatment={motifTreatment}
+						/>
+					)}
 					{wishlist.welcomeMessage && (
 						<WishlistMessage
 							attribution={wishlist.welcomeMessageAttribution}
@@ -168,6 +177,8 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 					compact
 					gifts={wishlist.gifts}
 					layout={layout}
+					motif={motif}
+					motifTreatment={motifTreatment}
 					showCategories={false}
 					showCounts={false}
 					showGridToggle

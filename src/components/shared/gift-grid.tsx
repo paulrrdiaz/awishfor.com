@@ -1,3 +1,4 @@
+import type { MotifPreset, MotifTreatment } from "@/config/motifs";
 import { cn } from "@/lib/utils";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 import { GiftCard, type GiftCardStyle } from "./gift-card";
@@ -24,6 +25,8 @@ type Props = {
 	categoryNames?: Record<string, string>;
 	columnsAtSmallBreakpoint?: boolean;
 	onGiftAction?: (gift: PublicGiftViewModel) => void;
+	motif?: MotifPreset | null;
+	motifTreatment?: MotifTreatment;
 };
 
 export function GiftGrid({
@@ -34,6 +37,8 @@ export function GiftGrid({
 	categoryNames,
 	columnsAtSmallBreakpoint = false,
 	onGiftAction,
+	motif,
+	motifTreatment,
 }: Props) {
 	if (gifts.length === 0) return null;
 
@@ -47,9 +52,16 @@ export function GiftGrid({
 			: giftCardStyle === "collage"
 				? "gap-[14px]"
 				: "gap-6";
+	// Positional rotation for the tilted style — applied by the grid from
+	// each card's column position rather than an index prop into GiftCard.
+	// Scoped to sm: so the single-column mobile stack isn't rotated.
+	const tiltClass =
+		giftCardStyle === "tilted"
+			? "sm:[&>*:nth-child(3n+1)]:rotate-[-1.6deg] sm:[&>*:nth-child(3n+2)]:mt-4 sm:[&>*:nth-child(3n+2)]:rotate-[1.4deg] sm:[&>*:nth-child(3n+3)]:rotate-[-0.8deg]"
+			: undefined;
 
 	return (
-		<div className={cn("grid", gapClass, colClass)}>
+		<div className={cn("grid", gapClass, colClass, tiltClass)}>
 			{gifts.map((gift) => (
 				<GiftCard
 					actionsEnabled={actionsEnabled}
@@ -59,6 +71,8 @@ export function GiftGrid({
 					}
 					gift={gift}
 					key={gift.id}
+					motif={motif}
+					motifTreatment={motifTreatment}
 					onGiftAction={onGiftAction}
 				/>
 			))}

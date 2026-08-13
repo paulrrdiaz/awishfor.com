@@ -83,13 +83,20 @@ describe("public wishlist footer integration", () => {
 			layoutPath("collage-staggered-layout.tsx"),
 			"utf8",
 		);
+		const archTrioSource = await readFile(
+			layoutPath("arch-trio-layout.tsx"),
+			"utf8",
+		);
 
 		expect(bodySource).toContain("<WishlistThankYou");
 		expect(bodySource).toContain("message={wishlist.thankYouMessage}");
 		expect(collageSource).toContain("<WishlistThankYou");
 		expect(collageSource).toContain("message={wishlist.thankYouMessage}");
+		expect(archTrioSource).toContain("<WishlistThankYou");
+		expect(archTrioSource).toContain("message={wishlist.thankYouMessage}");
 		expect(bodySource).not.toContain("WishlistFooter");
 		expect(collageSource).not.toContain("WishlistFooter");
+		expect(archTrioSource).not.toContain("WishlistFooter");
 	});
 
 	it("defaults embedded callers to compact and omits every footer in compact mode", async () => {

@@ -5,15 +5,28 @@ const INTL_LOCALE: Record<Locale, string> = {
 	en: "en-US",
 };
 
+/**
+ * Normalizes ICU whitespace variants (e.g. U+00A0, U+202F) to a plain space.
+ * Node and browsers can ship different ICU versions, which format the same
+ * locale string with different space characters (visually identical but
+ * byte-different) — this keeps SSR and client output identical and avoids
+ * React hydration mismatches.
+ */
+function normalizeIntlSpaces(value: string): string {
+	return value.replace(/[  ]/g, " ");
+}
+
 /** Formats a stored "HH:mm" (24-hour) event time as a locale-appropriate 12-hour clock. */
 export function formatEventTime(time: string, locale: Locale): string {
 	const [hours, minutes] = time.split(":").map(Number);
 	const d = new Date(1970, 0, 1, hours, minutes);
-	return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
-		hour: "numeric",
-		minute: "2-digit",
-		hour12: true,
-	}).format(d);
+	return normalizeIntlSpaces(
+		new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+			hour: "numeric",
+			minute: "2-digit",
+			hour12: true,
+		}).format(d),
+	);
 }
 
 export function formatEventDate(

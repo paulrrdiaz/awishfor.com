@@ -3,9 +3,15 @@ import type { PublicWishlistMode } from "@/components/layouts/public-wishlist/pu
 import { Countdown } from "@/components/shared/countdown";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
+import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { ProgressSummary } from "@/components/shared/progress-summary";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
+import {
+	resolveMotif,
+	resolveMotifPalette,
+	resolveMotifTreatment,
+} from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import { sortGifts } from "@/lib/wishlist/gift-filters";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
@@ -30,6 +36,9 @@ export function PublicWishlistBody({
 }: Props) {
 	const isCompact = mode === "compact";
 	const isFull = mode === "full";
+	const motif = resolveMotif(wishlist.motifId);
+	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
+	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
 
 	return (
 		<>
@@ -40,6 +49,14 @@ export function PublicWishlistBody({
 					createdAt={wishlist.createdAt}
 					eventDate={wishlist.eventDate}
 					variant={wishlist.countdownVariant}
+				/>
+			)}
+
+			{!isCompact && motif && (
+				<MotifDivider
+					motif={motif}
+					palette={motifPalette}
+					treatment={motifTreatment}
 				/>
 			)}
 
@@ -59,6 +76,8 @@ export function PublicWishlistBody({
 						categories={wishlist.categories}
 						gifts={wishlist.gifts}
 						layout={layout}
+						motif={motif}
+						motifTreatment={motifTreatment}
 					/>
 				) : (
 					<GiftGrid
@@ -66,6 +85,8 @@ export function PublicWishlistBody({
 						giftCardStyle={layout.giftCardStyle}
 						giftColumns={layout.giftColumns}
 						gifts={sortGifts(wishlist.gifts, "recommended")}
+						motif={motif}
+						motifTreatment={motifTreatment}
 					/>
 				)}
 			</section>

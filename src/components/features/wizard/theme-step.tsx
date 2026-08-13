@@ -2,8 +2,10 @@
 
 import { ButtonStyleChips } from "@/components/features/wishlist/button-style-chips";
 import { FontSelect } from "@/components/features/wishlist/font-select";
+import { MotifPicker } from "@/components/features/wishlist/motif-picker";
 import { ThemeSwatchPicker } from "@/components/features/wishlist/theme-swatch-picker";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
+import { isMotifGatedEventType } from "@/config/motifs";
 import { getAllButtonStyles } from "@/config/public-button-styles";
 import {
 	DEFAULT_BODY_FONT_ID,
@@ -72,7 +74,13 @@ export function ThemeStep() {
 					/>
 				</div>
 
-				<div>
+				<div
+					className={
+						draft.eventType && isMotifGatedEventType(draft.eventType)
+							? "mb-5"
+							: ""
+					}
+				>
 					<p className="mb-[7px] font-semibold text-[13px] text-foreground">
 						Estilo de botones
 					</p>
@@ -83,6 +91,26 @@ export function ThemeStep() {
 						variant="inline"
 					/>
 				</div>
+
+				{draft.eventType && isMotifGatedEventType(draft.eventType) && (
+					<div>
+						<p className="mb-[7px] font-semibold text-[13px] text-foreground">
+							Motivo
+						</p>
+						<MotifPicker
+							eventType={draft.eventType}
+							motifId={draft.motifId}
+							motifPalette={draft.motifPalette}
+							motifTreatment={draft.motifTreatment}
+							onSelectMotif={(id) => setField("motifId", id)}
+							onSelectPalette={(palette) => setField("motifPalette", palette)}
+							onSelectTreatment={(treatment) =>
+								setField("motifTreatment", treatment)
+							}
+							themeId={draft.themeId}
+						/>
+					</div>
+				)}
 			</div>
 
 			<div className="mt-8 lg:mt-0 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:px-8 lg:py-8">

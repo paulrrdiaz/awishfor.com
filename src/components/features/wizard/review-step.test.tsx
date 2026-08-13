@@ -115,6 +115,9 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	countdownVariant: null,
 	welcomeMessageVariant: null,
 	thankYouMessageVariant: null,
+	motifId: null,
+	motifTreatment: null,
+	motifPalette: null,
 	showHowItWorks: true,
 	gifts: [
 		{

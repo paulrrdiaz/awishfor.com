@@ -51,6 +51,9 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	countdownVariant: "progress-bar",
 	welcomeMessageVariant: "avatars",
 	thankYouMessageVariant: "social-proof",
+	motifId: "bear-cloud",
+	motifTreatment: "scene",
+	motifPalette: "fixed",
 	showHowItWorks: true,
 	categories: [
 		{ id: "cat-alimentacion", name: "Alimentación", sortOrder: 0 },

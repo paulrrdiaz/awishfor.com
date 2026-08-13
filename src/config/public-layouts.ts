@@ -14,7 +14,7 @@ export type PublicLayoutPreset = {
 	label: string;
 	description: string;
 	giftColumns: number;
-	giftCardStyle: "card" | "row" | "minimal" | "collage";
+	giftCardStyle: "card" | "row" | "minimal" | "collage" | "tilted";
 	showCategoryDividers: boolean;
 	/** How many cover images the hero composition displays at once. */
 	heroImageSlots: number;
@@ -113,10 +113,10 @@ const layoutList: PublicLayoutPreset[] = [
 		label: "Trío en Arco",
 		description: "Tres imágenes circulares en arco",
 		giftColumns: 3,
-		giftCardStyle: "card",
+		giftCardStyle: "tilted",
 		showCategoryDividers: true,
 		heroImageSlots: 3,
-		supportsCarousel: false,
+		supportsCarousel: true,
 		imageGuidance: {
 			ratio: "1:1",
 			orientation: "square",

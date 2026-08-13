@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">Little Joy — baby unicorn</title>
+  <desc id="desc">An original pastel baby unicorn sitting happily among tiny stars and hearts.</desc>
+  <defs>
+    <linearGradient id="hornGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF7B2"/><stop offset="1" stop-color="#F6C86E"/>
+    </linearGradient>
+    <linearGradient id="bodyPearl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FFF8F5"/>
+    </linearGradient>
+    <linearGradient id="groundMint" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#D9F5ED"/><stop offset="1" stop-color="#DCEFF8"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <!-- soft landing shadow -->
+  <ellipse cx="403" cy="713" rx="235" ry="34" fill="#B7D9DD" opacity=".28" filter="url(#softShadow)"/>
+  <ellipse cx="403" cy="701" rx="226" ry="31" fill="url(#groundMint)"/>
+
+  <!-- decorative confetti -->
+  <g stroke="#49345D" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M142 273c-21-34 10-53 29-22 18-31 50-11 28 23-15 20-40 23-57-1z" fill="#F5A8C5"/>
+    <path d="M646 221c-25-39 13-59 33-24 21-35 57-10 31 27-17 22-45 23-64-3z" fill="#F5A8C5"/>
+    <path d="m661 468 8 17 18 8-18 9-8 17-9-17-17-9 17-8z" fill="#A8DDD7"/>
+    <path d="m143 481 7 14 14 7-14 7-7 15-7-15-15-7 15-7z" fill="#F8E596"/>
+    <path d="M679 356h1M118 384h1" stroke-width="12"/>
+  </g>
+
+  <!-- rainbow tail behind the body -->
+  <g stroke="#49345D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M556 539c84-15 126 34 103 82-11 24-36 31-61 25 12 30-10 62-46 61-22 0-37-11-45-27 32-29 48-84 49-141z" fill="#A8DDD7"/>
+    <path d="M585 566c42-10 66 9 58 31-7 20-29 20-45 14 11 21-6 42-28 37" fill="none" stroke="#F6B6CF" stroke-width="25"/>
+    <path d="M598 579c25-3 39 6 36 17" fill="none" stroke="#F8E596" stroke-width="9"/>
+  </g>
+
+  <!-- mane behind head -->
+  <g stroke="#49345D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M270 251c-22-42 11-81 53-66 9-50 69-67 103-28 39-37 95-5 86 45 44-4 66 48 35 78 35 26 18 79-27 84-60 7-151-3-206-19-46-14-71-55-44-94z" fill="#F6BED3"/>
+    <path d="M300 229c13-34 53-40 74-15" fill="none" stroke="#A8DDD7" stroke-width="31"/>
+    <path d="M376 188c25-25 64-15 71 17" fill="none" stroke="#F8E596" stroke-width="30"/>
+    <path d="M458 203c28-12 58 9 55 39" fill="none" stroke="#B9DDF1" stroke-width="30"/>
+  </g>
+
+  <!-- horn -->
+  <g stroke="#49345D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M372 209 402 70l38 140z" fill="url(#hornGold)"/>
+    <path d="m389 133 37 18M382 169l52 23" fill="none" stroke="#E7A36E" stroke-width="7"/>
+  </g>
+
+  <!-- ears -->
+  <g stroke="#49345D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M286 269c-45-24-65-77-39-105 43 18 61 69 52 107z" fill="url(#bodyPearl)"/>
+    <path d="M514 269c45-24 65-77 39-105-43 18-61 69-52 107z" fill="url(#bodyPearl)"/>
+    <path d="M264 191c21 16 28 43 26 63" fill="none" stroke="#F5B3C9" stroke-width="12"/>
+    <path d="M536 191c-21 16-28 43-26 63" fill="none" stroke="#F5B3C9" stroke-width="12"/>
+  </g>
+
+  <!-- seated body -->
+  <g stroke="#49345D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M310 497c-48 35-76 101-65 159 8 45 42 67 88 49 38 25 96 28 139 0 47 18 80-4 88-49 11-58-17-124-65-159-47-34-138-34-185 0z" fill="url(#bodyPearl)"/>
+    <!-- belly patch -->
+    <ellipse cx="402" cy="610" rx="78" ry="93" fill="#FFF3F5" stroke="none"/>
+    <!-- haunches -->
+    <path d="M306 591c-42 5-66 48-49 87 11 27 42 38 68 24 21-12 25-43 19-71-5-24-18-43-38-40z" fill="#FFFDFC"/>
+    <path d="M498 591c42 5 66 48 49 87-11 27-42 38-68 24-21-12-25-43-19-71 5-24 18-43 38-40z" fill="#FFFDFC"/>
+    <!-- front legs -->
+    <path d="M347 568c-2 49-2 97 6 128 5 21 39 24 45 1 6-31 7-77 4-122" fill="#FFFDFC"/>
+    <path d="M457 568c2 49 2 97-6 128-5 21-39 24-45 1-6-31-7-77-4-122" fill="#FFFDFC"/>
+    <!-- hooves -->
+    <path d="M271 662c19-14 46-7 58 14-2 24-15 38-36 38-20 0-31-18-22-52z" fill="#F3A6C5"/>
+    <path d="M533 662c-19-14-46-7-58 14 2 24 15 38 36 38 20 0 31-18 22-52z" fill="#F3A6C5"/>
+    <path d="M351 682c13 12 32 14 46 5 0 27-7 38-23 38-17 0-24-15-23-43z" fill="#F3A6C5"/>
+    <path d="M453 682c-13 12-32 14-46 5 0 27 7 38 23 38 17 0 24-15 23-43z" fill="#F3A6C5"/>
+  </g>
+
+  <!-- head -->
+  <g stroke="#49345D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M259 335c4-80 64-129 143-129 80 0 140 49 144 129l4 75c5 91-57 151-148 151s-153-60-148-151z" fill="url(#bodyPearl)"/>
+    <!-- soft muzzle -->
+    <ellipse cx="402" cy="477" rx="72" ry="43" fill="#FDECF2" stroke="none"/>
+    <!-- eyes -->
+    <ellipse cx="337" cy="367" rx="31" ry="38" fill="#49345D"/>
+    <ellipse cx="467" cy="367" rx="31" ry="38" fill="#49345D"/>
+    <circle cx="326" cy="354" r="11" fill="#FFF" stroke="none"/>
+    <circle cx="456" cy="354" r="11" fill="#FFF" stroke="none"/>
+    <circle cx="345" cy="380" r="5" fill="#FFF" stroke="none"/>
+    <circle cx="475" cy="380" r="5" fill="#FFF" stroke="none"/>
+    <!-- cheeks, nostrils and smile -->
+    <ellipse cx="291" cy="415" rx="24" ry="10" fill="#F49FB9" stroke="none" opacity=".8"/>
+    <ellipse cx="513" cy="415" rx="24" ry="10" fill="#F49FB9" stroke="none" opacity=".8"/>
+    <ellipse cx="381" cy="464" rx="4" ry="6" fill="#49345D" stroke="none"/>
+    <ellipse cx="423" cy="464" rx="4" ry="6" fill="#49345D" stroke="none"/>
+    <path d="M381 490q21 22 42 0" fill="none" stroke-width="7"/>
+  </g>
+
+  <!-- tiny flower tucked in the mane -->
+  <g transform="translate(521 274)" stroke="#49345D" stroke-width="6" stroke-linejoin="round">
+    <path d="M0-14C-5-34-30-26-25-7c-19-5-27 20-8 26-11 16 10 33 23 18 12 16 35 1 25-17 20-5 13-31-7-27z" fill="#FFF7B2"/>
+    <circle r="9" fill="#F3A6C5"/>
+  </g>
+</svg>

@@ -298,4 +298,53 @@ describe("saveDraftWishlistSchema", () => {
 			expect(result.success).toBe(false);
 		});
 	});
+
+	describe("motif", () => {
+		it("accepts a motif tagged for the draft's event type", () => {
+			const result = saveDraftWishlistSchema.parse(
+				makeInput({
+					eventType: "baby_shower",
+					motifId: "bear-cloud",
+					motifPalette: "themed",
+					motifTreatment: "band",
+				}),
+			);
+
+			expect(result.motifId).toBe("bear-cloud");
+			expect(result.motifPalette).toBe("themed");
+			expect(result.motifTreatment).toBe("band");
+		});
+
+		it("leaves an unset motif as null", () => {
+			const result = saveDraftWishlistSchema.parse(
+				makeInput({ motifId: null }),
+			);
+			expect(result.motifId).toBeNull();
+		});
+
+		it("rejects a motif id absent from the catalog", () => {
+			const result = saveDraftWishlistSchema.safeParse({
+				...makeInput(),
+				motifId: "not-a-real-motif",
+			} as unknown);
+
+			expect(result.success).toBe(false);
+		});
+
+		it("rejects a motif not tagged for the draft's event type", () => {
+			// bear-cloud is tagged for baby_shower only, not wedding
+			const result = saveDraftWishlistSchema.safeParse(
+				makeInput({ eventType: "wedding", motifId: "bear-cloud" }),
+			);
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({ path: ["motifId"] }),
+					]),
+				);
+			}
+		});
+	});
 });

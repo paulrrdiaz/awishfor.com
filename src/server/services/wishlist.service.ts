@@ -185,6 +185,9 @@ const wishlistDraftToData = (input: SaveDraftDraftContent) => ({
 	countdownVariant: input.countdownVariant ?? null,
 	welcomeMessageVariant: input.welcomeMessageVariant ?? null,
 	thankYouMessageVariant: input.thankYouMessageVariant ?? null,
+	motifId: input.motifId ?? null,
+	motifTreatment: input.motifId ? (input.motifTreatment ?? null) : null,
+	motifPalette: input.motifId ? (input.motifPalette ?? null) : null,
 	showHowItWorks: input.showHowItWorks ?? true,
 });
 
@@ -217,6 +220,9 @@ const mapServerDraft = (
 		wishlist.welcomeMessageVariant as WelcomeVariantId | null,
 	thankYouMessageVariant:
 		wishlist.thankYouMessageVariant as ThankYouVariantId | null,
+	motifId: wishlist.motifId,
+	motifTreatment: wishlist.motifTreatment,
+	motifPalette: wishlist.motifPalette,
 	showHowItWorks: wishlist.showHowItWorks,
 	categories: wishlist.categories.map((category) => category.name),
 	gifts: wishlist.gifts.map((gift) => ({

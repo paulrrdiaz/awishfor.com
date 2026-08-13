@@ -422,22 +422,6 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 								/>
 								<FieldError errors={[form.formState.errors.productUrl]} />
 							</Field>
-
-							<Field className="sm:col-span-2">
-								<FieldLabel htmlFor="gift-sheet-note">
-									Nota para invitados{" "}
-									<span className="font-normal text-muted-foreground">
-										· opcional
-									</span>
-								</FieldLabel>
-								<Textarea
-									className="resize-none"
-									id="gift-sheet-note"
-									placeholder="Ej. Preferimos el color gris."
-									rows={3}
-									{...form.register("publicNote")}
-								/>
-							</Field>
 						</FieldGroup>
 
 						<div className="space-y-4 border-t pt-5">
@@ -473,6 +457,22 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 								/>
 							</Field>
 						</div>
+
+						<Field className="border-t pt-5">
+							<FieldLabel htmlFor="gift-sheet-note">
+								Nota para invitados{" "}
+								<span className="font-normal text-muted-foreground">
+									· opcional
+								</span>
+							</FieldLabel>
+							<Textarea
+								className="resize-none"
+								id="gift-sheet-note"
+								placeholder="Ej. Preferimos el color gris."
+								rows={3}
+								{...form.register("publicNote")}
+							/>
+						</Field>
 					</div>
 
 					<SheetFooter className="flex-row justify-end border-t">

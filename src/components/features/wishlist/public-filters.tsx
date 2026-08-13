@@ -16,6 +16,7 @@ import {
 	GiftGridToggle,
 } from "@/components/shared/gift-grid-toggle";
 import { GiftList } from "@/components/shared/gift-list";
+import type { MotifPreset, MotifTreatment } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import { useReducedMotion } from "@/lib/gsap/use-reduced-motion";
 import {
@@ -44,6 +45,8 @@ type Props = {
 	showGridToggle?: boolean;
 	showSort?: boolean;
 	toolbarLeading?: ReactNode;
+	motif?: MotifPreset | null;
+	motifTreatment?: MotifTreatment;
 };
 
 type EmptyStateCopy = { copy: string; ctaLabel: string };
@@ -100,6 +103,8 @@ export function PublicGiftFilters({
 	showGridToggle = false,
 	showSort = true,
 	toolbarLeading,
+	motif,
+	motifTreatment,
 }: Props) {
 	const [activeFilter, setActiveFilter] = useState<GiftFilter>(DEFAULT_FILTER);
 	const [sortMode, setSortMode] = useState<GiftSortMode>(DEFAULT_SORT_MODE);
@@ -321,6 +326,8 @@ export function PublicGiftFilters({
 						actionsEnabled={actionsEnabled}
 						giftCardStyle={layout.giftCardStyle}
 						gifts={filteredGifts}
+						motif={motif}
+						motifTreatment={motifTreatment}
 						onGiftAction={setSelectedGift}
 					/>
 				) : (
@@ -335,6 +342,8 @@ export function PublicGiftFilters({
 						}
 						giftColumns={showGridToggle ? gridColumns : layout.giftColumns}
 						gifts={filteredGifts}
+						motif={motif}
+						motifTreatment={motifTreatment}
 						onGiftAction={setSelectedGift}
 					/>
 				)}

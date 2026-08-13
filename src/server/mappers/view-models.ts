@@ -83,6 +83,9 @@ export type PublicWishlistViewModel = {
 	countdownVariant: string | null;
 	welcomeMessageVariant: string | null;
 	thankYouMessageVariant: string | null;
+	motifId: string | null;
+	motifTreatment: string | null;
+	motifPalette: string | null;
 	showHowItWorks: boolean;
 	categories: PublicCategoryViewModel[];
 	gifts: PublicGiftViewModel[];

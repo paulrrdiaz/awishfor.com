@@ -40,6 +40,9 @@ export type PersistedWishlistPreviewSource = {
 	countdownVariant: string | null;
 	welcomeMessageVariant: string | null;
 	thankYouMessageVariant: string | null;
+	motifId: string | null;
+	motifTreatment: string | null;
+	motifPalette: string | null;
 	showHowItWorks: boolean;
 };
 
@@ -83,6 +86,9 @@ export function persistedWishlistToPreviewDraft(
 		countdownVariant: wishlist.countdownVariant,
 		welcomeMessageVariant: wishlist.welcomeMessageVariant,
 		thankYouMessageVariant: wishlist.thankYouMessageVariant,
+		motifId: wishlist.motifId,
+		motifTreatment: wishlist.motifTreatment,
+		motifPalette: wishlist.motifPalette,
 		showHowItWorks: wishlist.showHowItWorks,
 		gifts: wishlist.gifts.map((gift) => ({
 			id: gift.id,

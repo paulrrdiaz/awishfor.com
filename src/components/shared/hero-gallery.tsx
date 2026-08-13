@@ -158,6 +158,12 @@ type HeroCarouselGalleryProps = {
 	images: HeroCoverImage[];
 	alt: string;
 	className?: string;
+	/**
+	 * Positions and shapes the clipping window images cycle within,
+	 * independently of `className` (what `GalleryControls` positions
+	 * against). Omit to clip to `className` itself, matching prior behavior.
+	 */
+	viewportClassName?: string;
 	controlsVariant?: "default" | "compact";
 	maxImages?: number;
 	priority: boolean;
@@ -174,6 +180,7 @@ export function HeroCarouselGallery({
 	images,
 	alt,
 	className,
+	viewportClassName,
 	controlsVariant = "default",
 	maxImages = 6,
 	priority,
@@ -184,10 +191,18 @@ export function HeroCarouselGallery({
 	const visibleImages = images.slice(0, maxImages);
 
 	if (visibleImages.length <= 1) {
+		// No CarouselContent/GalleryControls sibling exists in this branch, so
+		// there's nothing for `className` (the root a multi-image carousel
+		// sizes to fit controls against) to do here — `viewportClassName`
+		// alone determines the shape, matching what a slide would clip to.
+		// Merging both would let conflicting positioning utilities (e.g.
+		// `inset-0` alongside `top-4 left-0`) land on one element with no
+		// guaranteed winner, since tailwind-merge does not treat those as
+		// the same conflict group.
 		return (
 			<HeroImageSlot
 				alt={alt}
-				className={className}
+				className={viewportClassName ?? className}
 				isSample={visibleImages[0]?.isSample}
 				priority={priority}
 				sizes={sizes}
@@ -202,7 +217,10 @@ export function HeroCarouselGallery({
 			opts={{ duration: 28, loop: true, startIndex, active: true }}
 			plugins={[autoplay.current]}
 		>
-			<CarouselContent className="-ml-0 h-full">
+			<CarouselContent
+				className="-ml-0 h-full"
+				viewportClassName={viewportClassName}
+			>
 				{visibleImages.map((image, index) => (
 					<CarouselItem className="h-full pl-0" key={image.url}>
 						<div className="relative h-full w-full overflow-hidden">

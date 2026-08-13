@@ -4,6 +4,8 @@ import { z } from "zod";
 export const env = createEnv({
 	server: {
 		NODE_ENV: z.enum(["development", "test", "production"]),
+		BRIGHT_DATA_API_KEY: z.string().min(1).optional(),
+		BRIGHT_DATA_WEB_UNLOCKER_ZONE: z.string().min(1).optional(),
 		CLERK_SECRET_KEY: z.string(),
 		DATABASE_URL: z.string().url(),
 		CLERK_WEBHOOK_SIGNING_SECRET: z.string(),
@@ -17,6 +19,8 @@ export const env = createEnv({
 
 	runtimeEnv: {
 		NODE_ENV: process.env.NODE_ENV,
+		BRIGHT_DATA_API_KEY: process.env.BRIGHT_DATA_API_KEY,
+		BRIGHT_DATA_WEB_UNLOCKER_ZONE: process.env.BRIGHT_DATA_WEB_UNLOCKER_ZONE,
 		CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
 		DATABASE_URL: process.env.DATABASE_URL,
 		CLERK_WEBHOOK_SIGNING_SECRET: process.env.CLERK_WEBHOOK_SIGNING_SECRET,

@@ -1,10 +1,21 @@
+"use client";
+
+import { useRef } from "react";
 import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroCarouselGallery } from "@/components/shared/hero-gallery";
+import { MotifScatter } from "@/components/shared/motif/motif-scatter";
+import { MotifSeal } from "@/components/shared/motif/motif-seal";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
+import {
+	resolveMotif,
+	resolveMotifPalette,
+	resolveMotifTreatment,
+} from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
+import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import type { PublicWishlistMode } from "./public-wishlist-page";
 
@@ -20,10 +31,25 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
+	const motif = resolveMotif(wishlist.motifId);
+	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
+	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
+	const heroRef = useRef<HTMLElement>(null);
+	useMotifTilt(heroRef);
 
 	return (
 		<div className="flex flex-col">
-			<header className="relative grid grid-cols-1 gap-8 overflow-hidden bg-gradient-to-br from-accent via-accent/60 to-card px-6 py-10 sm:px-10 lg:grid-cols-[300px_1fr] lg:items-center">
+			<header
+				className="relative grid grid-cols-1 gap-8 overflow-hidden bg-gradient-to-br from-accent via-accent/60 to-card px-6 py-10 sm:px-10 lg:grid-cols-[300px_1fr] lg:items-center"
+				ref={heroRef}
+			>
+				{motif && (
+					<MotifScatter
+						motif={motif}
+						palette={motifPalette}
+						treatment={motifTreatment}
+					/>
+				)}
 				<div
 					aria-hidden
 					className="pointer-events-none absolute -top-24 -left-16 size-64 rounded-full bg-primary/25 blur-[70px]"
@@ -47,6 +73,13 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 					</div>
 				</div>
 				<div className="relative flex flex-col justify-center gap-4 text-center lg:text-left">
+					{motif && (
+						<MotifSeal
+							className="lg:mx-0"
+							motif={motif}
+							treatment={motifTreatment}
+						/>
+					)}
 					<p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.2em]">
 						{eventLabel}
 					</p>

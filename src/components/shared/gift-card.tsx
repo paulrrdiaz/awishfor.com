@@ -4,9 +4,11 @@ import { cva } from "class-variance-authority";
 import { Check, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
+import type { MotifPreset, MotifTreatment } from "@/config/motifs";
 import { useHoverLift } from "@/lib/gsap/use-hover-lift";
 import { cn } from "@/lib/utils";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
+import { MotifSticker } from "./motif/motif-sticker";
 import { PriorityBadge } from "./priority-badge";
 import { StatusBadge } from "./status-badge";
 
@@ -15,7 +17,8 @@ export type GiftCardStyle =
 	| "row"
 	| "minimal"
 	| "collage"
-	| "collage-row";
+	| "collage-row"
+	| "tilted";
 export type GiftCardStatus = PublicGiftViewModel["status"] | "hidden";
 
 type Props = {
@@ -25,14 +28,37 @@ type Props = {
 	actionsEnabled?: boolean;
 	status?: GiftCardStatus;
 	onGiftAction?: (gift: PublicGiftViewModel) => void;
+	motif?: MotifPreset | null;
+	motifTreatment?: MotifTreatment;
 };
 
+function GiftMotifSticker({
+	motif,
+	motifTreatment,
+}: {
+	motif: MotifPreset | null | undefined;
+	motifTreatment: MotifTreatment | undefined;
+}) {
+	if (!motif) {
+		return null;
+	}
+	return (
+		<MotifSticker
+			className="pointer-events-none top-1.5 right-1.5"
+			motif={motif}
+			treatment={motifTreatment ?? "scene"}
+		/>
+	);
+}
+
 const giftCardVariants = cva(
-	"border border-border bg-card text-card-foreground shadow-sm transition-opacity",
+	"relative border border-border bg-card text-card-foreground shadow-sm transition-opacity",
 	{
 		variants: {
 			cardStyle: {
 				card: "flex flex-col overflow-hidden rounded-xl",
+				tilted:
+					"flex flex-col overflow-hidden rounded-xl shadow-[0_16px_36px_rgba(30,50,80,.20)]",
 				collage: "flex flex-col overflow-hidden rounded-[16px] shadow-none",
 				"collage-row":
 					"relative grid min-h-[90px] grid-cols-[4rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 overflow-hidden rounded-[10px] border-l-[8px] border-l-primary p-3 shadow-none sm:flex sm:gap-3",
@@ -118,6 +144,8 @@ export function GiftCard({
 	actionsEnabled = false,
 	status = gift.status,
 	onGiftAction,
+	motif,
+	motifTreatment,
 }: Props) {
 	const cardRef = useRef<HTMLElement>(null);
 	const isPurchased = status === "purchased";
@@ -220,6 +248,7 @@ export function GiftCard({
 						</button>
 					</div>
 				)}
+				<GiftMotifSticker motif={motif} motifTreatment={motifTreatment} />
 			</article>
 		);
 	}
@@ -268,6 +297,7 @@ export function GiftCard({
 						Regalar
 					</button>
 				)}
+				<GiftMotifSticker motif={motif} motifTreatment={motifTreatment} />
 			</article>
 		);
 	}
@@ -365,6 +395,7 @@ export function GiftCard({
 						</button>
 					)}
 				</div>
+				<GiftMotifSticker motif={motif} motifTreatment={motifTreatment} />
 			</article>
 		);
 	}
@@ -420,6 +451,7 @@ export function GiftCard({
 					)}
 				</div>
 			</div>
+			<GiftMotifSticker motif={motif} motifTreatment={motifTreatment} />
 		</article>
 	);
 }

@@ -98,6 +98,9 @@ model Wishlist {
   countdownVariant       String?
   welcomeMessageVariant  String?
   thankYouMessageVariant String?
+  motifId         String?
+  motifTreatment  String?
+  motifPalette    String?
   showHowItWorks  Boolean        @default(true)
   status          WishlistStatus @default(draft)
   publishedAt     DateTime?

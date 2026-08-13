@@ -35,6 +35,8 @@ const IMPORT_ERROR_MESSAGES: Record<string, string> = {
 	timeout: "La tienda tardó demasiado en responder.",
 	network:
 		"No pudimos leer esa página. Revisa el enlace o intenta otra tienda.",
+	blocked:
+		"La tienda bloqueó la importación automática. Inténtalo de nuevo o completa los datos manualmente.",
 	blocked_host: "Ese enlace no se puede importar por seguridad.",
 	too_many_redirects: "Ese enlace redirige demasiadas veces.",
 	oversized: "La página es demasiado grande para importarla.",

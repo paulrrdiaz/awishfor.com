@@ -7,6 +7,7 @@ import {
 	extractTitle,
 	extractTwitterCard,
 	importGiftFromUrl,
+	isBlockedPage,
 	MAX_BODY_BYTES,
 	MAX_REDIRECTS,
 } from "@/server/services/importer.service";
@@ -225,6 +226,28 @@ describe("extractTitle", () => {
 	});
 });
 
+describe("isBlockedPage", () => {
+	it("detects the Ripley Cloudflare block page", () => {
+		expect(
+			isBlockedPage(
+				"<html><head><title>Ups!... Ripley.com Perú | Blocked</title></head><body>¡Alto, no puedes acceder!</body></html>",
+			),
+		).toBe(true);
+	});
+
+	it("does not mark a normal product page as blocked", () => {
+		expect(isBlockedPage(HTML_WITH_JSON_LD)).toBe(false);
+	});
+
+	it("allows a product page that loads Cloudflare challenge scripts", () => {
+		expect(
+			isBlockedPage(
+				'<html><head><title>Real product</title><script src="/cdn-cgi/challenge-platform/scripts/jsd/main.js"></script></head></html>',
+			),
+		).toBe(false);
+	});
+});
+
 // --- Priority chain ---
 
 describe("importGiftFromUrl metadata priority chain", () => {
@@ -330,6 +353,101 @@ describe("importGiftFromUrl sparse draft", () => {
 // --- Hardened fetch ---
 
 describe("importGiftFromUrl hardened fetch", () => {
+	it("returns blocked instead of importing a retailer block page title", async () => {
+		const fetchFn = vi
+			.fn()
+			.mockResolvedValue(
+				new Response(
+					"<html><title>Ups!... Ripley.com Perú | Blocked</title><body>¡Alto, no puedes acceder!</body></html>",
+					{ status: 403 },
+				),
+			);
+		const result = await importGiftFromUrl(
+			{ fetch: fetchFn },
+			{
+				url: "https://simple.ripley.com.pe/producto-pmp20001518103",
+			},
+		);
+
+		expect(result).toEqual({ ok: false, error: { kind: "blocked" } });
+	});
+
+	it("uses Bright Data for a blocked public store when configured", async () => {
+		const fetchFn = vi
+			.fn()
+			.mockResolvedValueOnce(
+				new Response("<html><title>Blocked</title></html>", { status: 403 }),
+			)
+			.mockResolvedValueOnce(
+				new Response(HTML_WITH_JSON_LD, {
+					status: 200,
+					headers: { "content-type": "text/html" },
+				}),
+			);
+		const result = await importGiftFromUrl(
+			{
+				fetch: fetchFn,
+				brightDataApiKey: "bright-key",
+				brightDataWebUnlockerZone: "product-import-zone",
+			},
+			{
+				url: "https://shop.example.com.pe/producto-123",
+			},
+		);
+
+		expect(result).toMatchObject({
+			ok: true,
+			draft: {
+				name: "Fancy Mug",
+				priceAmount: 24.99,
+				priceCurrency: "USD",
+			},
+		});
+		expect(fetchFn).toHaveBeenCalledTimes(2);
+		const [brightDataUrl, brightDataInit] = fetchFn.mock.calls[1] ?? [];
+		expect(String(brightDataUrl)).toBe("https://api.brightdata.com/request");
+		expect(brightDataInit).toMatchObject({
+			method: "POST",
+			headers: {
+				Authorization: "Bearer bright-key",
+				"Content-Type": "application/json",
+			},
+		});
+		expect(JSON.parse(String(brightDataInit?.body))).toEqual({
+			zone: "product-import-zone",
+			url: "https://shop.example.com.pe/producto-123",
+			format: "raw",
+			country: "pe",
+		});
+	});
+
+	it("lets Bright Data choose the location for a blocked non-Peru store", async () => {
+		const fetchFn = vi
+			.fn()
+			.mockResolvedValueOnce(
+				new Response("<html><title>Just a moment...</title></html>", {
+					status: 200,
+				}),
+			)
+			.mockResolvedValueOnce(new Response(HTML_WITH_JSON_LD, { status: 200 }));
+		const result = await importGiftFromUrl(
+			{
+				fetch: fetchFn,
+				brightDataApiKey: "bright-key",
+				brightDataWebUnlockerZone: "product-import-zone",
+			},
+			{ url: "https://shop.example.com/producto-123" },
+		);
+
+		expect(result.ok).toBe(true);
+		const [, brightDataInit] = fetchFn.mock.calls[1] ?? [];
+		expect(JSON.parse(String(brightDataInit?.body))).toEqual({
+			zone: "product-import-zone",
+			url: "https://shop.example.com/producto-123",
+			format: "raw",
+		});
+	});
+
 	it("returns timeout error when fetch is aborted", async () => {
 		const fetchFn = vi.fn().mockImplementation(() => {
 			const err = new DOMException("The operation was aborted", "AbortError");

@@ -246,6 +246,113 @@
 	border-color: var(--primary);
 }
 
+/* Motif shape wrapper — shapes render as inline <svg> illustrations (see
+   motif-shape-svgs.tsx), colored only through --m1 (body) / --m2 (detail) /
+   --m3 (features) / --mc1. */
+.mot {
+	position: relative;
+	flex-shrink: 0;
+}
+.mot svg {
+	display: block;
+}
+
+/* Motif placement chrome */
+.mdiv {
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+	gap: 14px;
+	padding: 14px 0;
+}
+.mband {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 9px 20px;
+	opacity: 0.55;
+}
+.mband[data-motif-treatment="band"] {
+	opacity: 1;
+	background: var(--accent);
+}
+.seal {
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 8px 18px rgba(20, 20, 20, 0.15);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto 14px;
+	position: relative;
+	z-index: 2;
+}
+.stk {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 4px 10px rgba(20, 20, 20, 0.15);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2;
+}
+.stk[data-motif-treatment="band"] {
+	background: var(--primary);
+}
+
+/* data-motif-surface: "base" passes the resolved palette through; "primary"
+   (motifs sitting on a --primary-filled surface, `band` treatment only)
+   forces body/detail to white and features to the motif's own m3Inverted,
+   supplied by the theme provider as --motif-m3-inverted. */
+[data-motif-surface="primary"] {
+	--m1: #ffffff;
+	--m2: #ffffff;
+	--m3: var(--motif-m3-inverted, var(--primary-foreground));
+	--mc1: #ffffff;
+}
+
+/* Idle float loop for hero scatter motifs: a gentle bob + sway, staggered per
+   instance via --motif-float-duration/--motif-float-delay/--motif-float-distance
+   set inline. Runs on a separate wrapper element so it composes with the
+   tilt/scale/rotate transform `.mot` itself already owns. Disabled under
+   prefers-reduced-motion. */
+@keyframes motif-float {
+	0%,
+	100% {
+		transform: translateY(0) rotate(0deg);
+	}
+	50% {
+		transform: translateY(var(--motif-float-distance, -8px)) rotate(2deg);
+	}
+}
+.motif-float {
+	animation: motif-float var(--motif-float-duration, 5s) ease-in-out infinite;
+	animation-delay: var(--motif-float-delay, 0s);
+}
+@media (prefers-reduced-motion: reduce) {
+	.motif-float {
+		animation: none;
+	}
+}
+
+/* Hover tilt: a single pointer listener writes --tilt-x/--tilt-y (-1..1) on
+   the container; motifs consume them with a per-placement depth multiplier
+   set inline per instance via --motif-tilt-depth. Absent (0) at rest, under
+   reduced motion, and on coarse pointers. --motif-scale/--motif-rotate carry
+   each instance's own design-specified transform so it composes with tilt. */
+.mot {
+	transform: rotate(var(--motif-rotate, 0deg)) scale(var(--motif-scale, 1))
+		translate(
+			calc(var(--tilt-x, 0) * var(--motif-tilt-depth, 0) * 1px),
+			calc(var(--tilt-y, 0) * var(--motif-tilt-depth, 0) * 1px)
+		);
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

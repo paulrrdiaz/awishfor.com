@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MOTIF_IDS, MOTIF_PALETTES, MOTIF_TREATMENTS } from "@/config/motifs";
 import {
 	COUNTDOWN_VARIANT_IDS,
 	THANK_YOU_VARIANT_IDS,
@@ -186,6 +187,15 @@ export const wishlistBodyFontSchema = optionalNullableTrimmedString(
 export const wishlistCountdownVariantSchema = optionalNullableVariantId(
 	COUNTDOWN_VARIANT_IDS,
 );
+export const wishlistMotifIdSchema = optionalNullableVariantId(
+	MOTIF_IDS as unknown as [string, ...string[]],
+);
+export const wishlistMotifTreatmentSchema = optionalNullableVariantId(
+	MOTIF_TREATMENTS as unknown as [string, ...string[]],
+);
+export const wishlistMotifPaletteSchema = optionalNullableVariantId(
+	MOTIF_PALETTES as unknown as [string, ...string[]],
+);
 export const wishlistWelcomeMessageVariantSchema =
 	optionalNullableVariantId(WELCOME_VARIANT_IDS);
 export const wishlistThankYouMessageVariantSchema = optionalNullableVariantId(
@@ -320,6 +330,9 @@ export const updateWishlistSettingsSchema = z.object({
 	countdownVariant: wishlistCountdownVariantSchema,
 	welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
 	thankYouMessageVariant: wishlistThankYouMessageVariantSchema,
+	motifId: wishlistMotifIdSchema,
+	motifTreatment: wishlistMotifTreatmentSchema,
+	motifPalette: wishlistMotifPaletteSchema,
 	language: localeSchema,
 	currency: currencySchema,
 	showHowItWorks: z.boolean(),

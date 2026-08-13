@@ -70,7 +70,10 @@ describe("importerRouter.importFromUrl", () => {
 
 		expect(result).toEqual({ ok: true, draft });
 		expect(importGiftFromUrlMock).toHaveBeenCalledWith(
-			{},
+			{
+				brightDataApiKey: undefined,
+				brightDataWebUnlockerZone: undefined,
+			},
 			{ url: "https://example.com/widget" },
 		);
 	});
