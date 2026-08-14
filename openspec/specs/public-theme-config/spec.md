@@ -52,7 +52,9 @@ Every preset SHALL follow the approved tonal palette system: near-white tinted b
 
 ### Requirement: Layout presets selectable by id
 
-The system SHALL provide nine hardcoded public layout presets — `carousel-hero`, `scrapbook-polaroids`, `portrait-frame-split`, `arch-hero-party`, `arch-trio`, `overlap-duo`, `split-image-right`, `collage-staggered`, and `magazine-editorial` (default) — each addressable by a stable id, and SHALL resolve a wishlist's `layoutId` to its preset with a default fallback. Each preset SHALL declare `heroImageSlots`, `supportsCarousel`, and its image guidance. No preset SHALL be flagged deprecated.
+The system SHALL provide nine hardcoded public layout presets — `carousel-hero`, `scrapbook-polaroids`, `portrait-frame-split`, `arch-hero-party`, `arch-trio`, `overlap-duo`, `split-image-right`, `collage-staggered`, and `magazine-editorial` (default) — each addressable by a stable id, and SHALL resolve a wishlist's `layoutId` to its preset with a default fallback. Each preset SHALL declare `heroImageSlots`, `supportsCarousel`, its gift-card style, and its image guidance. No preset SHALL be flagged deprecated.
+
+The `arch-trio` preset SHALL declare `supportsCarousel` true: its largest arc cycles through the wishlist's cover images while its two smaller arcs stay static. Its `heroImageSlots` SHALL remain 3 and its image guidance SHALL remain a 1:1 circle crop recommending a centered subject, since the arcs still crop to circles. Its gift-card style SHALL be `tilted`.
 
 #### Scenario: Layout id resolves to its preset
 
