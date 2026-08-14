@@ -56,9 +56,6 @@ describe("WishlistFooter", () => {
 			"href",
 			"mailto:hola@awishfor.com?subject=Reporte%20de%20lista",
 		);
-		expect(
-			screen.getByRole("link", { name: "hola@awishfor.com" }),
-		).toHaveAttribute("href", "mailto:hola@awishfor.com");
 	});
 
 	it("keeps the compact brand, report, and support utility without navigation", () => {

@@ -54,9 +54,11 @@ export function GiftGrid({
 				: "gap-6";
 	// Positional rotation for the tilted style — applied by the grid from
 	// each card's column position rather than an index prop into GiftCard.
-	// Scoped to sm: so the single-column mobile stack isn't rotated.
+	// Scoped to sm: so the single-column mobile stack isn't rotated, and
+	// skipped entirely at 1 column: a full-width row reads as misaligned
+	// when tilted, not playful.
 	const tiltClass =
-		giftCardStyle === "tilted"
+		giftCardStyle === "tilted" && giftColumns !== 1
 			? "sm:[&>*:nth-child(3n+1)]:rotate-[-1.6deg] sm:[&>*:nth-child(3n+2)]:mt-4 sm:[&>*:nth-child(3n+2)]:rotate-[1.4deg] sm:[&>*:nth-child(3n+3)]:rotate-[-0.8deg]"
 			: undefined;
 
@@ -70,7 +72,14 @@ export function GiftGrid({
 						gift.categoryId ? categoryNames?.[gift.categoryId] : undefined
 					}
 					gift={gift}
-					key={gift.id}
+					// cardStyle is keyed in too: useHoverLift writes GSAP's transform
+					// cache as an inline style, which bakes in whatever rotation the
+					// "tilted" style's CSS class had at the time of the last hover.
+					// Reusing the DOM node across a cardStyle switch (e.g. tilted ->
+					// collage-row when the column toggle goes to 1) would leave that
+					// stale inline transform in place since nothing else clears it —
+					// keying on cardStyle forces a fresh node instead.
+					key={`${gift.id}-${giftCardStyle}`}
 					motif={motif}
 					motifTreatment={motifTreatment}
 					onGiftAction={onGiftAction}

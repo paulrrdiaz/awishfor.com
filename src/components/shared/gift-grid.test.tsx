@@ -22,4 +22,12 @@ describe("GiftGrid tilted style", () => {
 		const wrapper = container.firstElementChild;
 		expect(wrapper?.className).not.toContain("nth-child");
 	});
+
+	it("skips rotation at 1 column even for the tilted style", () => {
+		const { container } = render(
+			<GiftGrid giftCardStyle="tilted" giftColumns={1} gifts={sampleGifts} />,
+		);
+		const wrapper = container.firstElementChild;
+		expect(wrapper?.className).not.toContain("nth-child");
+	});
 });

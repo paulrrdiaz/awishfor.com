@@ -66,6 +66,8 @@ type Props = {
 	variant: "marketing" | "public-wishlist";
 };
 
+const reportHref = `mailto:${SUPPORT_EMAIL}?subject=Reporte%20de%20lista`;
+
 export function FooterBody({ variant }: Props) {
 	const isMarketing = variant === "marketing";
 
@@ -230,13 +232,21 @@ export function FooterBody({ variant }: Props) {
 
 			<div
 				className={cn(
-					"py-[14px] text-[11px] lg:py-5 lg:text-[12px]",
+					"flex flex-col gap-1 py-[14px] text-[11px] sm:flex-row sm:items-center sm:justify-between lg:py-5 lg:text-[12px]",
 					isMarketing
 						? "text-[var(--mmut)]"
 						: "mx-auto max-w-[1160px] text-accent-foreground/70",
 				)}
 			>
-				© 2025 A Wish For · awishfor.com
+				<span>© 2025 A Wish For · awishfor.com</span>
+				{!isMarketing && (
+					<a
+						className="rounded-sm transition-colors hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+						href={reportHref}
+					>
+						Reportar lista
+					</a>
+				)}
 			</div>
 		</div>
 	);

@@ -110,9 +110,6 @@ export function PublicWishlistPage({
 			/>
 			{mode !== "compact" && (
 				<WishlistFooter
-					motif={motif}
-					motifPalette={motifPalette}
-					motifTreatment={motifTreatment}
 					variant={surface === "standalone" ? "expanded" : "compact"}
 					wishlistSlug={wishlist.slug}
 				/>

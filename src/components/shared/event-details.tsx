@@ -10,10 +10,12 @@ type EventDetailsWishlist = {
 };
 
 type EventDetailsVariant = "block" | "compact";
+type EventDetailsSize = "sm" | "md";
 
 type Props = {
 	wishlist: EventDetailsWishlist;
 	variant?: EventDetailsVariant;
+	size?: EventDetailsSize;
 	className?: string;
 };
 
@@ -25,6 +27,7 @@ const DRESS_CODE_LABEL: Record<EventDetailsVariant, string> = {
 export function EventDetails({
 	wishlist,
 	variant = "block",
+	size = "sm",
 	className,
 }: Props) {
 	const details = [
@@ -57,19 +60,37 @@ export function EventDetails({
 	if (details.length === 0) return null;
 
 	if (variant === "compact") {
+		const isMd = size === "md";
 		return (
 			<section
-				className={cn("grid grid-cols-1 gap-3 sm:grid-cols-3", className)}
+				className={cn(
+					"grid grid-cols-1 gap-3 sm:grid-cols-3",
+					isMd && "gap-4",
+					className,
+				)}
 			>
 				{details.map((detail) => (
 					<div
-						className="rounded-[14px] border border-border bg-card px-4 py-3 text-center"
+						className={cn(
+							"rounded-[14px] border border-border bg-card px-4 py-3 text-center",
+							isMd && "rounded-[16px] px-5 py-4",
+						)}
 						key={detail.label}
 					>
-						<p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.16em]">
+						<p
+							className={cn(
+								"font-mono text-[9px] text-muted-foreground uppercase tracking-[0.16em]",
+								isMd && "text-[10px]",
+							)}
+						>
 							{detail.label}
 						</p>
-						<p className="mt-1 font-heading font-semibold text-[15px]">
+						<p
+							className={cn(
+								"mt-1 font-heading font-semibold text-[15px]",
+								isMd && "mt-2 text-[17px]",
+							)}
+						>
 							{detail.value}
 						</p>
 					</div>

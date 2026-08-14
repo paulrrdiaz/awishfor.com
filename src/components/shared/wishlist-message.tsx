@@ -27,7 +27,7 @@ function Postcard({ message, attribution, className }: VariantProps) {
 				<span className="absolute top-4 right-2 rotate-12 rounded border border-border/60 bg-white/80 px-2 py-1 font-mono text-muted-foreground text-xs uppercase tracking-[0.2em]">
 					Para ti
 				</span>
-				<p className="mx-auto max-w-[820px] font-heading font-semibold text-[20px] italic leading-[1.45] sm:text-[24px]">
+				<p className="mx-auto max-w-[880px] font-heading font-semibold text-[20px] italic leading-[1.45] sm:text-[24px]">
 					«{message}»
 				</p>
 				{attribution && (
@@ -47,7 +47,7 @@ function Handwritten({ message, attribution, className }: VariantProps) {
 		<section
 			className={cn("border-border border-b px-5 pb-5 sm:px-7", className)}
 		>
-			<div className="relative mx-auto max-w-[640px] -rotate-1 rounded-[4px] bg-card px-7 py-8 text-center shadow-[0_10px_28px_rgba(30,50,80,.12)] sm:px-10">
+			<div className="relative mx-auto max-w-[700px] -rotate-1 rounded-[4px] bg-card px-7 py-8 text-center shadow-[0_10px_28px_rgba(30,50,80,.12)] sm:px-10">
 				<p className="mx-auto max-w-[560px] font-heading text-[19px] italic leading-[1.5] sm:text-[22px]">
 					«{message}»
 				</p>

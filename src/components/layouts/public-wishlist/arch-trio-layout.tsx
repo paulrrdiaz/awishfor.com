@@ -11,6 +11,7 @@ import {
 	HeroImageSlot,
 } from "@/components/shared/hero-gallery";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
+import { MotifMarginScatter } from "@/components/shared/motif/motif-margin-scatter";
 import { MotifScatter } from "@/components/shared/motif/motif-scatter";
 import { MotifSeal } from "@/components/shared/motif/motif-seal";
 import { ProgressSummary } from "@/components/shared/progress-summary";
@@ -24,7 +25,6 @@ import {
 } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
-import { formatEventDate } from "@/lib/format/dates";
 import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import { resolveHeroSlots } from "@/lib/hero-slots";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
@@ -51,14 +51,6 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
 	const heroRef = useRef<HTMLElement>(null);
 	useMotifTilt(heroRef);
-	const eventSummary = wishlist.eventDate
-		? [
-				wishlist.guest?.primaryName,
-				formatEventDate(wishlist.eventDate, wishlist.language as "es" | "en"),
-			]
-				.filter(Boolean)
-				.join(" · ")
-		: null;
 
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
@@ -73,29 +65,29 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 						treatment={motifTreatment}
 					/>
 				)}
-				<div className="relative mx-auto flex w-full max-w-[1160px] gap-12 px-6 py-10 sm:px-10 lg:min-h-[420px]">
-					<div className="relative h-[360px] w-[460px]">
+				<div className="relative mx-auto flex w-full max-w-[1160px] flex-col gap-8 px-6 py-10 sm:px-10 lg:min-h-[420px] lg:flex-row lg:gap-12">
+					<div className="relative mx-auto h-[220px] w-[260px] shrink-0 sm:h-[300px] sm:w-[360px] lg:mx-0 lg:h-[360px] lg:w-[460px]">
 						<HeroCarouselGallery
 							alt={`${heading} 1`}
-							className="absolute top-4 left-0 z-[2] size-[320px] overflow-hidden rounded-full shadow-[0_16px_40px_rgba(80,30,60,.18)]"
+							className="absolute top-4 left-0 z-[2] size-[180px] overflow-hidden rounded-full shadow-[0_16px_40px_rgba(80,30,60,.18)] sm:size-[250px] lg:size-[320px]"
 							controlsVariant="compact"
 							images={wishlist.images}
 							priority={!isCompact}
-							sizes="320px"
+							sizes="(min-width: 1024px) 320px, (min-width: 640px) 250px, 180px"
 							startIndex={0}
 						/>
 						<HeroImageSlot
 							alt={`${heading} 2`}
-							className="absolute -right-6 bottom-0 z-[1] size-[200px] rounded-full border-[5px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)]"
+							className="absolute -right-4 bottom-0 z-[1] size-[110px] rounded-full border-[3px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)] sm:-right-6 sm:size-[150px] sm:border-[5px] lg:size-[200px]"
 							isSample={slots[1]?.isSample}
-							sizes="200px"
+							sizes="(min-width: 1024px) 200px, (min-width: 640px) 150px, 110px"
 							src={slots[1]?.url ?? null}
 						/>
 						<HeroImageSlot
 							alt={`${heading} 3`}
-							className="absolute -top-4 right-6 z-[3] size-[160px] rounded-full border-[5px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)]"
+							className="absolute -top-3 right-4 z-[3] size-[90px] rounded-full border-[3px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)] sm:-top-4 sm:right-6 sm:size-[120px] sm:border-[5px] lg:size-[160px]"
 							isSample={slots[2]?.isSample}
-							sizes="160px"
+							sizes="(min-width: 1024px) 160px, (min-width: 640px) 120px, 90px"
 							src={slots[2]?.url ?? null}
 						/>
 					</div>
@@ -113,9 +105,6 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 						<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 							{heading}
 						</h1>
-						{eventSummary && (
-							<p className="text-muted-foreground text-sm">{eventSummary}</p>
-						)}
 						<GuestWelcomeSection
 							guest={wishlist.guest}
 							wishlistSlug={wishlist.slug}
@@ -133,31 +122,34 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 			{!isCompact && (
 				<>
 					{wishlist.welcomeMessage ? (
-						<div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:px-7">
-							<WishlistMessage
-								attribution={wishlist.welcomeMessageAttribution}
-								className="flex-1 border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
-								message={wishlist.welcomeMessage}
-								variant={wishlist.welcomeMessageVariant}
-							/>
+						<div className="flex flex-col gap-8 px-5 py-5 sm:flex-row sm:items-center sm:gap-16 sm:px-4">
 							<EventDetails
-								className="w-full shrink-0 sm:w-56 sm:grid-cols-1"
+								className="flex-1 gap-4 sm:w-72 sm:grid-cols-1"
+								size="md"
 								variant="compact"
 								wishlist={wishlist}
 							/>
+							<div>
+								<WishlistMessage
+									attribution={wishlist.welcomeMessageAttribution}
+									className="border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
+									message={wishlist.welcomeMessage}
+									variant={wishlist.welcomeMessageVariant}
+								/>
+								{wishlist.eventDate && (
+									<Countdown
+										createdAt={wishlist.createdAt}
+										eventDate={wishlist.eventDate}
+										variant={wishlist.countdownVariant}
+									/>
+								)}
+							</div>
 						</div>
 					) : (
 						<EventDetails
 							className="px-5 py-5 sm:px-7"
 							variant="compact"
 							wishlist={wishlist}
-						/>
-					)}
-					{wishlist.eventDate && (
-						<Countdown
-							createdAt={wishlist.createdAt}
-							eventDate={wishlist.eventDate}
-							variant={wishlist.countdownVariant}
 						/>
 					)}
 					{motif && (
@@ -171,29 +163,42 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 				</>
 			)}
 
-			<div className="mt-6 flex flex-wrap items-center justify-between gap-2 px-5 sm:px-7">
-				<h2 className="font-heading font-semibold text-xl">Lista de regalos</h2>
-				<ProgressSummary progress={wishlist.progress} variant="inline" />
-			</div>
+			<div className="relative left-1/2 w-screen -translate-x-1/2">
+				{motif && (
+					<MotifMarginScatter
+						motif={motif}
+						palette={motifPalette}
+						treatment={motifTreatment}
+					/>
+				)}
+				<div className="mx-auto w-full max-w-[1160px]">
+					<div className="mt-6 flex flex-wrap items-center justify-between gap-2 px-5 sm:px-7">
+						<h2 className="font-heading font-semibold text-xl">
+							Lista de regalos
+						</h2>
+						<ProgressSummary progress={wishlist.progress} variant="inline" />
+					</div>
 
-			<section
-				className="mt-3 scroll-mt-[59px] px-5 pb-16 sm:px-7"
-				id="regalos"
-			>
-				<PublicGiftFilters
-					actionsEnabled={mode === "full"}
-					categories={wishlist.categories}
-					compact
-					gifts={wishlist.gifts}
-					layout={layout}
-					motif={motif}
-					motifTreatment={motifTreatment}
-					showCategories={false}
-					showCounts={false}
-					showGridToggle
-					showSort={false}
-				/>
-			</section>
+					<section
+						className="mt-3 scroll-mt-[59px] px-5 pb-16 sm:px-7"
+						id="regalos"
+					>
+						<PublicGiftFilters
+							actionsEnabled={mode === "full"}
+							categories={wishlist.categories}
+							compact
+							gifts={wishlist.gifts}
+							layout={layout}
+							motif={motif}
+							motifTreatment={motifTreatment}
+							showCategories={false}
+							showCounts={false}
+							showGridToggle
+							showSort={false}
+						/>
+					</section>
+				</div>
+			</div>
 
 			{!isCompact && (
 				<WishlistThankYou
