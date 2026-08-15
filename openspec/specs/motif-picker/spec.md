@@ -2,9 +2,7 @@
 
 ## Purpose
 Defines the motif picker UI for wishlist settings, including event-type gating, filtering, treatment/palette controls, and theme suggestions.
-
 ## Requirements
-
 ### Requirement: Motif picker is gated by event type
 
 The motif picker SHALL render only when the wishlist's event type is `baby_shower` or `birthday`. For every other event type the picker SHALL be absent, and the wishlist SHALL retain a null `motifId`.
@@ -23,20 +21,6 @@ The motif picker SHALL render only when the wishlist's event type is `baby_showe
 
 - **WHEN** a wishlist with a selected motif has its event type changed to one outside the gate
 - **THEN** the motif is cleared so the public page does not render a motif the owner can no longer edit
-
-### Requirement: Picker offers only motifs tagged for the event type
-
-The picker SHALL list only catalog entries whose `eventTypes` array includes the wishlist's event type. The picker SHALL never present an empty gallery for a gated event type.
-
-#### Scenario: Baby shower sees all eight sets
-
-- **WHEN** the picker renders for a `baby_shower` wishlist
-- **THEN** all eight motif sets are offered
-
-#### Scenario: Birthday sees only its tagged sets
-
-- **WHEN** the picker renders for a `birthday` wishlist
-- **THEN** exactly `unicorn-rainbow`, `elephant-balloon` and `moon-stars` are offered
 
 ### Requirement: Motif selection is optional and reversible
 
@@ -125,3 +109,18 @@ The mutation persisting a motif selection SHALL validate `motifId` against the c
 
 - **WHEN** a save request carries a valid motif, treatment and palette
 - **THEN** the values persist for that owner's wishlist and the public wishlist path is revalidated
+
+### Requirement: Picker lists motifs tagged for the event type
+
+The picker SHALL list only catalog entries whose `eventTypes` array includes the wishlist's event type. The picker SHALL never present an empty gallery for a gated event type.
+
+#### Scenario: Baby shower sees every set in the catalog
+
+- **WHEN** the picker renders for a `baby_shower` wishlist
+- **THEN** all nine motif sets are offered
+
+#### Scenario: Birthday sees only its tagged sets
+
+- **WHEN** the picker renders for a `birthday` wishlist
+- **THEN** exactly `unicorn-rainbow`, `elephant-balloon`, `moon-stars` and `bow-bloom` are offered
+

@@ -21,6 +21,8 @@ const SHAPES: MotifShapeId[] = [
 	"moon",
 	"leaf",
 	"dino",
+	"bow",
+	"bloom",
 ];
 
 describe("MotifShape", () => {

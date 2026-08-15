@@ -777,4 +777,182 @@ export const SHAPE_SVGS: Record<MotifShapeId, ShapeSvg> = {
 			</>
 		),
 	},
+	bow: {
+		viewBox: "0 0 48 40",
+		width: 48,
+		height: 40,
+		children: (
+			<>
+				{/* tails, notched swallowtail ends, hang below the knot, behind the loops */}
+				<path
+					d="M21 21 L13 37 L17 37 L23 26 L23 21 Q22 20.5 21 21 Z"
+					fill="color-mix(in srgb, var(--m1) 90%, black 10%)"
+				/>
+				<path
+					d="M27 21 L35 37 L31 37 L25 26 L25 21 Q26 20.5 27 21 Z"
+					fill="color-mix(in srgb, var(--m1) 90%, black 10%)"
+				/>
+				{/*
+				 * Loops: concentric circles (outer r=12, inner r=4.3), so the
+				 * band (outer_r - inner_r = 7.7, ~16% of viewBox) and the hole
+				 * (diameter 8.6, exceeds the 8-unit floor) are exact by
+				 * construction at every angle, not just at the curve's widest
+				 * point (design.md decision 3 / tasks 2.1, 6.2).
+				 */}
+				<path
+					d="M0 13 A12 12 0 1 0 24 13 A12 12 0 1 0 0 13 Z M7.7 13 A4.3 4.3 0 1 0 16.3 13 A4.3 4.3 0 1 0 7.7 13 Z"
+					fill="var(--m1)"
+					fillRule="evenodd"
+					stroke="var(--m3)"
+					strokeWidth={1.2}
+				/>
+				<path
+					d="M24 13 A12 12 0 1 0 48 13 A12 12 0 1 0 24 13 Z M31.7 13 A4.3 4.3 0 1 0 40.3 13 A4.3 4.3 0 1 0 31.7 13 Z"
+					fill="var(--m1)"
+					fillRule="evenodd"
+					stroke="var(--m3)"
+					strokeWidth={1.2}
+				/>
+				{/* front-loop highlight */}
+				<ellipse
+					cx={8}
+					cy={6}
+					fill="color-mix(in srgb, var(--m1) 75%, white 25%)"
+					rx={3.5}
+					ry={2.5}
+					transform="rotate(-20 8 6)"
+				/>
+				<ellipse
+					cx={40}
+					cy={6}
+					fill="color-mix(in srgb, var(--m1) 75%, white 25%)"
+					rx={3.5}
+					ry={2.5}
+					transform="rotate(20 40 6)"
+				/>
+				{/* knot */}
+				<rect
+					fill="color-mix(in srgb, var(--m1) 85%, black 15%)"
+					height={13}
+					rx={2}
+					stroke="var(--m3)"
+					strokeWidth={1.2}
+					width={8}
+					x={20}
+					y={9}
+				/>
+			</>
+		),
+	},
+	bloom: {
+		viewBox: "0 0 40 40",
+		width: 40,
+		height: 40,
+		children: (
+			<>
+				{/* outer petal ring, darker shading */}
+				<g fill="color-mix(in srgb, var(--m1) 82%, black 18%)">
+					<ellipse
+						cx={20}
+						cy={7}
+						rx={5.6}
+						ry={8}
+						stroke="var(--m3)"
+						strokeWidth={1}
+					/>
+					<ellipse
+						cx={31}
+						cy={14.5}
+						rx={5.6}
+						ry={8}
+						stroke="var(--m3)"
+						strokeWidth={1}
+						transform="rotate(60 31 14.5)"
+					/>
+					<ellipse
+						cx={29}
+						cy={28}
+						rx={5.4}
+						ry={7.6}
+						stroke="var(--m3)"
+						strokeWidth={1}
+						transform="rotate(125 29 28)"
+					/>
+					<ellipse
+						cx={13}
+						cy={30}
+						rx={5.4}
+						ry={7.6}
+						stroke="var(--m3)"
+						strokeWidth={1}
+						transform="rotate(-125 13 30)"
+					/>
+					<ellipse
+						cx={7.5}
+						cy={16.5}
+						rx={5.6}
+						ry={8}
+						stroke="var(--m3)"
+						strokeWidth={1}
+						transform="rotate(-58 7.5 16.5)"
+					/>
+					<ellipse
+						cx={14}
+						cy={6}
+						rx={5}
+						ry={7}
+						stroke="var(--m3)"
+						strokeWidth={1}
+						transform="rotate(-25 14 6)"
+					/>
+				</g>
+				{/* inner petal ring, inset and rotated off the outer ring */}
+				<g fill="var(--m1)">
+					<ellipse
+						cx={20}
+						cy={11}
+						rx={3.6}
+						ry={5.4}
+						transform="rotate(30 20 11)"
+					/>
+					<ellipse
+						cx={27.5}
+						cy={16.5}
+						rx={3.6}
+						ry={5.4}
+						transform="rotate(95 27.5 16.5)"
+					/>
+					<ellipse
+						cx={25}
+						cy={25.5}
+						rx={3.4}
+						ry={5.1}
+						transform="rotate(155 25 25.5)"
+					/>
+					<ellipse
+						cx={15}
+						cy={26}
+						rx={3.4}
+						ry={5.1}
+						transform="rotate(-155 15 26)"
+					/>
+					<ellipse
+						cx={12.5}
+						cy={16.5}
+						rx={3.6}
+						ry={5.4}
+						transform="rotate(-95 12.5 16.5)"
+					/>
+				</g>
+				{/* serrated center disc */}
+				<path
+					d="M20 14.5 L21.6 16.6 L24 16 L23.4 18.4 L25.5 19.7 L23.2 20.9 L23.7 23.3 L21.3 22.8 L20 25 L18.7 22.8 L16.3 23.3 L16.8 20.9 L14.5 19.7 L16.6 18.4 L16 16 L18.4 16.6 Z"
+					fill="var(--m2)"
+					stroke="var(--m3)"
+					strokeWidth={0.8}
+				/>
+				<circle cx={20} cy={19.7} fill="var(--m3)" r={1.4} />
+			</>
+		),
+	},
 };

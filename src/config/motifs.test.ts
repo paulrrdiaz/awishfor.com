@@ -9,8 +9,8 @@ import {
 } from "./motifs";
 
 describe("MOTIF_PRESETS", () => {
-	it("contains exactly eight entries", () => {
-		expect(MOTIF_PRESETS).toHaveLength(8);
+	it("contains exactly nine entries", () => {
+		expect(MOTIF_PRESETS).toHaveLength(9);
 	});
 
 	it("gives every entry a non-empty eventTypes array", () => {
@@ -24,6 +24,16 @@ describe("MOTIF_PRESETS", () => {
 		for (const motif of MOTIF_PRESETS) {
 			expect(themeIds.has(motif.suggestedThemeId)).toBe(true);
 		}
+	});
+
+	it("gives bow-bloom a secondaryColors override and a valid suggestedThemeId", () => {
+		const bowBloom = resolveMotif("bow-bloom");
+		const themeIds = new Set(PUBLIC_THEME_PRESETS.map((theme) => theme.id));
+		expect(bowBloom).not.toBeNull();
+		expect(bowBloom?.secondaryColors).toBeDefined();
+		expect(themeIds.has(bowBloom?.suggestedThemeId ?? "cielo-suave")).toBe(
+			true,
+		);
 	});
 });
 
@@ -42,17 +52,17 @@ describe("resolveMotif", () => {
 });
 
 describe("getMotifsForEventType", () => {
-	it("returns exactly unicorn-rainbow, elephant-balloon and moon-stars for birthday", () => {
+	it("returns exactly unicorn-rainbow, elephant-balloon, moon-stars and bow-bloom for birthday", () => {
 		const ids = getMotifsForEventType("birthday")
 			.map((motif) => motif.id)
 			.sort();
 		expect(ids).toEqual(
-			["elephant-balloon", "moon-stars", "unicorn-rainbow"].sort(),
+			["bow-bloom", "elephant-balloon", "moon-stars", "unicorn-rainbow"].sort(),
 		);
 	});
 
-	it("returns all eight sets for baby_shower", () => {
-		expect(getMotifsForEventType("baby_shower")).toHaveLength(8);
+	it("returns all nine sets for baby_shower", () => {
+		expect(getMotifsForEventType("baby_shower")).toHaveLength(9);
 	});
 });
 

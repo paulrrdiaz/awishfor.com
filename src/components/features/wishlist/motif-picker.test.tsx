@@ -52,7 +52,7 @@ describe("MotifPicker", () => {
 		expect(birthday).not.toBeEmptyDOMElement();
 	});
 
-	it("offers all eight sets for baby_shower", () => {
+	it("offers all nine sets for baby_shower", () => {
 		render(
 			<MotifPicker
 				eventType="baby_shower"
@@ -65,13 +65,13 @@ describe("MotifPicker", () => {
 				themeId="cielo-suave"
 			/>,
 		);
-		// "Sin motivo" + 8 motif sets
+		// "Sin motivo" + 9 motif sets
 		expect(screen.getAllByRole("button", { pressed: false }).length + 1).toBe(
-			9,
+			10,
 		);
 	});
 
-	it("offers exactly three sets for birthday", () => {
+	it("offers exactly four sets for birthday", () => {
 		render(
 			<MotifPicker
 				eventType="birthday"
@@ -87,6 +87,7 @@ describe("MotifPicker", () => {
 		expect(screen.getByText("Unicornio y arcoíris")).toBeInTheDocument();
 		expect(screen.getByText("Elefante y globo")).toBeInTheDocument();
 		expect(screen.getByText("Luna y estrellas")).toBeInTheDocument();
+		expect(screen.getByText("Lazos y flores")).toBeInTheDocument();
 		expect(screen.queryByText("Osito y nube")).not.toBeInTheDocument();
 	});
 

@@ -10,7 +10,8 @@ export type MotifId =
 	| "duck-boat"
 	| "elephant-balloon"
 	| "moon-stars"
-	| "dino-leaf";
+	| "dino-leaf"
+	| "bow-bloom";
 
 export const MOTIF_IDS: MotifId[] = [
 	"bear-cloud",
@@ -21,6 +22,7 @@ export const MOTIF_IDS: MotifId[] = [
 	"elephant-balloon",
 	"moon-stars",
 	"dino-leaf",
+	"bow-bloom",
 ];
 
 export type MotifShape =
@@ -39,7 +41,9 @@ export type MotifShape =
 	| "balloon"
 	| "moon"
 	| "leaf"
-	| "dino";
+	| "dino"
+	| "bow"
+	| "bloom";
 
 export type MotifTreatment = "scene" | "band";
 export const MOTIF_TREATMENTS: MotifTreatment[] = ["scene", "band"];
@@ -156,6 +160,16 @@ export const MOTIF_PRESETS: MotifPreset[] = [
 		secondaryColors: { m1: "#5E7A48", m3: "#33421F" },
 		m3Inverted: "#3B4F2A",
 		suggestedThemeId: "jardin-verde",
+	},
+	{
+		id: "bow-bloom",
+		label: "Lazos y flores",
+		shapes: ["bow", "bloom"],
+		eventTypes: ["baby_shower", "birthday"],
+		colors: { m1: "#E3A0B4", m2: "#F5E7D8", m3: "#6B3D4C" },
+		secondaryColors: { m1: "#EFB98A" },
+		m3Inverted: "#5A2F3C",
+		suggestedThemeId: "cielo-suave-rosa",
 	},
 ];
 
