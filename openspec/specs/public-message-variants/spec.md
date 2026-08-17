@@ -2,9 +2,7 @@
 
 ## Purpose
 Defines the selectable presentation variants for the public wishlist's countdown, welcome message, and thank-you message — their catalog and ids, theme-token-only styling, cross-layout consistency, single-renderer ownership per component, graceful degradation when backing data is absent, the countdown progress-bar's elapsed-time math, and the owner-facing variant pickers in the settings form.
-
 ## Requirements
-
 ### Requirement: Message variants selectable by id
 
 The system SHALL expose a catalog of variants for three public wishlist components — countdown, welcome message, and thank-you message — each variant identified by a stable kebab-case id and resolved through a config module in the same shape as theme, layout, and button-style presets.
@@ -92,6 +90,16 @@ Each variant SHALL render meaningfully when the optional data it decorates with 
 - **WHEN** a wishlist has no event date
 - **THEN** no countdown variant renders
 
+#### Scenario: Welcome variant without delivery details
+
+- **WHEN** any welcome variant renders and the wishlist has no delivery address
+- **THEN** the message body renders without the postscript, its introductory copy, its separator, and its copy action
+
+#### Scenario: Welcome variant with partial delivery details
+
+- **WHEN** any welcome variant renders and the wishlist has a delivery address but no recipient name or no phone
+- **THEN** the postscript renders with only the present fields and no orphaned separator or emphasized empty name
+
 ### Requirement: Countdown progress bar spans list creation to the event
 
 The countdown `progress-bar` variant SHALL visualize elapsed time between the wishlist's creation date and the event date, clamped to a 0–100% range.
@@ -122,3 +130,23 @@ Each picker SHALL show a visual thumbnail per option and SHALL indicate the curr
 
 - **WHEN** the owner opens the settings form for a wishlist with no stored variant selections
 - **THEN** each picker indicates that component's default variant as selected
+
+### Requirement: Welcome variants share one optional postscript slot
+
+All three welcome variants SHALL render the delivery postscript through a single shared slot rather than each implementing its own. Adding delivery details SHALL NOT change which welcome variant is selected, SHALL NOT add a variant to the catalog, and SHALL NOT change the appearance of a wishlist that has no delivery address.
+
+#### Scenario: One slot serves every variant
+
+- **WHEN** the welcome message renders under the `postcard`, `handwritten`, or `avatars` variant with a delivery address present
+- **THEN** the postscript renders from the shared slot in all three, with no variant inlining its own postscript markup
+
+#### Scenario: Selected variant is unaffected by delivery details
+
+- **WHEN** a host adds or removes delivery details
+- **THEN** the wishlist's selected welcome variant is unchanged and the catalog of selectable variants is unchanged
+
+#### Scenario: Wishlist without delivery details is visually unchanged
+
+- **WHEN** a wishlist has no delivery address
+- **THEN** its welcome card renders exactly as it did before the postscript slot existed, with no divider, spacer, or empty container left behind
+

@@ -172,6 +172,15 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [welcomeMessageAttribution, setWelcomeMessageAttribution] = useState(
 		wishlist.welcomeMessageAttribution ?? "",
 	);
+	const [deliveryRecipientName, setDeliveryRecipientName] = useState(
+		wishlist.deliveryRecipientName ?? "",
+	);
+	const [deliveryAddress, setDeliveryAddress] = useState(
+		wishlist.deliveryAddress ?? "",
+	);
+	const [deliveryPhone, setDeliveryPhone] = useState(
+		wishlist.deliveryPhone ?? "",
+	);
 	const [thankYouMessage, setThankYouMessage] = useState(
 		wishlist.thankYouMessage ?? "",
 	);
@@ -254,8 +263,11 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		onError: () => toast.error("No se pudo restaurar la lista"),
 	});
 
+	const welcomeMessageError = welcomeMessage.trim().length === 0;
+
 	const canSave =
 		title.trim().length > 0 &&
+		!welcomeMessageError &&
 		slugStatus !== "taken" &&
 		slugStatus !== "invalid" &&
 		!rsvpDeadlineError &&
@@ -281,6 +293,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			dressCode: dressCode || null,
 			welcomeMessage: welcomeMessage || null,
 			welcomeMessageAttribution: welcomeMessageAttribution || null,
+			deliveryRecipientName: deliveryRecipientName || null,
+			deliveryAddress: deliveryAddress || null,
+			deliveryPhone: deliveryPhone || null,
 			thankYouMessage: thankYouMessage || null,
 			countdownVariant,
 			welcomeMessageVariant,
@@ -427,8 +442,11 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					<h2 className="font-medium text-base">Contenido</h2>
 
 					<div className="space-y-1.5">
-						<Label htmlFor="welcomeMessage">Mensaje de bienvenida</Label>
+						<Label htmlFor="welcomeMessage">
+							Mensaje de bienvenida <span className="text-destructive">*</span>
+						</Label>
 						<textarea
+							aria-invalid={welcomeMessageError}
 							className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 							id="welcomeMessage"
 							onChange={(e) => setWelcomeMessage(e.target.value)}
@@ -436,6 +454,11 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							rows={4}
 							value={welcomeMessage}
 						/>
+						{welcomeMessageError && (
+							<p className="text-destructive text-xs">
+								El mensaje de bienvenida es obligatorio.
+							</p>
+						)}
 					</div>
 
 					<div className="space-y-1.5">
@@ -460,6 +483,58 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							Aparecerá debajo del mensaje de bienvenida y del mensaje de
 							agradecimiento en tu lista pública.
 						</p>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label htmlFor="deliveryRecipientName">
+							Nombre del destinatario{" "}
+							<span className="font-normal text-muted-foreground text-xs">
+								(opcional)
+							</span>
+						</Label>
+						<Input
+							id="deliveryRecipientName"
+							maxLength={120}
+							onChange={(e) => setDeliveryRecipientName(e.target.value)}
+							placeholder="Ej. Ana Beltrán"
+							value={deliveryRecipientName}
+						/>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label htmlFor="deliveryAddress">
+							Dirección de envío{" "}
+							<span className="font-normal text-muted-foreground text-xs">
+								(opcional)
+							</span>
+						</Label>
+						<Input
+							id="deliveryAddress"
+							maxLength={240}
+							onChange={(e) => setDeliveryAddress(e.target.value)}
+							placeholder="Ej. Av. Universidad 1500, Col. Narvarte, CDMX"
+							value={deliveryAddress}
+						/>
+						<p className="text-muted-foreground text-xs">
+							Si la dejas vacía, no se mostrará ninguna opción de envío a
+							domicilio en tu lista pública.
+						</p>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label htmlFor="deliveryPhone">
+							Teléfono de envío{" "}
+							<span className="font-normal text-muted-foreground text-xs">
+								(opcional)
+							</span>
+						</Label>
+						<Input
+							id="deliveryPhone"
+							maxLength={40}
+							onChange={(e) => setDeliveryPhone(e.target.value)}
+							placeholder="Ej. +52 55 1122 3344"
+							value={deliveryPhone}
+						/>
 					</div>
 
 					<div className="space-y-1.5">

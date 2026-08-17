@@ -25,6 +25,7 @@ import {
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
+import { composeDelivery } from "@/lib/format/delivery";
 import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import { resolveHeroSlots } from "@/lib/hero-slots";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
@@ -47,6 +48,11 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 	const motif = resolveMotif(wishlist.motifId);
 	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
+	const delivery = composeDelivery(
+		wishlist.deliveryRecipientName,
+		wishlist.deliveryAddress,
+		wishlist.deliveryPhone,
+	);
 	const heroRef = useRef<HTMLElement>(null);
 	useMotifTilt(heroRef);
 	const carouselImages =
@@ -148,13 +154,12 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 							treatment={motifTreatment}
 						/>
 					)}
-					{wishlist.welcomeMessage && (
-						<WishlistMessage
-							attribution={wishlist.welcomeMessageAttribution}
-							message={wishlist.welcomeMessage}
-							variant={wishlist.welcomeMessageVariant}
-						/>
-					)}
+					<WishlistMessage
+						attribution={wishlist.welcomeMessageAttribution}
+						delivery={delivery}
+						message={wishlist.welcomeMessage}
+						variant={wishlist.welcomeMessageVariant}
+					/>
 				</>
 			)}
 
@@ -176,6 +181,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 						actionsEnabled={mode === "full"}
 						categories={wishlist.categories}
 						compact
+						delivery={delivery}
 						gifts={wishlist.gifts}
 						layout={layout}
 						motif={motif}

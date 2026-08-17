@@ -15,6 +15,7 @@ import {
 	resolveMotifTreatment,
 } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
+import { composeDelivery } from "@/lib/format/delivery";
 import { sortGifts } from "@/lib/wishlist/gift-filters";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 
@@ -41,6 +42,11 @@ export function PublicWishlistBody({
 	const motif = resolveMotif(wishlist.motifId);
 	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
+	const delivery = composeDelivery(
+		wishlist.deliveryRecipientName,
+		wishlist.deliveryAddress,
+		wishlist.deliveryPhone,
+	);
 
 	return (
 		<>
@@ -62,9 +68,10 @@ export function PublicWishlistBody({
 				/>
 			)}
 
-			{!isCompact && wishlist.welcomeMessage && (
+			{!isCompact && (
 				<WishlistMessage
 					attribution={wishlist.welcomeMessageAttribution}
+					delivery={delivery}
 					message={wishlist.welcomeMessage}
 					variant={wishlist.welcomeMessageVariant}
 				/>
@@ -89,6 +96,7 @@ export function PublicWishlistBody({
 						<PublicGiftFilters
 							actionsEnabled
 							categories={wishlist.categories}
+							delivery={delivery}
 							gifts={wishlist.gifts}
 							layout={layout}
 							motif={motif}

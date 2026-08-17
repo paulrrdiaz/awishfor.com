@@ -86,6 +86,8 @@ The system SHALL mark every `/w/[slug]` response as `noindex` so public wishlist
 
 The public wishlist page SHALL allow a guest to open a purchase modal from a non-purchased gift's primary action. The modal SHALL require a guest name of 2 to 80 characters; accept an optional email validated when present, an optional phone validated when present, and an optional message of at most 500 characters; show a quantity selector only when the gift's remaining quantity is greater than one, constrained between one and the remaining quantity; display the exact guest consent copy "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."; and surface loading and error states while submitting. The product link SHALL be disabled for gifts whose public status is purchased.
 
+When the wishlist has a delivery address, the modal's form phase SHALL also present the wishlist's delivery details as a contained block with a single copy action, visually distinct from the consent copy. The block SHALL NOT appear in the modal's success, undo, loading, or error states, and SHALL NOT appear when the wishlist has no delivery address.
+
 The modal SHALL render as a bottom sheet on mobile (below `md`) and as a centered dialog at `md` and above, with a sticky 48px footer holding the primary actions.
 
 #### Scenario: Guest opens the purchase modal
@@ -124,6 +126,18 @@ The modal SHALL render as a bottom sheet on mobile (below `md`) and as a centere
 #### Scenario: Purchased gift product link disabled
 - **WHEN** a gift's public status is purchased
 - **THEN** the gift's product link is disabled
+
+#### Scenario: Delivery block renders in the form phase
+- **WHEN** a guest opens the purchase modal on a wishlist that has a delivery address
+- **THEN** the form phase shows the delivery details as a contained block with a single copy action
+
+#### Scenario: Delivery block absent without an address
+- **WHEN** a guest opens the purchase modal on a wishlist with no delivery address
+- **THEN** no delivery block renders and the form is otherwise unchanged
+
+#### Scenario: Delivery block absent after submitting
+- **WHEN** the purchase succeeds and the modal moves to its success or undo state
+- **THEN** the delivery block is not shown in those states
 
 ### Requirement: Guest purchase success and undo state
 

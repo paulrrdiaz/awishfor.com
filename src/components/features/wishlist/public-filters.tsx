@@ -18,6 +18,7 @@ import {
 import { GiftList } from "@/components/shared/gift-list";
 import type { MotifPreset, MotifTreatment } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
+import type { ComposedDelivery } from "@/lib/format/delivery";
 import { useReducedMotion } from "@/lib/gsap/use-reduced-motion";
 import {
 	buildCategoryFilters,
@@ -47,6 +48,7 @@ type Props = {
 	toolbarLeading?: ReactNode;
 	motif?: MotifPreset | null;
 	motifTreatment?: MotifTreatment;
+	delivery?: ComposedDelivery | null;
 };
 
 type EmptyStateCopy = { copy: string; ctaLabel: string };
@@ -105,6 +107,7 @@ export function PublicGiftFilters({
 	toolbarLeading,
 	motif,
 	motifTreatment,
+	delivery,
 }: Props) {
 	const [activeFilter, setActiveFilter] = useState<GiftFilter>(DEFAULT_FILTER);
 	const [sortMode, setSortMode] = useState<GiftSortMode>(DEFAULT_SORT_MODE);
@@ -350,6 +353,7 @@ export function PublicGiftFilters({
 			</div>
 			{actionsEnabled && selectedGift && (
 				<PurchaseGiftModal
+					delivery={delivery}
 					gift={selectedGift}
 					onOpenChange={(open) => {
 						if (!open) setSelectedGift(null);

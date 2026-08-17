@@ -83,7 +83,7 @@ model Wishlist {
   eventType       EventType
   language        Locale         @default(es)
   currency        Currency       @default(PEN)
-  welcomeMessage  String?
+  welcomeMessage  String
   welcomeMessageAttribution String?
   thankYouMessage String?
   eventDate       DateTime?
@@ -91,6 +91,9 @@ model Wishlist {
   rsvpDeadline    DateTime?
   eventLocation   String?
   dressCode       String?
+  deliveryRecipientName String?
+  deliveryAddress String?
+  deliveryPhone   String?
   themeId         String?
   layoutId        String?
   buttonStyle     String?

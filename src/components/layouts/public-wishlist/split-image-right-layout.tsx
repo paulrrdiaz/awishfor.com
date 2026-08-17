@@ -18,6 +18,7 @@ import {
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
+import { composeDelivery } from "@/lib/format/delivery";
 import { resolveHeroSlots } from "@/lib/hero-slots";
 import { cn } from "@/lib/utils";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
@@ -54,6 +55,11 @@ export function SplitImageRightLayout({
 	const motif = resolveMotif(wishlist.motifId);
 	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
+	const delivery = composeDelivery(
+		wishlist.deliveryRecipientName,
+		wishlist.deliveryAddress,
+		wishlist.deliveryPhone,
+	);
 
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
@@ -111,14 +117,13 @@ export function SplitImageRightLayout({
 								</div>
 							)}
 
-							{wishlist.welcomeMessage && (
-								<WishlistMessage
-									attribution={wishlist.welcomeMessageAttribution}
-									className="mt-6 border-none px-0 pb-0"
-									message={wishlist.welcomeMessage}
-									variant={wishlist.welcomeMessageVariant}
-								/>
-							)}
+							<WishlistMessage
+								attribution={wishlist.welcomeMessageAttribution}
+								className="mt-6 border-none px-0 pb-0"
+								delivery={delivery}
+								message={wishlist.welcomeMessage}
+								variant={wishlist.welcomeMessageVariant}
+							/>
 						</>
 					)}
 
@@ -160,6 +165,7 @@ export function SplitImageRightLayout({
 								actionsEnabled={mode === "full"}
 								categories={wishlist.categories}
 								compact
+								delivery={delivery}
 								gifts={wishlist.gifts}
 								layout={layout}
 								motif={motif}

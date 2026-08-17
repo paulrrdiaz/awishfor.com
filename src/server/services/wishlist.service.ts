@@ -1,10 +1,16 @@
 import { TRPCError } from "@trpc/server";
+import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import type {
 	CountdownVariantId,
 	ThankYouVariantId,
 	WelcomeVariantId,
 } from "@/config/public-message-variants";
-import type { Category, Prisma, Wishlist } from "@/generated/prisma/client";
+import type {
+	Category,
+	EventType,
+	Prisma,
+	Wishlist,
+} from "@/generated/prisma/client";
 import {
 	Currency,
 	GiftVisibilityStatus,
@@ -159,6 +165,16 @@ const draftWishlistInclude = {
 const toDraftDate = (eventDate: string | null | undefined) =>
 	eventDate ? new Date(`${eventDate}T00:00:00.000Z`) : null;
 
+export const resolveWelcomeMessage = (
+	eventType: EventType,
+	welcomeMessage: string | null | undefined,
+): string => {
+	const trimmed = welcomeMessage?.trim();
+	return trimmed
+		? trimmed
+		: EVENT_TYPE_PRESETS[eventType].defaultWelcomeMessage;
+};
+
 const sortDraftGifts = (gifts: SaveDraftGiftInput[]) =>
 	[...gifts]
 		.map((gift, index) => ({ gift, index }))
@@ -171,7 +187,7 @@ const wishlistDraftToData = (input: SaveDraftDraftContent) => ({
 	eventType: input.eventType,
 	language: input.language ?? Locale.es,
 	currency: input.currency ?? Currency.PEN,
-	welcomeMessage: input.welcomeMessage ?? null,
+	welcomeMessage: resolveWelcomeMessage(input.eventType, input.welcomeMessage),
 	thankYouMessage: input.thankYouMessage ?? null,
 	eventDate: toDraftDate(input.eventDate ?? null),
 	eventTime: input.eventTime ?? null,
@@ -375,13 +391,19 @@ export const createWishlist = async (
 			eventType: input.eventType,
 			language: input.language ?? Locale.es,
 			currency: input.currency ?? Currency.PEN,
-			welcomeMessage: input.welcomeMessage ?? null,
+			welcomeMessage: resolveWelcomeMessage(
+				input.eventType,
+				input.welcomeMessage,
+			),
 			welcomeMessageAttribution: input.welcomeMessageAttribution ?? null,
 			thankYouMessage: input.thankYouMessage ?? null,
 			eventDate: input.eventDate ?? null,
 			eventTime: input.eventTime ?? null,
 			eventLocation: input.eventLocation ?? null,
 			dressCode: input.dressCode ?? null,
+			deliveryRecipientName: input.deliveryRecipientName ?? null,
+			deliveryAddress: input.deliveryAddress ?? null,
+			deliveryPhone: input.deliveryPhone ?? null,
 			images: {
 				create: buildCoverImageRecords(input.coverImages ?? []),
 			},

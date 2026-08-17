@@ -36,6 +36,7 @@ import {
 	archiveWishlist,
 	publishWishlist,
 	publishWishlistFromWizard,
+	resolveWelcomeMessage,
 	restoreWishlist,
 	saveWishlistDraft,
 } from "@/server/services/wishlist.service";
@@ -127,6 +128,9 @@ export const wishlistRouter = createTRPCRouter({
 				rsvpDeadline: wishlist.rsvpDeadline?.toISOString() ?? null,
 				eventLocation: wishlist.eventLocation,
 				dressCode: wishlist.dressCode,
+				deliveryRecipientName: wishlist.deliveryRecipientName,
+				deliveryAddress: wishlist.deliveryAddress,
+				deliveryPhone: wishlist.deliveryPhone,
 				images: wishlist.images.map((image) => ({
 					url: image.url,
 					width: image.width,
@@ -404,8 +408,14 @@ export const wishlistRouter = createTRPCRouter({
 						rsvpDeadline: input.rsvpDeadline ?? null,
 						eventLocation: input.eventLocation ?? null,
 						dressCode: input.dressCode ?? null,
-						welcomeMessage: input.welcomeMessage ?? null,
+						welcomeMessage: resolveWelcomeMessage(
+							existing.eventType,
+							input.welcomeMessage,
+						),
 						welcomeMessageAttribution: input.welcomeMessageAttribution ?? null,
+						deliveryRecipientName: input.deliveryRecipientName ?? null,
+						deliveryAddress: input.deliveryAddress ?? null,
+						deliveryPhone: input.deliveryPhone ?? null,
 						thankYouMessage: input.thankYouMessage ?? null,
 						countdownVariant: input.countdownVariant ?? null,
 						welcomeMessageVariant: input.welcomeMessageVariant ?? null,

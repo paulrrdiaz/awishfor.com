@@ -10,6 +10,7 @@ import {
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PurchaseGiftModal } from "@/components/features/wishlist/purchase-gift-modal";
+import { composeDelivery } from "@/lib/format/delivery";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 
 const mutateMock = vi.hoisted(() => vi.fn());
@@ -101,9 +102,24 @@ function makeGift(
 	};
 }
 
-function renderModal(gift = makeGift(), onOpenChange = vi.fn()) {
+const SAMPLE_DELIVERY = composeDelivery(
+	"Ana Beltrán",
+	"Av. Universidad 1500, CDMX",
+	"+52 55 1122 3344",
+);
+
+function renderModal(
+	gift = makeGift(),
+	onOpenChange = vi.fn(),
+	delivery: ReturnType<typeof composeDelivery> | undefined = undefined,
+) {
 	return render(
-		<PurchaseGiftModal gift={gift} onOpenChange={onOpenChange} open />,
+		<PurchaseGiftModal
+			delivery={delivery}
+			gift={gift}
+			onOpenChange={onOpenChange}
+			open
+		/>,
 	);
 }
 
@@ -121,6 +137,41 @@ describe("PurchaseGiftModal", () => {
 					/Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista\./i,
 				),
 			).toBeTruthy();
+		});
+	});
+
+	describe("delivery block", () => {
+		it("renders the delivery block in the form phase when a delivery address is present", () => {
+			renderModal(makeGift(), vi.fn(), SAMPLE_DELIVERY);
+
+			expect(screen.getByText("👤")).toBeTruthy();
+			expect(screen.getByText("Ana Beltrán")).toBeTruthy();
+			expect(screen.getByText("📍")).toBeTruthy();
+			expect(screen.getByText("Av. Universidad 1500, CDMX")).toBeTruthy();
+			expect(screen.getByText("📱")).toBeTruthy();
+			expect(screen.getByText("+52 55 1122 3344")).toBeTruthy();
+			expect(screen.getByRole("button", { name: /copiar/i })).toBeTruthy();
+		});
+
+		it("does not render the delivery block when there is no delivery address", () => {
+			renderModal(makeGift(), vi.fn(), null);
+
+			expect(screen.queryByText("Ana Beltrán")).toBeNull();
+			expect(screen.queryByRole("button", { name: /copiar/i })).toBeNull();
+		});
+
+		it("does not render the delivery block in the success/undo state", () => {
+			renderModal(makeGift(), vi.fn(), SAMPLE_DELIVERY);
+
+			act(() => {
+				mockCallbacks.purchaseSuccess?.({
+					purchase: { id: "purchase-1" },
+					undoToken: "raw-token-abc",
+				});
+			});
+
+			expect(screen.queryByText("Ana Beltrán")).toBeNull();
+			expect(screen.queryByRole("button", { name: /copiar/i })).toBeNull();
 		});
 	});
 

@@ -4,6 +4,8 @@ import { CheckCircle2, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { CopyButton } from "@/components/shared/copy-button";
+import { DeliveryItems } from "@/components/shared/delivery-items";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -14,6 +16,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import type { ComposedDelivery } from "@/lib/format/delivery";
 import { useSuccessCheckMotion } from "@/lib/gsap/use-success-check-motion";
 import { useSurfaceMotion } from "@/lib/gsap/use-surface-motion";
 import { useUndoRing } from "@/lib/gsap/use-undo-ring";
@@ -31,6 +34,7 @@ type Props = {
 	gift: PublicGiftViewModel;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	delivery?: ComposedDelivery | null;
 	debugState?: {
 		phase: Phase;
 		guestName?: string;
@@ -60,6 +64,7 @@ export function PurchaseGiftModal({
 	gift,
 	open,
 	onOpenChange,
+	delivery,
 	debugState,
 }: Props) {
 	const router = useRouter();
@@ -530,6 +535,17 @@ export function PurchaseGiftModal({
 											type="number"
 											value={quantity}
 										/>
+									</div>
+								)}
+
+								{/* Delivery details — form phase only */}
+								{renderedPhase === "form" && delivery && (
+									<div className="flex flex-col gap-2 rounded-lg border border-border bg-muted p-3">
+										<p className="font-medium text-xs uppercase tracking-wide">
+											¿Prefieres enviarlo a casa?
+										</p>
+										<DeliveryItems className="text-sm" delivery={delivery} />
+										<CopyButton className="self-start" value={delivery.line} />
 									</div>
 								)}
 

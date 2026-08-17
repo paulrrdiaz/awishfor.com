@@ -21,7 +21,7 @@ function makeWishlist(
 		eventType: "birthday",
 		language: "es",
 		currency: "PEN",
-		welcomeMessage: null,
+		welcomeMessage: "Welcome!",
 		welcomeMessageAttribution: null,
 		thankYouMessage: null,
 		eventDate: null,
@@ -29,6 +29,9 @@ function makeWishlist(
 		rsvpDeadline: null,
 		eventLocation: null,
 		dressCode: null,
+		deliveryRecipientName: null,
+		deliveryAddress: null,
+		deliveryPhone: null,
 		themeId: null,
 		layoutId: null,
 		buttonStyle: null,
@@ -114,6 +117,22 @@ describe("mapPublicWishlist", () => {
 		});
 
 		expect(result.welcomeMessageAttribution).toBe("Lucía y Marco");
+	});
+
+	it("includes delivery details", () => {
+		const result = mapPublicWishlist({
+			...makeWishlist({
+				deliveryRecipientName: "Ana Beltrán",
+				deliveryAddress: "Av. Universidad 1500",
+				deliveryPhone: "+52 55 1122 3344",
+			}),
+			categories: [],
+			gifts: [],
+		});
+
+		expect(result.deliveryRecipientName).toBe("Ana Beltrán");
+		expect(result.deliveryAddress).toBe("Av. Universidad 1500");
+		expect(result.deliveryPhone).toBe("+52 55 1122 3344");
 	});
 
 	it("includes visible gifts", () => {

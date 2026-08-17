@@ -126,6 +126,68 @@ describe("wishlist message attribution validation", () => {
 	});
 });
 
+describe("wishlist delivery details validation", () => {
+	const validSettings = {
+		id: "wishlist_123",
+		title: "Lista de boda",
+		slug: "lista-de-boda",
+		language: "es",
+		currency: "PEN",
+		showHowItWorks: true,
+	};
+
+	it("trims delivery fields and turns whitespace-only values into null", () => {
+		const result = updateWishlistSettingsSchema.parse({
+			...validSettings,
+			deliveryRecipientName: "  Ana Beltrán  ",
+			deliveryAddress: "  Av. Universidad 1500  ",
+			deliveryPhone: "  +52 55 1122 3344  ",
+		});
+
+		expect(result.deliveryRecipientName).toBe("Ana Beltrán");
+		expect(result.deliveryAddress).toBe("Av. Universidad 1500");
+		expect(result.deliveryPhone).toBe("+52 55 1122 3344");
+
+		const blank = updateWishlistSettingsSchema.parse({
+			...validSettings,
+			deliveryRecipientName: "   ",
+			deliveryAddress: "   ",
+			deliveryPhone: "   ",
+		});
+
+		expect(blank.deliveryRecipientName).toBeNull();
+		expect(blank.deliveryAddress).toBeNull();
+		expect(blank.deliveryPhone).toBeNull();
+	});
+
+	it("limits the recipient name to 120 characters", () => {
+		expect(() =>
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				deliveryRecipientName: "a".repeat(121),
+			}),
+		).toThrow("Delivery recipient name must be at most 120 characters");
+	});
+
+	it("limits the address to 240 characters", () => {
+		expect(() =>
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				deliveryAddress: "a".repeat(241),
+			}),
+		).toThrow("Delivery address must be at most 240 characters");
+	});
+
+	it("limits the phone to 40 characters", () => {
+		expect(() =>
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				deliveryPhone: "a".repeat(41),
+			}),
+		).toThrow("Delivery phone must be at most 40 characters");
+	});
+});
+
 describe("wishlist cover images validation", () => {
 	it("accepts up to six url/width/height records", () => {
 		const images = Array.from({ length: 6 }, (_, index) => ({

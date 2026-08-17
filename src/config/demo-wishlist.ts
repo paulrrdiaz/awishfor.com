@@ -24,6 +24,9 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	rsvpDeadline: null,
 	eventLocation: "Jardín Las Acacias",
 	dressCode: "Casual chic, tonos pastel",
+	deliveryRecipientName: "Familia Gómez",
+	deliveryAddress: "Av. Las Acacias 245, Dpto. 302, San Isidro, Lima",
+	deliveryPhone: "+51 999 888 777",
 	images: [
 		{
 			url: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9",

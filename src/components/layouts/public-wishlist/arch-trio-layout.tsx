@@ -26,6 +26,7 @@ import {
 } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
+import { composeDelivery } from "@/lib/format/delivery";
 import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import { resolveHeroSlots } from "@/lib/hero-slots";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
@@ -50,6 +51,11 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 	const motif = resolveMotif(wishlist.motifId);
 	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
+	const delivery = composeDelivery(
+		wishlist.deliveryRecipientName,
+		wishlist.deliveryAddress,
+		wishlist.deliveryPhone,
+	);
 	const heroRef = useRef<HTMLElement>(null);
 	useMotifTilt(heroRef);
 
@@ -118,37 +124,30 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 
 			{!isCompact && (
 				<>
-					{wishlist.welcomeMessage ? (
-						<div className="flex flex-col gap-8 px-5 py-5 sm:flex-row sm:items-center sm:gap-16 sm:px-4">
-							<EventDetails
-								className="flex-1 gap-4 sm:w-72 sm:grid-cols-1"
-								size="md"
-								variant="compact"
-								wishlist={wishlist}
-							/>
-							<div>
-								<WishlistMessage
-									attribution={wishlist.welcomeMessageAttribution}
-									className="border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
-									message={wishlist.welcomeMessage}
-									variant={wishlist.welcomeMessageVariant}
-								/>
-								{wishlist.eventDate && (
-									<Countdown
-										createdAt={wishlist.createdAt}
-										eventDate={wishlist.eventDate}
-										variant={wishlist.countdownVariant}
-									/>
-								)}
-							</div>
-						</div>
-					) : (
+					<div className="flex flex-col gap-8 px-5 py-5 sm:flex-row sm:items-center sm:gap-16 sm:px-4">
 						<EventDetails
-							className="px-5 py-5 sm:px-7"
+							className="flex-1 gap-4 sm:w-72 sm:grid-cols-1"
+							size="md"
 							variant="compact"
 							wishlist={wishlist}
 						/>
-					)}
+						<div>
+							<WishlistMessage
+								attribution={wishlist.welcomeMessageAttribution}
+								className="border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
+								delivery={delivery}
+								message={wishlist.welcomeMessage}
+								variant={wishlist.welcomeMessageVariant}
+							/>
+							{wishlist.eventDate && (
+								<Countdown
+									createdAt={wishlist.createdAt}
+									eventDate={wishlist.eventDate}
+									variant={wishlist.countdownVariant}
+								/>
+							)}
+						</div>
+					</div>
 					{motif && (
 						<MotifDivider
 							motif={motif}
@@ -193,6 +192,7 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 							actionsEnabled={mode === "full"}
 							categories={wishlist.categories}
 							compact
+							delivery={delivery}
 							gifts={wishlist.gifts}
 							layout={layout}
 							motif={motif}

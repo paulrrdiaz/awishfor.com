@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { WizardLayout } from "@/components/shared/wizard-layout";
 import { WizardNav } from "@/components/shared/wizard-nav";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
@@ -25,9 +25,16 @@ import {
 	type WizardStep,
 } from "./wizard-steps";
 
-function StepContent({ step }: { step: WizardStep }) {
+function StepContent({
+	step,
+	detailsValidationAttempt,
+}: {
+	step: WizardStep;
+	detailsValidationAttempt: number;
+}) {
 	if (step === "event-type") return <EventTypeStep />;
-	if (step === "details") return <DetailsStep />;
+	if (step === "details")
+		return <DetailsStep validationAttempt={detailsValidationAttempt} />;
 	if (step === "layout") return <LayoutStep />;
 	if (step === "theme") return <ThemeStep />;
 	if (step === "images") return <ImagesStep />;
@@ -44,6 +51,8 @@ export function WizardShell() {
 	const step = resolveWizardStep(raw);
 	const hasHydrated = useWizardStore((s) => s._hasHydrated);
 	const publishSuccess = useWizardStore((s) => s.publishSuccess);
+	const welcomeMessage = useWizardStore((s) => s.draft.welcomeMessage);
+	const [detailsValidationAttempt, setDetailsValidationAttempt] = useState(0);
 
 	const currentIndex = WIZARD_STEPS.indexOf(step);
 	const isFirst = currentIndex === 0;
@@ -69,6 +78,10 @@ export function WizardShell() {
 	}
 
 	function goNext() {
+		if (step === "details" && welcomeMessage.trim().length === 0) {
+			setDetailsValidationAttempt((n) => n + 1);
+			return;
+		}
 		const nextStep = getNextWizardStep(step);
 		if (nextStep) {
 			navigate(nextStep);
@@ -118,7 +131,10 @@ export function WizardShell() {
 			}
 		>
 			<RecoveryPrompt />
-			<StepContent step={step} />
+			<StepContent
+				detailsValidationAttempt={detailsValidationAttempt}
+				step={step}
+			/>
 		</WizardLayout>
 	);
 }

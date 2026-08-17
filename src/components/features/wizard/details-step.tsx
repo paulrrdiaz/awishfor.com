@@ -53,7 +53,11 @@ function SlugStatusBadge({ status }: { status: SlugStatus }) {
 	return <Badge variant={cfg.variant}>{cfg.text}</Badge>;
 }
 
-export function DetailsStep() {
+type Props = {
+	validationAttempt?: number;
+};
+
+export function DetailsStep({ validationAttempt = 0 }: Props) {
 	const draft = useWizardStore((s) => s.draft);
 	const slugTouched = useWizardStore((s) => s.slugTouched);
 	const copyTouched = useWizardStore((s) => s.copyTouched);
@@ -65,6 +69,7 @@ export function DetailsStep() {
 
 	const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
 	const [rsvpDeadlineError, setRsvpDeadlineError] = useState(false);
+	const [welcomeMessageError, setWelcomeMessageError] = useState(false);
 
 	const debouncedCheckSlug = useDebouncedCallback(async (slug: string) => {
 		if (!isValidSlug(slug)) {
@@ -88,6 +93,12 @@ export function DetailsStep() {
 		}
 		debouncedCheckSlug(draft.slug);
 	}, [draft.slug, debouncedCheckSlug]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: only re-run when a new advance attempt is signaled from the shell, not on every draft.welcomeMessage keystroke
+	useEffect(() => {
+		if (validationAttempt === 0) return;
+		setWelcomeMessageError(draft.welcomeMessage.trim().length === 0);
+	}, [validationAttempt]);
 
 	const isPastDate = draft.eventDate
 		? new Date(`${draft.eventDate}T00:00:00`) <
@@ -281,7 +292,8 @@ export function DetailsStep() {
 									className="mb-0 font-semibold text-[13px] text-foreground"
 									htmlFor="welcomeMessage"
 								>
-									Mensaje de bienvenida
+									Mensaje de bienvenida{" "}
+									<span className="text-destructive">*</span>
 								</FieldLabel>
 								{hasCopyEdits && (
 									<Button
@@ -295,12 +307,23 @@ export function DetailsStep() {
 								)}
 							</div>
 							<Textarea
+								aria-invalid={welcomeMessageError}
 								className="rounded-[10px] text-[13.5px]"
 								id="welcomeMessage"
-								onChange={(e) => setField("welcomeMessage", e.target.value)}
+								onChange={(e) => {
+									setField("welcomeMessage", e.target.value);
+									if (welcomeMessageError && e.target.value.trim()) {
+										setWelcomeMessageError(false);
+									}
+								}}
 								placeholder="Escribe un mensaje para tus invitados"
 								value={draft.welcomeMessage}
 							/>
+							{welcomeMessageError && (
+								<FieldError className="mt-2.5 text-[11.5px]">
+									El mensaje de bienvenida es obligatorio.
+								</FieldError>
+							)}
 						</Field>
 
 						<Field className="gap-0">

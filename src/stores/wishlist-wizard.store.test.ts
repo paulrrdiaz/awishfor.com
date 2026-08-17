@@ -31,6 +31,15 @@ describe("wishlist-wizard store", () => {
 			expect(draft.thankYouMessage).toBe(preset.defaultThankYouMessage);
 		});
 
+		it("seeds a non-empty welcome message, so the required-field error is reachable only on a deliberate clear", () => {
+			const store = makeStore();
+			store.getState().setEventType("wedding");
+			expect(store.getState().draft.welcomeMessage.trim()).not.toBe("");
+
+			store.getState().setField("welcomeMessage", "");
+			expect(store.getState().draft.welcomeMessage.trim()).toBe("");
+		});
+
 		it("clears the motif when the event type changes to one outside the gate", () => {
 			const store = makeStore();
 			store.getState().setEventType("baby_shower");

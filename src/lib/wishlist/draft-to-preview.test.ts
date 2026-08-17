@@ -156,6 +156,14 @@ describe("draftToPreview", () => {
 			expect(vm.showHowItWorks).toBe(true);
 		});
 
+		it("never includes delivery details, since the wizard does not collect them", () => {
+			const draft = makeDraft();
+			const vm = draftToPreview(draft);
+			expect(vm.deliveryRecipientName).toBeNull();
+			expect(vm.deliveryAddress).toBeNull();
+			expect(vm.deliveryPhone).toBeNull();
+		});
+
 		it("progress reflects all gifts as available with 0 purchased", () => {
 			const gift = makeGift({ quantityNeeded: 3 });
 			const draft = makeDraft({ gifts: [gift] });

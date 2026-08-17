@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { describe, expect, it, vi } from "vitest";
+import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import {
 	Currency,
 	EventType,
@@ -32,7 +33,7 @@ const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	eventType: EventType.wedding,
 	language: Locale.es,
 	currency: Currency.PEN,
-	welcomeMessage: null,
+	welcomeMessage: "Gracias por acompañarnos",
 	welcomeMessageAttribution: null,
 	thankYouMessage: null,
 	eventDate: null,
@@ -40,6 +41,9 @@ const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	rsvpDeadline: null,
 	eventLocation: null,
 	dressCode: null,
+	deliveryRecipientName: null,
+	deliveryAddress: null,
+	deliveryPhone: null,
 	themeId: null,
 	layoutId: null,
 	buttonStyle: null,
@@ -299,8 +303,7 @@ const createMockDatabase = (
 			eventType: args.data.eventType as EventType,
 			language: (args.data.language as Locale | undefined) ?? Locale.es,
 			currency: (args.data.currency as Currency | undefined) ?? Currency.PEN,
-			welcomeMessage:
-				(args.data.welcomeMessage as string | null | undefined) ?? null,
+			welcomeMessage: args.data.welcomeMessage as string,
 			thankYouMessage:
 				(args.data.thankYouMessage as string | null | undefined) ?? null,
 			eventDate: (args.data.eventDate as Date | null | undefined) ?? null,
@@ -308,6 +311,12 @@ const createMockDatabase = (
 			eventLocation:
 				(args.data.eventLocation as string | null | undefined) ?? null,
 			dressCode: (args.data.dressCode as string | null | undefined) ?? null,
+			deliveryRecipientName:
+				(args.data.deliveryRecipientName as string | null | undefined) ?? null,
+			deliveryAddress:
+				(args.data.deliveryAddress as string | null | undefined) ?? null,
+			deliveryPhone:
+				(args.data.deliveryPhone as string | null | undefined) ?? null,
 			themeId: (args.data.themeId as string | null | undefined) ?? null,
 			layoutId: (args.data.layoutId as string | null | undefined) ?? null,
 			buttonStyle: (args.data.buttonStyle as string | null | undefined) ?? null,
@@ -675,6 +684,41 @@ describe("wishlist service", () => {
 		});
 	});
 
+	it("persists delivery details during creation", async () => {
+		const { db, create } = createMockDatabase();
+
+		await createWishlist(db, {
+			...createWishlistInput(),
+			deliveryRecipientName: "Ana Beltrán",
+			deliveryAddress: "Av. Universidad 1500, CDMX",
+			deliveryPhone: "+52 55 1122 3344",
+		});
+
+		expect(create).toHaveBeenCalledWith({
+			data: expect.objectContaining({
+				deliveryRecipientName: "Ana Beltrán",
+				deliveryAddress: "Av. Universidad 1500, CDMX",
+				deliveryPhone: "+52 55 1122 3344",
+			}),
+		});
+	});
+
+	it("substitutes the event type's preset welcome message when creating with an empty value", async () => {
+		const { db, create } = createMockDatabase();
+
+		await createWishlist(db, {
+			...createWishlistInput(),
+			eventType: EventType.birthday,
+			welcomeMessage: "   ",
+		});
+
+		expect(create).toHaveBeenCalledWith({
+			data: expect.objectContaining({
+				welcomeMessage: EVENT_TYPE_PRESETS.birthday.defaultWelcomeMessage,
+			}),
+		});
+	});
+
 	it("creates a first saved draft with ordered categories and gifts", async () => {
 		const { db, state } = createMockDatabase({ wishlists: [] });
 
@@ -734,6 +778,20 @@ describe("wishlist service", () => {
 				priceCurrency: null,
 			},
 		]);
+	});
+
+	it("substitutes the event type's preset welcome message for an empty draft save", async () => {
+		const { db, state } = createMockDatabase({ wishlists: [] });
+
+		await saveWishlistDraft(
+			db,
+			makeDraftInput({ eventType: EventType.wedding, welcomeMessage: "" }),
+		);
+
+		const savedWishlist = state.wishlists[0];
+		expect(savedWishlist?.welcomeMessage).toBe(
+			EVENT_TYPE_PRESETS.wedding.defaultWelcomeMessage,
+		);
 	});
 
 	it("updates the same draft in place and replaces previous collections", async () => {

@@ -38,6 +38,7 @@ export function makeWishlist(overrides: Partial<WishlistData>): WishlistData {
 		eventType: "general",
 		language: "es",
 		currency: "PEN",
+		welcomeMessage: "¡Bienvenido a mi wishlist!",
 		showHowItWorks: true,
 		status: "published",
 		...overrides,

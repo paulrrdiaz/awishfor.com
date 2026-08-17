@@ -69,7 +69,7 @@ export type PublicWishlistViewModel = {
 	eventType: string;
 	language: string;
 	currency: string;
-	welcomeMessage: string | null;
+	welcomeMessage: string;
 	welcomeMessageAttribution: string | null;
 	thankYouMessage: string | null;
 	eventDate: string | null;
@@ -77,6 +77,9 @@ export type PublicWishlistViewModel = {
 	rsvpDeadline: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
+	deliveryRecipientName: string | null;
+	deliveryAddress: string | null;
+	deliveryPhone: string | null;
 	images: WishlistImageViewModel[];
 	themeId: string | null;
 	layoutId: string | null;
@@ -210,7 +213,7 @@ export type DashboardWishlistCardViewModel = {
 	eventType: string;
 	language: string;
 	currency: string;
-	welcomeMessage: string | null;
+	welcomeMessage: string;
 	welcomeMessageAttribution: string | null;
 	thankYouMessage: string | null;
 	eventDate: string | null;

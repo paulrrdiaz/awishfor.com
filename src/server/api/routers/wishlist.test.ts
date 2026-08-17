@@ -16,11 +16,16 @@ vi.mock("@clerk/nextjs/server", () => ({
 	currentUser: currentUserMock,
 }));
 
-vi.mock("@/server/services/wishlist.service", () => ({
-	publishWishlist: publishWishlistMock,
-	publishWishlistFromWizard: publishWishlistFromWizardMock,
-	saveWishlistDraft: saveWishlistDraftMock,
-}));
+vi.mock("@/server/services/wishlist.service", async (importOriginal) => {
+	const actual =
+		await importOriginal<typeof import("@/server/services/wishlist.service")>();
+	return {
+		...actual,
+		publishWishlist: publishWishlistMock,
+		publishWishlistFromWizard: publishWishlistFromWizardMock,
+		saveWishlistDraft: saveWishlistDraftMock,
+	};
+});
 
 vi.mock("next/cache", () => ({
 	revalidatePath: revalidatePathMock,
@@ -542,6 +547,7 @@ describe("wishlistRouter.updateSettings", () => {
 			wishlistFindFirst: vi.fn().mockResolvedValue({
 				id: "wishlist_123",
 				slug: "lista-de-boda",
+				eventType: "wedding",
 			}),
 			wishlistUpdate,
 		});
@@ -577,6 +583,7 @@ describe("wishlistRouter.updateSettings", () => {
 			wishlistFindFirst: vi.fn().mockResolvedValue({
 				id: "wishlist_123",
 				slug: "lista-de-boda",
+				eventType: "wedding",
 			}),
 			wishlistUpdate,
 		});

@@ -149,6 +149,16 @@ export const wishlistDressCodeSchema = optionalNullableTrimmedString(
 	"Dress code",
 	240,
 );
+export const wishlistDeliveryRecipientNameSchema =
+	optionalNullableTrimmedString("Delivery recipient name", 120);
+export const wishlistDeliveryAddressSchema = optionalNullableTrimmedString(
+	"Delivery address",
+	240,
+);
+export const wishlistDeliveryPhoneSchema = optionalNullableTrimmedString(
+	"Delivery phone",
+	40,
+);
 export const wishlistCoverImageInputSchema = z.object({
 	url: z.url("Cover image URL must be a valid URL"),
 	width: z.number().int().positive("Width must be a positive integer"),
@@ -215,6 +225,9 @@ const wishlistCreateUpdateShape = {
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
+	deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
+	deliveryAddress: wishlistDeliveryAddressSchema,
+	deliveryPhone: wishlistDeliveryPhoneSchema,
 	coverImages: wishlistCoverImagesSchema.default([]),
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
@@ -244,6 +257,9 @@ export const updateWishlistSchema = z.object({
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
+	deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
+	deliveryAddress: wishlistDeliveryAddressSchema,
+	deliveryPhone: wishlistDeliveryPhoneSchema,
 	coverImages: wishlistCoverImagesSchema.optional(),
 	themeId: wishlistThemeIdSchema,
 	layoutId: wishlistLayoutIdSchema,
@@ -280,6 +296,9 @@ export type CreateWishlistInput = {
 	eventTime?: string | null;
 	eventLocation?: string | null;
 	dressCode?: string | null;
+	deliveryRecipientName?: string | null;
+	deliveryAddress?: string | null;
+	deliveryPhone?: string | null;
 	coverImages?: WishlistCoverImageInput[];
 	themeId?: string | null;
 	layoutId?: string | null;
@@ -303,6 +322,9 @@ export type UpdateWishlistInput = {
 	eventTime?: string | null;
 	eventLocation?: string | null;
 	dressCode?: string | null;
+	deliveryRecipientName?: string | null;
+	deliveryAddress?: string | null;
+	deliveryPhone?: string | null;
 	coverImages?: WishlistCoverImageInput[];
 	themeId?: string | null;
 	layoutId?: string | null;
@@ -330,6 +352,9 @@ export const updateWishlistSettingsSchema = z
 		dressCode: wishlistDressCodeSchema,
 		welcomeMessage: wishlistWelcomeMessageSchema,
 		welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
+		deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
+		deliveryAddress: wishlistDeliveryAddressSchema,
+		deliveryPhone: wishlistDeliveryPhoneSchema,
 		thankYouMessage: wishlistThankYouMessageSchema,
 		countdownVariant: wishlistCountdownVariantSchema,
 		welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
