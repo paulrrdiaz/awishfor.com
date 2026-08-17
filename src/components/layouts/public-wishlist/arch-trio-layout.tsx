@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
 import { EventDetails } from "@/components/shared/event-details";
-import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
+import { GiftListBand } from "@/components/shared/gift-list-band";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroCarouselGallery,
@@ -15,6 +15,7 @@ import { MotifMarginScatter } from "@/components/shared/motif/motif-margin-scatt
 import { MotifScatter } from "@/components/shared/motif/motif-scatter";
 import { MotifSeal } from "@/components/shared/motif/motif-seal";
 import { ProgressSummary } from "@/components/shared/progress-summary";
+import { RsvpSection } from "@/components/shared/rsvp-section";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -105,10 +106,6 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 						<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 							{heading}
 						</h1>
-						<GuestWelcomeSection
-							guest={wishlist.guest}
-							wishlistSlug={wishlist.slug}
-						/>
 						{!isCompact && (
 							<HeroCtas
 								className="justify-center lg:justify-start"
@@ -163,6 +160,15 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 				</>
 			)}
 
+			<RsvpSection
+				eventDate={wishlist.eventDate}
+				eventLocation={wishlist.eventLocation}
+				eventTime={wishlist.eventTime}
+				guest={wishlist.guest}
+				rsvpDeadline={wishlist.rsvpDeadline}
+				wishlistSlug={wishlist.slug}
+			/>
+
 			<div className="relative left-1/2 w-screen -translate-x-1/2">
 				{motif && (
 					<MotifMarginScatter
@@ -171,18 +177,18 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 						treatment={motifTreatment}
 					/>
 				)}
-				<div className="mx-auto w-full max-w-[1160px]">
-					<div className="mt-6 flex flex-wrap items-center justify-between gap-2 px-5 sm:px-7">
-						<h2 className="font-heading font-semibold text-xl">
-							Lista de regalos
-						</h2>
-						<ProgressSummary progress={wishlist.progress} variant="inline" />
-					</div>
 
+				<GiftListBand className="relative left-1/2 w-screen -translate-x-1/2">
 					<section
-						className="mt-3 scroll-mt-[59px] px-5 pb-16 sm:px-7"
+						className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-6 pb-16 sm:px-7"
 						id="regalos"
 					>
+						<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+							<h2 className="font-heading font-semibold text-xl">
+								Lista de regalos
+							</h2>
+							<ProgressSummary progress={wishlist.progress} variant="inline" />
+						</div>
 						<PublicGiftFilters
 							actionsEnabled={mode === "full"}
 							categories={wishlist.categories}
@@ -197,7 +203,7 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 							showSort={false}
 						/>
 					</section>
-				</div>
+				</GiftListBand>
 			</div>
 
 			{!isCompact && (

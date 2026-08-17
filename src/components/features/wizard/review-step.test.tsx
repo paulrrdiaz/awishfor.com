@@ -85,6 +85,14 @@ vi.mock("@/trpc/react", () => ({
 				}),
 			},
 		},
+		invite: {
+			respond: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+				}),
+			},
+		},
 	},
 }));
 
@@ -94,6 +102,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	slug: "lista-de-boda",
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
+	rsvpDeadline: null,
 	eventLocation: "Barranco",
 	dressCode: "",
 	images: [

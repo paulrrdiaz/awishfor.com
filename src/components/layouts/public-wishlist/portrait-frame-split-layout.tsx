@@ -1,4 +1,3 @@
-import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
@@ -41,10 +40,6 @@ export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 					<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
-					<GuestWelcomeSection
-						guest={wishlist.guest}
-						wishlistSlug={wishlist.slug}
-					/>
 					{!isCompact && (
 						<HeroCtas
 							className="justify-start"

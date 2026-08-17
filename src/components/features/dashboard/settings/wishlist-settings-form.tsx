@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
 	Dialog,
@@ -157,6 +158,10 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		wishlist.eventDate ? wishlist.eventDate.split("T")[0] : "",
 	);
 	const [eventTime, setEventTime] = useState(wishlist.eventTime ?? "");
+	const [rsvpDeadline, setRsvpDeadline] = useState(
+		wishlist.rsvpDeadline ? wishlist.rsvpDeadline.split("T")[0] : "",
+	);
+	const [rsvpDeadlineError, setRsvpDeadlineError] = useState(false);
 	const [eventLocation, setEventLocation] = useState(
 		wishlist.eventLocation ?? "",
 	);
@@ -253,7 +258,14 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		title.trim().length > 0 &&
 		slugStatus !== "taken" &&
 		slugStatus !== "invalid" &&
+		!rsvpDeadlineError &&
 		(!showPublishedSlugWarning || slugWarningAck);
+
+	function handleRsvpDeadlineChange(date: Date | null) {
+		const next = date ? format(date, "yyyy-MM-dd") : "";
+		setRsvpDeadline(next);
+		setRsvpDeadlineError(Boolean(next && eventDate && next > eventDate));
+	}
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -264,6 +276,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			slug,
 			eventDate: (eventDate || null) as unknown as Date | null,
 			eventTime: eventTime || null,
+			rsvpDeadline: (rsvpDeadline || null) as unknown as Date | null,
 			eventLocation: eventLocation || null,
 			dressCode: dressCode || null,
 			welcomeMessage: welcomeMessage || null,
@@ -363,6 +376,20 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							onTimeChange={(time) => setEventTime(time ?? "")}
 							time={eventTime || null}
 						/>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label htmlFor="rsvpDeadline">Fecha límite de confirmación</Label>
+						<DatePicker
+							date={rsvpDeadline ? new Date(`${rsvpDeadline}T00:00:00`) : null}
+							id="rsvpDeadline"
+							onDateChange={handleRsvpDeadlineChange}
+						/>
+						{rsvpDeadlineError && (
+							<p className="text-destructive text-xs">
+								La fecha límite no puede ser posterior a la fecha del evento.
+							</p>
+						)}
 					</div>
 
 					<div className="space-y-1.5">

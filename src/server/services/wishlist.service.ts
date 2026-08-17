@@ -175,6 +175,7 @@ const wishlistDraftToData = (input: SaveDraftDraftContent) => ({
 	thankYouMessage: input.thankYouMessage ?? null,
 	eventDate: toDraftDate(input.eventDate ?? null),
 	eventTime: input.eventTime ?? null,
+	rsvpDeadline: toDraftDate(input.rsvpDeadline ?? null),
 	eventLocation: input.eventLocation ?? null,
 	dressCode: input.dressCode ?? null,
 	themeId: input.themeId ?? null,
@@ -203,6 +204,7 @@ const mapServerDraft = (
 	thankYouMessage: wishlist.thankYouMessage,
 	eventDate: wishlist.eventDate?.toISOString().slice(0, 10) ?? null,
 	eventTime: wishlist.eventTime,
+	rsvpDeadline: wishlist.rsvpDeadline?.toISOString().slice(0, 10) ?? null,
 	eventLocation: wishlist.eventLocation,
 	dressCode: wishlist.dressCode,
 	coverImages: wishlist.images.map((image) => ({

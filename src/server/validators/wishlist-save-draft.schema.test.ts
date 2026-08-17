@@ -239,6 +239,32 @@ describe("saveDraftWishlistSchema", () => {
 		expect(result.force).toBe(true);
 	});
 
+	describe("rsvpDeadline", () => {
+		it("accepts a deadline on or before the event date", () => {
+			const result = saveDraftWishlistSchema.parse(
+				makeInput({ eventDate: "2026-12-24", rsvpDeadline: "2026-12-10" }),
+			);
+
+			expect(result.rsvpDeadline).toBe("2026-12-10");
+		});
+
+		it("rejects a deadline after the event date", () => {
+			expect(() =>
+				saveDraftWishlistSchema.parse(
+					makeInput({ eventDate: "2026-12-24", rsvpDeadline: "2026-12-25" }),
+				),
+			).toThrow();
+		});
+
+		it("allows a deadline with no event date set", () => {
+			const result = saveDraftWishlistSchema.parse(
+				makeInput({ eventDate: null, rsvpDeadline: "2026-12-10" }),
+			);
+
+			expect(result.rsvpDeadline).toBe("2026-12-10");
+		});
+	});
+
 	describe("message variant ids", () => {
 		it("accepts a valid id from each variant catalog", () => {
 			const result = saveDraftWishlistSchema.parse(

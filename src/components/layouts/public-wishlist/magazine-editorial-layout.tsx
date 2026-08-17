@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { SampleImageMarker } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
@@ -44,11 +43,6 @@ export function MagazineEditorialLayout({ wishlist, layout, mode }: Props) {
 						<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 							{heading}
 						</h1>
-						<GuestWelcomeSection
-							className="mt-3"
-							guest={wishlist.guest}
-							wishlistSlug={wishlist.slug}
-						/>
 					</div>
 				</div>
 				{!isCompact && (

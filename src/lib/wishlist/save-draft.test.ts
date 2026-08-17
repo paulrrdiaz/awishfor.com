@@ -12,6 +12,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	slug: "lista-de-boda",
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
+	rsvpDeadline: null,
 	eventLocation: "",
 	dressCode: "",
 	images: [
@@ -82,6 +83,7 @@ const makeServerDraft = (
 	thankYouMessage: null,
 	eventDate: "2026-12-24",
 	eventTime: "18:30",
+	rsvpDeadline: null,
 	eventLocation: null,
 	dressCode: null,
 	coverImages: [

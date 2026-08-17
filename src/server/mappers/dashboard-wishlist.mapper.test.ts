@@ -22,6 +22,7 @@ function makeWishlist(overrides: Partial<Wishlist> = {}): Wishlist {
 		thankYouMessage: null,
 		eventDate: null,
 		eventTime: null,
+		rsvpDeadline: null,
 		eventLocation: null,
 		dressCode: null,
 		themeId: null,

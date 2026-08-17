@@ -16,6 +16,7 @@ export function mapDashboardInvite(
 		extraGuests: invite.extraGuests.map((guest) => ({
 			id: guest.id,
 			name: guest.name,
+			status: guest.status,
 		})),
 		openedAt: invite.openedAt?.toISOString() ?? null,
 		respondedAt: invite.respondedAt?.toISOString() ?? null,

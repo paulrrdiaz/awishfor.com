@@ -86,10 +86,16 @@ export const listInvitesSchema = z.object({
 	wishlistId: wishlistIdSchema,
 });
 
+export const respondInviteExtraGuestSchema = z.object({
+	id: z.string().min(1),
+	status: z.enum(["confirmed", "declined"]),
+});
+
 export const respondInviteSchema = z.object({
 	wishlistSlug: z.string().min(1),
 	guestSlug: z.string().min(1),
 	status: z.enum(["confirmed", "declined"]),
+	extraGuests: z.array(respondInviteExtraGuestSchema).default([]),
 });
 
 export type CreateInviteInput = z.infer<typeof createInviteSchema>;

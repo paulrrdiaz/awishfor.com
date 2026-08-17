@@ -128,6 +128,11 @@ export const saveDraftDraftContentSchema = z.object({
 		.nullable()
 		.optional(),
 	eventTime: wishlistEventTimeSchema,
+	rsvpDeadline: z
+		.string()
+		.regex(ISO_DATE_PATTERN, "RSVP deadline must use YYYY-MM-DD format")
+		.nullable()
+		.optional(),
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
 	coverImages: wishlistCoverImagesSchema.default([]),
@@ -206,6 +211,18 @@ export const saveDraftWishlistSchema = saveDraftDraftContentSchema
 					});
 				}
 			}
+		}
+
+		if (
+			value.eventDate &&
+			value.rsvpDeadline &&
+			value.rsvpDeadline > value.eventDate
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "RSVP deadline cannot be after the event date",
+				path: ["rsvpDeadline"],
+			});
 		}
 
 		if (value.motifId) {

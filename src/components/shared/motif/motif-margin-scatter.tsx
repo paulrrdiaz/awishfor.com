@@ -248,9 +248,13 @@ export function MotifMarginScatter({
 		palette === "fixed" ? motif.secondaryColors : undefined;
 
 	return (
+		// z-10: a sibling full-bleed surface (e.g. the gift list band) is also
+		// `position:relative` for its own breakout and sits later in DOM order,
+		// so without an explicit stack level it paints over this absolutely
+		// positioned layer instead of the reverse.
 		<div
 			className={cn(
-				"pointer-events-none absolute inset-y-0 right-0 left-0 hidden overflow-hidden xl:block",
+				"pointer-events-none absolute inset-y-0 right-0 left-0 z-10 hidden overflow-hidden xl:block",
 				className,
 			)}
 		>

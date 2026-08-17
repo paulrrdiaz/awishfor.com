@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
 import { EventDetails } from "@/components/shared/event-details";
-import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
+import { GiftListBand } from "@/components/shared/gift-list-band";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroCarouselGallery,
@@ -13,6 +13,7 @@ import {
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { MotifScatter } from "@/components/shared/motif/motif-scatter";
 import { MotifSeal } from "@/components/shared/motif/motif-seal";
+import { RsvpSection } from "@/components/shared/rsvp-section";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -51,12 +52,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 	const carouselImages =
 		wishlist.images.length > 0 ? wishlist.images : slots[1] ? [slots[1]] : [];
 	const eventSummary = wishlist.eventDate
-		? [
-				wishlist.guest?.primaryName,
-				formatEventDate(wishlist.eventDate, wishlist.language as "es" | "en"),
-			]
-				.filter(Boolean)
-				.join(" · ")
+		? formatEventDate(wishlist.eventDate, wishlist.language as "es" | "en")
 		: null;
 
 	return (
@@ -85,11 +81,6 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 							{eventSummary}
 						</p>
 					)}
-					<GuestWelcomeSection
-						className="mt-3"
-						guest={wishlist.guest}
-						wishlistSlug={wishlist.slug}
-					/>
 					<div className="relative mt-5 grid grid-cols-[1fr_1.15fr_1fr] items-end gap-3 px-4 pb-[58px] sm:px-7">
 						<HeroImageSlot
 							alt={`${heading} 1`}
@@ -167,34 +158,45 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 				</>
 			)}
 
-			<section
-				className="scroll-mt-[59px] px-5 pt-[18px] pb-16 sm:px-[22px]"
-				id="regalos"
-			>
-				<PublicGiftFilters
-					actionsEnabled={mode === "full"}
-					categories={wishlist.categories}
-					compact
-					gifts={wishlist.gifts}
-					layout={layout}
-					motif={motif}
-					motifTreatment={motifTreatment}
-					showCategories={false}
-					showCounts={false}
-					showGridToggle
-					showSort={false}
-					toolbarLeading={
-						wishlist.eventDate ? (
-							<Countdown
-								className="p-0 text-left"
-								createdAt={wishlist.createdAt}
-								eventDate={wishlist.eventDate}
-								variant={wishlist.countdownVariant}
-							/>
-						) : undefined
-					}
-				/>
-			</section>
+			<RsvpSection
+				eventDate={wishlist.eventDate}
+				eventLocation={wishlist.eventLocation}
+				eventTime={wishlist.eventTime}
+				guest={wishlist.guest}
+				rsvpDeadline={wishlist.rsvpDeadline}
+				wishlistSlug={wishlist.slug}
+			/>
+
+			<GiftListBand className="relative left-1/2 w-screen -translate-x-1/2">
+				<section
+					className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-[18px] pb-16 sm:px-[22px]"
+					id="regalos"
+				>
+					<PublicGiftFilters
+						actionsEnabled={mode === "full"}
+						categories={wishlist.categories}
+						compact
+						gifts={wishlist.gifts}
+						layout={layout}
+						motif={motif}
+						motifTreatment={motifTreatment}
+						showCategories={false}
+						showCounts={false}
+						showGridToggle
+						showSort={false}
+						toolbarLeading={
+							wishlist.eventDate ? (
+								<Countdown
+									className="p-0 text-left"
+									createdAt={wishlist.createdAt}
+									eventDate={wishlist.eventDate}
+									variant={wishlist.countdownVariant}
+								/>
+							) : undefined
+						}
+					/>
+				</section>
+			</GiftListBand>
 
 			{!isCompact && (
 				<WishlistThankYou

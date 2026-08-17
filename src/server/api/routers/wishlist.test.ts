@@ -74,6 +74,7 @@ function makeStoredWishlist(overrides: Record<string, unknown> = {}) {
 		thankYouMessage: "Con cariño",
 		eventDate: null,
 		eventTime: null,
+		rsvpDeadline: null,
 		eventLocation: "Barranco",
 		dressCode: null,
 		images: [
@@ -528,6 +529,99 @@ describe("wishlistRouter.updateSettings", () => {
 				showHowItWorks: true,
 			}),
 		).rejects.toThrow(TRPCError);
+		expect(wishlistUpdate).not.toHaveBeenCalled();
+	});
+
+	it("persists an RSVP deadline before the event date", async () => {
+		const wishlistUpdate = vi.fn().mockResolvedValue({
+			id: "wishlist_123",
+			slug: "lista-de-boda",
+			updatedAt: now,
+		});
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "lista-de-boda",
+			}),
+			wishlistUpdate,
+		});
+		const caller = makeCaller(db);
+
+		await caller.updateSettings({
+			id: "wishlist_123",
+			title: "Lista de boda",
+			slug: "lista-de-boda",
+			eventDate: new Date("2026-12-24"),
+			rsvpDeadline: new Date("2026-12-10"),
+			language: "es",
+			currency: "PEN",
+			showHowItWorks: true,
+		});
+
+		expect(wishlistUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					rsvpDeadline: new Date("2026-12-10"),
+				}),
+			}),
+		);
+	});
+
+	it("clears the RSVP deadline", async () => {
+		const wishlistUpdate = vi.fn().mockResolvedValue({
+			id: "wishlist_123",
+			slug: "lista-de-boda",
+			updatedAt: now,
+		});
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "lista-de-boda",
+			}),
+			wishlistUpdate,
+		});
+		const caller = makeCaller(db);
+
+		await caller.updateSettings({
+			id: "wishlist_123",
+			title: "Lista de boda",
+			slug: "lista-de-boda",
+			rsvpDeadline: null,
+			language: "es",
+			currency: "PEN",
+			showHowItWorks: true,
+		});
+
+		expect(wishlistUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({ rsvpDeadline: null }),
+			}),
+		);
+	});
+
+	it("rejects an RSVP deadline after the event date", async () => {
+		const wishlistUpdate = vi.fn();
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "lista-de-boda",
+			}),
+			wishlistUpdate,
+		});
+		const caller = makeCaller(db);
+
+		await expect(
+			caller.updateSettings({
+				id: "wishlist_123",
+				title: "Lista de boda",
+				slug: "lista-de-boda",
+				eventDate: new Date("2026-12-24"),
+				rsvpDeadline: new Date("2026-12-25"),
+				language: "es",
+				currency: "PEN",
+				showHowItWorks: true,
+			}),
+		).rejects.toThrow();
 		expect(wishlistUpdate).not.toHaveBeenCalled();
 	});
 });

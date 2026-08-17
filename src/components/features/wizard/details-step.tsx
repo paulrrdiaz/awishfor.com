@@ -6,6 +6,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { PublicThemeProvider } from "@/components/layouts/public-wishlist/public-theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
 	Field,
@@ -63,6 +64,7 @@ export function DetailsStep() {
 		copyTouched.welcomeMessage || copyTouched.thankYouMessage;
 
 	const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
+	const [rsvpDeadlineError, setRsvpDeadlineError] = useState(false);
 
 	const debouncedCheckSlug = useDebouncedCallback(async (slug: string) => {
 		if (!isValidSlug(slug)) {
@@ -91,6 +93,16 @@ export function DetailsStep() {
 		? new Date(`${draft.eventDate}T00:00:00`) <
 			new Date(new Date().toDateString())
 		: false;
+
+	function handleRsvpDeadlineChange(date: Date | null) {
+		const next = dateToDateStr(date);
+		if (next && draft.eventDate && next > draft.eventDate) {
+			setRsvpDeadlineError(true);
+			return;
+		}
+		setRsvpDeadlineError(false);
+		setField("rsvpDeadline", next);
+	}
 
 	return (
 		<div className="mx-auto w-full max-w-2xl lg:flex lg:h-full lg:max-w-none">
@@ -158,6 +170,26 @@ export function DetailsStep() {
 									Esta fecha ya pasó. Puedes continuar, pero el contador
 									mostrará un mensaje de cierre.
 								</p>
+							)}
+						</Field>
+
+						<Field className="gap-0">
+							<FieldLabel
+								className="mb-[7px] font-semibold text-[13px] text-foreground"
+								htmlFor="rsvpDeadline"
+							>
+								Fecha límite de confirmación
+							</FieldLabel>
+							<DatePicker
+								className="rounded-[10px] text-[13.5px]"
+								date={dateStrToDate(draft.rsvpDeadline)}
+								id="rsvpDeadline"
+								onDateChange={handleRsvpDeadlineChange}
+							/>
+							{rsvpDeadlineError && (
+								<FieldError className="mt-2.5 text-[11.5px]">
+									La fecha límite no puede ser posterior a la fecha del evento.
+								</FieldError>
 							)}
 						</Field>
 

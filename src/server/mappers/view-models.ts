@@ -45,7 +45,9 @@ export type PublicCategoryViewModel = {
 };
 
 export type PublicGuestExtraGuestViewModel = {
+	id: string;
 	name: string | null;
+	status: string;
 };
 
 export type PublicGuestViewModel = {
@@ -72,6 +74,7 @@ export type PublicWishlistViewModel = {
 	thankYouMessage: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
+	rsvpDeadline: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
 	images: WishlistImageViewModel[];
@@ -181,6 +184,7 @@ export type DashboardWishlistOverviewViewModel = {
 export type InviteExtraGuestViewModel = {
 	id: string;
 	name: string | null;
+	status: string;
 };
 
 export type DashboardInviteViewModel = {

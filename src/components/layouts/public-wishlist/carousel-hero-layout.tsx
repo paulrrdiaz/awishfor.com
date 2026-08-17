@@ -1,4 +1,3 @@
-import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroCarouselGallery } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
@@ -40,12 +39,6 @@ export function CarouselHeroLayout({ wishlist, layout, mode }: Props) {
 					<h1 className="mt-4 font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
-					<GuestWelcomeSection
-						className="mt-4"
-						guest={wishlist.guest}
-						tone="on-photo"
-						wishlistSlug={wishlist.slug}
-					/>
 					{imageCount < 2 && (
 						<p className="mt-3 font-mono text-[11px] opacity-70">
 							El carrusel aparece al subir 2+ fotos

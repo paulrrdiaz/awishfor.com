@@ -10,6 +10,7 @@ function makeDraft(overrides: Partial<WishlistDraft> = {}): WishlistDraft {
 		slug: "baby-shower-de-ana",
 		eventDate: null,
 		eventTime: null,
+		rsvpDeadline: null,
 		eventLocation: "",
 		dressCode: "",
 		images: [],

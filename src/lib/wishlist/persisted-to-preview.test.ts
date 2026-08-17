@@ -11,6 +11,7 @@ function makePersistedWishlist(
 		slug: "ana-y-luis",
 		eventDate: "2026-12-24T00:00:00.000Z",
 		eventTime: "18:30",
+		rsvpDeadline: null,
 		eventLocation: "Barranco",
 		dressCode: "Formal",
 		images: [

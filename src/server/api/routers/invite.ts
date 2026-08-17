@@ -12,10 +12,13 @@ import {
 	getOwnedInvite,
 	type InviteDatabase,
 	listInvites,
-	respondToInvite,
 	updateInvite,
 } from "@/server/services/invite.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
+import {
+	type PublicInviteDatabase,
+	respondToInvite,
+} from "@/server/services/public-invite.service";
 import {
 	createInviteSchema,
 	deleteInviteSchema,
@@ -34,6 +37,10 @@ const getLocalUserId = (ctx: InviteRouterContext) =>
 const asInviteDb = (
 	ctx: Awaited<ReturnType<typeof createTRPCContext>>,
 ): InviteDatabase => ctx.db as unknown as InviteDatabase;
+
+const asPublicInviteDb = (
+	ctx: Awaited<ReturnType<typeof createTRPCContext>>,
+): PublicInviteDatabase => ctx.db as unknown as PublicInviteDatabase;
 
 export const inviteRouter = createTRPCRouter({
 	list: protectedProcedure
@@ -91,6 +98,6 @@ export const inviteRouter = createTRPCRouter({
 	respond: publicProcedure
 		.input(respondInviteSchema)
 		.mutation(async ({ ctx, input }) =>
-			respondToInvite(asInviteDb(ctx), input),
+			respondToInvite(asPublicInviteDb(ctx), input),
 		),
 });

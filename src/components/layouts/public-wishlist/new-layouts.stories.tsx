@@ -4,6 +4,7 @@ import type {
 	PublicWishlistViewModel,
 	WishlistImageViewModel,
 } from "@/server/mappers/view-models";
+import { TRPCReactProvider } from "@/trpc/react";
 import { PublicWishlistPage } from "./public-wishlist-page";
 
 function image(url: string): WishlistImageViewModel {
@@ -64,6 +65,13 @@ const meta = {
 		surface: "standalone",
 	},
 	component: PublicWishlistPage,
+	decorators: [
+		(Story) => (
+			<TRPCReactProvider>
+				<Story />
+			</TRPCReactProvider>
+		),
+	],
 	parameters: {
 		layout: "fullscreen",
 	},

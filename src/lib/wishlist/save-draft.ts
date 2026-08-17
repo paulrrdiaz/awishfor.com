@@ -25,6 +25,7 @@ export const draftToSaveDraftInput = (
 	thankYouMessage: draft.thankYouMessage,
 	eventDate: draft.eventDate,
 	eventTime: draft.eventTime,
+	rsvpDeadline: draft.rsvpDeadline,
 	eventLocation: draft.eventLocation,
 	dressCode: draft.dressCode,
 	coverImages: draft.images.map(({ url, width, height }) => ({
@@ -71,6 +72,7 @@ export const serverDraftToLocalDraft = (
 		slug: serverDraft.slug,
 		eventDate: serverDraft.eventDate ?? null,
 		eventTime: serverDraft.eventTime ?? null,
+		rsvpDeadline: serverDraft.rsvpDeadline ?? null,
 		eventLocation: serverDraft.eventLocation ?? "",
 		dressCode: serverDraft.dressCode ?? "",
 		images: (serverDraft.coverImages ?? []).map(({ url, width, height }) => ({

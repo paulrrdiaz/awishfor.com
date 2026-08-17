@@ -2,10 +2,11 @@
 
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
-import { GuestWelcomeSection } from "@/components/shared/guest-welcome-section";
+import { GiftListBand } from "@/components/shared/gift-list-band";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
+import { RsvpSection } from "@/components/shared/rsvp-section";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -64,12 +65,6 @@ export function SplitImageRightLayout({
 					<h1 className="mt-2 font-heading font-semibold text-[32px] leading-[1.1] sm:text-[38px]">
 						{heading}
 					</h1>
-
-					<GuestWelcomeSection
-						className="mt-3"
-						guest={wishlist.guest}
-						wishlistSlug={wishlist.slug}
-					/>
 
 					{!isCompact && (
 						<>
@@ -143,25 +138,39 @@ export function SplitImageRightLayout({
 						/>
 					)}
 
-					<h2 className="mt-5 font-heading font-semibold text-xl">
-						Lista de regalos
-					</h2>
+					<RsvpSection
+						className="mt-5 max-w-none px-0 pt-0"
+						eventDate={wishlist.eventDate}
+						eventLocation={wishlist.eventLocation}
+						eventTime={wishlist.eventTime}
+						guest={wishlist.guest}
+						rsvpDeadline={wishlist.rsvpDeadline}
+						wishlistSlug={wishlist.slug}
+					/>
 
-					<section className="mt-3 scroll-mt-[59px]" id="regalos">
-						<PublicGiftFilters
-							actionsEnabled={mode === "full"}
-							categories={wishlist.categories}
-							compact
-							gifts={wishlist.gifts}
-							layout={layout}
-							motif={motif}
-							motifTreatment={motifTreatment}
-							showCategories={false}
-							showCounts={false}
-							showGridToggle
-							showSort={false}
-						/>
-					</section>
+					<GiftListBand className="-mx-6 sm:-mx-7">
+						<section
+							className="scroll-mt-[59px] px-6 pt-5 pb-3 sm:px-7"
+							id="regalos"
+						>
+							<h2 className="mb-3 font-heading font-semibold text-xl">
+								Lista de regalos
+							</h2>
+							<PublicGiftFilters
+								actionsEnabled={mode === "full"}
+								categories={wishlist.categories}
+								compact
+								gifts={wishlist.gifts}
+								layout={layout}
+								motif={motif}
+								motifTreatment={motifTreatment}
+								showCategories={false}
+								showCounts={false}
+								showGridToggle
+								showSort={false}
+							/>
+						</section>
+					</GiftListBand>
 				</div>
 
 				<div

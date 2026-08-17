@@ -43,6 +43,7 @@ export type WishlistDraft = {
 	slug: string;
 	eventDate: string | null;
 	eventTime: string | null;
+	rsvpDeadline: string | null;
 	eventLocation: string;
 	dressCode: string;
 	images: DraftCoverImage[];
@@ -120,6 +121,7 @@ const emptyDraft = (): WishlistDraft => ({
 	slug: "",
 	eventDate: null,
 	eventTime: null,
+	rsvpDeadline: null,
 	eventLocation: "",
 	dressCode: "",
 	images: [],

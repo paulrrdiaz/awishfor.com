@@ -3,8 +3,10 @@ import type { PublicWishlistMode } from "@/components/layouts/public-wishlist/pu
 import { Countdown } from "@/components/shared/countdown";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
+import { GiftListBand } from "@/components/shared/gift-list-band";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { ProgressSummary } from "@/components/shared/progress-summary";
+import { RsvpSection } from "@/components/shared/rsvp-section";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import {
@@ -68,28 +70,42 @@ export function PublicWishlistBody({
 				/>
 			)}
 
-			<section className={`mx-auto w-full ${maxWidth} px-6 py-12`} id="regalos">
-				{isFull && <ProgressSummary progress={wishlist.progress} />}
-				{isFull ? (
-					<PublicGiftFilters
-						actionsEnabled
-						categories={wishlist.categories}
-						gifts={wishlist.gifts}
-						layout={layout}
-						motif={motif}
-						motifTreatment={motifTreatment}
-					/>
-				) : (
-					<GiftGrid
-						actionsEnabled={false}
-						giftCardStyle={layout.giftCardStyle}
-						giftColumns={layout.giftColumns}
-						gifts={sortGifts(wishlist.gifts, "recommended")}
-						motif={motif}
-						motifTreatment={motifTreatment}
-					/>
-				)}
-			</section>
+			<RsvpSection
+				eventDate={wishlist.eventDate}
+				eventLocation={wishlist.eventLocation}
+				eventTime={wishlist.eventTime}
+				guest={wishlist.guest}
+				rsvpDeadline={wishlist.rsvpDeadline}
+				wishlistSlug={wishlist.slug}
+			/>
+
+			<GiftListBand className="relative left-1/2 w-screen -translate-x-1/2">
+				<section
+					className={`mx-auto w-full ${maxWidth} px-6 py-12`}
+					id="regalos"
+				>
+					{isFull && <ProgressSummary progress={wishlist.progress} />}
+					{isFull ? (
+						<PublicGiftFilters
+							actionsEnabled
+							categories={wishlist.categories}
+							gifts={wishlist.gifts}
+							layout={layout}
+							motif={motif}
+							motifTreatment={motifTreatment}
+						/>
+					) : (
+						<GiftGrid
+							actionsEnabled={false}
+							giftCardStyle={layout.giftCardStyle}
+							giftColumns={layout.giftColumns}
+							gifts={sortGifts(wishlist.gifts, "recommended")}
+							motif={motif}
+							motifTreatment={motifTreatment}
+						/>
+					)}
+				</section>
+			</GiftListBand>
 
 			{!isCompact && (
 				<WishlistThankYou

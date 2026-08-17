@@ -42,6 +42,101 @@ describe("public wishlist drawer integration", () => {
 	});
 });
 
+describe("public wishlist RSVP integration", () => {
+	const SELF_CONTAINED_FILES = [
+		"arch-trio-layout.tsx",
+		"collage-staggered-layout.tsx",
+		"split-image-right-layout.tsx",
+	];
+	const SHARED_BODY_FILES = LAYOUT_FILES.filter(
+		(file) => !SELF_CONTAINED_FILES.includes(file),
+	);
+
+	it("mounts RsvpSection wired to the guest field in every self-contained layout", async () => {
+		for (const file of SELF_CONTAINED_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source).toContain(
+				'import { RsvpSection } from "@/components/shared/rsvp-section"',
+			);
+			expect(source).toContain("<RsvpSection");
+			expect(source).toContain("guest={wishlist.guest}");
+		}
+	});
+
+	it("routes every other layout's RSVP section through the shared body", async () => {
+		const bodySource = await readFile(
+			sharedPath("public-wishlist-body.tsx"),
+			"utf8",
+		);
+		expect(bodySource).toContain(
+			'import { RsvpSection } from "@/components/shared/rsvp-section"',
+		);
+		expect(bodySource).toContain("<RsvpSection");
+		expect(bodySource).toContain("guest={wishlist.guest}");
+
+		for (const file of SHARED_BODY_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source).toContain(
+				'import { PublicWishlistBody } from "@/components/shared/public-wishlist-body"',
+			);
+		}
+	});
+
+	it("removed the retired guest welcome section and inline RSVP control everywhere", async () => {
+		const bodySource = await readFile(
+			sharedPath("public-wishlist-body.tsx"),
+			"utf8",
+		);
+		expect(bodySource).not.toContain("GuestWelcomeSection");
+		expect(bodySource).not.toContain("RsvpControl");
+
+		for (const file of LAYOUT_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source).not.toContain("GuestWelcomeSection");
+			expect(source).not.toContain("RsvpControl");
+		}
+	});
+
+	it("never prints the guest's name outside the RSVP section", async () => {
+		for (const file of LAYOUT_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source).not.toContain("primaryName");
+			expect(source).not.toContain("guest?.");
+		}
+	});
+});
+
+describe("public wishlist gift list band", () => {
+	const SELF_CONTAINED_FILES = [
+		"arch-trio-layout.tsx",
+		"collage-staggered-layout.tsx",
+		"split-image-right-layout.tsx",
+	];
+
+	it("wraps the gift section in the shared band at every self-contained call site, preserving its anchor", async () => {
+		for (const file of SELF_CONTAINED_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source).toContain(
+				'import { GiftListBand } from "@/components/shared/gift-list-band"',
+			);
+			expect(source).toContain("<GiftListBand");
+			expect(source).toContain('id="regalos"');
+		}
+	});
+
+	it("wraps the shared body's gift section in the same band", async () => {
+		const bodySource = await readFile(
+			sharedPath("public-wishlist-body.tsx"),
+			"utf8",
+		);
+		expect(bodySource).toContain(
+			'import { GiftListBand } from "@/components/shared/gift-list-band"',
+		);
+		expect(bodySource).toContain("<GiftListBand");
+		expect(bodySource).toContain('id="regalos"');
+	});
+});
+
 describe("public wishlist footer integration", () => {
 	it("centralizes one footer after the selected layout for all nine variants", async () => {
 		const pageSource = await readFile(

@@ -28,7 +28,7 @@ function Spotlight({ message, attribution, className }: VariantProps) {
 	return (
 		<section
 			aria-label="Agradecimiento"
-			className={cn("mx-auto w-full max-w-4xl px-6 pt-4 pb-16", className)}
+			className={cn("mx-auto w-full max-w-4xl px-6 py-10", className)}
 		>
 			<div className="mx-auto max-w-2xl rounded-[20px] bg-foreground px-8 py-10 text-center text-background">
 				<span className="font-mono text-[9px] uppercase tracking-[0.24em] opacity-70">
@@ -57,7 +57,7 @@ function Handwritten({ message, attribution, className }: VariantProps) {
 	return (
 		<section
 			aria-label="Agradecimiento"
-			className={cn("mx-auto w-full max-w-4xl px-6 pt-4 pb-16", className)}
+			className={cn("mx-auto w-full max-w-4xl px-6 py-10", className)}
 		>
 			<div className="relative mx-auto max-w-[640px] -rotate-1 rounded-[4px] bg-card px-7 py-8 text-center shadow-[0_10px_28px_rgba(30,50,80,.12)] sm:px-10">
 				<p className="mx-auto max-w-[560px] font-heading text-[19px] italic leading-[1.5] sm:text-[22px]">
@@ -90,7 +90,7 @@ function SocialProof({
 	return (
 		<section
 			aria-label="Agradecimiento"
-			className={cn("mx-auto w-full max-w-4xl px-6 pt-4 pb-16", className)}
+			className={cn("mx-auto w-full max-w-4xl px-6 py-10", className)}
 		>
 			<div className="mx-auto max-w-2xl rounded-[20px] border border-border bg-card px-8 py-10 text-center">
 				<span className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.24em]">
@@ -134,7 +134,7 @@ function PlainMessage({ message, attribution, className }: VariantProps) {
 	return (
 		<section
 			aria-label="Agradecimiento"
-			className={cn("mx-auto w-full max-w-4xl px-6 pt-4 pb-16", className)}
+			className={cn("mx-auto w-full max-w-4xl px-6 py-10", className)}
 		>
 			<p className="mx-auto max-w-xl text-center font-heading text-base leading-relaxed">
 				{message}

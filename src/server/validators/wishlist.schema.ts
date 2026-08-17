@@ -316,27 +316,42 @@ export const checkSlugAvailabilitySchema = z.object({
 	excludeWishlistId: wishlistIdSchema.optional(),
 });
 
-export const updateWishlistSettingsSchema = z.object({
-	id: wishlistIdSchema,
-	title: wishlistTitleSchema,
-	slug: wishlistSlugSchema,
-	eventDate: optionalNullableDate,
-	eventTime: wishlistEventTimeSchema,
-	eventLocation: wishlistEventLocationSchema,
-	dressCode: wishlistDressCodeSchema,
-	welcomeMessage: wishlistWelcomeMessageSchema,
-	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
-	thankYouMessage: wishlistThankYouMessageSchema,
-	countdownVariant: wishlistCountdownVariantSchema,
-	welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
-	thankYouMessageVariant: wishlistThankYouMessageVariantSchema,
-	motifId: wishlistMotifIdSchema,
-	motifTreatment: wishlistMotifTreatmentSchema,
-	motifPalette: wishlistMotifPaletteSchema,
-	language: localeSchema,
-	currency: currencySchema,
-	showHowItWorks: z.boolean(),
-});
+export const wishlistRsvpDeadlineSchema = optionalNullableDate;
+
+export const updateWishlistSettingsSchema = z
+	.object({
+		id: wishlistIdSchema,
+		title: wishlistTitleSchema,
+		slug: wishlistSlugSchema,
+		eventDate: optionalNullableDate,
+		eventTime: wishlistEventTimeSchema,
+		rsvpDeadline: wishlistRsvpDeadlineSchema,
+		eventLocation: wishlistEventLocationSchema,
+		dressCode: wishlistDressCodeSchema,
+		welcomeMessage: wishlistWelcomeMessageSchema,
+		welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
+		thankYouMessage: wishlistThankYouMessageSchema,
+		countdownVariant: wishlistCountdownVariantSchema,
+		welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
+		thankYouMessageVariant: wishlistThankYouMessageVariantSchema,
+		motifId: wishlistMotifIdSchema,
+		motifTreatment: wishlistMotifTreatmentSchema,
+		motifPalette: wishlistMotifPaletteSchema,
+		language: localeSchema,
+		currency: currencySchema,
+		showHowItWorks: z.boolean(),
+	})
+	.refine(
+		(value) =>
+			!value.eventDate ||
+			!value.rsvpDeadline ||
+			value.rsvpDeadline <= value.eventDate,
+		{
+			message:
+				"La fecha límite de confirmación no puede ser posterior a la fecha del evento",
+			path: ["rsvpDeadline"],
+		},
+	);
 
 export const updateWishlistDesignSchema = z.object({
 	id: wishlistIdSchema,

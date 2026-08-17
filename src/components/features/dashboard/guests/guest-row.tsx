@@ -21,8 +21,17 @@ type Props = {
 	onEdit: () => void;
 };
 
+function confirmedCount(invite: DashboardInviteViewModel): number {
+	const primaryConfirmed = invite.status === "confirmed" ? 1 : 0;
+	const extrasConfirmed = invite.extraGuests.filter(
+		(extra) => extra.status === "confirmed",
+	).length;
+	return primaryConfirmed + extrasConfirmed;
+}
+
 export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
 	const [deleteOpen, setDeleteOpen] = useState(false);
+	const hasResponded = invite.status !== "pending";
 
 	return (
 		<div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3.5 sm:flex-row sm:items-center sm:justify-between">
@@ -35,7 +44,9 @@ export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
 				</div>
 				<div className="mt-1 flex items-center gap-1.5 text-muted-foreground text-xs">
 					<Users className="size-3.5" />
-					{invite.partySize} {invite.partySize === 1 ? "persona" : "personas"}
+					{hasResponded
+						? `${confirmedCount(invite)} de ${invite.partySize} confirmados`
+						: `${invite.partySize} ${invite.partySize === 1 ? "persona" : "personas"}`}
 				</div>
 			</div>
 

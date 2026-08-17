@@ -35,12 +35,17 @@ function makeInviteRow(overrides: Record<string, unknown> = {}) {
 
 function makeDb({
 	userFindUnique = vi.fn().mockResolvedValue({ id: 42 }),
-	wishlistFindFirst = vi.fn().mockResolvedValue({ id: "wishlist_1" }),
+	wishlistFindFirst = vi.fn().mockResolvedValue({
+		id: "wishlist_1",
+		eventDate: null,
+		rsvpDeadline: null,
+	}),
 	inviteFindFirst = vi.fn().mockResolvedValue(null),
 	inviteFindMany = vi.fn().mockResolvedValue([]),
 	inviteCreate = vi.fn(),
 	inviteUpdate = vi.fn(),
 	inviteDelete = vi.fn(),
+	inviteExtraGuestUpdate = vi.fn().mockResolvedValue({}),
 }: {
 	userFindUnique?: ReturnType<typeof vi.fn>;
 	wishlistFindFirst?: ReturnType<typeof vi.fn>;
@@ -49,6 +54,7 @@ function makeDb({
 	inviteCreate?: ReturnType<typeof vi.fn>;
 	inviteUpdate?: ReturnType<typeof vi.fn>;
 	inviteDelete?: ReturnType<typeof vi.fn>;
+	inviteExtraGuestUpdate?: ReturnType<typeof vi.fn>;
 } = {}) {
 	return {
 		user: { findUnique: userFindUnique },
@@ -60,6 +66,13 @@ function makeDb({
 			update: inviteUpdate,
 			delete: inviteDelete,
 		},
+		inviteExtraGuest: { update: inviteExtraGuestUpdate },
+		$transaction: vi.fn().mockImplementation((cb) =>
+			cb({
+				invite: { update: inviteUpdate },
+				inviteExtraGuest: { update: inviteExtraGuestUpdate },
+			}),
+		),
 	};
 }
 
@@ -184,7 +197,9 @@ describe("inviteRouter.respond", () => {
 			.fn()
 			.mockResolvedValue(makeInviteRow({ status: "confirmed" }));
 		const db = makeDb({
-			inviteFindFirst: vi.fn().mockResolvedValue({ id: "invite_1" }),
+			inviteFindFirst: vi
+				.fn()
+				.mockResolvedValue(makeInviteRow({ extraGuests: [] })),
 			inviteUpdate,
 		});
 		const caller = makeCaller(db);
@@ -193,6 +208,7 @@ describe("inviteRouter.respond", () => {
 			wishlistSlug: "lista-de-boda",
 			guestSlug: "pedro-castillo",
 			status: "confirmed",
+			extraGuests: [],
 		});
 
 		expect(result.status).toBe("confirmed");
@@ -208,7 +224,9 @@ describe("inviteRouter.respond", () => {
 			.fn()
 			.mockResolvedValue(makeInviteRow({ status: "declined" }));
 		const db = makeDb({
-			inviteFindFirst: vi.fn().mockResolvedValue({ id: "invite_1" }),
+			inviteFindFirst: vi
+				.fn()
+				.mockResolvedValue(makeInviteRow({ extraGuests: [] })),
 			inviteUpdate,
 		});
 		const caller = makeCaller(db);
@@ -217,9 +235,49 @@ describe("inviteRouter.respond", () => {
 			wishlistSlug: "lista-de-boda",
 			guestSlug: "pedro-castillo",
 			status: "declined",
+			extraGuests: [],
 		});
 
 		expect(result.status).toBe("declined");
+	});
+
+	it("confirms the primary and every extra guest in one submit", async () => {
+		const inviteUpdate = vi
+			.fn()
+			.mockResolvedValue(makeInviteRow({ status: "confirmed" }));
+		const inviteExtraGuestUpdate = vi.fn().mockResolvedValue({});
+		const db = makeDb({
+			inviteFindFirst: vi.fn().mockResolvedValue(
+				makeInviteRow({
+					extraGuests: [
+						{ id: "g1", name: "Ana" },
+						{ id: "g2", name: "Luis" },
+					],
+				}),
+			),
+			inviteUpdate,
+			inviteExtraGuestUpdate,
+		});
+		const caller = makeCaller(db);
+
+		await caller.respond({
+			wishlistSlug: "lista-de-boda",
+			guestSlug: "pedro-castillo",
+			status: "confirmed",
+			extraGuests: [
+				{ id: "g1", status: "confirmed" },
+				{ id: "g2", status: "declined" },
+			],
+		});
+
+		expect(inviteExtraGuestUpdate).toHaveBeenCalledWith({
+			where: { id: "g1" },
+			data: { status: "confirmed" },
+		});
+		expect(inviteExtraGuestUpdate).toHaveBeenCalledWith({
+			where: { id: "g2" },
+			data: { status: "declined" },
+		});
 	});
 
 	it("rejects a status other than confirmed or declined", async () => {
@@ -231,6 +289,7 @@ describe("inviteRouter.respond", () => {
 				wishlistSlug: "lista-de-boda",
 				guestSlug: "pedro-castillo",
 				status: "pending" as never,
+				extraGuests: [],
 			}),
 		).rejects.toThrow();
 		expect(db.invite.update).not.toHaveBeenCalled();
@@ -245,7 +304,29 @@ describe("inviteRouter.respond", () => {
 				wishlistSlug: "lista-de-boda",
 				guestSlug: "unknown",
 				status: "confirmed",
+				extraGuests: [],
 			}),
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+
+	it("rejects a mismatched extra-guest id set", async () => {
+		const db = makeDb({
+			inviteFindFirst: vi
+				.fn()
+				.mockResolvedValue(
+					makeInviteRow({ extraGuests: [{ id: "g1", name: "Ana" }] }),
+				),
+		});
+		const caller = makeCaller(db);
+
+		await expect(
+			caller.respond({
+				wishlistSlug: "lista-de-boda",
+				guestSlug: "pedro-castillo",
+				status: "confirmed",
+				extraGuests: [{ id: "unknown-id", status: "confirmed" }],
+			}),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		expect(db.invite.update).not.toHaveBeenCalled();
 	});
 });

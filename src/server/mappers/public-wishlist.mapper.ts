@@ -150,6 +150,7 @@ export function mapPublicWishlist(
 		thankYouMessage: wishlist.thankYouMessage,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
+		rsvpDeadline: wishlist.rsvpDeadline?.toISOString() ?? null,
 		eventLocation: wishlist.eventLocation,
 		dressCode: wishlist.dressCode,
 		images: mapImages(wishlist.images),
