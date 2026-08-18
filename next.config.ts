@@ -61,6 +61,26 @@ const config: NextConfig = {
 				protocol: "https",
 				hostname: "www.rikury.pe",
 			},
+			{
+				protocol: "https",
+				hostname: "petitpima.com.pe",
+			},
+			{
+				protocol: "https",
+				hostname: "babyloli.pe",
+			},
+			{
+				protocol: "https",
+				hostname: "bamboobalance.pe",
+			},
+			{
+				protocol: "https",
+				hostname: "versatino.com",
+			},
+			{
+				protocol: "https",
+				hostname: "rimage.ripley.com.pe",
+			},
 		],
 	},
 	async headers() {
