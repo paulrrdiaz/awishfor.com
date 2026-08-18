@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { normalizeClerkAuthError } from "@/lib/auth/clerk-api-errors";
 import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 import { GoogleButton } from "./google-button";
 import { OutlookButton } from "./outlook-button";
@@ -35,13 +36,35 @@ export function SignInForm() {
 	const {
 		register,
 		handleSubmit,
+		setError,
+		clearErrors,
 		formState: { errors, isSubmitting },
 	} = useForm<SignInValues>({
 		resolver: zodResolver(signInSchema),
 	});
 
+	function showPasswordErrors(error: unknown) {
+		const normalized = normalizeClerkAuthError(error);
+		if (normalized.email.length) {
+			setError("email", {
+				type: "server",
+				message: normalized.email.join(" "),
+			});
+		}
+		if (normalized.password.length) {
+			setError("password", {
+				type: "server",
+				message: normalized.password.join(" "),
+			});
+		}
+		if (normalized.general.length) {
+			setClerkError(normalized.general.join(" "));
+		}
+	}
+
 	async function onSubmit(values: SignInValues) {
 		setClerkError(null);
+		clearErrors(["email", "password"]);
 		try {
 			const { error } = await signIn.password({
 				emailAddress: values.email,
@@ -52,17 +75,15 @@ export function SignInForm() {
 					router.replace(redirectPath);
 					return;
 				}
-				setClerkError(
-					error.longMessage ?? "Algo salió mal. Inténtalo de nuevo.",
-				);
+				showPasswordErrors(error);
 				return;
 			}
 			if (signIn.status === "complete") {
 				await signIn.finalize();
 				router.push(redirectPath);
 			}
-		} catch {
-			setClerkError("Algo salió mal. Inténtalo de nuevo.");
+		} catch (error) {
+			showPasswordErrors(error);
 		}
 	}
 

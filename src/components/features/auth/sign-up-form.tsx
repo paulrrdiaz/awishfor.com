@@ -12,6 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import {
+	hasClerkErrorCode,
+	normalizeClerkAuthError,
+} from "@/lib/auth/clerk-api-errors";
 import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 import { CheckEmail } from "./check-email";
 import { GoogleButton } from "./google-button";
@@ -23,6 +27,10 @@ import {
 	type VerifyEmailValues,
 	verifyEmailSchema,
 } from "./schemas";
+
+const CLIENT_STATE_INVALID_CODE = "client_state_invalid";
+const CLIENT_STATE_INVALID_MESSAGE =
+	"No pudimos continuar con el registro. Inténtalo de nuevo.";
 
 export function SignUpForm() {
 	const router = useRouter();
@@ -56,27 +64,56 @@ export function SignUpForm() {
 		resolver: zodResolver(verifyEmailSchema),
 	});
 
+	function showPasswordErrors(error: unknown) {
+		const normalized = normalizeClerkAuthError(error);
+		if (normalized.email.length) {
+			signUpForm.setError("email", {
+				type: "server",
+				message: normalized.email.join(" "),
+			});
+		}
+		if (normalized.password.length) {
+			signUpForm.setError("password", {
+				type: "server",
+				message: normalized.password.join(" "),
+			});
+		}
+		if (normalized.general.length) {
+			setClerkError(normalized.general.join(" "));
+		}
+	}
+
 	async function onSignUp(values: SignUpValues) {
 		setClerkError(null);
-		const { error } = await signUp.password({
-			emailAddress: values.email,
-			password: values.password,
-			firstName: values.name,
-			legalAccepted: values.acceptedTerms,
-		});
-		if (error) {
-			setClerkError(error.longMessage ?? "Algo salió mal. Inténtalo de nuevo.");
-			return;
+		signUpForm.clearErrors(["email", "password"]);
+		try {
+			const { error } = await signUp.password({
+				emailAddress: values.email,
+				password: values.password,
+				firstName: values.name,
+				legalAccepted: values.acceptedTerms,
+			});
+			if (error) {
+				showPasswordErrors(error);
+				return;
+			}
+			const { error: verifyError } = await signUp.verifications.sendEmailCode();
+			if (verifyError) {
+				if (hasClerkErrorCode(verifyError, CLIENT_STATE_INVALID_CODE)) {
+					await signUp.reset();
+					setClerkError(CLIENT_STATE_INVALID_MESSAGE);
+					return;
+				}
+				setClerkError(
+					verifyError.longMessage ??
+						"No se pudo enviar el código de verificación.",
+				);
+				return;
+			}
+			setVerifying(true);
+		} catch (error) {
+			showPasswordErrors(error);
 		}
-		const { error: verifyError } = await signUp.verifications.sendEmailCode();
-		if (verifyError) {
-			setClerkError(
-				verifyError.longMessage ??
-					"No se pudo enviar el código de verificación.",
-			);
-			return;
-		}
-		setVerifying(true);
 	}
 
 	async function onVerify(values: VerifyEmailValues) {

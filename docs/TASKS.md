@@ -2270,6 +2270,7 @@ Tasks:
 - [x] Test money formatting.
 - [x] Test date/countdown formatting.
 - [x] Test public/dashboard view model mappers.
+- [x] Surface field-associated Clerk API errors on email/password auth forms.
 
 Acceptance criteria:
 

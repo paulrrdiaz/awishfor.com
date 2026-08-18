@@ -33,8 +33,28 @@ The system SHALL provide a sign-up page at `src/app/(auth)` built with `react-ho
 
 #### Scenario: Clerk rejects the sign-up
 
-- **WHEN** Clerk returns an error (e.g. email already in use)
-- **THEN** the form SHALL surface a human-readable error message and remain on the page
+- **WHEN** Clerk rejects a sign-up attempt with one error associated with the email or password field
+- **THEN** the form SHALL display the Spanish translation for known Clerk error codes beneath that field and remain on the page
+
+#### Scenario: Clerk rejects sign-up with multiple simultaneous errors
+
+- **WHEN** Clerk returns multiple errors for one sign-up attempt
+- **THEN** the form SHALL preserve every returned message, display email and password errors beneath their corresponding fields, display unassociated errors in the general form banner, and remain on the page
+
+#### Scenario: Clerk rejects sign-up without a field association
+
+- **WHEN** Clerk rejects a sign-up attempt with an error that is not associated with the email or password field
+- **THEN** the form SHALL display Clerk's human-readable message in the general form banner and remain on the page
+
+#### Scenario: Clerk loses the current sign-up attempt
+
+- **WHEN** Clerk rejects the verification-code request with `client_state_invalid`
+- **THEN** the system SHALL reset the stale sign-up state, display a Spanish retry message, and keep the user on the sign-up form
+
+#### Scenario: Clerk client state survives application navigation
+
+- **WHEN** the root `ClerkProvider` renders or persists across application routes
+- **THEN** Clerk middleware SHALL cover every non-static page request, every API request, and Clerk's `/__clerk` frontend routes without making public pages protected
 
 #### Scenario: Design language on desktop and mobile
 
@@ -85,8 +105,18 @@ The system SHALL provide a sign-in page at `src/app/(auth)` built with `react-ho
 
 #### Scenario: Invalid credentials
 
-- **WHEN** a user submits incorrect credentials
-- **THEN** the form SHALL display a human-readable error and remain on the page
+- **WHEN** Clerk rejects a sign-in attempt with one error associated with the email or password field
+- **THEN** the form SHALL display the Spanish translation for known Clerk error codes beneath that field and remain on the page
+
+#### Scenario: Clerk rejects sign-in with multiple simultaneous errors
+
+- **WHEN** Clerk returns multiple errors for one sign-in attempt
+- **THEN** the form SHALL preserve every returned message, display email and password errors beneath their corresponding fields, display unassociated errors in the general form banner, and remain on the page
+
+#### Scenario: Clerk rejects sign-in without a field association
+
+- **WHEN** Clerk rejects a sign-in attempt with an error that is not associated with the email or password field
+- **THEN** the form SHALL display Clerk's human-readable message in the general form banner and remain on the page
 
 #### Scenario: Recovery link is present
 
@@ -168,4 +198,3 @@ The system SHALL present a "Revisa tu correo" confirmation state after a verific
 
 - **WHEN** the recovery flow sends an email reset code
 - **THEN** the system SHALL show the check-your-email confirmation with the code + new-password entry in the same view, preserving the Clerk sign-in session
-
