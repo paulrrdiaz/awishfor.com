@@ -88,6 +88,7 @@ const makeDraftInput = (
 	eventLocation: "Barranco",
 	coverImages: [
 		{ url: "https://example.com/cover.jpg", width: 1600, height: 900 },
+		{ url: "https://example.com/cover-2.jpg", width: 1600, height: 900 },
 	],
 	themeId: "soft",
 	layoutId: "editorial",
@@ -1022,7 +1023,7 @@ describe("wishlist service", () => {
 	it("publishes a ready wishlist and sets publishedAt while clearing archivedAt", async () => {
 		const { db, findFirst, count, imageCount, update } = createMockDatabase({
 			visibleGiftCount: 1,
-			imageCount: 1,
+			imageCount: 2,
 		});
 		const now = new Date("2026-06-25T10:00:00.000Z");
 
