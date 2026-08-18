@@ -37,6 +37,13 @@ describe("formatCountdown", () => {
 		const now = new Date(2026, 7, 6, 12);
 		expect(formatCountdown("2026-08-20", now)).toBe("Faltan 14 días");
 	});
+
+	it("treats a serialized UTC-midnight event as the same local calendar date", () => {
+		const now = new Date(2026, 7, 18, 12);
+		expect(formatCountdown("2026-09-27T00:00:00.000Z", now)).toBe(
+			"Faltan 40 días",
+		);
+	});
 });
 
 describe("getCountdownProgress", () => {

@@ -1,14 +1,14 @@
-const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const CALENDAR_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/;
 
 function parseEventDate(eventDate: Date | string): Date {
 	if (eventDate instanceof Date) return eventDate;
 
-	const dateOnly = DATE_ONLY_PATTERN.exec(eventDate);
-	if (dateOnly) {
+	const calendarDate = CALENDAR_DATE_PATTERN.exec(eventDate);
+	if (calendarDate) {
 		return new Date(
-			Number(dateOnly[1]),
-			Number(dateOnly[2]) - 1,
-			Number(dateOnly[3]),
+			Number(calendarDate[1]),
+			Number(calendarDate[2]) - 1,
+			Number(calendarDate[3]),
 		);
 	}
 

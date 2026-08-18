@@ -34,30 +34,31 @@ export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
 	const hasResponded = invite.status !== "pending";
 
 	return (
-		<div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3.5 sm:flex-row sm:items-center sm:justify-between">
-			<div className="min-w-0 flex-1">
-				<div className="flex flex-wrap items-center gap-2">
-					<span className="truncate font-semibold text-sm">
-						{invite.primaryName}
-					</span>
-					<RsvpStatusBadge status={invite.status} />
+		<div className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-3.5">
+			<div className="flex items-start justify-between gap-2">
+				<div className="min-w-0 flex-1">
+					<div className="flex flex-wrap items-center gap-2">
+						<span className="truncate font-semibold text-sm">
+							{invite.primaryName}
+						</span>
+						<RsvpStatusBadge status={invite.status} />
+					</div>
+					<div className="mt-1 flex items-center gap-1.5 text-muted-foreground text-xs">
+						<Users className="size-3.5" />
+						{hasResponded
+							? `${confirmedCount(invite)} de ${invite.partySize} confirmados`
+							: `${invite.partySize} ${invite.partySize === 1 ? "persona" : "personas"}`}
+					</div>
 				</div>
-				<div className="mt-1 flex items-center gap-1.5 text-muted-foreground text-xs">
-					<Users className="size-3.5" />
-					{hasResponded
-						? `${confirmedCount(invite)} de ${invite.partySize} confirmados`
-						: `${invite.partySize} ${invite.partySize === 1 ? "persona" : "personas"}`}
-				</div>
-			</div>
 
-			<div className="flex shrink-0 items-center gap-2">
-				<CopyInviteUrlButton url={inviteUrl} />
-				<Button onClick={onEdit} size="sm" type="button" variant="ghost">
-					<Pencil /> Editar
-				</Button>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button aria-label="Más acciones" size="icon-sm" variant="ghost">
+						<Button
+							aria-label="Más acciones"
+							className="shrink-0"
+							size="icon-sm"
+							variant="ghost"
+						>
 							<MoreHorizontal />
 						</Button>
 					</DropdownMenuTrigger>
@@ -73,6 +74,13 @@ export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
+			</div>
+
+			<div className="mt-auto flex items-center justify-between gap-2 border-border border-t pt-3">
+				<CopyInviteUrlButton url={inviteUrl} />
+				<Button onClick={onEdit} size="sm" type="button" variant="ghost">
+					<Pencil /> Editar
+				</Button>
 			</div>
 
 			<DeleteGuestDialog

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { resolveMotif } from "@/config/motifs";
@@ -97,6 +97,32 @@ describe("GiftCard actions across styles", () => {
 		expect(
 			screen.queryByRole("button", { name: /ver producto|regalar/i }),
 		).toBeNull();
+	});
+});
+
+describe("GiftCard image fallback", () => {
+	it("replaces an unavailable remote image with an accessible fallback", () => {
+		render(
+			<GiftCard
+				cardStyle="card"
+				gift={{
+					...sampleGift,
+					imageUrl: "https://example.com/unavailable.jpg",
+				}}
+			/>,
+		);
+
+		fireEvent.error(screen.getByRole("img", { name: sampleGift.name }));
+
+		expect(
+			screen.getByRole("img", {
+				name: `Imagen no disponible para ${sampleGift.name}`,
+			}),
+		).toBeVisible();
+		expect(screen.getByText("Imagen no disponible")).toBeVisible();
+		expect(
+			screen.queryByRole("img", { name: sampleGift.name }),
+		).not.toBeInTheDocument();
 	});
 });
 

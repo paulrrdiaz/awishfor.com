@@ -48,13 +48,13 @@ describe("WishlistFooter", () => {
 		).toHaveAttribute("href", "/terms");
 		expect(screen.getByRole("link", { name: "Contacto" })).toHaveAttribute(
 			"href",
-			"mailto:hola@awishfor.com",
+			"mailto:contact@awishfor.com",
 		);
 		expect(
 			screen.getByRole("link", { name: "Reportar lista" }),
 		).toHaveAttribute(
 			"href",
-			"mailto:hola@awishfor.com?subject=Reporte%20de%20lista",
+			"mailto:contact@awishfor.com?subject=Reporte%20de%20lista",
 		);
 	});
 
@@ -78,11 +78,11 @@ describe("WishlistFooter", () => {
 			screen.getByRole("link", { name: "Reportar lista" }),
 		).toHaveAttribute(
 			"href",
-			"mailto:hola@awishfor.com?subject=Reporte%20de%20lista",
+			"mailto:contact@awishfor.com?subject=Reporte%20de%20lista",
 		);
 		expect(
-			screen.getByRole("link", { name: "hola@awishfor.com" }),
-		).toHaveAttribute("href", "mailto:hola@awishfor.com");
+			screen.getByRole("link", { name: "contact@awishfor.com" }),
+		).toHaveAttribute("href", "mailto:contact@awishfor.com");
 		expect(screen.queryByText("Producto")).not.toBeInTheDocument();
 		expect(screen.queryByText("100% gratis")).not.toBeInTheDocument();
 	});

@@ -27,10 +27,18 @@ export default async function DashboardWishlistGuestsPage({ params }: Props) {
 		...invite,
 		inviteUrl: toCanonicalWishlistUrl(`/w/${wishlist.slug}/${invite.slug}`),
 	}));
+	const totalGuests = invites.reduce(
+		(total, invite) => total + invite.partySize,
+		0,
+	);
 
 	return (
 		<div className="w-full space-y-5 px-7 pt-1 pb-5">
-			<GuestsHeaderToolbar totalInvites={invites.length} wishlistId={id} />
+			<GuestsHeaderToolbar
+				totalGuests={totalGuests}
+				totalInvites={invites.length}
+				wishlistId={id}
+			/>
 
 			{invites.length === 0 ? (
 				<GuestsEmptyState wishlistId={id} />

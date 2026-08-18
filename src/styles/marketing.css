@@ -288,3 +288,162 @@
 	background: #ececec;
 	color: #6b6b6b;
 }
+
+/*
+ * ---- blog ----
+ * Transcribed from the design canvas (Blog Page.dc.html, Blog Post Page.dc.html).
+ * Two documented divergences: the article column reads on the shared --mbg
+ * page background inside a white .m-card rather than the canvas's standalone
+ * #FDFCF8, and category badges always show their full label (the canvas
+ * truncates on small cards; treated as a space-saving shortcut, not intent).
+ */
+.marketing-theme .m-prose {
+	color: #3a3f35;
+	font-size: 16px;
+	line-height: 1.85;
+}
+.marketing-theme .m-prose p {
+	margin: 0 0 20px;
+}
+.marketing-theme .m-prose h2 {
+	font-family: var(--font-lora), Georgia, "Times New Roman", serif;
+	font-size: 28px;
+	font-weight: 600;
+	color: var(--mink);
+	margin: 44px 0 16px;
+}
+.marketing-theme .m-prose h3 {
+	font-family: var(--font-lora), Georgia, "Times New Roman", serif;
+	font-size: 24px;
+	font-weight: 600;
+	color: var(--mink);
+	margin: 36px 0 14px;
+}
+.marketing-theme .m-prose blockquote {
+	margin: 36px 0;
+	padding: 4px 0 4px 24px;
+	border-left: 3px solid var(--mlime);
+	font-family: var(--font-lora), Georgia, "Times New Roman", serif;
+	font-style: italic;
+	font-size: 20px;
+	color: var(--mink);
+	line-height: 1.5;
+}
+.marketing-theme .m-prose ul,
+.marketing-theme .m-prose ol {
+	margin: 0 0 20px;
+	padding-left: 22px;
+	line-height: 1.85;
+}
+.marketing-theme .m-prose ul {
+	list-style-type: disc;
+}
+.marketing-theme .m-prose ol {
+	list-style-type: decimal;
+}
+.marketing-theme .m-prose li {
+	margin-bottom: 6px;
+}
+.marketing-theme .m-prose li::marker {
+	color: var(--mmut);
+}
+.marketing-theme .m-prose a {
+	color: var(--mink);
+	text-decoration: underline;
+	text-decoration-color: var(--mlime);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+	transition: text-decoration-thickness 0.15s ease;
+}
+.marketing-theme .m-prose a:hover {
+	text-decoration-thickness: 2px;
+}
+.marketing-theme .m-prose img {
+	width: 100%;
+	height: auto;
+	border-radius: 14px;
+	margin: 28px 0;
+}
+
+/* ---- blog index card, chips, badge ---- */
+.marketing-theme .m-blog-card {
+	background: #fff;
+	border: 1px solid var(--mline);
+	border-radius: 16px;
+	overflow: hidden;
+	transition:
+		transform 0.22s ease,
+		box-shadow 0.22s ease;
+}
+.marketing-theme .m-blog-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 16px 34px rgba(20, 80, 20, 0.12);
+}
+.marketing-theme .m-blog-card-fallback {
+	background: var(--mink);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 24px;
+}
+.marketing-theme .m-blog-meta {
+	font-family: var(--font-mono), ui-monospace, monospace;
+	color: #8a9187;
+	letter-spacing: 0.04em;
+}
+.marketing-theme .m-cat-badge {
+	display: inline-flex;
+	align-items: center;
+	border-radius: 999px;
+	padding: 5px 12px;
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-size: 10.5px;
+	font-weight: 700;
+}
+.marketing-theme .m-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	padding: 8px 16px;
+	border-radius: 999px;
+	border: 1px solid var(--mline);
+	background: #fff;
+	color: var(--mink);
+	font-size: 12.5px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.marketing-theme .m-chip[data-selected="true"] {
+	background: var(--mink);
+	border-color: var(--mink);
+	color: #fff;
+}
+
+/* ---- blog post chrome: tags, share control, related rail ---- */
+.marketing-theme .m-tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 7px 14px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	border: 1px solid var(--mline);
+	background: #fff;
+	color: var(--mink);
+}
+.marketing-theme .m-related-card {
+	background: #fff;
+	border: 1px solid var(--mline);
+	border-radius: 14px;
+	overflow: hidden;
+	display: block;
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+}
+.marketing-theme .m-related-card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 14px 30px rgba(20, 60, 20, 0.1);
+}

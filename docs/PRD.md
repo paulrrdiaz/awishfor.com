@@ -1603,7 +1603,7 @@ No cookie banner if no ads/retargeting/Meta Pixel/Google Ads.
 Use one generic email:
 
 ```txt
-hola@awishfor.com
+contact@awishfor.com
 ```
 
 For:
@@ -1620,7 +1620,7 @@ For:
 Report link:
 
 ```txt
-mailto:hola@awishfor.com?subject=Reportar%20lista
+mailto:contact@awishfor.com?subject=Reportar%20lista
 ```
 
 ### Guest consent copy

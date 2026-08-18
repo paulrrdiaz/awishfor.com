@@ -72,7 +72,7 @@ export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
 						{/* biome-ignore lint/a11y/useValidAnchor: native hash navigation is preserved; the handler only dismisses the dialog. */}
 						<a
 							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
-							href="#como-funciona"
+							href="/#como-funciona"
 							onClick={closeDrawer}
 						>
 							Cómo funciona
@@ -80,10 +80,17 @@ export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
 						{/* biome-ignore lint/a11y/useValidAnchor: native hash navigation is preserved; the handler only dismisses the dialog. */}
 						<a
 							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
-							href="#ocasiones"
+							href="/#ocasiones"
 							onClick={closeDrawer}
 						>
 							Ocasiones
+						</a>
+						<a
+							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
+							href="/blog"
+							onClick={closeDrawer}
+						>
+							Blog
 						</a>
 						<a
 							className="flex min-h-11 items-center font-medium text-[15px] text-[var(--mink)] focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"

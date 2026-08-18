@@ -7,10 +7,15 @@ import { Button } from "@/components/ui/button";
 
 type Props = {
 	wishlistId: string;
+	totalGuests: number;
 	totalInvites: number;
 };
 
-export function GuestsHeaderToolbar({ wishlistId, totalInvites }: Props) {
+export function GuestsHeaderToolbar({
+	wishlistId,
+	totalGuests,
+	totalInvites,
+}: Props) {
 	const [addOpen, setAddOpen] = useState(false);
 
 	return (
@@ -18,7 +23,8 @@ export function GuestsHeaderToolbar({ wishlistId, totalInvites }: Props) {
 			<div className="font-semibold text-base">
 				Invitados{" "}
 				<span className="font-medium text-muted-foreground">
-					· {totalInvites}
+					· {totalGuests} {totalGuests === 1 ? "persona" : "personas"} ·{" "}
+					{totalInvites} {totalInvites === 1 ? "invitación" : "invitaciones"}
 				</span>
 			</div>
 			<Button onClick={() => setAddOpen(true)} type="button">

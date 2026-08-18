@@ -1,9 +1,31 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+	formatBlogIndexDate,
+	formatBlogPostDate,
 	formatEventDate,
 	formatEventTime,
 	formatRelativeDate,
 } from "@/lib/format/dates";
+
+describe("formatBlogPostDate", () => {
+	it("formats the lowercase post meta form", () => {
+		expect(formatBlogPostDate(new Date(Date.UTC(2026, 7, 14)))).toBe(
+			"14 ago 2026",
+		);
+	});
+
+	it("accepts ISO string input", () => {
+		expect(formatBlogPostDate("2026-08-14")).toBe("14 ago 2026");
+	});
+});
+
+describe("formatBlogIndexDate", () => {
+	it("formats the uppercase monospace index form", () => {
+		expect(formatBlogIndexDate(new Date(Date.UTC(2026, 7, 14)))).toBe(
+			"14 AGO 2026",
+		);
+	});
+});
 
 describe("formatEventDate", () => {
 	it("formats a date in Spanish", () => {
@@ -23,6 +45,22 @@ describe("formatEventDate", () => {
 	it("accepts ISO string input", () => {
 		const result = formatEventDate("2026-06-15T00:00:00Z", "en");
 		expect(result).toMatch(/june/i);
+	});
+
+	it("preserves the stored calendar day for viewers west of UTC", () => {
+		const previousTimezone = process.env.TZ;
+		process.env.TZ = "America/Lima";
+
+		try {
+			const result = formatEventDate("2026-09-26T00:00:00.000Z", "es");
+			expect(result).toMatch(/^26 de (septiembre|setiembre) de 2026$/i);
+		} finally {
+			if (previousTimezone === undefined) {
+				delete process.env.TZ;
+			} else {
+				process.env.TZ = previousTimezone;
+			}
+		}
 	});
 
 	it("appends the time as a 12-hour clock when provided", () => {

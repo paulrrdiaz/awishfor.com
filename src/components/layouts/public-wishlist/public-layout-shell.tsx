@@ -1,7 +1,6 @@
-"use client";
-
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
+import { SUPPORT_EMAIL } from "@/config/contact";
 import type { PublicWishlistMode } from "./public-wishlist-page";
 
 // What actually pins to the top of the viewport differs per mode: the fixed
@@ -23,15 +22,7 @@ type Props = {
 	children: ReactNode;
 };
 
-export function PublicLayoutShell({ mode, heading, children }: Props) {
-	function shareWishlist() {
-		if (navigator.share) {
-			void navigator.share({ title: heading, url: window.location.href });
-			return;
-		}
-		void navigator.clipboard?.writeText(window.location.href);
-	}
-
+export function PublicLayoutShell({ mode, children }: Props) {
 	const style: ShellStyle = {
 		"--sticky-offset": STICKY_OFFSET_BY_MODE[mode],
 	};
@@ -48,24 +39,55 @@ export function PublicLayoutShell({ mode, heading, children }: Props) {
 			<header
 				className={`border-border border-b bg-background ${mode === "full" ? "fixed inset-x-0 top-0 z-50" : ""}`}
 			>
-				<div className="flex items-center justify-between px-5 py-3.5 sm:px-7">
-					<Image
-						alt="A Wish For"
-						height={22}
-						src="/assets/isotype.svg"
-						width={22}
-					/>
-					<div className="flex items-center gap-2">
-						<span className="rounded-full bg-[#e4f3e8] px-2.5 py-1 font-medium text-[#2f7d43] text-[11px]">
-							● Publicada
-						</span>
-						<button
-							className="rounded-full border border-border bg-card px-3.5 py-1.5 font-medium text-xs transition-colors hover:bg-muted"
-							onClick={shareWishlist}
-							type="button"
+				<div className="flex items-center justify-between gap-4 px-5 py-3.5 sm:px-7">
+					<a
+						aria-label="A Wish For"
+						className="flex shrink-0 items-center"
+						href="/"
+					>
+						<Image alt="" height={22} src="/assets/isotype.svg" width={22} />
+					</a>
+
+					<div className="flex items-center gap-6">
+						<nav
+							aria-label="Navegación"
+							className="hidden items-center gap-5 md:flex"
 						>
-							Compartir
-						</button>
+							<a
+								className="font-medium text-muted-foreground text-xs hover:text-foreground"
+								href="/"
+							>
+								Inicio
+							</a>
+							<a
+								className="font-medium text-muted-foreground text-xs hover:text-foreground"
+								href="/blog"
+							>
+								Blog
+							</a>
+							<a
+								className="font-medium text-muted-foreground text-xs hover:text-foreground"
+								href={`mailto:${SUPPORT_EMAIL}`}
+							>
+								Contacto
+							</a>
+						</nav>
+
+						<div className="flex items-center gap-2">
+							<a
+								className="hidden font-medium text-foreground text-xs hover:opacity-70 sm:inline-flex"
+								data-marketing-account-link
+								href="/sign-in"
+							>
+								Iniciar sesión
+							</a>
+							<a
+								className="rounded-full border border-border bg-card px-3.5 py-1.5 font-medium text-xs transition-colors hover:bg-muted"
+								href="/create"
+							>
+								Crea un wishlist
+							</a>
+						</div>
 					</div>
 				</div>
 			</header>

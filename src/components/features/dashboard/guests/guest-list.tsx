@@ -16,9 +16,9 @@ export function GuestList({ wishlistId, invites }: Props) {
 
 	return (
 		<>
-			<ul className="space-y-2.5">
+			<ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
 				{invites.map((invite) => (
-					<li key={invite.id}>
+					<li className="h-full" key={invite.id}>
 						<GuestRow
 							invite={invite}
 							inviteUrl={invite.inviteUrl}

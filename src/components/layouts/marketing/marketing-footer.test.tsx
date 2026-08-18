@@ -55,7 +55,7 @@ describe("MarketingFooter", () => {
 		).toHaveAttribute("href", "/terms");
 		expect(screen.getByRole("link", { name: "Contacto" })).toHaveAttribute(
 			"href",
-			"mailto:hola@awishfor.com",
+			"mailto:contact@awishfor.com",
 		);
 	});
 });

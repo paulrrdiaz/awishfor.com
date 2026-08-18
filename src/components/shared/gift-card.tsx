@@ -1,8 +1,9 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { Check, ExternalLink } from "lucide-react";
+import { Check, ExternalLink, ImageOff } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import type { MotifPreset, MotifTreatment } from "@/config/motifs";
 import { cn } from "@/lib/utils";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
@@ -105,6 +106,51 @@ function formatPrice(amount: string, currency: string): string {
 	}
 }
 
+function GiftImage({
+	src,
+	alt,
+	className,
+	sizes,
+	compact = false,
+}: {
+	src: string;
+	alt: string;
+	className: string;
+	sizes: string;
+	compact?: boolean;
+}) {
+	const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+	if (failedSrc === src) {
+		return (
+			<div
+				aria-label={`Imagen no disponible para ${alt}`}
+				className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted px-3 text-center text-muted-foreground"
+				role="img"
+			>
+				<ImageOff
+					aria-hidden="true"
+					className={compact ? "size-5" : "size-8"}
+				/>
+				{!compact && (
+					<span className="font-medium text-xs">Imagen no disponible</span>
+				)}
+			</div>
+		);
+	}
+
+	return (
+		<Image
+			alt={alt}
+			className={className}
+			fill
+			onError={() => setFailedSrc(src)}
+			sizes={sizes}
+			src={src}
+		/>
+	);
+}
+
 function GiftMeta({
 	gift,
 	showProductAction,
@@ -175,10 +221,10 @@ export function GiftCard({
 			>
 				<div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
 					{gift.imageUrl && (
-						<Image
+						<GiftImage
 							alt={gift.name}
 							className="object-cover"
-							fill
+							compact
 							sizes="64px"
 							src={gift.imageUrl}
 						/>
@@ -261,10 +307,10 @@ export function GiftCard({
 			>
 				{gift.imageUrl && (
 					<div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
-						<Image
+						<GiftImage
 							alt={gift.name}
 							className="object-contain"
-							fill
+							compact
 							sizes="64px"
 							src={gift.imageUrl}
 						/>
@@ -327,10 +373,9 @@ export function GiftCard({
 			>
 				<div className="relative h-36 w-full overflow-hidden bg-muted">
 					{gift.imageUrl && (
-						<Image
+						<GiftImage
 							alt={gift.name}
 							className="object-cover"
-							fill
 							sizes="(min-width: 1024px) 440px, (min-width: 640px) 50vw, 100vw"
 							src={gift.imageUrl}
 						/>
@@ -412,10 +457,9 @@ export function GiftCard({
 		>
 			{gift.imageUrl && (
 				<div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-					<Image
+					<GiftImage
 						alt={gift.name}
 						className="object-contain"
-						fill
 						sizes="(min-width: 1024px) 480px, (min-width: 640px) 50vw, 100vw"
 						src={gift.imageUrl}
 					/>

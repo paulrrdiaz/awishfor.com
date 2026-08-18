@@ -31,7 +31,7 @@ The marketing footer SHALL link its legal and contact entries to working destina
 - **WHEN** the marketing footer renders
 - **THEN** "Términos de uso" links to `/terms`
 - **AND** "Privacidad" links to `/privacy`
-- **AND** "Contacto" opens an email draft to `hola@awishfor.com`
+- **AND** "Contacto" opens an email draft to `contact@awishfor.com`
 
 ### Requirement: Public footer report and support links
 
@@ -43,9 +43,9 @@ The shared public wishlist footer SHALL reuse the A Wish For brand/navigation/le
 - **THEN** it presents the A Wish For brand treatment
 - **AND** "Privacidad" links to `/privacy`
 - **AND** "Términos de uso" links to `/terms`
-- **AND** "Contacto" opens an email draft to `hola@awishfor.com`
-- **AND** it provides a report link that opens an email draft to `hola@awishfor.com`
-- **AND** it surfaces the support email `hola@awishfor.com`
+- **AND** "Contacto" opens an email draft to `contact@awishfor.com`
+- **AND** it provides a report link that opens an email draft to `contact@awishfor.com`
+- **AND** it surfaces the support email `contact@awishfor.com`
 
 #### Scenario: Compact public footer preserves reporting access
 

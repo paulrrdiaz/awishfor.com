@@ -39,11 +39,34 @@ export function formatEventDate(
 		year: "numeric",
 		month: "long",
 		day: "numeric",
+		// Event dates are calendar days stored at UTC midnight. Formatting them
+		// in the viewer's local timezone can shift the displayed day backwards.
+		timeZone: "UTC",
 	}).format(d);
 
 	return time
 		? `${formattedDate} · ${formatEventTime(time, locale)}`
 		: formattedDate;
+}
+
+/** Post meta line form, e.g. "14 ago 2026". */
+export function formatBlogPostDate(date: Date | string): string {
+	const d = typeof date === "string" ? new Date(date) : date;
+	return normalizeIntlSpaces(
+		new Intl.DateTimeFormat("es-PE", {
+			day: "numeric",
+			month: "short",
+			year: "numeric",
+			// Frontmatter dates are calendar days; formatting in UTC keeps the
+			// displayed day stable regardless of the build or viewer's timezone.
+			timeZone: "UTC",
+		}).format(d),
+	).replace(/\./g, "");
+}
+
+/** Index card form, e.g. "14 AGO 2026". */
+export function formatBlogIndexDate(date: Date | string): string {
+	return formatBlogPostDate(date).toUpperCase();
 }
 
 export function formatRelativeDate(

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { preload } from "react-dom";
 
 import { BenefitsSection } from "@/components/layouts/marketing/benefits-section";
 import { ExamplePreview } from "@/components/layouts/marketing/example-preview";
@@ -19,6 +20,22 @@ export const metadata: Metadata = {
 };
 
 export default function MarketingLandingPage() {
+	preload("/assets/fonts/marketing-inter-latin.woff2", {
+		as: "font",
+		crossOrigin: "anonymous",
+		type: "font/woff2",
+	});
+	preload("/assets/fonts/marketing-lora-latin.woff2", {
+		as: "font",
+		crossOrigin: "anonymous",
+		type: "font/woff2",
+	});
+	preload("/assets/hero/wedding-hero-mobile-300.jpg", {
+		as: "image",
+		fetchPriority: "high",
+		media: "(max-width: 1023px)",
+	});
+
 	return (
 		<>
 			<MarketingFirstFold />

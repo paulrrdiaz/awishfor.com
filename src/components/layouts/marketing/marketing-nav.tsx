@@ -6,11 +6,27 @@ type MarketingNavProps = {
 	variant?: "default" | "h2b";
 };
 
-/** Scrollspy targets for the H2b nav — `id` must match the anchored section's `id`. */
+/**
+ * H2b nav destinations. `kind: "section"` entries are scrollspy targets — their
+ * `id` must match the anchored section's `id`. `kind: "route"` entries navigate
+ * to another page and carry no `data-nav-link`, so scroll-position tracking can
+ * never treat them as a missing section.
+ */
 const NAV_ITEMS = [
-	{ id: "como-funciona", href: "#como-funciona", label: "Cómo funciona" },
-	{ id: "ocasiones", href: "#ocasiones", label: "Ocasiones" },
-	{ id: "ejemplo", href: "#ejemplo", label: "Ejemplos" },
+	{
+		kind: "section",
+		id: "como-funciona",
+		href: "#como-funciona",
+		label: "Cómo funciona",
+	},
+	{
+		kind: "section",
+		id: "ocasiones",
+		href: "#ocasiones",
+		label: "Ocasiones",
+	},
+	{ kind: "section", id: "ejemplo", href: "#ejemplo", label: "Ejemplos" },
+	{ kind: "route", id: "blog", href: "/blog", label: "Blog" },
 ] as const;
 
 export function MarketingNav({ variant = "default" }: MarketingNavProps) {
@@ -55,11 +71,11 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
 							</a>
 
 							<div className="flex items-center gap-[26px] transition-[gap] duration-300 ease-out group-data-[scrolled=true]/h2b:gap-[22px] motion-reduce:transition-none">
-								{NAV_ITEMS.map(({ href, id, label }) => (
+								{NAV_ITEMS.map(({ href, id, kind, label }) => (
 									<a
 										className="-mb-[5px] border-transparent border-b-2 pb-[3px] font-mono font-semibold text-[11px] text-white/[.82] uppercase tracking-[0.13em] transition-colors duration-300 ease-out hover:opacity-80 focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 data-[active=true]:border-[var(--mlime)] data-[active=true]:text-white group-data-[scrolled=true]/h2b:text-[10px] group-data-[scrolled=true]/h2b:text-[var(--mmut)] group-data-[scrolled=true]/h2b:tracking-[0.12em] group-data-[scrolled=true]/h2b:data-[active=true]:border-transparent group-data-[scrolled=true]/h2b:data-[active=true]:text-[var(--mink)] motion-reduce:transition-none"
-										data-active="false"
-										data-nav-link={id}
+										data-active={kind === "section" ? "false" : undefined}
+										data-nav-link={kind === "section" ? id : undefined}
 										href={href}
 										key={id}
 									>
