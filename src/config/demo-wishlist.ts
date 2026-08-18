@@ -49,7 +49,7 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 		},
 	],
 	themeId: "cielo-suave",
-	layoutId: "collage-staggered",
+	layoutId: "arch-trio",
 	buttonStyle: "pill",
 	headingFont: null,
 	bodyFont: null,

@@ -36,7 +36,7 @@ export function ExamplePreview() {
 	const countdown = preview.eventDate
 		? formatCountdown(preview.eventDate)
 		: null;
-	const [collageLeft, collageCenter, collageRight] = preview.coverImageUrls;
+	const [archPrimary, archSecondary, archTertiary] = preview.coverImageUrls;
 
 	return (
 		<section
@@ -65,39 +65,40 @@ export function ExamplePreview() {
 					</div>
 				</div>
 
-				<div className="bg-[linear-gradient(180deg,var(--accent),var(--card))] px-[18px] pt-[22px] pb-4 text-center lg:px-11 lg:pt-8 lg:pb-[22px]">
-					<div className="m-eyebrow mb-[6px] text-[9px] text-[var(--muted-fg)] lg:mb-2">
-						{preview.eyebrow}
+				<div className="grid overflow-hidden bg-[linear-gradient(180deg,var(--accent),var(--card))] px-[18px] py-[22px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:px-11 lg:py-8">
+					<div className="relative mx-auto h-[194px] w-[250px] sm:h-[230px] sm:w-[310px] lg:mx-0 lg:h-[270px] lg:w-[360px]">
+						<div className="absolute top-4 left-0 z-[2] size-[158px] overflow-clip rounded-full bg-[var(--ph-tint)] shadow-[0_16px_40px_rgba(30,50,80,0.18)] sm:size-[190px] lg:size-[230px]">
+							<img
+								alt=""
+								className="m-parallax h-full w-full scale-[1.08] object-cover [--m-par-from:-3%] [--m-par-to:3%]"
+								loading="lazy"
+								src={sizedImage(archPrimary ?? null, 460, 460)}
+							/>
+						</div>
+						<div className="absolute right-0 bottom-0 z-[1] size-[96px] overflow-clip rounded-full border-[3px] border-[var(--card)] bg-[var(--ph-tint)] shadow-[0_12px_30px_rgba(30,50,80,0.15)] sm:size-[116px] lg:size-[145px] lg:border-[5px]">
+							<img
+								alt=""
+								className="m-parallax h-full w-full scale-[1.14] object-cover [--m-par-from:-6%] [--m-par-to:6%]"
+								loading="lazy"
+								src={sizedImage(archSecondary ?? null, 290, 290)}
+							/>
+						</div>
+						<div className="absolute top-0 right-[22px] z-[3] size-[76px] overflow-clip rounded-full border-[3px] border-[var(--card)] bg-[var(--ph-tint)] shadow-[0_10px_24px_rgba(30,50,80,0.14)] sm:right-[30px] sm:size-[92px] lg:size-[116px] lg:border-[5px]">
+							<img
+								alt=""
+								className="m-parallax h-full w-full scale-[1.14] object-cover [--m-par-from:-6%] [--m-par-to:6%]"
+								loading="lazy"
+								src={sizedImage(archTertiary ?? null, 230, 230)}
+							/>
+						</div>
 					</div>
-					<div className="m-serif font-semibold text-[26px] text-[var(--fg)] leading-[1.05] lg:text-[40px]">
-						{preview.title}
-					</div>
-				</div>
-
-				<div className="grid grid-cols-[1fr_1.1fr_1fr] items-end gap-2 bg-[linear-gradient(180deg,var(--card),var(--bg))] px-[18px] pb-5 lg:grid-cols-[1fr_1.15fr_1fr] lg:gap-3 lg:px-8 lg:pb-[30px]">
-					<div className="mt-[22px] h-[82px] overflow-clip rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
-						<img
-							alt=""
-							className="m-parallax h-full w-full scale-[1.14] object-cover [--m-par-from:-6%] [--m-par-to:6%]"
-							loading="lazy"
-							src={sizedImage(collageLeft ?? null, 280, 200)}
-						/>
-					</div>
-					<div className="h-[118px] overflow-clip rounded-xl bg-[var(--ph-tint)] shadow-[0_18px_44px_rgba(30,50,80,0.13)] lg:h-[210px]">
-						<img
-							alt=""
-							className="m-parallax h-full w-full scale-[1.08] object-cover [--m-par-from:-3%] [--m-par-to:3%]"
-							loading="lazy"
-							src={sizedImage(collageCenter ?? null, 320, 280)}
-						/>
-					</div>
-					<div className="mt-[22px] h-[82px] overflow-clip rounded-xl bg-[var(--ph-tint)] shadow-[0_12px_32px_rgba(30,50,80,0.10)] lg:mt-9 lg:h-[150px]">
-						<img
-							alt=""
-							className="m-parallax h-full w-full scale-[1.14] object-cover [--m-par-from:-6%] [--m-par-to:6%]"
-							loading="lazy"
-							src={sizedImage(collageRight ?? null, 280, 200)}
-						/>
+					<div className="flex flex-col justify-center py-2 text-center lg:text-left">
+						<div className="m-eyebrow mb-[6px] text-[9px] text-[var(--muted-fg)] lg:mb-2">
+							{preview.eyebrow}
+						</div>
+						<div className="m-serif font-semibold text-[26px] text-[var(--fg)] leading-[1.05] lg:text-[40px]">
+							{preview.title}
+						</div>
 					</div>
 				</div>
 

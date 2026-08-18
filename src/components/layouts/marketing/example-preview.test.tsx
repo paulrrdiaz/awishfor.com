@@ -16,6 +16,7 @@ describe("marketing example preview", () => {
 		const preview = toMarketingWishlistPreview(DEMO_WISHLIST);
 		expect(preview.title).toBe(getWishlistHeading(DEMO_WISHLIST));
 		expect(preview.eyebrow).toBe("Baby Shower");
+		expect(DEMO_WISHLIST.layoutId).toBe("arch-trio");
 		expect(preview.gifts).toHaveLength(8);
 		expect(preview.coverImageUrls).toHaveLength(3);
 	});
