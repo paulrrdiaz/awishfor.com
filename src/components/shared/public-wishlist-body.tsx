@@ -1,6 +1,7 @@
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import type { PublicWishlistMode } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { Countdown } from "@/components/shared/countdown";
+import { DeliveryCard } from "@/components/shared/delivery-card";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
 import { GiftListBand } from "@/components/shared/gift-list-band";
@@ -51,6 +52,12 @@ export function PublicWishlistBody({
 	return (
 		<>
 			{!isCompact && <EventDetails wishlist={wishlist} />}
+			{!isCompact && (
+				<DeliveryCard
+					className="mx-auto mb-6 w-[calc(100%-3rem)] max-w-4xl"
+					delivery={delivery}
+				/>
+			)}
 
 			{!isCompact && wishlist.eventDate && (
 				<Countdown
@@ -71,7 +78,6 @@ export function PublicWishlistBody({
 			{!isCompact && (
 				<WishlistMessage
 					attribution={wishlist.welcomeMessageAttribution}
-					delivery={delivery}
 					message={wishlist.welcomeMessage}
 					variant={wishlist.welcomeMessageVariant}
 				/>

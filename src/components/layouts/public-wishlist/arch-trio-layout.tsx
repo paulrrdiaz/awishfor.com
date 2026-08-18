@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
+import { DeliveryCard } from "@/components/shared/delivery-card";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftListBand } from "@/components/shared/gift-list-band";
 import { HeroCtas } from "@/components/shared/hero-ctas";
@@ -55,6 +56,9 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 		wishlist.deliveryRecipientName,
 		wishlist.deliveryAddress,
 		wishlist.deliveryPhone,
+	);
+	const hasEventDetails = Boolean(
+		wishlist.eventDate || wishlist.eventLocation || wishlist.dressCode,
 	);
 	const heroRef = useRef<HTMLElement>(null);
 	useMotifTilt(heroRef);
@@ -125,17 +129,33 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 			{!isCompact && (
 				<>
 					<div className="flex flex-col gap-8 px-5 py-5 sm:flex-row sm:items-center sm:gap-16 sm:px-4">
-						<EventDetails
-							className="flex-1 gap-4 sm:w-72 sm:grid-cols-1"
-							size="md"
-							variant="compact"
-							wishlist={wishlist}
-						/>
+						<div
+							className={
+								delivery && hasEventDetails
+									? "flex flex-1 flex-col sm:w-72"
+									: "flex flex-1 flex-col gap-4 sm:w-72"
+							}
+						>
+							<EventDetails
+								className={delivery ? "rounded-b-none border-b-0" : undefined}
+								grouped
+								size="md"
+								variant="compact"
+								wishlist={wishlist}
+							/>
+							<DeliveryCard
+								className={
+									hasEventDetails
+										? "rounded-[16px] rounded-t-none border-border border-t px-5 py-4"
+										: "rounded-[16px] px-5 py-4"
+								}
+								delivery={delivery}
+							/>
+						</div>
 						<div>
 							<WishlistMessage
 								attribution={wishlist.welcomeMessageAttribution}
 								className="border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
-								delivery={delivery}
 								message={wishlist.welcomeMessage}
 								variant={wishlist.welcomeMessageVariant}
 							/>

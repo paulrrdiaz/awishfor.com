@@ -16,6 +16,7 @@ type Props = {
 	wishlist: EventDetailsWishlist;
 	variant?: EventDetailsVariant;
 	size?: EventDetailsSize;
+	grouped?: boolean;
 	className?: string;
 };
 
@@ -28,6 +29,7 @@ export function EventDetails({
 	wishlist,
 	variant = "block",
 	size = "sm",
+	grouped = false,
 	className,
 }: Props) {
 	const details = [
@@ -61,6 +63,43 @@ export function EventDetails({
 
 	if (variant === "compact") {
 		const isMd = size === "md";
+
+		if (grouped) {
+			return (
+				<section
+					className={cn(
+						"grid grid-cols-1 divide-y divide-border overflow-hidden rounded-[14px] border border-border bg-card",
+						isMd && "rounded-[16px]",
+						className,
+					)}
+				>
+					{details.map((detail) => (
+						<div
+							className={cn("px-4 py-3 text-center", isMd && "px-5 py-4")}
+							key={detail.label}
+						>
+							<p
+								className={cn(
+									"font-mono text-[9px] text-muted-foreground uppercase tracking-[0.16em]",
+									isMd && "text-[10px]",
+								)}
+							>
+								{detail.label}
+							</p>
+							<p
+								className={cn(
+									"mt-1 font-heading font-semibold text-[15px]",
+									isMd && "mt-2 text-[17px]",
+								)}
+							>
+								{detail.value}
+							</p>
+						</div>
+					))}
+				</section>
+			);
+		}
+
 		return (
 			<section
 				className={cn(

@@ -1,10 +1,7 @@
-import { CopyButton } from "@/components/shared/copy-button";
-import { DeliveryItems } from "@/components/shared/delivery-items";
 import {
 	resolveWelcomeVariant,
 	type WelcomeVariantId,
 } from "@/config/public-message-variants";
-import type { ComposedDelivery } from "@/lib/format/delivery";
 import { parseSignatureInitials } from "@/lib/format/signature";
 import { cn } from "@/lib/utils";
 
@@ -12,53 +9,16 @@ type Props = {
 	message: string;
 	attribution?: string | null;
 	variant?: string | null;
-	delivery?: ComposedDelivery | null;
 	className?: string;
 };
 
 type VariantProps = {
 	message: string;
 	attribution?: string | null;
-	delivery?: ComposedDelivery | null;
 	className?: string;
 };
 
-/**
- * Shared postscript slot rendered inside every welcome variant's card. Kept
- * as a single implementation so the three variants can never disagree about
- * what a wishlist's delivery line says.
- */
-function DeliveryPostscript({
-	delivery,
-	className,
-}: {
-	delivery?: ComposedDelivery | null;
-	className?: string;
-}) {
-	if (!delivery) {
-		return null;
-	}
-
-	return (
-		<div
-			className={cn("flex flex-col items-center gap-2 text-center", className)}
-			data-slot="delivery-postscript"
-		>
-			<p className="font-medium text-[13px] italic leading-snug">
-				<span className="text-muted-foreground not-italic">
-					P.D. — si prefieres enviarlo a casa:
-				</span>
-			</p>
-			<DeliveryItems
-				className="font-medium text-[13px] italic leading-2.5"
-				delivery={delivery}
-			/>
-			<CopyButton value={delivery.line} />
-		</div>
-	);
-}
-
-function Postcard({ message, attribution, delivery, className }: VariantProps) {
+function Postcard({ message, attribution, className }: VariantProps) {
 	return (
 		<section
 			className={cn("border-border border-b px-5 pb-5 sm:px-7", className)}
@@ -75,18 +35,12 @@ function Postcard({ message, attribution, delivery, className }: VariantProps) {
 						— {attribution}
 					</p>
 				)}
-				<DeliveryPostscript className="mt-[10px]" delivery={delivery} />
 			</div>
 		</section>
 	);
 }
 
-function Handwritten({
-	message,
-	attribution,
-	delivery,
-	className,
-}: VariantProps) {
+function Handwritten({ message, attribution, className }: VariantProps) {
 	const seal = parseSignatureInitials(attribution).join("+");
 
 	return (
@@ -102,7 +56,6 @@ function Handwritten({
 						— {attribution}
 					</p>
 				)}
-				<DeliveryPostscript className="mt-[10px]" delivery={delivery} />
 				{seal && (
 					<span className="absolute right-6 -bottom-3 flex size-11 rotate-6 items-center justify-center rounded-full border border-primary/40 bg-background font-heading font-semibold text-[11px] text-primary shadow-sm">
 						{seal}
@@ -113,7 +66,7 @@ function Handwritten({
 	);
 }
 
-function Avatars({ message, attribution, delivery, className }: VariantProps) {
+function Avatars({ message, attribution, className }: VariantProps) {
 	const initials = parseSignatureInitials(attribution);
 
 	return (
@@ -140,10 +93,6 @@ function Avatars({ message, attribution, delivery, className }: VariantProps) {
 						))}
 					</div>
 				)}
-				<DeliveryPostscript
-					className="mt-4 border-accent-foreground/15 border-t pt-[14px]"
-					delivery={delivery}
-				/>
 			</div>
 		</section>
 	);
@@ -153,7 +102,6 @@ export function WishlistMessage({
 	message,
 	attribution,
 	variant,
-	delivery,
 	className,
 }: Props) {
 	const resolvedVariant = resolveWelcomeVariant(variant).id as WelcomeVariantId;
@@ -163,7 +111,6 @@ export function WishlistMessage({
 			<Handwritten
 				attribution={attribution}
 				className={className}
-				delivery={delivery}
 				message={message}
 			/>
 		);
@@ -174,7 +121,6 @@ export function WishlistMessage({
 			<Avatars
 				attribution={attribution}
 				className={className}
-				delivery={delivery}
 				message={message}
 			/>
 		);
@@ -184,7 +130,6 @@ export function WishlistMessage({
 		<Postcard
 			attribution={attribution}
 			className={className}
-			delivery={delivery}
 			message={message}
 		/>
 	);

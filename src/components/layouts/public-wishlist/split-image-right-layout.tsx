@@ -2,6 +2,7 @@
 
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
+import { DeliveryCard } from "@/components/shared/delivery-card";
 import { GiftListBand } from "@/components/shared/gift-list-band";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
@@ -105,6 +106,7 @@ export function SplitImageRightLayout({
 										</div>
 									))}
 							</div>
+							<DeliveryCard className="mt-4" delivery={delivery} />
 
 							{wishlist.eventDate && (
 								<div className="mt-6 flex justify-center">
@@ -120,7 +122,6 @@ export function SplitImageRightLayout({
 							<WishlistMessage
 								attribution={wishlist.welcomeMessageAttribution}
 								className="mt-6 border-none px-0 pb-0"
-								delivery={delivery}
 								message={wishlist.welcomeMessage}
 								variant={wishlist.welcomeMessageVariant}
 							/>

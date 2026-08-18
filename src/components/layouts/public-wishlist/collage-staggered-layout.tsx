@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
+import { DeliveryCard } from "@/components/shared/delivery-card";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftListBand } from "@/components/shared/gift-list-band";
 import { HeroCtas } from "@/components/shared/hero-ctas";
@@ -147,6 +148,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 						variant="compact"
 						wishlist={wishlist}
 					/>
+					<DeliveryCard className="mx-5 mb-5" delivery={delivery} />
 					{motif && (
 						<MotifDivider
 							motif={motif}
@@ -156,7 +158,6 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 					)}
 					<WishlistMessage
 						attribution={wishlist.welcomeMessageAttribution}
-						delivery={delivery}
 						message={wishlist.welcomeMessage}
 						variant={wishlist.welcomeMessageVariant}
 					/>

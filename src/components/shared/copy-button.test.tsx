@@ -14,8 +14,16 @@ describe("CopyButton", () => {
 		vi.useRealTimers();
 	});
 
-	it("writes the value to the clipboard and shows a copied confirmation", async () => {
-		render(<CopyButton value="Ana Beltrán, Av. Universidad 1500" />);
+	it.each([
+		"button",
+		"link",
+	] as const)("the %s treatment writes the value and shows a copied confirmation", async (treatment) => {
+		render(
+			<CopyButton
+				treatment={treatment}
+				value="Ana Beltrán, Av. Universidad 1500"
+			/>,
+		);
 
 		fireEvent.click(screen.getByRole("button", { name: /copiar/i }));
 
@@ -36,6 +44,25 @@ describe("CopyButton", () => {
 			await Promise.resolve();
 		});
 
+		expect(screen.getByRole("button")).toHaveTextContent("Copiado");
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(1500);
+		});
+
+		expect(screen.getByRole("button")).toHaveTextContent("Copiar");
+	});
+
+	it("renders the link treatment without an icon and reverts after the confirmation window", async () => {
+		vi.useFakeTimers();
+		const { container } = render(<CopyButton treatment="link" value="line" />);
+
+		await act(async () => {
+			fireEvent.click(screen.getByRole("button", { name: /copiar/i }));
+			await Promise.resolve();
+		});
+
+		expect(container.querySelector("svg")).toBeNull();
 		expect(screen.getByRole("button")).toHaveTextContent("Copiado");
 
 		await act(async () => {
