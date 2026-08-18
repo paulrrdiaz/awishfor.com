@@ -1,10 +1,9 @@
-"use client";
-
-import { useRef } from "react";
+import type { ReactNode } from "react";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroCarouselGallery } from "@/components/shared/hero-gallery";
 import { MotifScatter } from "@/components/shared/motif/motif-scatter";
 import { MotifSeal } from "@/components/shared/motif/motif-seal";
+import { MotifTiltHeader } from "@/components/shared/motif/motif-tilt-region";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import {
@@ -14,7 +13,6 @@ import {
 } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
-import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import type { PublicWishlistMode } from "./public-wishlist-page";
 
@@ -22,9 +20,15 @@ type Props = {
 	wishlist: PublicWishlistViewModel;
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
+	rsvpSection?: ReactNode;
 };
 
-export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
+export function ArchHeroPartyLayout({
+	wishlist,
+	layout,
+	mode,
+	rsvpSection,
+}: Props) {
 	const isCompact = mode === "compact";
 	const heading = wishlist.title;
 	const eventLabel =
@@ -33,15 +37,10 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 	const motif = resolveMotif(wishlist.motifId);
 	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
-	const heroRef = useRef<HTMLElement>(null);
-	useMotifTilt(heroRef);
 
 	return (
 		<div className="flex flex-col">
-			<header
-				className="relative grid grid-cols-1 gap-8 overflow-hidden bg-gradient-to-br from-accent via-accent/60 to-card px-6 py-10 sm:px-10 lg:grid-cols-[300px_1fr] lg:items-center"
-				ref={heroRef}
-			>
+			<MotifTiltHeader className="relative grid grid-cols-1 gap-8 overflow-hidden bg-gradient-to-br from-accent via-accent/60 to-card px-6 py-10 sm:px-10 lg:grid-cols-[300px_1fr] lg:items-center">
 				{motif && (
 					<MotifScatter
 						motif={motif}
@@ -92,8 +91,13 @@ export function ArchHeroPartyLayout({ wishlist, layout, mode }: Props) {
 						/>
 					)}
 				</div>
-			</header>
-			<PublicWishlistBody layout={layout} mode={mode} wishlist={wishlist} />
+			</MotifTiltHeader>
+			<PublicWishlistBody
+				layout={layout}
+				mode={mode}
+				rsvpSection={rsvpSection}
+				wishlist={wishlist}
+			/>
 		</div>
 	);
 }

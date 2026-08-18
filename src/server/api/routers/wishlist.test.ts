@@ -10,6 +10,7 @@ const publishWishlistMock = vi.hoisted(() => vi.fn());
 const publishWishlistFromWizardMock = vi.hoisted(() => vi.fn());
 const saveWishlistDraftMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
+const revalidateTagMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@clerk/nextjs/server", () => ({
 	auth: authMock,
@@ -29,6 +30,7 @@ vi.mock("@/server/services/wishlist.service", async (importOriginal) => {
 
 vi.mock("next/cache", () => ({
 	revalidatePath: revalidatePathMock,
+	revalidateTag: revalidateTagMock,
 }));
 
 const createCaller = createCallerFactory(wishlistRouter);
@@ -812,6 +814,29 @@ describe("wishlistRouter.updateDesign", () => {
 		});
 
 		expect(wishlistUpdate).not.toHaveBeenCalled();
+		expect(revalidatePathMock).not.toHaveBeenCalled();
+	});
+
+	it("does not invalidate when the design transaction fails", async () => {
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "lista-de-boda",
+			}),
+		});
+		db.$transaction.mockRejectedValue(new Error("transaction rolled back"));
+		const caller = makeCaller(db);
+
+		await expect(
+			caller.updateDesign({
+				id: "wishlist_123",
+				themeId: "crema-elegante",
+				layoutId: "editorial",
+				buttonStyle: "pill",
+			}),
+		).rejects.toThrow("transaction rolled back");
+
+		expect(revalidateTagMock).not.toHaveBeenCalled();
 		expect(revalidatePathMock).not.toHaveBeenCalled();
 	});
 });

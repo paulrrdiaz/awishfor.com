@@ -43,6 +43,8 @@ All environment variables are validated at runtime in `src/env.ts`. Add any new 
 | `pnpm test` / `pnpm test:watch` | Run Vitest |
 | `pnpm typecheck` | `tsc --noEmit` (also runs pre-push) |
 | `pnpm check` / `pnpm check:write` | Biome lint + format (check / fix) |
+| `pnpm audit:marketing` | Build and run the production marketing Lighthouse audit |
+| `pnpm audit:public-wishlist` | Build and audit deterministic light/heavy public wishlists |
 | `pnpm tunnel` | ngrok tunnel for testing Clerk webhooks locally |
 | `pnpm prisma migrate dev` / `studio` | DB migrations / GUI |
 
@@ -66,6 +68,12 @@ All environment variables are validated at runtime in `src/env.ts`. Add any new 
 ## Auth & user sync
 
 Clerk is the source of truth for identity; the local `User` table mirrors it. The webhook at `src/app/api/webhooks/clerk/route.ts` verifies the Svix signature and upserts/deletes the local user on `user.created|updated|deleted`. To test locally: `pnpm tunnel`, then point the Clerk dashboard webhook at the ngrok URL.
+
+## Production performance audits
+
+Run `pnpm audit:public-wishlist` after changing public wishlist routes, layouts, providers, fonts, hero images, gift rendering, or hydration. It builds once, exposes server-only light/heavy fixtures to the spawned production server, runs three cold mobile audits per fixture plus a heavy desktop comparison, and writes evidence to `artifacts/public-wishlist-performance/`.
+
+The marketing audit remains independent. When shared root provider or font code changes, run both `pnpm audit:marketing` and `pnpm audit:public-wishlist` so each surface keeps its own versioned budgets.
 
 ## Deploy
 

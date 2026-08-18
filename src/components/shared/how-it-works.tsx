@@ -1,19 +1,7 @@
 "use client";
 
-import { XIcon } from "lucide-react";
-import { useCallback, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-	Drawer,
-	DrawerClose,
-	DrawerContent,
-	DrawerDescription,
-	DrawerFooter,
-	DrawerHandle,
-	DrawerHeader,
-	DrawerTitle,
-	DrawerTrigger,
-} from "@/components/ui/drawer";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const DEFAULT_STEPS = [
 	{
@@ -46,79 +34,108 @@ export function HowItWorksDrawer({
 	triggerClassName,
 }: Props) {
 	const [container, setContainer] = useState<HTMLElement | null>(null);
-	const [isReady, setIsReady] = useState(false);
 	const [open, setOpen] = useState(defaultOpen);
+	const triggerRef = useRef<HTMLButtonElement | null>(null);
+	const titleId = useId();
 
 	const setTrigger = useCallback((node: HTMLButtonElement | null) => {
-		if (!node) return;
-		setContainer(node.closest<HTMLElement>(".public-theme") ?? null);
-		setIsReady(true);
+		triggerRef.current = node;
+		if (node) setContainer(node.closest<HTMLElement>(".public-theme") ?? null);
 	}, []);
+
+	const close = useCallback(() => {
+		setOpen(false);
+		window.setTimeout(() => triggerRef.current?.focus());
+	}, []);
+
+	useEffect(() => {
+		if (!open) return;
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") close();
+		};
+		document.addEventListener("keydown", onKeyDown);
+		return () => document.removeEventListener("keydown", onKeyDown);
+	}, [close, open]);
 
 	if (!showHowItWorks) return null;
 
 	return (
-		<Drawer
-			container={container}
-			onOpenChange={(nextOpen) => setOpen(isReady && nextOpen)}
-			open={isReady ? open : false}
-		>
-			<DrawerTrigger asChild>
-				<button className={triggerClassName} ref={setTrigger} type="button">
-					Cómo funciona
-				</button>
-			</DrawerTrigger>
-			<DrawerContent
-				className="mx-auto max-w-[480px] rounded-t-[24px] border-border bg-popover pb-[env(safe-area-inset-bottom)]"
-				overlayClassName="bg-foreground/35 supports-backdrop-filter:backdrop-blur-sm"
-				showCloseButton={false}
+		<>
+			<button
+				className={triggerClassName}
+				onClick={() => setOpen(true)}
+				ref={setTrigger}
+				type="button"
 			>
-				<DrawerHandle className="bg-border" />
-				<DrawerHeader className="relative px-6 pt-5 pb-2 text-left">
-					<DrawerTitle className="font-heading font-semibold text-2xl">
-						¿Cómo funciona?
-					</DrawerTitle>
-					<DrawerDescription className="sr-only">
-						Tres pasos para elegir y registrar un regalo.
-					</DrawerDescription>
-					<DrawerClose asChild>
-						<Button
-							className="absolute top-3 right-3"
-							size="icon-sm"
+				Cómo funciona
+			</button>
+			{open &&
+				container &&
+				createPortal(
+					<div className="fixed inset-0 z-50 flex items-end justify-center">
+						<button
+							aria-label="Cerrar"
+							className="absolute inset-0 cursor-default bg-foreground/35 supports-backdrop-filter:backdrop-blur-sm"
+							onClick={close}
 							type="button"
-							variant="ghost"
+						/>
+						<div
+							aria-labelledby={titleId}
+							aria-modal="true"
+							className="relative w-full max-w-[480px] rounded-t-[24px] border border-border bg-popover pb-[env(safe-area-inset-bottom)] shadow-2xl"
+							data-slot="drawer-content"
+							role="dialog"
 						>
-							<XIcon />
-							<span className="sr-only">Cerrar</span>
-						</Button>
-					</DrawerClose>
-				</DrawerHeader>
-				<div className="space-y-5 px-6 py-4">
-					{DEFAULT_STEPS.map((step) => (
-						<div className="flex gap-4" key={step.number}>
-							<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-foreground font-semibold text-background text-sm">
-								{step.number}
-							</div>
-							<div className="pt-0.5">
-								<h3 className="font-semibold text-foreground">{step.title}</h3>
-								<p className="mt-1 text-muted-foreground text-sm leading-relaxed">
-									{step.description}
+							<div className="mx-auto mt-2.5 h-1.5 w-12 rounded-full bg-border" />
+							<div className="relative px-6 pt-5 pb-2 text-left">
+								<h2
+									className="font-heading font-semibold text-2xl"
+									id={titleId}
+								>
+									¿Cómo funciona?
+								</h2>
+								<p className="sr-only">
+									Tres pasos para elegir y registrar un regalo.
 								</p>
+								<button
+									aria-label="Cerrar"
+									className="absolute top-3 right-3 grid size-8 place-items-center rounded-md hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+									onClick={close}
+									type="button"
+								>
+									<span aria-hidden>×</span>
+								</button>
+							</div>
+							<div className="space-y-5 px-6 py-4">
+								{DEFAULT_STEPS.map((step) => (
+									<div className="flex gap-4" key={step.number}>
+										<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-foreground font-semibold text-background text-sm">
+											{step.number}
+										</div>
+										<div className="pt-0.5">
+											<h3 className="font-semibold text-foreground">
+												{step.title}
+											</h3>
+											<p className="mt-1 text-muted-foreground text-sm leading-relaxed">
+												{step.description}
+											</p>
+										</div>
+									</div>
+								))}
+							</div>
+							<div className="px-6 pt-3 pb-5">
+								<button
+									className="w-full rounded-full bg-foreground px-4 py-2.5 font-medium text-background hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+									onClick={close}
+									type="button"
+								>
+									Entendido
+								</button>
 							</div>
 						</div>
-					))}
-				</div>
-				<DrawerFooter className="px-6 pt-3 pb-5">
-					<DrawerClose asChild>
-						<Button
-							className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90"
-							type="button"
-						>
-							Entendido
-						</Button>
-					</DrawerClose>
-				</DrawerFooter>
-			</DrawerContent>
-		</Drawer>
+					</div>,
+					container,
+				)}
+		</>
 	);
 }

@@ -5,6 +5,7 @@ import type {
 	Prisma,
 } from "@/generated/prisma/client";
 import { isRsvpClosed } from "@/lib/wishlist/rsvp-window";
+import { getPublicWishlistAuditGuest } from "@/server/fixtures/public-wishlist-audit";
 import type { PublicGuestViewModel } from "@/server/mappers/view-models";
 
 type InviteWithExtras = Invite & { extraGuests: InviteExtraGuest[] };
@@ -44,6 +45,12 @@ export async function resolvePersonalizedInvite(
 	db: PublicInviteDatabase,
 	{ wishlistId, guestSlug }: { wishlistId: string; guestSlug: string },
 ): Promise<PersonalizedInviteResult> {
+	const auditGuest = getPublicWishlistAuditGuest(wishlistId, guestSlug);
+	if (auditGuest !== undefined) {
+		return auditGuest
+			? { kind: "found", guest: auditGuest }
+			: { kind: "notFound" };
+	}
 	const invite = await db.invite.findFirst({
 		where: { wishlistId, slug: guestSlug },
 		include: { extraGuests: { orderBy: { sortOrder: "asc" } } },

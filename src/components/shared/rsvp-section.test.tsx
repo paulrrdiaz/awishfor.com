@@ -26,6 +26,12 @@ vi.mock("@/trpc/react", () => ({
 	},
 }));
 
+vi.mock("@/components/providers/public-wishlist-providers", () => ({
+	PublicWishlistProviders: ({ children }: { children: React.ReactNode }) => (
+		<div data-testid="public-wishlist-trpc-provider">{children}</div>
+	),
+}));
+
 function makeGuest(
 	overrides: Partial<PublicGuestViewModel> = {},
 ): PublicGuestViewModel {
@@ -61,6 +67,12 @@ describe("RsvpSection", () => {
 			<RsvpSection {...defaultProps} guest={undefined} />,
 		);
 		expect(container).toBeEmptyDOMElement();
+	});
+
+	it("provides tRPC context for an invited guest", () => {
+		render(<RsvpSection {...defaultProps} guest={makeGuest()} />);
+
+		expect(screen.getByTestId("public-wishlist-trpc-provider")).toBeVisible();
 	});
 
 	it("keeps the submit control disabled until the primary guest chooses", async () => {

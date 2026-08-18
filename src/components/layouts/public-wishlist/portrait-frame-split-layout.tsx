@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
@@ -11,9 +12,15 @@ type Props = {
 	wishlist: PublicWishlistViewModel;
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
+	rsvpSection?: ReactNode;
 };
 
-export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
+export function PortraitFrameSplitLayout({
+	wishlist,
+	layout,
+	mode,
+	rsvpSection,
+}: Props) {
 	const isCompact = mode === "compact";
 	const heading = wishlist.title;
 	const eventLabel =
@@ -48,7 +55,12 @@ export function PortraitFrameSplitLayout({ wishlist, layout, mode }: Props) {
 					)}
 				</div>
 			</header>
-			<PublicWishlistBody layout={layout} mode={mode} wishlist={wishlist} />
+			<PublicWishlistBody
+				layout={layout}
+				mode={mode}
+				rsvpSection={rsvpSection}
+				wishlist={wishlist}
+			/>
 		</div>
 	);
 }

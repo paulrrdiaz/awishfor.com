@@ -1,6 +1,5 @@
 "use client";
 
-import gsap from "gsap";
 import type { RefObject } from "react";
 import { useEffect } from "react";
 import { useReducedMotion } from "@/lib/gsap/use-reduced-motion";
@@ -32,6 +31,7 @@ export function useMotifTilt(ref: RefObject<HTMLElement | null>) {
 		}
 
 		const state = { x: 0, y: 0 };
+		let resetFrame: number | null = null;
 
 		const applyState = () => {
 			element.style.setProperty("--tilt-x", state.x.toFixed(3));
@@ -43,27 +43,35 @@ export function useMotifTilt(ref: RefObject<HTMLElement | null>) {
 			if (rect.width === 0 || rect.height === 0) {
 				return;
 			}
-			gsap.killTweensOf(state);
+			if (resetFrame !== null) {
+				window.cancelAnimationFrame(resetFrame);
+				resetFrame = null;
+			}
 			state.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
 			state.y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
 			applyState();
 		};
 
 		const onPointerLeave = () => {
-			gsap.to(state, {
-				duration: 0.4,
-				ease: "power2.out",
-				onUpdate: applyState,
-				x: 0,
-				y: 0,
-			});
+			const startX = state.x;
+			const startY = state.y;
+			const start = performance.now();
+			const reset = (now: number) => {
+				const progress = Math.min((now - start) / 400, 1);
+				const remaining = (1 - progress) ** 2;
+				state.x = startX * remaining;
+				state.y = startY * remaining;
+				applyState();
+				resetFrame = progress < 1 ? window.requestAnimationFrame(reset) : null;
+			};
+			resetFrame = window.requestAnimationFrame(reset);
 		};
 
 		element.addEventListener("pointermove", onPointerMove);
 		element.addEventListener("pointerleave", onPointerLeave);
 
 		return () => {
-			gsap.killTweensOf(state);
+			if (resetFrame !== null) window.cancelAnimationFrame(resetFrame);
 			element.removeEventListener("pointermove", onPointerMove);
 			element.removeEventListener("pointerleave", onPointerLeave);
 			element.style.removeProperty("--tilt-x");

@@ -1,6 +1,4 @@
-"use client";
-
-import { useRef } from "react";
+import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
 import { DeliveryCard } from "@/components/shared/delivery-card";
@@ -14,7 +12,7 @@ import {
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { MotifScatter } from "@/components/shared/motif/motif-scatter";
 import { MotifSeal } from "@/components/shared/motif/motif-seal";
-import { RsvpSection } from "@/components/shared/rsvp-section";
+import { MotifTiltSection } from "@/components/shared/motif/motif-tilt-region";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -27,20 +25,36 @@ import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
 import { composeDelivery } from "@/lib/format/delivery";
-import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import { partitionHeroImages } from "@/lib/hero-slots";
+import { cn } from "@/lib/utils";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import { PublicLayoutShell } from "./public-layout-shell";
-import type { PublicWishlistMode } from "./public-wishlist-page";
+import type {
+	PublicWishlistMode,
+	PublicWishlistSurface,
+} from "./public-wishlist-page";
 
 type Props = {
 	wishlist: PublicWishlistViewModel;
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
+	surface?: PublicWishlistSurface;
+	rsvpSection?: ReactNode;
 };
 
-export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
+export function CollageStaggeredLayout({
+	wishlist,
+	layout,
+	mode,
+	surface = "standalone",
+	rsvpSection,
+}: Props) {
 	const isCompact = mode === "compact";
+	// An embedded preview (wizard steps, dashboard editor) is bounded by its
+	// host pane, not the real viewport — breaking out to `w-screen` there
+	// overflows the pane instead of the page, and gets clipped by whatever
+	// `overflow-x-hidden` ancestor is scrolling it.
+	const isEmbedded = surface === "embedded";
 	const heading = wishlist.title;
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
@@ -58,17 +72,17 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 		wishlist.deliveryPhone,
 		wishlist.deliveryDocumentId,
 	);
-	const heroRef = useRef<HTMLElement>(null);
-	useMotifTilt(heroRef);
 	const eventSummary = wishlist.eventDate
 		? formatEventDate(wishlist.eventDate, wishlist.language as "es" | "en")
 		: null;
 
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
-			<section
-				className="relative left-1/2 w-screen -translate-x-1/2 bg-[linear-gradient(180deg,var(--accent)_0%,var(--card)_30%,var(--background)_72%,var(--background)_100%)]"
-				ref={heroRef}
+			<MotifTiltSection
+				className={cn(
+					"relative bg-[linear-gradient(180deg,var(--accent)_0%,var(--card)_30%,var(--background)_72%,var(--background)_100%)]",
+					isEmbedded ? "w-full" : "left-1/2 w-screen -translate-x-1/2",
+				)}
 			>
 				{motif && (
 					<MotifScatter
@@ -95,6 +109,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 							alt={`${heading} 1`}
 							className="mt-11 h-[180px] rounded-xl shadow-[0_12px_32px_rgba(30,50,80,.10)]"
 							isSample={staticSlots[0]?.isSample}
+							priority={!isCompact}
 							sizes="33vw"
 							src={staticSlots[0]?.url ?? null}
 						/>
@@ -103,7 +118,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 							className="h-[253px] overflow-hidden rounded-xl shadow-[0_18px_44px_rgba(30,50,80,.13)]"
 							controlsVariant="compact"
 							images={carouselImages}
-							priority={!isCompact}
+							priority={false}
 							sizes="(min-width: 768px) 360px, 42vw"
 						/>
 						<HeroImageSlot
@@ -139,7 +154,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 						</div>
 					)}
 				</div>
-			</section>
+			</MotifTiltSection>
 
 			{!isCompact && (
 				<>
@@ -164,16 +179,14 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 				</>
 			)}
 
-			<RsvpSection
-				eventDate={wishlist.eventDate}
-				eventLocation={wishlist.eventLocation}
-				eventTime={wishlist.eventTime}
-				guest={wishlist.guest}
-				rsvpDeadline={wishlist.rsvpDeadline}
-				wishlistSlug={wishlist.slug}
-			/>
+			{rsvpSection}
 
-			<GiftListBand className="relative left-1/2 w-screen -translate-x-1/2">
+			<GiftListBand
+				className={cn(
+					"relative",
+					isEmbedded ? "w-full" : "left-1/2 w-screen -translate-x-1/2",
+				)}
+			>
 				<section
 					className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-[18px] pb-16 sm:px-[22px]"
 					id="regalos"

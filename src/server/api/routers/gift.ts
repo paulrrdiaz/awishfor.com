@@ -20,6 +20,10 @@ import {
 } from "@/server/services/gift.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
+	invalidatePublicWishlistById,
+	type PublicWishlistInvalidationDatabase,
+} from "@/server/services/public-wishlist-cache";
+import {
 	createGiftSchema,
 	deleteGiftSchema,
 	giftIdSchema,
@@ -42,6 +46,12 @@ const asReorderDb = (ctx: GiftRouterContext): ReorderGiftDatabase =>
 const asGiftDb = (ctx: GiftRouterContext): GiftDatabase =>
 	ctx.db as unknown as GiftDatabase;
 
+const invalidateWishlist = (ctx: GiftRouterContext, wishlistId: string) =>
+	invalidatePublicWishlistById(
+		ctx.db as unknown as PublicWishlistInvalidationDatabase,
+		wishlistId,
+	);
+
 export const giftRouter = createTRPCRouter({
 	create: protectedProcedure
 		.input(createGiftSchema)
@@ -51,7 +61,9 @@ export const giftRouter = createTRPCRouter({
 				ownerId,
 				wishlistId: input.wishlistId,
 			});
-			return createGift(asGiftDb(ctx), input);
+			const gift = await createGift(asGiftDb(ctx), input);
+			await invalidateWishlist(ctx, gift.wishlistId);
+			return gift;
 		}),
 
 	list: protectedProcedure
@@ -70,8 +82,13 @@ export const giftRouter = createTRPCRouter({
 		.input(updateGiftSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			await getOwnedGift(asDashboardDb(ctx), { ownerId, giftId: input.giftId });
-			return updateGift(ctx.db, input);
+			const existing = await getOwnedGift(asDashboardDb(ctx), {
+				ownerId,
+				giftId: input.giftId,
+			});
+			const gift = await updateGift(ctx.db, input);
+			await invalidateWishlist(ctx, existing.wishlistId);
+			return gift;
 		}),
 
 	setVisibility: protectedProcedure
@@ -85,25 +102,36 @@ export const giftRouter = createTRPCRouter({
 		)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			await getOwnedGift(asDashboardDb(ctx), { ownerId, giftId: input.giftId });
-			return updateGift(ctx.db, {
+			const existing = await getOwnedGift(asDashboardDb(ctx), {
+				ownerId,
+				giftId: input.giftId,
+			});
+			const gift = await updateGift(ctx.db, {
 				giftId: input.giftId,
 				visibilityStatus: input.visibilityStatus,
 			});
+			await invalidateWishlist(ctx, existing.wishlistId);
+			return gift;
 		}),
 
 	delete: protectedProcedure
 		.input(deleteGiftSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			await getOwnedGift(asDashboardDb(ctx), { ownerId, giftId: input.giftId });
-			return softDeleteGift(ctx.db, input);
+			const existing = await getOwnedGift(asDashboardDb(ctx), {
+				ownerId,
+				giftId: input.giftId,
+			});
+			const gift = await softDeleteGift(ctx.db, input);
+			await invalidateWishlist(ctx, existing.wishlistId);
+			return gift;
 		}),
 
 	reorder: protectedProcedure
 		.input(reorderGiftsSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			return reorderGifts(asReorderDb(ctx), { ownerId, ...input });
+			await reorderGifts(asReorderDb(ctx), { ownerId, ...input });
+			await invalidateWishlist(ctx, input.wishlistId);
 		}),
 });

@@ -11,6 +11,10 @@ import {
 } from "@/server/services/category.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
+	invalidatePublicWishlistById,
+	type PublicWishlistInvalidationDatabase,
+} from "@/server/services/public-wishlist-cache";
+import {
 	addCategorySchema,
 	deleteCategorySchema,
 	listCategoriesSchema,
@@ -26,6 +30,12 @@ type CategoryRouterContext = Awaited<ReturnType<typeof createTRPCContext>> & {
 
 const getLocalUserId = (ctx: CategoryRouterContext) =>
 	getOrCreateLocalUserId(ctx);
+
+const invalidateWishlist = (ctx: CategoryRouterContext, wishlistId: string) =>
+	invalidatePublicWishlistById(
+		ctx.db as unknown as PublicWishlistInvalidationDatabase,
+		wishlistId,
+	);
 
 export const categoryRouter = createTRPCRouter({
 	list: protectedProcedure
@@ -44,30 +54,43 @@ export const categoryRouter = createTRPCRouter({
 		.input(addCategorySchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			return addCategory(ctx.db, { ownerId, ...input });
+			const category = await addCategory(ctx.db, { ownerId, ...input });
+			await invalidateWishlist(ctx, category.wishlistId);
+			return category;
 		}),
 	rename: protectedProcedure
 		.input(renameCategorySchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			return renameCategory(ctx.db, { ownerId, ...input });
+			const category = await renameCategory(ctx.db, { ownerId, ...input });
+			await invalidateWishlist(ctx, category.wishlistId);
+			return category;
 		}),
 	delete: protectedProcedure
 		.input(deleteCategorySchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			return deleteCategory(ctx.db, { ownerId, ...input });
+			const category = await deleteCategory(ctx.db, { ownerId, ...input });
+			await invalidateWishlist(ctx, category.wishlistId);
+			return category;
 		}),
 	reorder: protectedProcedure
 		.input(reorderCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			return reorderCategories(ctx.db, { ownerId, ...input });
+			const categories = await reorderCategories(ctx.db, { ownerId, ...input });
+			await invalidateWishlist(ctx, input.wishlistId);
+			return categories;
 		}),
 	seedDefaults: protectedProcedure
 		.input(seedDefaultCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			return seedDefaultCategories(ctx.db, { ownerId, ...input });
+			const categories = await seedDefaultCategories(ctx.db, {
+				ownerId,
+				...input,
+			});
+			await invalidateWishlist(ctx, input.wishlistId);
+			return categories;
 		}),
 });

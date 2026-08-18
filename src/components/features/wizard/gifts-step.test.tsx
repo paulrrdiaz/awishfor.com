@@ -10,6 +10,21 @@ import { createWishlistWizardStore } from "@/stores/wishlist-wizard.store";
 
 const importFromUrlMock = vi.hoisted(() => vi.fn());
 
+vi.mock("next/font/google", () => {
+	const font = () => ({ variable: "font-test" });
+	return {
+		Cormorant_Garamond: font,
+		DM_Serif_Display: font,
+		Figtree: font,
+		Inter: font,
+		Karla: font,
+		Lora: font,
+		Nunito: font,
+		Playfair_Display: font,
+		Source_Serif_4: font,
+	};
+});
+
 vi.mock("next/image", () => ({
 	default: ({
 		alt,

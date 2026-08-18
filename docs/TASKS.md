@@ -689,6 +689,8 @@ Tasks:
 - [x] Return public view model.
 - [x] Return archived state when applicable.
 - [x] Return not found for inaccessible draft.
+- [x] Split cached published snapshots from uncached owner-preview and personalized invite resolution.
+- [x] Use explicit public Prisma selects, request memoization, tagged cross-request caching, and post-commit invalidation for every public mutation path.
 
 Acceptance criteria:
 
@@ -723,6 +725,9 @@ Tasks:
 - [x] Handle 404 state.
 - [x] Handle archived state.
 - [x] Handle owner preview banner.
+- [x] Emit bounded published-only canonical, Open Graph, Twitter Card, and `noindex, nofollow` metadata from a server-safe projection.
+- [x] Add a branded 1200×630 social image with validated cover-image loading and a deterministic private-safe fallback.
+- [x] Keep personalized guest, owner, delivery, hidden-gift, and purchase data out of metadata and social images.
 
 Acceptance criteria:
 
@@ -759,6 +764,7 @@ Tasks:
 - [x] Add three layout presets.
 - [x] Add `src/config/public-fonts.ts`.
 - [x] Add font pairings using `next/font` (now Lora-based — see 2.2).
+- [x] Load only active public font families, deduplicate heading/body families, and keep initial public font delivery within three resources.
 - [x] Add `src/config/public-button-styles.ts`.
 - [x] Add button style presets.
 
@@ -2213,6 +2219,30 @@ Affected areas:
 Notes/out-of-scope:
 
 - No cookie banner unless ads/retargeting added.
+
+### 8.8 Harden public sharing and performance
+
+Priority: P0
+
+Details:
+
+Keep published and personalized wishlist links private-safe, fast on first load, and
+independently auditable from the marketing route.
+
+Tasks:
+
+- [x] Scope Clerk to auth, creation, and protected application surfaces while preserving signed-in draft-owner preview.
+- [x] Replace the public application shell with a server-first public layout and load tRPC/React Query only with mutation drawers and RSVP controls.
+- [x] Defer guest purchase UI until first pointer or keyboard activation while preserving focus, refresh, undo, share, and RSVP behavior.
+- [x] Add deterministic light and heavy public audit fixtures plus a versioned Lighthouse budget runner.
+- [x] Pass three cold mobile runs per fixture and a heavy desktop run within the public score, LCP, CLS, TBT, JavaScript, CSS, font, transfer, and image-priority budgets.
+- [x] Verify production published/personalized HTML and the social-image response for metadata, privacy, dimensions, and content type.
+
+Affected areas:
+
+- `src/app/w/*`, `src/components/layouts/public-wishlist/*`, `src/components/features/public-wishlist/*`
+- `src/server/services/public-wishlist.service.ts`, `src/server/cache/*`
+- `scripts/audit-public-wishlist-performance.mjs`, `config/public-wishlist-performance-audit.json`
 
 ### Cut line
 

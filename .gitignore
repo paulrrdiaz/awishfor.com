@@ -55,3 +55,4 @@ storybook-static/
 
 # Generated production Lighthouse reports
 /artifacts/marketing-performance/
+/artifacts/public-wishlist-performance/*.report.json

@@ -9,6 +9,7 @@ const createOwnerManualPurchaseMock = vi.hoisted(() => vi.fn());
 const deleteOwnerPurchaseMock = vi.hoisted(() => vi.fn());
 const markGiftPurchasedPublicMock = vi.hoisted(() => vi.fn());
 const undoPurchaseMock = vi.hoisted(() => vi.fn());
+const invalidatePublicWishlistByGiftIdMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/db", () => ({ db: {} }));
 
@@ -24,6 +25,10 @@ vi.mock("@/server/services/purchase.service", () => ({
 	markGiftPurchasedPublic: markGiftPurchasedPublicMock,
 	undoPurchase: undoPurchaseMock,
 	getRemainingQuantity: vi.fn(),
+}));
+
+vi.mock("@/server/services/public-wishlist-cache", () => ({
+	invalidatePublicWishlistByGiftId: invalidatePublicWishlistByGiftIdMock,
 }));
 
 vi.mock("@/server/mappers/owner-purchase.mapper", () => ({
@@ -75,7 +80,7 @@ describe("purchaseRouter — undoRecentPurchase (public)", () => {
 	beforeEach(() => vi.clearAllMocks());
 
 	it("calls undoPurchase and returns { ok: true } on valid token", async () => {
-		undoPurchaseMock.mockResolvedValue({});
+		undoPurchaseMock.mockResolvedValue({ giftId: "gift_1" });
 		const caller = createCaller(makeDb() as never);
 
 		const result = await caller.undoRecentPurchase({
@@ -106,6 +111,7 @@ describe("purchaseRouter — undoRecentPurchase (public)", () => {
 		).rejects.toThrow("Undo token has expired");
 
 		expect(undoPurchaseMock).toHaveBeenCalledTimes(1);
+		expect(invalidatePublicWishlistByGiftIdMock).not.toHaveBeenCalled();
 	});
 });
 
@@ -177,7 +183,7 @@ describe("purchaseRouter — owner authorization", () => {
 
 	it("resolves local owner before calling service for delete", async () => {
 		authMock.mockResolvedValue({ userId: "clerk_123" });
-		deleteOwnerPurchaseMock.mockResolvedValue({});
+		deleteOwnerPurchaseMock.mockResolvedValue({ giftId: "gift_1" });
 		const db = makeDb(42);
 		const caller = createCaller(db as never);
 

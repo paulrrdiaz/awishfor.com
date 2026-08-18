@@ -410,20 +410,25 @@ export function GiftsStep() {
 				)}
 			</div>
 
-			<div className="mt-8 hidden flex-1 flex-col bg-background px-8 py-8 lg:mt-0 lg:flex">
+			<div className="mt-8 hidden min-h-0 flex-1 flex-col overflow-hidden bg-background px-8 py-8 lg:mt-0 lg:flex">
 				<p className={cn(EYEBROW, "mb-3.5 text-muted-foreground")}>
 					Así los verán tus invitados
 				</p>
 				<PublicThemeProvider
 					bodyFont={resolveBodyFont(draft.bodyFont)}
 					buttonStyle={resolveButtonStyle(draft.buttonStyle)}
-					className="min-h-0 bg-transparent"
+					className="min-h-0 flex-1 overflow-hidden bg-transparent"
 					headingFont={resolveHeadingFont(draft.headingFont)}
 					theme={resolveTheme(draft.themeId)}
 				>
 					<div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-						{previewGifts.slice(0, 6).map((gift) => (
-							<GiftCard cardStyle="card" gift={gift} key={gift.id} />
+						{previewGifts.slice(0, 3).map((gift, index) => (
+							<div
+								className={index === 2 ? "hidden 2xl:block" : undefined}
+								key={gift.id}
+							>
+								<GiftCard cardStyle="card" gift={gift} />
+							</div>
 						))}
 					</div>
 				</PublicThemeProvider>

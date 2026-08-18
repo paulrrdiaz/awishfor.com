@@ -1,5 +1,10 @@
 import { TRPCError } from "@trpc/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+	PUBLIC_WISHLIST_AUDIT_GUEST_SLUG,
+	PUBLIC_WISHLIST_AUDIT_MODE_ENV,
+	PUBLIC_WISHLIST_AUDIT_SLUGS,
+} from "@/server/fixtures/public-wishlist-audit";
 import {
 	type PublicInviteDatabase,
 	resolvePersonalizedInvite,
@@ -77,6 +82,29 @@ function makeRespondDb({
 }
 
 describe("resolvePersonalizedInvite", () => {
+	afterEach(() => {
+		delete process.env[PUBLIC_WISHLIST_AUDIT_MODE_ENV];
+	});
+
+	it("resolves the audit invite without touching the database", async () => {
+		process.env[PUBLIC_WISHLIST_AUDIT_MODE_ENV] = "1";
+		const findFirst = vi.fn(() => {
+			throw new Error("audit invite must not query the database");
+		});
+		const db = makeDb({ findFirst });
+
+		const result = await resolvePersonalizedInvite(db, {
+			wishlistId: `audit-${PUBLIC_WISHLIST_AUDIT_SLUGS.light}`,
+			guestSlug: PUBLIC_WISHLIST_AUDIT_GUEST_SLUG,
+		});
+
+		expect(result).toMatchObject({
+			kind: "found",
+			guest: { primaryName: "Invitada de auditoría" },
+		});
+		expect(findFirst).not.toHaveBeenCalled();
+	});
+
 	it("returns notFound when no invite matches the guest slug", async () => {
 		const db = makeDb({ findFirst: vi.fn().mockResolvedValue(null) });
 

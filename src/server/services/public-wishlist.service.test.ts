@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type {
 	Category,
 	Gift,
@@ -15,6 +15,32 @@ import {
 	Locale,
 	WishlistStatus,
 } from "@/generated/prisma/client";
+
+const sharedCache = vi.hoisted(() => new Map<string, Promise<unknown>>());
+const unstableCacheMock = vi.hoisted(() =>
+	vi.fn(
+		<T extends (...args: never[]) => Promise<unknown>>(
+			callback: T,
+			keyParts: string[] = [],
+		) =>
+			((...args: Parameters<T>) => {
+				const key = JSON.stringify([keyParts, args]);
+				const cached = sharedCache.get(key);
+				if (cached) return cached;
+				const pending = callback(...args);
+				sharedCache.set(key, pending);
+				return pending;
+			}) as T,
+	),
+);
+
+vi.mock("server-only", () => ({}));
+vi.mock("next/cache", () => ({
+	revalidatePath: vi.fn(),
+	revalidateTag: vi.fn(),
+	unstable_cache: unstableCacheMock,
+}));
+
 import {
 	getPublicWishlistBySlug,
 	type PublicWishlistDatabase,
@@ -111,6 +137,27 @@ const makeDb = (row: MockRow | null): PublicWishlistDatabase => ({
 });
 
 describe("getPublicWishlistBySlug", () => {
+	beforeEach(() => {
+		sharedCache.clear();
+		unstableCacheMock.mockClear();
+	});
+
+	it("uses a slim public projection without nested category gifts or purchase contacts", async () => {
+		const db = makeDb(makeWishlist());
+		await getPublicWishlistBySlug(db, {
+			slug: "mi-lista",
+			viewerClerkId: null,
+		});
+		const args = vi.mocked(db.wishlist.findUnique).mock.calls[1]?.[0];
+		expect(args?.select?.categories).toEqual({
+			select: { id: true, name: true, sortOrder: true },
+		});
+		expect(args?.select?.gifts).toMatchObject({
+			select: { purchases: { select: { guestName: true, quantity: true } } },
+		});
+		expect(JSON.stringify(args)).not.toContain("guestEmail");
+		expect(JSON.stringify(args)).not.toContain("internalNote");
+	});
 	it("returns published result for a published wishlist", async () => {
 		const db = makeDb(makeWishlist({ status: WishlistStatus.published }));
 		const result = await getPublicWishlistBySlug(db, {
@@ -118,6 +165,48 @@ describe("getPublicWishlistBySlug", () => {
 			viewerClerkId: null,
 		});
 		expect(result.kind).toBe("published");
+	});
+
+	it("reuses a tagged published presentation across anonymous requests", async () => {
+		const db = makeDb(makeWishlist({ status: WishlistStatus.published }));
+
+		const first = await getPublicWishlistBySlug(db, {
+			slug: "mi-lista",
+			viewerClerkId: null,
+		});
+		const second = await getPublicWishlistBySlug(db, {
+			slug: "mi-lista",
+			viewerClerkId: null,
+		});
+
+		expect(first).toEqual(second);
+		expect(db.wishlist.findUnique).toHaveBeenCalledTimes(3);
+		expect(unstableCacheMock).toHaveBeenLastCalledWith(
+			expect.any(Function),
+			["public-wishlist-presentation", "wl_1", "mi-lista"],
+			{
+				revalidate: false,
+				tags: ["public-wishlist:wl_1", "public-wishlist-slug:mi-lista"],
+			},
+		);
+	});
+
+	it("keeps draft owner previews outside the shared published cache", async () => {
+		const db = makeDb(
+			makeWishlist({ status: WishlistStatus.draft, publishedAt: null }),
+		);
+
+		await getPublicWishlistBySlug(db, {
+			slug: "mi-lista",
+			viewerClerkId: "clerk_owner",
+		});
+		await getPublicWishlistBySlug(db, {
+			slug: "mi-lista",
+			viewerClerkId: "clerk_owner",
+		});
+
+		expect(db.wishlist.findUnique).toHaveBeenCalledTimes(4);
+		expect(unstableCacheMock).not.toHaveBeenCalled();
 	});
 
 	it("returns preview for draft + owner viewer", async () => {
@@ -181,6 +270,19 @@ describe("getPublicWishlistBySlug", () => {
 			viewerClerkId: null,
 		});
 		expect(result.kind).toBe("notFound");
+	});
+
+	it("returns notFound for reserved audit slugs in normal runtime", async () => {
+		delete process.env.PUBLIC_WISHLIST_AUDIT_MODE;
+		const db = makeDb(makeWishlist());
+
+		const result = await getPublicWishlistBySlug(db, {
+			slug: "__audit-public-wishlist-light",
+			viewerClerkId: null,
+		});
+
+		expect(result.kind).toBe("notFound");
+		expect(db.wishlist.findUnique).not.toHaveBeenCalled();
 	});
 
 	it("excludes hidden gifts from the published result", async () => {

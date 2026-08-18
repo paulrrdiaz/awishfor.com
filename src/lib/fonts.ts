@@ -21,6 +21,7 @@ export const fontLora = Lora({
 	weight: ["400", "500", "600", "700"],
 	variable: "--font-lora",
 	display: "swap",
+	preload: false,
 });
 
 export const fontPlayfairDisplay = Playfair_Display({
@@ -28,6 +29,7 @@ export const fontPlayfairDisplay = Playfair_Display({
 	weight: ["400", "500", "600", "700"],
 	variable: "--font-playfair-display",
 	display: "swap",
+	preload: false,
 });
 
 export const fontCormorantGaramond = Cormorant_Garamond({
@@ -35,6 +37,7 @@ export const fontCormorantGaramond = Cormorant_Garamond({
 	weight: ["400", "500", "600", "700"],
 	variable: "--font-cormorant-garamond",
 	display: "swap",
+	preload: false,
 });
 
 export const fontDmSerifDisplay = DM_Serif_Display({
@@ -42,6 +45,7 @@ export const fontDmSerifDisplay = DM_Serif_Display({
 	weight: "400",
 	variable: "--font-dm-serif-display",
 	display: "swap",
+	preload: false,
 });
 
 export const fontInter = Inter({
@@ -49,6 +53,7 @@ export const fontInter = Inter({
 	weight: ["400", "500", "600", "700"],
 	variable: "--font-inter",
 	display: "swap",
+	preload: false,
 });
 
 export const fontNunito = Nunito({
@@ -56,6 +61,7 @@ export const fontNunito = Nunito({
 	weight: ["400", "500", "600", "700"],
 	variable: "--font-nunito",
 	display: "swap",
+	preload: false,
 });
 
 export const fontFigtree = Figtree({
@@ -63,6 +69,7 @@ export const fontFigtree = Figtree({
 	weight: ["400", "500", "600"],
 	variable: "--font-figtree",
 	display: "swap",
+	preload: false,
 });
 
 export const fontSourceSerif4 = Source_Serif_4({
@@ -70,6 +77,7 @@ export const fontSourceSerif4 = Source_Serif_4({
 	weight: ["400", "500", "600"],
 	variable: "--font-source-serif-4",
 	display: "swap",
+	preload: false,
 });
 
 export const fontKarla = Karla({
@@ -77,6 +85,7 @@ export const fontKarla = Karla({
 	weight: ["400", "500", "600"],
 	variable: "--font-karla",
 	display: "swap",
+	preload: false,
 });
 
 export const PUBLIC_FONT_VARIABLE_CLASSES = [
@@ -90,3 +99,15 @@ export const PUBLIC_FONT_VARIABLE_CLASSES = [
 	fontSourceSerif4.variable,
 	fontKarla.variable,
 ].join(" ");
+
+export const PUBLIC_FONT_VARIABLE_CLASS_BY_ID: Record<string, string> = {
+	lora: fontLora.variable,
+	"playfair-display": fontPlayfairDisplay.variable,
+	"cormorant-garamond": fontCormorantGaramond.variable,
+	"dm-serif-display": fontDmSerifDisplay.variable,
+	inter: fontInter.variable,
+	nunito: fontNunito.variable,
+	figtree: fontFigtree.variable,
+	"source-serif-4": fontSourceSerif4.variable,
+	karla: fontKarla.variable,
+};

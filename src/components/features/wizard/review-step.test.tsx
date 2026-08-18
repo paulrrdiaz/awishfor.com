@@ -54,11 +54,16 @@ vi.mock("next/font/google", () => {
 
 	return {
 		Cormorant_Garamond: () => makeFont(),
+		DM_Serif_Display: () => makeFont(),
+		Figtree: () => makeFont(),
+		Lora: () => makeFont(),
 		Inter: () => makeFont(),
+		Karla: () => makeFont(),
 		Lato: () => makeFont(),
 		Montserrat: () => makeFont(),
 		Nunito: () => makeFont(),
 		Playfair_Display: () => makeFont(),
+		Source_Serif_4: () => makeFont(),
 	};
 });
 

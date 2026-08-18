@@ -1,5 +1,4 @@
-"use client";
-
+import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
 import { DeliveryCard } from "@/components/shared/delivery-card";
@@ -7,7 +6,6 @@ import { GiftListBand } from "@/components/shared/gift-list-band";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
-import { RsvpSection } from "@/components/shared/rsvp-section";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -34,6 +32,7 @@ type Props = {
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
+	rsvpSection?: ReactNode;
 };
 
 export function SplitImageRightLayout({
@@ -41,6 +40,7 @@ export function SplitImageRightLayout({
 	layout,
 	mode,
 	surface = "standalone",
+	rsvpSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	// An embedded preview (wizard steps, dashboard editor) is bounded by its
@@ -145,15 +145,7 @@ export function SplitImageRightLayout({
 						/>
 					)}
 
-					<RsvpSection
-						className="mt-5 max-w-none px-0 pt-0"
-						eventDate={wishlist.eventDate}
-						eventLocation={wishlist.eventLocation}
-						eventTime={wishlist.eventTime}
-						guest={wishlist.guest}
-						rsvpDeadline={wishlist.rsvpDeadline}
-						wishlistSlug={wishlist.slug}
-					/>
+					{rsvpSection}
 
 					<GiftListBand className="-mx-6 sm:-mx-7">
 						<section

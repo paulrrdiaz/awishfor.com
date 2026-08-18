@@ -1,18 +1,15 @@
 "use client";
 
-import gsap from "gsap";
 import {
+	lazy,
 	type ReactNode,
+	Suspense,
 	useCallback,
-	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
 } from "react";
-import {
-	GuestGiftDrawer,
-	type GuestGiftDrawerView,
-} from "@/components/features/wishlist/guest-gift-drawer";
+import type { GuestGiftDrawerView } from "@/components/features/wishlist/guest-gift-drawer";
 import { EmptyState } from "@/components/shared/empty-state";
 import { GiftGrid } from "@/components/shared/gift-grid";
 import {
@@ -23,7 +20,6 @@ import { GiftList } from "@/components/shared/gift-list";
 import type { MotifPreset, MotifTreatment } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { ComposedDelivery } from "@/lib/format/delivery";
-import { useReducedMotion } from "@/lib/gsap/use-reduced-motion";
 import {
 	buildCategoryFilters,
 	countByStatusFilter,
@@ -38,6 +34,26 @@ import type {
 	PublicCategoryViewModel,
 	PublicGiftViewModel,
 } from "@/server/mappers/view-models";
+
+const PublicGuestGiftDrawer = lazy(() =>
+	import("@/components/features/wishlist/public-guest-gift-drawer").then(
+		(module) => ({ default: module.PublicGuestGiftDrawer }),
+	),
+);
+
+function GuestDrawerLoading() {
+	return (
+		<div
+			aria-live="polite"
+			className="fixed inset-0 z-50 grid place-items-center bg-background/70 text-foreground backdrop-blur-sm"
+			role="status"
+		>
+			<div className="rounded-xl border border-border bg-card px-5 py-3 shadow-lg">
+				Cargando regalo…
+			</div>
+		</div>
+	);
+}
 
 type Props = {
 	gifts: PublicGiftViewModel[];
@@ -125,8 +141,6 @@ export function PublicGiftFilters({
 		null,
 	);
 	const actionTriggerRef = useRef<HTMLElement | null>(null);
-	const resultsRef = useRef<HTMLDivElement>(null);
-	const reducedMotion = useReducedMotion();
 
 	const counts = useMemo(() => countByStatusFilter(gifts), [gifts]);
 	const categoryFilters = useMemo(
@@ -182,39 +196,6 @@ export function PublicGiftFilters({
 			setDrawerContainer(node.closest<HTMLElement>(".public-theme"));
 		}
 	}, []);
-
-	const activeFilterKey =
-		activeFilter.kind === "status"
-			? activeFilter.value
-			: activeFilter.categoryId;
-	const resultsRenderKey = `${activeFilterKey}|${filteredGifts.map((gift) => gift.id).join(":")}|${gridColumns}|${layout.giftCardStyle}`;
-
-	useLayoutEffect(() => {
-		const resultsElement = resultsRef.current;
-		if (!resultsElement) return;
-
-		gsap.killTweensOf(resultsElement);
-		if (reducedMotion) {
-			gsap.set(resultsElement, { clearProps: "opacity,visibility" });
-			return;
-		}
-
-		gsap.fromTo(
-			resultsElement,
-			{ autoAlpha: 0 },
-			{
-				autoAlpha: 1,
-				duration: 0.24,
-				ease: "power1.out",
-				id: `gift-results-${resultsRenderKey}`,
-			},
-		);
-
-		return () => {
-			gsap.killTweensOf(resultsElement);
-			gsap.set(resultsElement, { clearProps: "opacity,visibility" });
-		};
-	}, [reducedMotion, resultsRenderKey]);
 
 	const chipBase = compact
 		? "shrink-0 snap-start cursor-pointer rounded-full border px-3 py-1.5 font-medium text-xs transition-colors"
@@ -331,7 +312,7 @@ export function PublicGiftFilters({
 				)}
 			</div>
 
-			<div ref={resultsRef}>
+			<div className="motion-safe:fade-in motion-safe:animate-in motion-safe:duration-200 motion-reduce:animate-none">
 				{/* Gift list or empty state */}
 				{isEmpty ? (
 					<EmptyState
@@ -383,23 +364,25 @@ export function PublicGiftFilters({
 				)}
 			</div>
 			{actionsEnabled && selectedGift && drawerContainer && (
-				<GuestGiftDrawer
-					container={drawerContainer}
-					delivery={delivery}
-					gift={selectedGift}
-					onOpenChange={(open) => {
-						if (!open) closeGiftDrawer();
-					}}
-					onViewChange={(nextView) => {
-						setProductFromPurchase(
-							drawerView === "purchase" && nextView === "product",
-						);
-						setDrawerView(nextView);
-					}}
-					open
-					productFromPurchase={productFromPurchase}
-					view={drawerView}
-				/>
+				<Suspense fallback={<GuestDrawerLoading />}>
+					<PublicGuestGiftDrawer
+						container={drawerContainer}
+						delivery={delivery}
+						gift={selectedGift}
+						onOpenChange={(open) => {
+							if (!open) closeGiftDrawer();
+						}}
+						onViewChange={(nextView) => {
+							setProductFromPurchase(
+								drawerView === "purchase" && nextView === "product",
+							);
+							setDrawerView(nextView);
+						}}
+						open
+						productFromPurchase={productFromPurchase}
+						view={drawerView}
+					/>
+				</Suspense>
 			)}
 		</div>
 	);

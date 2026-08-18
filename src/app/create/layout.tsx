@@ -1,9 +1,9 @@
-import { ApplicationLayout } from "@/components/providers/application-layout";
+import { ClerkApplicationLayout } from "@/components/providers/clerk-application-layout";
 
 export default function CreateLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	return <ApplicationLayout>{children}</ApplicationLayout>;
+	return <ClerkApplicationLayout>{children}</ClerkApplicationLayout>;
 }

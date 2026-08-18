@@ -105,23 +105,15 @@ const defaultBodyFont = bodyFontsById.get(
 export function resolveHeadingFont(
 	headingFont: string | null | undefined,
 ): PublicFontOption {
-	if (headingFont) {
-		const found = headingFontsById.get(headingFont);
-		if (found) return found;
-	}
-
-	return defaultHeadingFont;
+	return (
+		(headingFont && headingFontsById.get(headingFont)) || defaultHeadingFont
+	);
 }
 
 export function resolveBodyFont(
 	bodyFont: string | null | undefined,
 ): PublicFontOption {
-	if (bodyFont) {
-		const found = bodyFontsById.get(bodyFont);
-		if (found) return found;
-	}
-
-	return defaultBodyFont;
+	return (bodyFont && bodyFontsById.get(bodyFont)) || defaultBodyFont;
 }
 
 export function getAllHeadingFontOptions(): PublicFontOption[] {

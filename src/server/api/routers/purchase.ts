@@ -6,6 +6,10 @@ import {
 } from "@/server/api/trpc";
 import { mapOwnerPurchaseRecord } from "@/server/mappers/owner-purchase.mapper";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
+import {
+	invalidatePublicWishlistByGiftId,
+	type PublicGiftInvalidationDatabase,
+} from "@/server/services/public-wishlist-cache";
 import type {
 	OwnerPurchaseDatabase,
 	PublicPurchaseDatabase,
@@ -39,6 +43,12 @@ type PublicContext = Awaited<ReturnType<typeof createTRPCContext>>;
 const asPublicPurchaseDb = (ctx: PublicContext): PublicPurchaseDatabase =>
 	ctx.db as unknown as PublicPurchaseDatabase;
 
+const invalidateGiftWishlist = (ctx: PublicContext, giftId: string) =>
+	invalidatePublicWishlistByGiftId(
+		ctx.db as unknown as PublicGiftInvalidationDatabase,
+		giftId,
+	);
+
 export const purchaseRouter = createTRPCRouter({
 	markGiftPurchased: publicProcedure
 		.input(createPurchaseSchema)
@@ -47,6 +57,7 @@ export const purchaseRouter = createTRPCRouter({
 				asPublicPurchaseDb(ctx),
 				input,
 			);
+			await invalidateGiftWishlist(ctx, result.purchase.giftId);
 			return {
 				purchase: mapOwnerPurchaseRecord(result.purchase),
 				undoToken: result.undoToken,
@@ -57,7 +68,8 @@ export const purchaseRouter = createTRPCRouter({
 	undoRecentPurchase: publicProcedure
 		.input(undoPurchaseSchema)
 		.mutation(async ({ ctx, input }) => {
-			await undoPurchase(asPublicPurchaseDb(ctx), input);
+			const purchase = await undoPurchase(asPublicPurchaseDb(ctx), input);
+			await invalidateGiftWishlist(ctx, purchase.giftId);
 			return { ok: true } as const;
 		}),
 
@@ -80,6 +92,7 @@ export const purchaseRouter = createTRPCRouter({
 				ownerId,
 				...input,
 			});
+			await invalidateGiftWishlist(ctx, purchase.giftId);
 			return mapOwnerPurchaseRecord(purchase);
 		}),
 
@@ -87,9 +100,10 @@ export const purchaseRouter = createTRPCRouter({
 		.input(deleteOwnerPurchaseSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
-			await deleteOwnerPurchase(asOwnerPurchaseDb(ctx), {
+			const purchase = await deleteOwnerPurchase(asOwnerPurchaseDb(ctx), {
 				ownerId,
 				purchaseId: input.purchaseId,
 			});
+			await invalidateGiftWishlist(ctx, purchase.giftId);
 		}),
 });

@@ -5,7 +5,7 @@ TBD - created by archiving change add-clerk-auth. Update Purpose after archive.
 ## Requirements
 ### Requirement: Authentication provider
 
-The system SHALL use Clerk as the authentication backend. The application root SHALL be wrapped in `ClerkProvider`, and Clerk environment variables SHALL be validated through `src/env.js`.
+The system SHALL use Clerk as the authentication backend. Every route group that consumes Clerk client state SHALL be wrapped in `ClerkProvider`, while anonymous marketing and published public-wishlist surfaces that need only server authentication SHALL render outside the client provider boundary. Clerk environment variables SHALL be validated through `src/env.ts`.
 
 #### Scenario: Missing Clerk keys at startup
 
@@ -14,8 +14,20 @@ The system SHALL use Clerk as the authentication backend. The application root S
 
 #### Scenario: Clerk session available to the app
 
-- **WHEN** a request is handled in the app with a valid Clerk session
+- **WHEN** a request is handled in an authenticated, auth-flow, or creation surface with a valid Clerk session
 - **THEN** the current user's authentication state SHALL be accessible to server and client components via Clerk
+
+#### Scenario: Public wishlist retains server authorization
+
+- **WHEN** a signed-in owner requests their draft wishlist through `/w/<slug>`
+- **THEN** server authentication SHALL recognize the owner and allow the existing draft preview
+- **AND** the public wishlist SHALL not require the Clerk client provider or its UI packages
+
+#### Scenario: Anonymous published wishlist omits Clerk client UI
+
+- **WHEN** a signed-out guest opens a published `/w/<slug>` page
+- **THEN** no Clerk client UI package is requested
+- **AND** the wishlist remains fully usable for public guest interactions
 
 ### Requirement: Custom sign-up form
 
@@ -53,8 +65,9 @@ The system SHALL provide a sign-up page at `src/app/(auth)` built with `react-ho
 
 #### Scenario: Clerk client state survives application navigation
 
-- **WHEN** the root `ClerkProvider` renders or persists across application routes
-- **THEN** Clerk middleware SHALL cover every non-static page request, every API request, and Clerk's `/__clerk` frontend routes without making public pages protected
+- **WHEN** the scoped `ClerkProvider` persists across sign-up, sign-in, verification, recovery, OAuth callback, creation, and protected application routes
+- **THEN** Clerk client state remains available throughout those flows
+- **AND** Clerk middleware continues to cover required page, API, and `/__clerk` requests without making public pages protected
 
 #### Scenario: Design language on desktop and mobile
 

@@ -273,6 +273,8 @@ describe("GuestGiftDrawer", () => {
 		});
 		act(() => callbacks.undoError?.({ message: "Undo token has expired" }));
 		expect(screen.getByText("Undo token has expired")).toBeInTheDocument();
+		act(() => callbacks.undoSuccess?.());
+		expect(refreshMock).toHaveBeenCalledTimes(2);
 	});
 	it("hides undo at expiry and keeps success dismissible", () => {
 		renderDrawer("success", {

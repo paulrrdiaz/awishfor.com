@@ -2,6 +2,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 import { PublicGiftFilters } from "./public-filters";
 
 vi.mock("gsap", () => ({
@@ -20,7 +21,10 @@ vi.mock("@/components/shared/gift-grid", () => ({
 		onProductAction?: (gift: { id: string }) => void;
 		onPurchaseAction?: (gift: { id: string }) => void;
 	}) => (
-		<div>
+		<div
+			data-gift-ids={gifts.map(({ id }) => id).join(",")}
+			data-testid="gift-grid"
+		>
 			<button
 				onClick={() => gifts[0] && onProductAction?.(gifts[0])}
 				type="button"
@@ -37,8 +41,8 @@ vi.mock("@/components/shared/gift-grid", () => ({
 	),
 }));
 vi.mock("@/components/shared/gift-list", () => ({ GiftList: () => null }));
-vi.mock("@/components/features/wishlist/guest-gift-drawer", () => ({
-	GuestGiftDrawer: ({
+vi.mock("@/components/features/wishlist/public-guest-gift-drawer", () => ({
+	PublicGuestGiftDrawer: ({
 		container,
 		onOpenChange,
 		onViewChange,
@@ -61,7 +65,7 @@ vi.mock("@/components/features/wishlist/guest-gift-drawer", () => ({
 	),
 }));
 
-const gift = {
+const gift: PublicGiftViewModel = {
 	id: "gift-1",
 	name: "Cojín",
 	productUrl: "https://example.com",
@@ -78,6 +82,35 @@ const gift = {
 	remainingQuantity: 1,
 };
 
+function makeGift(
+	id: string,
+	overrides: Partial<PublicGiftViewModel> = {},
+): PublicGiftViewModel {
+	return {
+		...gift,
+		id,
+		name: `Regalo ${id}`,
+		sortOrder: Number(id.replace(/\D/g, "")) || 0,
+		...overrides,
+	};
+}
+
+function makeWishlistGifts(size: number) {
+	return Array.from({ length: size }, (_, index) =>
+		makeGift(`gift-${index + 1}`, {
+			categoryId: index % 2 === 0 ? "category-home" : "category-travel",
+			priceAmount: String((index + 1) * 10),
+			priority: index % 4 === 0 ? "high" : "medium",
+			status: index % 3 === 0 ? "purchased" : "available",
+		}),
+	);
+}
+
+const categories = [
+	{ id: "category-home", name: "Hogar", sortOrder: 0 },
+	{ id: "category-travel", name: "Viaje", sortOrder: 1 },
+];
+
 const layout = {
 	id: "default",
 	giftCardStyle: "card",
@@ -85,6 +118,91 @@ const layout = {
 } as never;
 
 describe("PublicGiftFilters guest drawer controller", () => {
+	it.each([
+		8, 24,
+	])("keeps filters and sorting interactive for a %i-gift wishlist", async (size) => {
+		const user = userEvent.setup();
+		const gifts = makeWishlistGifts(size);
+		const { rerender } = render(
+			<PublicGiftFilters
+				actionsEnabled
+				categories={categories}
+				gifts={gifts}
+				layout={layout}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", {
+				name: `Disponibles (${gifts.filter(({ status }) => status === "available").length})`,
+			}),
+		);
+		expect(screen.getByTestId("gift-grid").dataset.giftIds?.split(",")).toEqual(
+			expect.arrayContaining(
+				gifts
+					.filter(({ status }) => status === "available")
+					.map(({ id }) => id),
+			),
+		);
+
+		await user.click(screen.getByRole("button", { name: "Hogar" }));
+		await user.selectOptions(screen.getByRole("combobox"), "price-desc");
+		const expectedHomeIds = gifts
+			.filter(({ categoryId }) => categoryId === "category-home")
+			.sort((a, b) => Number(b.priceAmount) - Number(a.priceAmount))
+			.map(({ id }) => id);
+		expect(screen.getByTestId("gift-grid")).toHaveAttribute(
+			"data-gift-ids",
+			expectedHomeIds.join(","),
+		);
+
+		const refreshedGifts = [
+			...gifts,
+			makeGift(`gift-${size + 1}`, {
+				categoryId: "category-home",
+				priceAmount: "999",
+			}),
+		];
+		rerender(
+			<PublicGiftFilters
+				actionsEnabled
+				categories={categories}
+				gifts={refreshedGifts}
+				layout={layout}
+			/>,
+		);
+		expect(screen.getByRole("button", { name: "Hogar" })).toHaveAttribute(
+			"aria-pressed",
+			"true",
+		);
+		expect(screen.getByRole("combobox")).toHaveValue("price-desc");
+		expect(screen.getByTestId("gift-grid").dataset.giftIds?.split(",")[0]).toBe(
+			`gift-${size + 1}`,
+		);
+	});
+
+	it("opens the purchase drawer on its first keyboard activation", async () => {
+		const user = userEvent.setup();
+		render(
+			<div className="public-theme" data-theme="keyboard">
+				<PublicGiftFilters
+					actionsEnabled
+					categories={[]}
+					gifts={[gift]}
+					layout={layout}
+				/>
+			</div>,
+		);
+
+		const purchaseButton = screen.getByRole("button", { name: "Abrir compra" });
+		purchaseButton.focus();
+		await user.keyboard("{Enter}");
+
+		const drawer = await screen.findByTestId("guest-drawer");
+		expect(drawer).toHaveTextContent("purchase");
+		expect(drawer).toHaveAttribute("data-container", "keyboard");
+	});
+
 	it("keeps product, purchase, and success drawers inside their triggering public theme", async () => {
 		const user = userEvent.setup();
 		render(
@@ -115,11 +233,9 @@ describe("PublicGiftFilters guest drawer controller", () => {
 		if (!secondProductButton)
 			throw new Error("Second public preview trigger missing");
 		await user.click(secondProductButton);
-		expect(screen.getByTestId("guest-drawer")).toHaveAttribute(
-			"data-container",
-			"second",
-		);
-		expect(screen.getByTestId("guest-drawer")).toHaveTextContent("product");
+		const drawer = await screen.findByTestId("guest-drawer");
+		expect(drawer).toHaveAttribute("data-container", "second");
+		expect(drawer).toHaveTextContent("product");
 
 		await user.click(screen.getByRole("button", { name: "Éxito" }));
 		expect(screen.getByTestId("guest-drawer")).toHaveTextContent("success");

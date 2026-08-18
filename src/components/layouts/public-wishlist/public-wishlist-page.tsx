@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { MotifBand } from "@/components/shared/motif/motif-band";
 import { WishlistFooter } from "@/components/shared/wishlist-footer";
 import {
@@ -29,6 +30,7 @@ type Props = {
 	wishlist: PublicWishlistViewModel;
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
+	rsvpSection?: ReactNode;
 };
 
 type LayoutComponentType = (props: {
@@ -36,6 +38,7 @@ type LayoutComponentType = (props: {
 	layout: ReturnType<typeof resolveLayout>;
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
+	rsvpSection?: ReactNode;
 }) => ReturnType<typeof MagazineEditorialLayout>;
 
 const LAYOUT_COMPONENTS: Record<string, LayoutComponentType> = {
@@ -54,6 +57,7 @@ export function PublicWishlistPage({
 	wishlist,
 	mode,
 	surface = "embedded",
+	rsvpSection,
 }: Props) {
 	const theme = resolveTheme(wishlist.themeId);
 	const layout = resolveLayout(wishlist.layoutId);
@@ -66,6 +70,7 @@ export function PublicWishlistPage({
 
 	const LayoutComponent =
 		LAYOUT_COMPONENTS[layout.id] ?? MagazineEditorialLayout;
+	const isSelfContainedLayout = SELF_CONTAINED_LAYOUT_IDS.has(layout.id);
 
 	return (
 		<PublicThemeProvider
@@ -75,7 +80,7 @@ export function PublicWishlistPage({
 			// Standalone owner previews still use mode="preview", so render surface
 			// determines page sizing independently of interaction mode.
 			className={
-				SELF_CONTAINED_LAYOUT_IDS.has(layout.id)
+				isSelfContainedLayout
 					? surface === "embedded"
 						? "min-h-0 bg-background"
 						: "bg-background"
@@ -105,6 +110,7 @@ export function PublicWishlistPage({
 			<LayoutComponent
 				layout={layout}
 				mode={mode}
+				rsvpSection={rsvpSection}
 				surface={surface}
 				wishlist={wishlist}
 			/>

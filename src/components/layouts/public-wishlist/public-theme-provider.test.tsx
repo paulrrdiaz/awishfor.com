@@ -1,6 +1,22 @@
 // @vitest-environment jsdom
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/font/google", () => {
+	const font = () => ({ variable: "font-test" });
+	return {
+		Cormorant_Garamond: font,
+		DM_Serif_Display: font,
+		Figtree: font,
+		Inter: font,
+		Karla: font,
+		Lora: font,
+		Nunito: font,
+		Playfair_Display: font,
+		Source_Serif_4: font,
+	};
+});
+
 import { resolveMotif } from "@/config/motifs";
 import { resolveButtonStyle } from "@/config/public-button-styles";
 import { resolveBodyFont, resolveHeadingFont } from "@/config/public-fonts";

@@ -10,4 +10,13 @@ describe("Clerk proxy matcher", () => {
 			"/__clerk/(.*)",
 		]);
 	});
+
+	it("bypasses Clerk middleware for anonymous public wishlist requests", async () => {
+		const source = await import("node:fs/promises").then(({ readFile }) =>
+			readFile(new URL("./proxy.ts", import.meta.url), "utf8"),
+		);
+		expect(source).toContain('req.nextUrl.pathname.startsWith("/w/")');
+		expect(source).toContain('cookie.name.startsWith("__session")');
+		expect(source).toContain("return NextResponse.next()");
+	});
 });

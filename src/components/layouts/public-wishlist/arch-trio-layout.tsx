@@ -1,6 +1,4 @@
-"use client";
-
-import { useRef } from "react";
+import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
 import { DeliveryCard } from "@/components/shared/delivery-card";
@@ -15,8 +13,8 @@ import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { MotifMarginScatter } from "@/components/shared/motif/motif-margin-scatter";
 import { MotifScatter } from "@/components/shared/motif/motif-scatter";
 import { MotifSeal } from "@/components/shared/motif/motif-seal";
+import { MotifTiltSection } from "@/components/shared/motif/motif-tilt-region";
 import { ProgressSummary } from "@/components/shared/progress-summary";
-import { RsvpSection } from "@/components/shared/rsvp-section";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -28,20 +26,36 @@ import {
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
 import { composeDelivery } from "@/lib/format/delivery";
-import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
 import { partitionHeroImages } from "@/lib/hero-slots";
+import { cn } from "@/lib/utils";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import { PublicLayoutShell } from "./public-layout-shell";
-import type { PublicWishlistMode } from "./public-wishlist-page";
+import type {
+	PublicWishlistMode,
+	PublicWishlistSurface,
+} from "./public-wishlist-page";
 
 type Props = {
 	wishlist: PublicWishlistViewModel;
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
+	surface?: PublicWishlistSurface;
+	rsvpSection?: ReactNode;
 };
 
-export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
+export function ArchTrioLayout({
+	wishlist,
+	layout,
+	mode,
+	surface = "standalone",
+	rsvpSection,
+}: Props) {
 	const isCompact = mode === "compact";
+	// An embedded preview (wizard steps, dashboard editor) is bounded by its
+	// host pane, not the real viewport — breaking out to `w-screen` there
+	// overflows the pane instead of the page, and gets clipped by whatever
+	// `overflow-x-hidden` ancestor is scrolling it.
+	const isEmbedded = surface === "embedded";
 	const heading = wishlist.title;
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
@@ -62,14 +76,14 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 	const hasEventDetails = Boolean(
 		wishlist.eventDate || wishlist.eventLocation || wishlist.dressCode,
 	);
-	const heroRef = useRef<HTMLElement>(null);
-	useMotifTilt(heroRef);
 
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
-			<section
-				className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-gradient-to-b from-accent via-accent/60 to-background"
-				ref={heroRef}
+			<MotifTiltSection
+				className={cn(
+					"relative overflow-hidden bg-gradient-to-b from-accent via-accent/60 to-background",
+					isEmbedded ? "w-full" : "left-1/2 w-screen -translate-x-1/2",
+				)}
 			>
 				{motif && (
 					<MotifScatter
@@ -79,27 +93,27 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 					/>
 				)}
 				<div className="relative mx-auto flex w-full max-w-[1160px] flex-col gap-8 px-6 py-10 sm:px-10 lg:min-h-[420px] lg:flex-row lg:gap-12">
-					<div className="relative mx-auto h-[220px] w-[260px] shrink-0 sm:h-[300px] sm:w-[360px] lg:mx-0 lg:h-[360px] lg:w-[460px]">
+					<div className="relative h-[255px] w-full shrink-0 sm:mx-auto sm:h-[300px] sm:w-[360px] lg:mx-0 lg:h-[360px] lg:w-[460px]">
 						<HeroCarouselGallery
 							alt={`${heading} 1`}
-							className="absolute top-4 left-0 z-[2] size-[180px] overflow-hidden rounded-full border-[3px] border-white shadow-[0_16px_40px_rgba(80,30,60,.18)] sm:size-[250px] sm:border-[5px] lg:size-[320px]"
+							className="absolute left-8 z-[2] size-[260px] overflow-hidden rounded-full border-[3px] border-white shadow-[0_16px_40px_rgba(80,30,60,.18)] sm:top-4 sm:top-4.5 sm:left-0 sm:size-[250px] sm:border-[5px] lg:size-[320px]"
 							controlsVariant="compact"
 							images={carouselImages}
 							priority={!isCompact}
-							sizes="(min-width: 1024px) 320px, (min-width: 640px) 250px, 180px"
+							sizes="(min-width: 1024px) 320px, (min-width: 640px) 250px, 205px"
 						/>
 						<HeroImageSlot
 							alt={`${heading} 2`}
-							className="absolute -right-4 bottom-0 z-[1] size-[110px] rounded-full border-[3px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)] sm:-right-6 sm:size-[150px] sm:border-[5px] lg:size-[200px]"
+							className="absolute right-8 bottom-0 z-[1] size-[160px] rounded-full border-[3px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)] sm:-right-4.5 sm:-right-6 sm:size-[150px] sm:border-[5px] lg:size-[200px]"
 							isSample={staticSlots[0]?.isSample}
-							sizes="(min-width: 1024px) 200px, (min-width: 640px) 150px, 110px"
+							sizes="(min-width: 1024px) 200px, (min-width: 640px) 150px, 125px"
 							src={staticSlots[0]?.url ?? null}
 						/>
 						<HeroImageSlot
 							alt={`${heading} 3`}
-							className="absolute -top-3 right-4 z-[3] size-[90px] rounded-full border-[3px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)] sm:-top-4 sm:right-6 sm:size-[120px] sm:border-[5px] lg:size-[160px]"
+							className="absolute -top-3.5 right-20 z-[3] size-[120px] rounded-full border-[3px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)] sm:-top-4 sm:right-4.5 sm:right-6 sm:size-[120px] sm:border-[5px] lg:size-[160px]"
 							isSample={staticSlots[1]?.isSample}
-							sizes="(min-width: 1024px) 160px, (min-width: 640px) 120px, 90px"
+							sizes="(min-width: 1024px) 160px, (min-width: 640px) 120px, 100px"
 							src={staticSlots[1]?.url ?? null}
 						/>
 					</div>
@@ -125,16 +139,16 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 						)}
 					</div>
 				</div>
-			</section>
+			</MotifTiltSection>
 
 			{!isCompact && (
 				<>
-					<div className="flex flex-col gap-8 px-5 py-5 sm:flex-row sm:items-center sm:gap-16 sm:px-4">
+					<div className="flex flex-col gap-8 px-5 py-5 lg:flex-row lg:items-center lg:gap-16 lg:px-4">
 						<div
 							className={
 								delivery && hasEventDetails
-									? "flex flex-1 flex-col sm:w-72"
-									: "flex flex-1 flex-col gap-4 sm:w-72"
+									? "flex min-w-0 flex-col lg:w-96 lg:shrink-0"
+									: "flex min-w-0 flex-col gap-4 lg:w-96 lg:shrink-0"
 							}
 						>
 							<EventDetails
@@ -153,7 +167,7 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 								delivery={delivery}
 							/>
 						</div>
-						<div>
+						<div className="min-w-0 flex-1">
 							<WishlistMessage
 								attribution={wishlist.welcomeMessageAttribution}
 								className="border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
@@ -180,16 +194,14 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 				</>
 			)}
 
-			<RsvpSection
-				eventDate={wishlist.eventDate}
-				eventLocation={wishlist.eventLocation}
-				eventTime={wishlist.eventTime}
-				guest={wishlist.guest}
-				rsvpDeadline={wishlist.rsvpDeadline}
-				wishlistSlug={wishlist.slug}
-			/>
+			{rsvpSection}
 
-			<div className="relative left-1/2 w-screen -translate-x-1/2">
+			<div
+				className={cn(
+					"relative",
+					isEmbedded ? "w-full" : "left-1/2 w-screen -translate-x-1/2",
+				)}
+			>
 				{motif && (
 					<MotifMarginScatter
 						motif={motif}
@@ -198,7 +210,12 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 					/>
 				)}
 
-				<GiftListBand className="relative left-1/2 w-screen -translate-x-1/2">
+				<GiftListBand
+					className={cn(
+						"relative",
+						isEmbedded ? "w-full" : "left-1/2 w-screen -translate-x-1/2",
+					)}
+				>
 					<section
 						className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-6 pb-16 sm:px-7"
 						id="regalos"

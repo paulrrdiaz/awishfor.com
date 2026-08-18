@@ -23,6 +23,10 @@ import {
 } from "@/server/services/gift.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
+	invalidatePublicWishlistById,
+	type PublicWishlistInvalidationDatabase,
+} from "@/server/services/public-wishlist-cache";
+import {
 	type CreateGiftInput,
 	createGiftSchema,
 	type ReorderGiftsInput,
@@ -43,6 +47,22 @@ function revalidateGiftsRoute(wishlistId: string): void {
 	revalidatePath(`/dashboard/wishlists/${wishlistId}/gifts`);
 }
 
+async function invalidateWishlist(wishlistId: string): Promise<void> {
+	await invalidatePublicWishlistById(
+		db as unknown as PublicWishlistInvalidationDatabase,
+		wishlistId,
+	);
+}
+
+function assertGiftWishlist(
+	actualWishlistId: string,
+	wishlistId: string,
+): void {
+	if (actualWishlistId !== wishlistId) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+	}
+}
+
 export async function createGiftAction(input: CreateGiftInput): Promise<void> {
 	const parsed = createGiftSchema.parse(input);
 	const ownerId = await getLocalOwnerId();
@@ -51,6 +71,7 @@ export async function createGiftAction(input: CreateGiftInput): Promise<void> {
 		wishlistId: parsed.wishlistId,
 	});
 	await createGift(db as unknown as GiftDatabase, parsed);
+	await invalidateWishlist(parsed.wishlistId);
 	revalidateGiftsRoute(parsed.wishlistId);
 }
 
@@ -60,12 +81,14 @@ export async function updateGiftAction(
 ): Promise<void> {
 	const parsed = updateGiftSchema.parse(input);
 	const ownerId = await getLocalOwnerId();
-	await getOwnedGift(db as unknown as DashboardGiftDatabase, {
+	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
 		ownerId,
 		giftId: parsed.giftId,
 	});
+	assertGiftWishlist(existing.wishlistId, wishlistId);
 	await updateGift(db as unknown as GiftDatabase, parsed);
-	revalidateGiftsRoute(wishlistId);
+	await invalidateWishlist(existing.wishlistId);
+	revalidateGiftsRoute(existing.wishlistId);
 }
 
 export async function duplicateGiftAction(
@@ -73,11 +96,17 @@ export async function duplicateGiftAction(
 	giftId: string,
 ): Promise<void> {
 	const ownerId = await getLocalOwnerId();
-	await duplicateGift(db as unknown as DuplicateGiftDatabase, {
+	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
 		ownerId,
 		giftId,
 	});
-	revalidateGiftsRoute(wishlistId);
+	assertGiftWishlist(existing.wishlistId, wishlistId);
+	const gift = await duplicateGift(db as unknown as DuplicateGiftDatabase, {
+		ownerId,
+		giftId,
+	});
+	await invalidateWishlist(gift.wishlistId);
+	revalidateGiftsRoute(gift.wishlistId);
 }
 
 export async function setGiftVisibilityAction(
@@ -86,15 +115,17 @@ export async function setGiftVisibilityAction(
 	visibilityStatus: GiftVisibilityStatus,
 ): Promise<void> {
 	const ownerId = await getLocalOwnerId();
-	await getOwnedGift(db as unknown as DashboardGiftDatabase, {
+	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
 		ownerId,
 		giftId,
 	});
+	assertGiftWishlist(existing.wishlistId, wishlistId);
 	await updateGift(db as unknown as GiftDatabase, {
 		giftId,
 		visibilityStatus,
 	});
-	revalidateGiftsRoute(wishlistId);
+	await invalidateWishlist(existing.wishlistId);
+	revalidateGiftsRoute(existing.wishlistId);
 }
 
 export async function setGiftPriorityAction(
@@ -103,25 +134,29 @@ export async function setGiftPriorityAction(
 	priority: GiftPriority,
 ): Promise<void> {
 	const ownerId = await getLocalOwnerId();
-	await getOwnedGift(db as unknown as DashboardGiftDatabase, {
+	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
 		ownerId,
 		giftId,
 	});
+	assertGiftWishlist(existing.wishlistId, wishlistId);
 	await updateGift(db as unknown as GiftDatabase, {
 		giftId,
 		priority,
 	});
-	revalidateGiftsRoute(wishlistId);
+	await invalidateWishlist(existing.wishlistId);
+	revalidateGiftsRoute(existing.wishlistId);
 }
 
 export async function deleteGiftAction(wishlistId: string, giftId: string) {
 	const ownerId = await getLocalOwnerId();
-	await getOwnedGift(db as unknown as DashboardGiftDatabase, {
+	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
 		ownerId,
 		giftId,
 	});
+	assertGiftWishlist(existing.wishlistId, wishlistId);
 	await softDeleteGift(db as unknown as GiftDatabase, { giftId });
-	revalidateGiftsRoute(wishlistId);
+	await invalidateWishlist(existing.wishlistId);
+	revalidateGiftsRoute(existing.wishlistId);
 }
 
 export async function reorderGiftsAction(input: ReorderGiftsInput) {
@@ -131,5 +166,6 @@ export async function reorderGiftsAction(input: ReorderGiftsInput) {
 		ownerId,
 		...parsed,
 	});
+	await invalidateWishlist(parsed.wishlistId);
 	revalidateGiftsRoute(parsed.wishlistId);
 }

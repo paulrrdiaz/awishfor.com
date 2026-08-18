@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import type { PublicWishlistMode } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { Countdown } from "@/components/shared/countdown";
@@ -7,7 +8,6 @@ import { GiftGrid } from "@/components/shared/gift-grid";
 import { GiftListBand } from "@/components/shared/gift-list-band";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { ProgressSummary } from "@/components/shared/progress-summary";
-import { RsvpSection } from "@/components/shared/rsvp-section";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
 import { WishlistThankYou } from "@/components/shared/wishlist-thank-you";
 import {
@@ -25,6 +25,7 @@ type Props = {
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
 	maxWidth?: string;
+	rsvpSection?: ReactNode;
 };
 
 /**
@@ -37,6 +38,7 @@ export function PublicWishlistBody({
 	layout,
 	mode,
 	maxWidth = "max-w-4xl",
+	rsvpSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	const isFull = mode === "full";
@@ -84,14 +86,7 @@ export function PublicWishlistBody({
 				/>
 			)}
 
-			<RsvpSection
-				eventDate={wishlist.eventDate}
-				eventLocation={wishlist.eventLocation}
-				eventTime={wishlist.eventTime}
-				guest={wishlist.guest}
-				rsvpDeadline={wishlist.rsvpDeadline}
-				wishlistSlug={wishlist.slug}
-			/>
+			{rsvpSection}
 
 			<GiftListBand className="relative left-1/2 w-screen -translate-x-1/2">
 				<section

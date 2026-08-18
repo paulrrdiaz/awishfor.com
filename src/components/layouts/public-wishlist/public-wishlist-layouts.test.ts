@@ -52,33 +52,37 @@ describe("public wishlist RSVP integration", () => {
 		(file) => !SELF_CONTAINED_FILES.includes(file),
 	);
 
-	it("mounts RsvpSection wired to the guest field in every self-contained layout", async () => {
+	it("mounts the route-provided RSVP slot in every self-contained layout", async () => {
 		for (const file of SELF_CONTAINED_FILES) {
 			const source = await readFile(layoutPath(file), "utf8");
-			expect(source).toContain(
-				'import { RsvpSection } from "@/components/shared/rsvp-section"',
-			);
-			expect(source).toContain("<RsvpSection");
-			expect(source).toContain("guest={wishlist.guest}");
+			expect(source).not.toContain("rsvp-section");
+			expect(source).toContain("rsvpSection?: ReactNode");
+			expect(source).toContain("{rsvpSection}");
 		}
 	});
 
-	it("routes every other layout's RSVP section through the shared body", async () => {
+	it("keeps the shared body free of personalized mutation code", async () => {
 		const bodySource = await readFile(
 			sharedPath("public-wishlist-body.tsx"),
 			"utf8",
 		);
-		expect(bodySource).toContain(
-			'import { RsvpSection } from "@/components/shared/rsvp-section"',
+		expect(bodySource).not.toContain("rsvp-section");
+		expect(bodySource).toContain("{rsvpSection}");
+
+		const pageSource = await readFile(
+			layoutPath("public-wishlist-page.tsx"),
+			"utf8",
 		);
-		expect(bodySource).toContain("<RsvpSection");
-		expect(bodySource).toContain("guest={wishlist.guest}");
+		expect(pageSource).toContain("rsvpSection={rsvpSection}");
+		expect(pageSource).not.toContain("!isSelfContainedLayout && rsvpSection");
 
 		for (const file of SHARED_BODY_FILES) {
 			const source = await readFile(layoutPath(file), "utf8");
 			expect(source).toContain(
 				'import { PublicWishlistBody } from "@/components/shared/public-wishlist-body"',
 			);
+			expect(source).toContain("rsvpSection?: ReactNode");
+			expect(source).toContain("rsvpSection={rsvpSection}");
 		}
 	});
 
@@ -220,5 +224,23 @@ describe("public wishlist footer integration", () => {
 		);
 		expect(personalizedRoute).toContain('surface="standalone"');
 		expect(personalizedRoute).toContain('mode="full"');
+	});
+});
+
+describe("public wishlist image priority", () => {
+	it("declares exactly one non-compact hero priority in every layout", async () => {
+		for (const file of LAYOUT_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(
+				source.match(/priority=\{!isCompact(?:\s*&&\s*index\s*===\s*0)?\}/g),
+				file,
+			).toHaveLength(1);
+		}
+	});
+
+	it("leaves gift images on Next Image's lazy default", async () => {
+		const source = await readFile(sharedPath("gift-card.tsx"), "utf8");
+		expect(source).not.toMatch(/<Image[\s\S]{0,240}priority=/);
+		expect(source).not.toContain('loading="eager"');
 	});
 });

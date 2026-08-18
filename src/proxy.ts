@@ -1,5 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import {
+	type NextFetchEvent,
+	type NextRequest,
+	NextResponse,
+} from "next/server";
 import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 
 // Only the dashboard actually requires auth. Everything else — marketing
@@ -10,7 +14,7 @@ const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
-export default clerkMiddleware(async (auth, req) => {
+const clerkProxy = clerkMiddleware(async (auth, req) => {
 	if (isAuthRoute(req)) {
 		const { userId } = await auth();
 		if (!userId) return;
@@ -24,6 +28,16 @@ export default clerkMiddleware(async (auth, req) => {
 		await auth.protect();
 	}
 });
+
+export default function proxy(req: NextRequest, event: NextFetchEvent) {
+	const isAnonymousPublicWishlist =
+		req.nextUrl.pathname.startsWith("/w/") &&
+		!req.cookies
+			.getAll()
+			.some((cookie) => cookie.name.startsWith("__session") && cookie.value);
+	if (isAnonymousPublicWishlist) return NextResponse.next();
+	return clerkProxy(req, event);
+}
 
 export const config = {
 	matcher: [

@@ -7,6 +7,7 @@ import type {
 import type { PublicButtonStylePreset } from "@/config/public-button-styles";
 import type { PublicFontOption } from "@/config/public-fonts";
 import type { ThemePreset } from "@/config/public-themes";
+import { PUBLIC_FONT_VARIABLE_CLASS_BY_ID } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
 type PublicThemeStyle = CSSProperties & Record<`--${string}`, string>;
@@ -34,6 +35,13 @@ export function PublicThemeProvider({
 	motifPalette,
 	className,
 }: Props) {
+	const activeFontClasses = [
+		...new Set(
+			[headingFont.id, bodyFont.id]
+				.map((id) => PUBLIC_FONT_VARIABLE_CLASS_BY_ID[id])
+				.filter((value): value is string => Boolean(value)),
+		),
+	].join(" ");
 	const style: PublicThemeStyle = {
 		...theme.vars,
 		"--radius": "18px",
@@ -59,6 +67,7 @@ export function PublicThemeProvider({
 		<div
 			className={cn(
 				"public-theme min-h-svh bg-background text-foreground",
+				activeFontClasses,
 				className,
 			)}
 			data-btn-variant={buttonStyle.variant}

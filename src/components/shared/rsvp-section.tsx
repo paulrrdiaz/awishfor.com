@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PublicWishlistProviders } from "@/components/providers/public-wishlist-providers";
 import { Locale } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ import type {
 } from "@/server/mappers/view-models";
 import { api } from "@/trpc/react";
 
-type Props = {
+export type RsvpSectionProps = {
 	guest: PublicGuestViewModel | undefined;
 	wishlistSlug: string;
 	rsvpDeadline: string | null;
@@ -21,6 +22,10 @@ type Props = {
 	eventTime: string | null;
 	eventLocation: string | null;
 	className?: string;
+};
+
+type RsvpFormProps = Omit<RsvpSectionProps, "guest"> & {
+	guest: PublicGuestViewModel;
 };
 
 type ExtraStatus = "confirmed" | "declined";
@@ -83,7 +88,21 @@ function initialExtraStatuses(
 	return result;
 }
 
-export function RsvpSection({
+export function RsvpSection(props: RsvpSectionProps) {
+	// Public wishlist routes deliberately omit the application-wide provider
+	// stack. RSVP is the only always-rendered public surface that uses a tRPC
+	// hook, so keep its client context scoped to an invited guest.
+	const { guest, ...rsvpProps } = props;
+	if (!guest) return null;
+
+	return (
+		<PublicWishlistProviders>
+			<RsvpForm {...rsvpProps} guest={guest} />
+		</PublicWishlistProviders>
+	);
+}
+
+function RsvpForm({
 	guest,
 	wishlistSlug,
 	rsvpDeadline,
@@ -91,19 +110,19 @@ export function RsvpSection({
 	eventTime,
 	eventLocation,
 	className,
-}: Props) {
+}: RsvpFormProps) {
 	const router = useRouter();
 	const [mode, setMode] = useState<"auto" | "form">("auto");
 	const [primaryChoice, setPrimaryChoice] = useState<
 		"confirmed" | "declined" | null
 	>(() =>
-		guest?.status === "confirmed" || guest?.status === "declined"
+		guest.status === "confirmed" || guest.status === "declined"
 			? guest.status
 			: null,
 	);
 	const [extraStatuses, setExtraStatuses] = useState<
 		Record<string, ExtraStatus>
-	>(() => (guest ? initialExtraStatuses(guest) : {}));
+	>(() => initialExtraStatuses(guest));
 
 	const respondMutation = api.invite.respond.useMutation({
 		onError: () => {
@@ -120,16 +139,11 @@ export function RsvpSection({
 		},
 	});
 
-	if (!guest) {
-		return null;
-	}
-
 	const closed = isRsvpClosed(eventDate, rsvpDeadline);
 	const showForm = !closed && (mode === "form" || guest.status === "pending");
 	const isDeclined = guest.status === "declined";
 
 	function openForm() {
-		if (!guest) return;
 		setPrimaryChoice(
 			guest.status === "confirmed" || guest.status === "declined"
 				? guest.status
@@ -140,7 +154,7 @@ export function RsvpSection({
 	}
 
 	function handleSubmit() {
-		if (!guest || primaryChoice === null) return;
+		if (primaryChoice === null) return;
 		respondMutation.mutate({
 			wishlistSlug,
 			guestSlug: guest.slug,

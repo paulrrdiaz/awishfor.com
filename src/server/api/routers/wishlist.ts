@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { resolveMotif } from "@/config/motifs";
 import {
@@ -27,6 +26,7 @@ import {
 	mapDashboardWishlistSummary,
 } from "@/server/mappers/dashboard-wishlist.mapper";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
+import { invalidatePublicWishlist } from "@/server/services/public-wishlist-cache";
 import {
 	listOwnerWishlistRecentPurchases,
 	type WishlistRecentPurchaseDatabase,
@@ -250,10 +250,15 @@ export const wishlistRouter = createTRPCRouter({
 			const ownerId = await getLocalUserId(ctx);
 
 			try {
-				return await publishWishlist(ctx.db, {
+				const published = await publishWishlist(ctx.db, {
 					ownerId,
 					...input,
 				});
+				invalidatePublicWishlist({
+					wishlistId: published.id,
+					slug: published.slug,
+				});
+				return published;
 			} catch (error) {
 				if (error instanceof PublishReadinessError) {
 					throw new TRPCError({
@@ -272,10 +277,17 @@ export const wishlistRouter = createTRPCRouter({
 			const ownerId = await getLocalUserId(ctx);
 
 			try {
-				return await publishWishlistFromWizard(ctx.db, {
+				const published = await publishWishlistFromWizard(ctx.db, {
 					ownerId,
 					...input,
 				});
+				if (published.status === "published") {
+					invalidatePublicWishlist({
+						wishlistId: published.wishlistId,
+						slug: published.slug,
+					});
+				}
+				return published;
 			} catch (error) {
 				if (error instanceof PublishReadinessError) {
 					throw new TRPCError({
@@ -359,7 +371,7 @@ export const wishlistRouter = createTRPCRouter({
 				});
 			});
 
-			revalidatePath(`/w/${updated.slug}`);
+			invalidatePublicWishlist({ wishlistId: updated.id, slug: updated.slug });
 
 			return {
 				...updated,
@@ -448,10 +460,11 @@ export const wishlistRouter = createTRPCRouter({
 				throw error;
 			}
 
-			revalidatePath(`/w/${updated.slug}`);
-			if (existing.slug !== updated.slug) {
-				revalidatePath(`/w/${existing.slug}`);
-			}
+			invalidatePublicWishlist({
+				wishlistId: updated.id,
+				slug: updated.slug,
+				previousSlug: existing.slug,
+			});
 
 			return { ...updated, updatedAt: updated.updatedAt.toISOString() };
 		}),
@@ -469,8 +482,14 @@ export const wishlistRouter = createTRPCRouter({
 				throw new TRPCError({ code: "NOT_FOUND" });
 			}
 
-			await archiveWishlist(ctx.db, { wishlistId: existing.id, ownerId });
-			revalidatePath(`/w/${existing.slug}`);
+			const archived = await archiveWishlist(ctx.db, {
+				wishlistId: existing.id,
+				ownerId,
+			});
+			invalidatePublicWishlist({
+				wishlistId: archived.id,
+				slug: archived.slug,
+			});
 		}),
 
 	restore: protectedProcedure
@@ -491,11 +510,14 @@ export const wishlistRouter = createTRPCRouter({
 				throw new TRPCError({ code: "NOT_FOUND" });
 			}
 
-			await restoreWishlist(ctx.db, {
+			const restored = await restoreWishlist(ctx.db, {
 				wishlistId: existing.id,
 				ownerId,
 				targetStatus: input.targetStatus,
 			});
-			revalidatePath(`/w/${existing.slug}`);
+			invalidatePublicWishlist({
+				wishlistId: restored.id,
+				slug: restored.slug,
+			});
 		}),
 });

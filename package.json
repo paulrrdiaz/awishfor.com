@@ -28,7 +28,8 @@
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
 		"runTS": "dotenv -e .env -- tsx",
-		"audit:marketing": "node scripts/audit-marketing-performance.mjs"
+		"audit:marketing": "node scripts/audit-marketing-performance.mjs",
+		"audit:public-wishlist": "node scripts/audit-public-wishlist-performance.mjs"
 	},
 	"prisma": {
 		"seed": "dotenv -e .env -- tsx prisma/seed.ts"

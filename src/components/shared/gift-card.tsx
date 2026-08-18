@@ -3,9 +3,7 @@
 import { cva } from "class-variance-authority";
 import { Check, ExternalLink } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
 import type { MotifPreset, MotifTreatment } from "@/config/motifs";
-import { useHoverLift } from "@/lib/gsap/use-hover-lift";
 import { cn } from "@/lib/utils";
 import type { PublicGiftViewModel } from "@/server/mappers/view-models";
 import { MotifSticker } from "./motif/motif-sticker";
@@ -148,7 +146,6 @@ export function GiftCard({
 	motif,
 	motifTreatment,
 }: Props) {
-	const cardRef = useRef<HTMLElement>(null);
 	const isPurchased = status === "purchased";
 	const isPartial = status === "partial";
 	const isHidden = status === "hidden";
@@ -157,10 +154,8 @@ export function GiftCard({
 	const isCollage = cardStyle === "collage";
 	const isCollageRow = cardStyle === "collage-row";
 
-	useHoverLift(cardRef, {
-		scale: cardStyle === "card" ? 1.01 : 1.005,
-		y: cardStyle === "card" ? -8 : -4,
-	});
+	const interactiveMotion =
+		"motion-safe:transition-transform motion-safe:duration-200 motion-safe:hover:-translate-y-1 motion-safe:hover:scale-[1.005] motion-reduce:transform-none motion-reduce:transition-none";
 
 	if (isCollageRow) {
 		const purchasedQuantity = Math.max(
@@ -173,9 +168,10 @@ export function GiftCard({
 			<article
 				className={cn(
 					giftCardVariants({ cardStyle, status }),
+					interactiveMotion,
+					"[contain-intrinsic-size:auto_180px] [content-visibility:auto]",
 					(isPurchased || isHidden) && "border-l-muted-foreground/60",
 				)}
-				ref={cardRef}
 			>
 				<div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
 					{gift.imageUrl && (
@@ -257,8 +253,11 @@ export function GiftCard({
 	if (cardStyle === "row" || cardStyle === "minimal") {
 		return (
 			<article
-				className={cn(giftCardVariants({ cardStyle, status }))}
-				ref={cardRef}
+				className={cn(
+					giftCardVariants({ cardStyle, status }),
+					interactiveMotion,
+					"[contain-intrinsic-size:auto_180px] [content-visibility:auto]",
+				)}
 			>
 				{gift.imageUrl && (
 					<div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
@@ -320,8 +319,11 @@ export function GiftCard({
 
 		return (
 			<article
-				className={cn(giftCardVariants({ cardStyle, status }))}
-				ref={cardRef}
+				className={cn(
+					giftCardVariants({ cardStyle, status }),
+					interactiveMotion,
+					"[contain-intrinsic-size:auto_320px] [content-visibility:auto]",
+				)}
 			>
 				<div className="relative h-36 w-full overflow-hidden bg-muted">
 					{gift.imageUrl && (
@@ -402,8 +404,11 @@ export function GiftCard({
 
 	return (
 		<article
-			className={cn(giftCardVariants({ cardStyle, status }))}
-			ref={cardRef}
+			className={cn(
+				giftCardVariants({ cardStyle, status }),
+				interactiveMotion,
+				"[contain-intrinsic-size:auto_360px] [content-visibility:auto]",
+			)}
 		>
 			{gift.imageUrl && (
 				<div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">

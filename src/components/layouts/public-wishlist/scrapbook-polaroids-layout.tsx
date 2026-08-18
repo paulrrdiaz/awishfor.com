@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
@@ -13,6 +14,7 @@ type Props = {
 	wishlist: PublicWishlistViewModel;
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
+	rsvpSection?: ReactNode;
 };
 
 function Polaroid({
@@ -21,12 +23,14 @@ function Polaroid({
 	rotation,
 	className,
 	isSample,
+	priority = false,
 }: {
 	src: string | null;
 	alt: string;
 	rotation: string;
 	className?: string;
 	isSample?: boolean;
+	priority?: boolean;
 }) {
 	return (
 		<div
@@ -40,6 +44,7 @@ function Polaroid({
 				alt={alt}
 				className="aspect-[4/3]"
 				isSample={isSample}
+				priority={priority}
 				sizes="144px"
 				src={src}
 			/>
@@ -47,7 +52,12 @@ function Polaroid({
 	);
 }
 
-export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
+export function ScrapbookPolaroidsLayout({
+	wishlist,
+	layout,
+	mode,
+	rsvpSection,
+}: Props) {
 	const isCompact = mode === "compact";
 	const heading = wishlist.title;
 	const eventLabel =
@@ -78,6 +88,7 @@ export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
 						alt={`${heading} 2`}
 						className="z-[3] w-36 sm:w-40"
 						isSample={slots[1]?.isSample}
+						priority={!isCompact}
 						rotation="rotate-3"
 						src={slots[1]?.url ?? null}
 					/>
@@ -95,7 +106,12 @@ export function ScrapbookPolaroidsLayout({ wishlist, layout, mode }: Props) {
 					</div>
 				)}
 			</header>
-			<PublicWishlistBody layout={layout} mode={mode} wishlist={wishlist} />
+			<PublicWishlistBody
+				layout={layout}
+				mode={mode}
+				rsvpSection={rsvpSection}
+				wishlist={wishlist}
+			/>
 		</div>
 	);
 }

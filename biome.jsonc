@@ -7,7 +7,7 @@
 		"clientKind": "git"
 	},
 	"files": {
-		"includes": ["**", "!.claude"]
+		"includes": ["**", "!.claude", "!artifacts/public-wishlist-performance"]
 	},
 	"assist": {
 		"enabled": true,
