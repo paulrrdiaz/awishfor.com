@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageOff } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function ImageUpload({
 }: Props) {
 	const [error, setError] = useState<string | null>(null);
 	const [isHandlingUpload, setIsHandlingUpload] = useState(false);
+	const [failedPreviewUrl, setFailedPreviewUrl] = useState<string | null>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const { startUpload, isUploading } = useUploadThing(endpoint, {
@@ -50,6 +52,7 @@ export function ImageUpload({
 		},
 	});
 	const isBusy = isUploading || isHandlingUpload;
+	const previewFailed = Boolean(value && failedPreviewUrl === value);
 
 	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[0];
@@ -90,14 +93,24 @@ export function ImageUpload({
 			<div className="space-y-2">
 				<div className="flex items-center gap-3.5">
 					<div className="relative size-18 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
-						{value ? (
+						{value && !previewFailed ? (
 							<Image
 								alt="Imagen subida"
 								className="object-cover"
 								fill
+								onError={() => setFailedPreviewUrl(value)}
+								onLoad={() => setFailedPreviewUrl(null)}
 								src={value}
 								unoptimized
 							/>
+						) : previewFailed ? (
+							<div
+								aria-label="Imagen no disponible"
+								className="flex h-full flex-col items-center justify-center gap-1 text-muted-foreground"
+								role="img"
+							>
+								<ImageOff aria-hidden="true" className="size-5" />
+							</div>
 						) : null}
 					</div>
 					<div className="flex flex-col items-start gap-1.5">
@@ -131,7 +144,7 @@ export function ImageUpload({
 		);
 	}
 
-	if (value) {
+	if (value && !previewFailed) {
 		return (
 			<div className="space-y-2">
 				<div className="relative h-48 overflow-hidden rounded-lg border border-border bg-muted sm:h-64">
@@ -139,6 +152,8 @@ export function ImageUpload({
 						alt="Imagen subida"
 						className="object-contain"
 						fill
+						onError={() => setFailedPreviewUrl(value)}
+						onLoad={() => setFailedPreviewUrl(null)}
 						src={value}
 						unoptimized
 					/>
@@ -151,6 +166,30 @@ export function ImageUpload({
 				>
 					Eliminar imagen
 				</Button>
+			</div>
+		);
+	}
+
+	if (previewFailed) {
+		return (
+			<div className="space-y-2">
+				<div
+					aria-label="Imagen no disponible"
+					className="flex h-48 flex-col items-center justify-center gap-2 rounded-lg border border-border bg-muted text-muted-foreground sm:h-64"
+					role="img"
+				>
+					<ImageOff aria-hidden="true" className="size-8" />
+					<span className="font-medium text-xs">Imagen no disponible</span>
+				</div>
+				<Button
+					className="h-auto p-0 text-xs"
+					onClick={() => onChange(null)}
+					type="button"
+					variant="link"
+				>
+					Eliminar imagen
+				</Button>
+				{fileInput}
 			</div>
 		);
 	}

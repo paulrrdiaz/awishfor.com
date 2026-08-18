@@ -46,6 +46,7 @@ import {
 } from "@/server/validators/gift.schema";
 import { api } from "@/trpc/react";
 import { ImageUpload } from "../../wishlist/image-upload";
+import { GiftReimportRecovery } from "./gift-reimport-recovery";
 
 const CURRENCY_OPTIONS = [
 	{ value: "PEN", label: "S/ PEN" },
@@ -144,6 +145,7 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 	const [isPending, startTransition] = useTransition();
 	const [importUrl, setImportUrl] = useState("");
 	const [importError, setImportError] = useState<string | null>(null);
+	const [imagePreviewVersion, setImagePreviewVersion] = useState(0);
 	const importMutation = api.importer.importFromUrl.useMutation();
 	const categoriesQuery = api.category.list.useQuery(
 		{ wishlistId },
@@ -160,13 +162,15 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 		form.reset(gift ? valuesFromGift(gift) : BLANK_VALUES);
 		setImportUrl("");
 		setImportError(null);
+		setImagePreviewVersion(0);
 	}, [open, gift, form.reset]);
 
-	async function handleImport() {
-		const url = importUrl.trim();
+	async function handleImport(urlOverride?: string) {
+		const url = (urlOverride ?? importUrl).trim();
 		if (!url || importMutation.isPending) return;
 		setImportError(null);
 		try {
+			const previousImageUrl = form.getValues("imageUrl");
 			const result = await importMutation.mutateAsync({ url });
 			if (!result.ok) {
 				setImportError("No pudimos importar ese enlace.");
@@ -182,6 +186,21 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 			if (result.draft.priceCurrency)
 				form.setValue("priceCurrency", result.draft.priceCurrency);
 			form.setValue("productUrl", result.draft.productUrl);
+			setImagePreviewVersion((version) => version + 1);
+
+			if (mode === "edit") {
+				if (result.draft.imageUrl === previousImageUrl) {
+					toast.info(
+						"La tienda devolvió la misma imagen. Si sigue sin cargar, súbela manualmente.",
+					);
+				} else if (result.draft.imageUrl) {
+					toast.success("Datos reimportados. Guarda los cambios.");
+				} else {
+					toast.warning(
+						"La tienda no devolvió una imagen. Puedes subirla manualmente.",
+					);
+				}
+			}
 		} catch {
 			setImportError("No pudimos importar ese enlace.");
 		}
@@ -231,6 +250,8 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 
 	const quantity = form.watch("quantityNeeded");
 	const imageUrl = form.watch("imageUrl");
+	const productUrl = form.watch("productUrl")?.trim() ?? "";
+	const canReimport = mode === "edit" && isValidHttpUrl(productUrl);
 
 	return (
 		<Sheet onOpenChange={onOpenChange} open={open}>
@@ -261,7 +282,7 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 									/>
 									<Button
 										disabled={!importUrl.trim() || importMutation.isPending}
-										onClick={handleImport}
+										onClick={() => handleImport()}
 										type="button"
 										variant="outline"
 									>
@@ -285,10 +306,18 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 							<Field className="sm:col-span-2">
 								<ImageUpload
 									endpoint="giftImage"
+									key={`gift-image-${imagePreviewVersion}`}
 									onChange={(url) => form.setValue("imageUrl", url)}
 									value={imageUrl ?? null}
 									variant="compact"
 								/>
+								{canReimport && (
+									<GiftReimportRecovery
+										error={importError}
+										isPending={importMutation.isPending}
+										onReimport={() => handleImport(productUrl)}
+									/>
+								)}
 							</Field>
 
 							<Field className="sm:col-span-2">

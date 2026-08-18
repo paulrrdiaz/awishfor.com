@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { GiftReimportRecovery } from "@/components/features/dashboard/gifts/gift-reimport-recovery";
 import { OverviewShare } from "@/components/features/dashboard/overview/overview-share";
 import {
 	PublishedSlugWarning,
@@ -61,5 +62,13 @@ export const RestoreDialog: Story = {
 				/>
 			</DialogContent>
 		</Dialog>
+	),
+};
+
+export const GiftImageRecovery: Story = {
+	render: () => (
+		<div className="max-w-xl">
+			<GiftReimportRecovery isPending={false} onReimport={() => undefined} />
+		</div>
 	),
 };
