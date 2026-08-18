@@ -28,7 +28,7 @@ import type { EventType } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
 import { composeDelivery } from "@/lib/format/delivery";
 import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
-import { resolveHeroSlots } from "@/lib/hero-slots";
+import { partitionHeroImages } from "@/lib/hero-slots";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import { PublicLayoutShell } from "./public-layout-shell";
 import type { PublicWishlistMode } from "./public-wishlist-page";
@@ -45,7 +45,10 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
-	const slots = resolveHeroSlots(wishlist.images, 3);
+	const { carouselImages, staticSlots } = partitionHeroImages(
+		wishlist.images,
+		2,
+	);
 	const motif = resolveMotif(wishlist.motifId);
 	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
@@ -57,8 +60,6 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 	);
 	const heroRef = useRef<HTMLElement>(null);
 	useMotifTilt(heroRef);
-	const carouselImages =
-		wishlist.images.length > 0 ? wishlist.images : slots[1] ? [slots[1]] : [];
 	const eventSummary = wishlist.eventDate
 		? formatEventDate(wishlist.eventDate, wishlist.language as "es" | "en")
 		: null;
@@ -93,35 +94,33 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 						<HeroImageSlot
 							alt={`${heading} 1`}
 							className="mt-11 h-[180px] rounded-xl shadow-[0_12px_32px_rgba(30,50,80,.10)]"
-							isSample={slots[0]?.isSample}
+							isSample={staticSlots[0]?.isSample}
 							sizes="33vw"
-							src={slots[0]?.url ?? null}
+							src={staticSlots[0]?.url ?? null}
 						/>
 						<HeroCarouselGallery
 							alt={`${heading} destacada`}
 							className="h-[253px] overflow-hidden rounded-xl shadow-[0_18px_44px_rgba(30,50,80,.13)]"
 							controlsVariant="compact"
 							images={carouselImages}
-							maxImages={carouselImages.length}
 							priority={!isCompact}
 							sizes="(min-width: 768px) 360px, 42vw"
-							startIndex={wishlist.images.length > 1 ? 1 : 0}
 						/>
 						<HeroImageSlot
 							alt={`${heading} 3`}
 							className="mt-11 h-[180px] rounded-xl shadow-[0_12px_32px_rgba(30,50,80,.10)]"
-							isSample={slots[2]?.isSample}
+							isSample={staticSlots[1]?.isSample}
 							sizes="33vw"
-							src={slots[2]?.url ?? null}
+							src={staticSlots[1]?.url ?? null}
 						/>
-						{slots[2] && (
+						{carouselImages[0] && (
 							<div className="absolute bottom-[-20px] left-2 z-10 w-24 rotate-[-7deg] rounded-[2px] bg-white p-2 pb-3.5 shadow-[0_14px_30px_rgba(30,50,80,.22)] sm:w-[118px]">
 								<HeroImageSlot
 									alt={`${heading} recuerdo`}
 									className="h-[96px] w-full"
-									isSample={slots[2].isSample}
+									isSample={carouselImages[0].isSample}
 									sizes="118px"
-									src={slots[2].url}
+									src={carouselImages[0].url}
 								/>
 								<p className="mt-1.5 text-center font-heading text-[#333] text-[10px] italic">
 									Un recuerdo especial 🤍

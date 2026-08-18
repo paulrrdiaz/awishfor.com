@@ -29,7 +29,7 @@ import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
 import { composeDelivery } from "@/lib/format/delivery";
 import { useMotifTilt } from "@/lib/gsap/use-motif-tilt";
-import { resolveHeroSlots } from "@/lib/hero-slots";
+import { partitionHeroImages } from "@/lib/hero-slots";
 import type { PublicWishlistViewModel } from "@/server/mappers/view-models";
 import { PublicLayoutShell } from "./public-layout-shell";
 import type { PublicWishlistMode } from "./public-wishlist-page";
@@ -46,9 +46,10 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 	const eventLabel =
 		EVENT_TYPE_PRESETS[wishlist.eventType as EventType]?.label ??
 		wishlist.eventType;
-	// The medium and small arcs (slots 1 and 2) are static; slot 0 is owned by
-	// the carousel below and rendered from `wishlist.images` directly.
-	const slots = resolveHeroSlots(wishlist.images, 3);
+	const { carouselImages, staticSlots } = partitionHeroImages(
+		wishlist.images,
+		2,
+	);
 	const motif = resolveMotif(wishlist.motifId);
 	const motifTreatment = resolveMotifTreatment(wishlist.motifTreatment);
 	const motifPalette = resolveMotifPalette(wishlist.motifPalette);
@@ -81,26 +82,25 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 					<div className="relative mx-auto h-[220px] w-[260px] shrink-0 sm:h-[300px] sm:w-[360px] lg:mx-0 lg:h-[360px] lg:w-[460px]">
 						<HeroCarouselGallery
 							alt={`${heading} 1`}
-							className="absolute top-4 left-0 z-[2] size-[180px] overflow-hidden rounded-full shadow-[0_16px_40px_rgba(80,30,60,.18)] sm:size-[250px] lg:size-[320px]"
+							className="absolute top-4 left-0 z-[2] size-[180px] overflow-hidden rounded-full border-[3px] border-white shadow-[0_16px_40px_rgba(80,30,60,.18)] sm:size-[250px] sm:border-[5px] lg:size-[320px]"
 							controlsVariant="compact"
-							images={wishlist.images}
+							images={carouselImages}
 							priority={!isCompact}
 							sizes="(min-width: 1024px) 320px, (min-width: 640px) 250px, 180px"
-							startIndex={0}
 						/>
 						<HeroImageSlot
 							alt={`${heading} 2`}
 							className="absolute -right-4 bottom-0 z-[1] size-[110px] rounded-full border-[3px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)] sm:-right-6 sm:size-[150px] sm:border-[5px] lg:size-[200px]"
-							isSample={slots[1]?.isSample}
+							isSample={staticSlots[0]?.isSample}
 							sizes="(min-width: 1024px) 200px, (min-width: 640px) 150px, 110px"
-							src={slots[1]?.url ?? null}
+							src={staticSlots[0]?.url ?? null}
 						/>
 						<HeroImageSlot
 							alt={`${heading} 3`}
 							className="absolute -top-3 right-4 z-[3] size-[90px] rounded-full border-[3px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)] sm:-top-4 sm:right-6 sm:size-[120px] sm:border-[5px] lg:size-[160px]"
-							isSample={slots[2]?.isSample}
+							isSample={staticSlots[1]?.isSample}
 							sizes="(min-width: 1024px) 160px, (min-width: 640px) 120px, 90px"
-							src={slots[2]?.url ?? null}
+							src={staticSlots[1]?.url ?? null}
 						/>
 					</div>
 					<div className="relative flex flex-col justify-center gap-4 text-center lg:text-left">

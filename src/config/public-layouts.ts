@@ -20,7 +20,7 @@ export type PublicLayoutPreset = {
 	showCategoryDividers: boolean;
 	/** How many cover images the hero composition displays at once. */
 	heroImageSlots: number;
-	/** Shows prev/next gallery controls when 2+ cover images exist. */
+	/** Whether this layout supports a carousel. Hybrid layouts show controls when their carousel-owned remainder has 2+ images. */
 	supportsCarousel: boolean;
 	/** Recommended source-image shape for this layout's hero composition. */
 	imageGuidance: LayoutImageGuidance;

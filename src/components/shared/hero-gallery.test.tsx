@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { partitionHeroImages } from "@/lib/hero-slots";
 import { HeroCarouselGallery } from "./hero-gallery";
 
 const images = [
@@ -45,6 +46,42 @@ describe("HeroCarouselGallery", () => {
 		expect(
 			screen.queryByRole("button", { name: "Foto siguiente" }),
 		).not.toBeInTheDocument();
+	});
+
+	it("keeps hybrid controls tied to carousel-owned images after two static slots", () => {
+		const hybridImages = Array.from({ length: 4 }, (_, index) => ({
+			url: `https://example.com/hybrid-${index + 1}.jpg`,
+		}));
+		const threeImageRemainder = partitionHeroImages(
+			hybridImages.slice(0, 3),
+			2,
+		).carouselImages;
+		const { unmount } = render(
+			<HeroCarouselGallery
+				alt="Celebración"
+				images={threeImageRemainder}
+				priority={false}
+			/>,
+		);
+
+		expect(
+			screen.queryByRole("button", { name: "Foto anterior" }),
+		).not.toBeInTheDocument();
+		unmount();
+
+		const fourImageRemainder = partitionHeroImages(
+			hybridImages,
+			2,
+		).carouselImages;
+		render(
+			<HeroCarouselGallery
+				alt="Celebración"
+				images={fourImageRemainder}
+				priority={false}
+			/>,
+		);
+
+		expect(screen.getByRole("button", { name: "Foto anterior" })).toBeVisible();
 	});
 
 	it("clips the multi-image viewport to className when viewportClassName is omitted", () => {
