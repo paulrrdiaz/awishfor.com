@@ -73,6 +73,11 @@ export function SplitImageRightLayout({
 					<h1 className="mt-2 font-heading font-semibold text-[32px] leading-[1.1] sm:text-[38px]">
 						{heading}
 					</h1>
+					{wishlist.subtitle && (
+						<p className="mt-2 max-w-2xl text-muted-foreground text-sm leading-relaxed">
+							{wishlist.subtitle}
+						</p>
+					)}
 
 					{!isCompact && (
 						<>

@@ -429,6 +429,7 @@ const makeWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	createdAt: NOW,
 	updatedAt: NOW,
 	...overrides,
+	subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 });
 
 const makePublicDb = (

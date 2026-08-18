@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -75,6 +74,11 @@ export function ScrapbookPolaroidsLayout({
 					<h1 className="mt-3 font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
+					{wishlist.subtitle && (
+						<p className="mx-auto mt-2 max-w-2xl text-muted-foreground text-sm leading-relaxed sm:text-base">
+							{wishlist.subtitle}
+						</p>
+					)}
 				</div>
 				<div className="flex items-end justify-center gap-0 bg-gradient-to-b from-card to-background px-6 pt-7 pb-10 sm:px-10">
 					<Polaroid
@@ -100,11 +104,6 @@ export function ScrapbookPolaroidsLayout({
 						src={slots[2]?.url ?? null}
 					/>
 				</div>
-				{!isCompact && (
-					<div className="pb-8 text-center">
-						<HeroCtas showHowItWorks={wishlist.showHowItWorks} />
-					</div>
-				)}
 			</header>
 			<PublicWishlistBody
 				layout={layout}

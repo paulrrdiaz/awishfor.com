@@ -46,6 +46,7 @@ import {
 } from "@/config/public-message-variants";
 import { Currency, Locale } from "@/generated/prisma/enums";
 import { isValidSlug } from "@/lib/slug";
+import { WISHLIST_SUBTITLE_MAX_LENGTH } from "@/lib/wishlist/subtitle";
 import { api, type RouterOutputs } from "@/trpc/react";
 
 const COUNTDOWN_VARIANTS = getAllCountdownVariants();
@@ -152,6 +153,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const utils = api.useUtils();
 
 	const [title, setTitle] = useState(wishlist.title);
+	const [subtitle, setSubtitle] = useState(wishlist.subtitle ?? "");
 	const [slug, setSlug] = useState(wishlist.slug);
 	const [savedSlug, setSavedSlug] = useState(wishlist.slug);
 	const [eventDate, setEventDate] = useState(
@@ -267,9 +269,12 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	});
 
 	const welcomeMessageError = welcomeMessage.trim().length === 0;
+	const subtitleLength = subtitle.trim().length;
+	const subtitleError = subtitleLength > WISHLIST_SUBTITLE_MAX_LENGTH;
 
 	const canSave =
 		title.trim().length > 0 &&
+		!subtitleError &&
 		!welcomeMessageError &&
 		slugStatus !== "taken" &&
 		slugStatus !== "invalid" &&
@@ -288,6 +293,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		updateSettings.mutate({
 			id: wishlist.id,
 			title: title.trim(),
+			subtitle: subtitle.trim() || null,
 			slug,
 			eventDate: (eventDate || null) as unknown as Date | null,
 			eventTime: eventTime || null,
@@ -350,6 +356,46 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							Así la identificas en tu panel y así la verán tus invitados — un
 							solo nombre para ambos.
 						</p>
+					</div>
+
+					<div className="space-y-1.5">
+						<div className="flex items-center justify-between gap-3">
+							<Label htmlFor="subtitle">
+								Subtítulo{" "}
+								<span className="font-normal text-muted-foreground text-xs">
+									(opcional)
+								</span>
+							</Label>
+							<span
+								className={
+									subtitleError
+										? "text-destructive text-xs"
+										: "text-muted-foreground text-xs"
+								}
+							>
+								{subtitleLength}/{WISHLIST_SUBTITLE_MAX_LENGTH}
+							</span>
+						</div>
+						<Input
+							aria-describedby="settings-subtitle-help"
+							aria-invalid={subtitleError}
+							id="subtitle"
+							onChange={(e) => setSubtitle(e.target.value)}
+							placeholder="Una frase breve para tus invitados"
+							value={subtitle}
+						/>
+						<p
+							className="text-muted-foreground text-xs"
+							id="settings-subtitle-help"
+						>
+							Aparece debajo del nombre en tu lista pública. Puedes cambiarlo o
+							quitarlo cuando quieras.
+						</p>
+						{subtitleError && (
+							<p className="text-destructive text-xs">
+								El subtítulo debe tener como máximo 160 caracteres.
+							</p>
+						)}
 					</div>
 
 					<div className="space-y-1.5">

@@ -29,6 +29,7 @@ import {
 	wishlistMotifPaletteSchema,
 	wishlistMotifTreatmentSchema,
 	wishlistSlugSchema,
+	wishlistSubtitleSchema,
 	wishlistThankYouMessageSchema,
 	wishlistThankYouMessageVariantSchema,
 	wishlistThemeIdSchema,
@@ -110,6 +111,7 @@ const saveDraftGiftSchema = z.object({
 
 export const saveDraftDraftContentSchema = z.object({
 	title: wishlistTitleSchema,
+	subtitle: wishlistSubtitleSchema,
 	slug: wishlistSlugSchema,
 	eventType: eventTypeSchema,
 	language: z.enum(Locale).default(Locale.es),

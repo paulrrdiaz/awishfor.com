@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { HeroCtas } from "./hero-ctas";
 
 describe("HeroCtas", () => {
-	it("smoothly scrolls to the gift section in its own template", async () => {
+	it("smoothly scrolls from its relocated welcome region to gifts in its own template", async () => {
 		const user = userEvent.setup();
 		const firstScroll = vi.fn();
 		const secondScroll = vi.fn();
@@ -13,6 +13,7 @@ describe("HeroCtas", () => {
 		render(
 			<>
 				<div className="public-theme">
+					<p>Mensaje de bienvenida uno</p>
 					<HeroCtas showHowItWorks />
 					<section
 						id="regalos"
@@ -22,6 +23,7 @@ describe("HeroCtas", () => {
 					/>
 				</div>
 				<div className="public-theme">
+					<p>Mensaje de bienvenida dos</p>
 					<HeroCtas showHowItWorks />
 					<section
 						id="regalos"

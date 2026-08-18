@@ -47,6 +47,7 @@ function makeWishlist(overrides: Partial<Wishlist> = {}): Wishlist {
 		createdAt: now,
 		updatedAt: now,
 		...overrides,
+		subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 	};
 }
 
@@ -93,6 +94,18 @@ function makePurchase(overrides: Partial<Purchase> = {}): Purchase {
 }
 
 describe("mapDashboardWishlist", () => {
+	it("preserves present and absent subtitles", () => {
+		expect(
+			mapDashboardWishlist({
+				...makeWishlist({ subtitle: "Celebramos juntos" }),
+				gifts: [],
+			}).subtitle,
+		).toBe("Celebramos juntos");
+		expect(
+			mapDashboardWishlist({ ...makeWishlist(), gifts: [] }).subtitle,
+		).toBeNull();
+	});
+
 	it("counts only visible non-deleted gifts", () => {
 		const visible = makeGift({ id: "g1", visibilityStatus: "available" });
 		const hidden = makeGift({ id: "g2", visibilityStatus: "hidden" });

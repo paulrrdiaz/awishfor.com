@@ -63,6 +63,7 @@ const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	createdAt: BASE_DATE,
 	updatedAt: BASE_DATE,
 	...overrides,
+	subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 });
 
 const createWishlistInput = () => ({
@@ -129,6 +130,10 @@ const makeDraftInput = (
 	lastSavedAt: null,
 	force: false,
 	...overrides,
+	subtitle:
+		overrides.subtitle === undefined
+			? "Una lista creada con cariño para celebrar juntos."
+			: overrides.subtitle,
 });
 
 type TestCategory = {
@@ -301,6 +306,7 @@ const createMockDatabase = (
 			id: `wishlist_${state.wishlists.length + 1}`,
 			ownerId,
 			title: args.data.title as string,
+			subtitle: (args.data.subtitle as string | null | undefined) ?? null,
 			slug: args.data.slug as string,
 			eventType: args.data.eventType as EventType,
 			language: (args.data.language as Locale | undefined) ?? Locale.es,
@@ -641,6 +647,7 @@ describe("wishlist service", () => {
 			eventType: EventType.birthday,
 			language: Locale.en,
 			currency: Currency.USD,
+			subtitle: "Celebremos este día inolvidable",
 			welcomeMessage: "Gracias por ser parte de este dia.",
 			thankYouMessage: "Nos vemos pronto.",
 			eventDate,
@@ -662,6 +669,7 @@ describe("wishlist service", () => {
 				eventType: EventType.birthday,
 				language: Locale.en,
 				currency: Currency.USD,
+				subtitle: "Celebremos este día inolvidable",
 				welcomeMessage: "Gracias por ser parte de este dia.",
 				thankYouMessage: "Nos vemos pronto.",
 				eventDate,
@@ -741,6 +749,9 @@ describe("wishlist service", () => {
 		expect(savedWishlist.ownerId).toBe(42);
 		expect(savedWishlist.status).toBe(WishlistStatus.draft);
 		expect(savedWishlist.slug).toBe("lista-de-boda");
+		expect(savedWishlist.subtitle).toBe(
+			"Una lista creada con cariño para celebrar juntos.",
+		);
 		expect(savedWishlist.eventDate?.toISOString()).toBe(
 			"2026-12-24T00:00:00.000Z",
 		);
@@ -799,6 +810,7 @@ describe("wishlist service", () => {
 	it("updates the same draft in place and replaces previous collections", async () => {
 		const existingWishlist = createWishlistRecord({
 			id: "wishlist_existing",
+			subtitle: "Texto anterior",
 			updatedAt: new Date("2026-06-25T08:00:00.000Z"),
 		});
 		const existingCategories: TestCategory[] = [
@@ -844,6 +856,7 @@ describe("wishlist service", () => {
 			makeDraftInput({
 				savedWishlistId: existingWishlist.id,
 				lastSavedAt: existingWishlist.updatedAt.getTime(),
+				subtitle: null,
 				categories: ["Dormitorio"],
 				gifts: [
 					{
@@ -866,6 +879,7 @@ describe("wishlist service", () => {
 		expect(result.status).toBe("saved");
 		expect(state.wishlists).toHaveLength(1);
 		expect(state.wishlists[0]?.id).toBe(existingWishlist.id);
+		expect(state.wishlists[0]?.subtitle).toBeNull();
 		expect(state.categories).toHaveLength(1);
 		expect(state.categories[0]?.name).toBe("Dormitorio");
 		expect(state.gifts).toHaveLength(1);
@@ -923,6 +937,7 @@ describe("wishlist service", () => {
 		const existingWishlist = createWishlistRecord({
 			id: "wishlist_existing",
 			title: "Versión del dashboard",
+			subtitle: "Subtítulo del dashboard",
 			updatedAt: new Date("2026-06-25T10:00:00.000Z"),
 		});
 		const { db } = createMockDatabase({
@@ -974,6 +989,7 @@ describe("wishlist service", () => {
 			status: "conflict",
 			serverDraft: expect.objectContaining({
 				title: "Versión del dashboard",
+				subtitle: "Subtítulo del dashboard",
 				savedWishlistId: existingWishlist.id,
 				lastSavedAt: existingWishlist.updatedAt.getTime(),
 				categories: ["Dashboard"],
@@ -987,6 +1003,28 @@ describe("wishlist service", () => {
 				],
 			}),
 		});
+	});
+
+	it("keeps an absent server subtitle absent in conflict recovery", async () => {
+		const existingWishlist = createWishlistRecord({
+			id: "wishlist_existing",
+			subtitle: null,
+			updatedAt: new Date("2026-06-25T10:00:00.000Z"),
+		});
+		const { db } = createMockDatabase({ wishlists: [existingWishlist] });
+
+		const result = await saveWishlistDraft(
+			db,
+			makeDraftInput({
+				savedWishlistId: existingWishlist.id,
+				lastSavedAt: new Date("2026-06-25T09:00:00.000Z").getTime(),
+			}),
+		);
+
+		expect(result.status).toBe("conflict");
+		if (result.status === "conflict") {
+			expect(result.serverDraft.subtitle).toBeNull();
+		}
 	});
 
 	it("allows an explicit overwrite after a conflict", async () => {

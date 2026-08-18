@@ -69,6 +69,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 		},
 	],
 	...overrides,
+	subtitle: overrides.subtitle ?? "Celebremos juntos",
 });
 
 const makeServerDraft = (
@@ -117,6 +118,7 @@ const makeServerDraft = (
 	savedWishlistId: "wishlist_123",
 	lastSavedAt: 123456789,
 	...overrides,
+	subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 });
 
 describe("save draft mapping", () => {
@@ -128,6 +130,7 @@ describe("save draft mapping", () => {
 
 		expect(result).toMatchObject({
 			title: "Lista de boda",
+			subtitle: "Celebremos juntos",
 			slug: "lista-de-boda",
 			eventType: "wedding",
 			language: "es",
@@ -154,6 +157,7 @@ describe("save draft mapping", () => {
 		expect(result.savedWishlistId).toBe("wishlist_123");
 		expect(result.lastSavedAt).toBe(123456789);
 		expect(result.draft.eventLocation).toBe("");
+		expect(result.draft.subtitle).toBe("");
 		expect(result.draft.thankYouMessage).toBe("");
 		expect(result.draft.images).toEqual([
 			{
@@ -173,5 +177,12 @@ describe("save draft mapping", () => {
 				sortOrder: 0,
 			}),
 		]);
+	});
+
+	it("round-trips a server subtitle into the controlled local field", () => {
+		expect(
+			serverDraftToLocalDraft(makeServerDraft({ subtitle: "Con cariño" })).draft
+				.subtitle,
+		).toBe("Con cariño");
 	});
 });

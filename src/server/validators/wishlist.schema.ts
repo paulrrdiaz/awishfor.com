@@ -13,6 +13,7 @@ import {
 	Locale,
 	WishlistStatus,
 } from "@/generated/prisma/enums";
+import { WISHLIST_SUBTITLE_MAX_LENGTH } from "@/lib/wishlist/subtitle";
 
 export const wishlistIdSchema = z.string().min(1, "Wishlist id is required");
 export const wishlistOwnerIdSchema = z
@@ -103,6 +104,10 @@ const optionalNullableDate = z.preprocess((value) => {
 }, z.coerce.date().nullable().optional());
 
 export const wishlistTitleSchema = requiredTrimmedString("Title", 120);
+export const wishlistSubtitleSchema = optionalNullableTrimmedString(
+	"Subtitle",
+	WISHLIST_SUBTITLE_MAX_LENGTH,
+);
 export const wishlistSlugSchema = z
 	.string()
 	.trim()
@@ -218,6 +223,7 @@ export const wishlistThankYouMessageVariantSchema = optionalNullableVariantId(
 
 const wishlistCreateUpdateShape = {
 	title: wishlistTitleSchema,
+	subtitle: wishlistSubtitleSchema,
 	slug: wishlistSlugSchema,
 	eventType: eventTypeSchema,
 	language: localeSchema.default(Locale.es),
@@ -251,6 +257,7 @@ export const updateWishlistSchema = z.object({
 	wishlistId: wishlistIdSchema,
 	ownerId: wishlistOwnerIdSchema.optional(),
 	title: wishlistTitleSchema.optional(),
+	subtitle: wishlistSubtitleSchema,
 	slug: wishlistSlugSchema.optional(),
 	eventType: eventTypeSchema.optional(),
 	language: localeSchema.optional(),
@@ -291,6 +298,7 @@ export const restoreWishlistSchema = z.object({
 export type CreateWishlistInput = {
 	ownerId: number;
 	title: string;
+	subtitle?: string | null;
 	slug: string;
 	eventType: EventType;
 	language?: Locale;
@@ -318,6 +326,7 @@ export type UpdateWishlistInput = {
 	wishlistId: string;
 	ownerId?: number;
 	title?: string;
+	subtitle?: string | null;
 	slug?: string;
 	eventType?: EventType;
 	language?: Locale;
@@ -352,6 +361,7 @@ export const updateWishlistSettingsSchema = z
 	.object({
 		id: wishlistIdSchema,
 		title: wishlistTitleSchema,
+		subtitle: wishlistSubtitleSchema,
 		slug: wishlistSlugSchema,
 		eventDate: optionalNullableDate,
 		eventTime: wishlistEventTimeSchema,

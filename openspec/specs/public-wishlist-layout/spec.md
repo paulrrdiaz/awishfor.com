@@ -106,13 +106,13 @@ The system SHALL provide a `PublicWishlistPage` component that takes a published
 
 ### Requirement: How-it-works drawer interaction
 
-When `showHowItWorks` is enabled, the public wishlist SHALL expose a “Cómo funciona” button in the shared hero CTA group. Activating it SHALL open a ShadCN/Vaul bottom drawer at every viewport width without changing the page URL or scroll position. The drawer SHALL be full-width on narrow screens, centered with a constrained width on wider screens, and SHALL include a drag handle, close control, accessible title and description, three numbered instruction rows, and a full-width `Entendido` close action.
+When `showHowItWorks` is enabled, the public wishlist SHALL expose a “Cómo funciona” button in the shared CTA group positioned with the welcome-message content rather than in the hero title block. Activating it SHALL open a ShadCN/Vaul bottom drawer at every viewport width without changing the page URL or scroll position. The drawer SHALL be full-width on narrow screens, centered with a constrained width on wider screens, and SHALL include a drag handle, close control, accessible title and description, three numbered instruction rows, and a full-width `Entendido` close action.
 
 The drawer SHALL be dismissible through its close control, `Entendido` action, Escape key, backdrop interaction, and downward swipe. Focus SHALL move into the modal interaction while open and return to the triggering “Cómo funciona” button after dismissal.
 
 #### Scenario: Hero control opens the drawer
 
-- **WHEN** a guest activates the “Cómo funciona” button
+- **WHEN** a guest activates the “Cómo funciona” button beside the welcome-message content
 - **THEN** a bottom drawer opens over the current wishlist without hash navigation or page scrolling
 
 #### Scenario: Drawer presents the approved guest steps
@@ -151,36 +151,38 @@ The how-it-works drawer portal SHALL mount within the `.public-theme` instance t
 
 ### Requirement: Required section order
 
-The system SHALL render the public page sections in this order: hero, event details, countdown, welcome message, RSVP, gift list, thank-you message, footer. The RSVP section SHALL be present only on a personalized render (one carrying guest context) and SHALL be absent otherwise. Sections whose backing data is absent SHALL be omitted, preserving the relative order of the remaining sections. How-it-works guidance SHALL be drawer content opened from the hero and SHALL NOT occupy an inline position in the document section order.
+The system SHALL render the public page sections in this order: hero, event details, countdown, welcome-message content, shared CTA group, RSVP, gift list, thank-you message, footer. Layout-specific composition MAY colocate the countdown with the welcome-message content; in that case the shared CTA group SHALL follow both. The RSVP section SHALL be present only on a personalized render (one carrying guest context) and SHALL be absent otherwise. Sections whose backing data is absent SHALL be omitted, preserving the relative order of the remaining sections. How-it-works guidance SHALL be drawer content opened from the shared CTA group and SHALL NOT occupy an inline position in the document section order.
 
 #### Scenario: All inline sections render in order
 
 - **WHEN** a wishlist has hero, event details, event date, welcome message, gifts, and a thank-you message
-- **THEN** the inline sections appear in the required order from hero through footer without a how-it-works section between gifts and thank-you content
+- **THEN** the inline sections appear in the required order from hero through footer
+- **AND** the shared CTA group appears after the welcome-message content and any countdown colocated with it
+- **AND** no how-it-works section appears between gifts and thank-you content
 
 #### Scenario: Personalized render places RSVP directly before the gift list
 
-- **WHEN** a wishlist renders with guest context
-- **THEN** the RSVP section appears after the welcome message and immediately before the gift list section
+- **WHEN** the public wishlist view model carries guest context
+- **THEN** the RSVP section renders after the shared CTA group and immediately before the gift list
 
 #### Scenario: Plain render omits the RSVP section
 
-- **WHEN** a wishlist renders without guest context
-- **THEN** no RSVP section is rendered and the remaining sections keep their order
+- **WHEN** the public wishlist view model has no guest context
+- **THEN** no RSVP section renders and the gift list follows the shared CTA group
 
 #### Scenario: Optional sections omitted when data absent
 
-- **WHEN** a wishlist has no event date and no welcome message
-- **THEN** the countdown and welcome-message sections are omitted and the remaining sections keep their order
+- **WHEN** a wishlist has no event date
+- **THEN** the countdown is omitted and the remaining sections keep their order
 
 #### Scenario: How it works respects its toggle
 
 - **WHEN** a wishlist has `showHowItWorks` set to false
-- **THEN** neither the “Cómo funciona” hero control nor how-it-works drawer content is rendered
+- **THEN** the shared CTA group omits the “Cómo funciona” control and no how-it-works drawer content is rendered
 
 ### Requirement: Layout variants
 
-The system SHALL provide nine layout variants selected by the resolved `layoutId`: `carousel-hero`, `scrapbook-polaroids`, `portrait-frame-split`, `arch-hero-party`, `arch-trio`, `overlap-duo`, `split-image-right`, `collage-staggered`, and `magazine-editorial`. Every variant SHALL compose the shared section components, shared hero CTA behavior, and optional how-it-works drawer, and SHALL honor the required section order, render modes, and purchased-gift rules.
+The system SHALL provide nine layout variants selected by the resolved `layoutId`: `carousel-hero`, `scrapbook-polaroids`, `portrait-frame-split`, `arch-hero-party`, `arch-trio`, `overlap-duo`, `split-image-right`, `collage-staggered`, and `magazine-editorial`. Every variant SHALL compose the shared section components, shared CTA behavior, and optional how-it-works drawer, and SHALL honor the required section order, render modes, and purchased-gift rules.
 
 Variants exist in two generations while the layouts migrate. Variants that own their full page composition — currently `collage-staggered`, `split-image-right`, and `arch-trio` — SHALL compose a single shared page shell for their chrome rather than each inlining it, and SHALL be identified by one shared declaration rather than by per-layout conditionals scattered through the page shell. Variants not yet migrated SHALL continue to render through the shared public wishlist body.
 
@@ -193,8 +195,9 @@ The shared shell SHALL own the mode-dependent outer wrapper, the page header (br
 
 #### Scenario: Every layout composes the shared drawer trigger
 
-- **WHEN** any of the nine layout variants renders a non-compact wishlist with `showHowItWorks` enabled
-- **THEN** its shared hero CTA group exposes the same “Cómo funciona” drawer interaction without an inline how-it-works section
+- **WHEN** any of the nine layout variants renders a non-compact wishlist
+- **THEN** `Ver regalos disponibles` appears after the welcome-message content and any countdown colocated with it rather than in the hero title block
+- **AND** `Cómo funciona` appears in the same group when enabled
 
 #### Scenario: Retired layout ids fall back
 
@@ -397,22 +400,28 @@ The `split-image-right` layout SHALL declare `heroImageSlots` of 2 and SHALL NOT
 
 ### Requirement: Hero shows the wishlist title alone
 
-Every layout's hero composition SHALL present the wishlist's `title` as its heading and SHALL NOT render a second heading or a duplicate name line beneath it. A layout MAY render a single muted event summary line under the title, combining the host name and formatted event date (date only, no time), when its design calls for one; event location, event time and dress code SHALL reach the guest only through the event-details section, not the hero summary line.
+Every layout's hero composition SHALL present the wishlist's `title` as its only heading and MAY render the wishlist's optional `subtitle` as supporting text directly beneath it. The subtitle SHALL NOT be marked up as a second heading or repeat the wishlist name. When the subtitle is null or empty, the hero SHALL omit the subtitle element and its reserved spacing. A layout MAY additionally render a single muted event summary line under the title block, combining the host name and formatted event date (date only, no time), when its design calls for one; event location, event time and dress code SHALL reach the guest only through the event-details section, not the hero summary line.
 
 #### Scenario: Hero renders the title
 
-- **WHEN** any layout variant renders a wishlist
+- **WHEN** any layout variant renders a wishlist with a subtitle in full, preview, or compact mode
 - **THEN** the hero heading is the wishlist's `title`
+- **AND** the subtitle renders as supporting text directly beneath the heading
 
 #### Scenario: No second heading under the hero title
 
-- **WHEN** any layout variant renders a wishlist
-- **THEN** no second heading or duplicate name line renders beneath the hero title
+- **WHEN** a layout renders a subtitle
+- **THEN** the subtitle is not a heading and does not duplicate the wishlist title
+
+#### Scenario: Missing subtitle leaves no gap
+
+- **WHEN** any layout variant renders a wishlist without a subtitle
+- **THEN** no subtitle element or subtitle-specific spacing is rendered
 
 #### Scenario: Summary line permitted where the design calls for one
 
 - **WHEN** a layout whose design includes a summary line, such as `collage-staggered` or `split-image-right`, renders a wishlist that has a host name and event date
-- **THEN** a single muted line combining the host name and date (no time, no location) renders beneath the title, and the date still appears in the event-details section alongside location, time and dress code
+- **THEN** a single muted line combining the host name and date (no time, no location) renders beneath the title block, and the date still appears in the event-details section alongside location, time and dress code
 
 ### Requirement: Standalone wishlist branded footer
 
@@ -618,4 +627,3 @@ This allocation SHALL apply to `arch-trio` and `collage-staggered` in full, prev
 
 - **WHEN** the same ordered image collection renders in full, preview, or compact mode
 - **THEN** each mode assigns the same images to the two primary static frames and the carousel
-

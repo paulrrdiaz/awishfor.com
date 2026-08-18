@@ -117,6 +117,7 @@ export const wishlistRouter = createTRPCRouter({
 				id: wishlist.id,
 				slug: wishlist.slug,
 				title: wishlist.title,
+				subtitle: wishlist.subtitle,
 				eventType: wishlist.eventType,
 				language: wishlist.language,
 				currency: wishlist.currency,
@@ -415,6 +416,7 @@ export const wishlistRouter = createTRPCRouter({
 					where: { id: existing.id },
 					data: {
 						title: input.title,
+						subtitle: input.subtitle ?? null,
 						slug: input.slug,
 						eventDate: input.eventDate ?? null,
 						eventTime: input.eventTime ?? null,

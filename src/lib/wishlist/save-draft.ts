@@ -17,6 +17,7 @@ export const draftToSaveDraftInput = (
 	metadata: SaveDraftMetadata = {},
 ): SaveDraftWishlistInput => ({
 	title: draft.title,
+	subtitle: draft.subtitle,
 	slug: draft.slug,
 	eventType: draft.eventType ?? "general",
 	language: "es",
@@ -69,6 +70,7 @@ export const serverDraftToLocalDraft = (
 	draft: {
 		eventType: serverDraft.eventType,
 		title: serverDraft.title,
+		subtitle: serverDraft.subtitle ?? "",
 		slug: serverDraft.slug,
 		eventDate: serverDraft.eventDate ?? null,
 		eventTime: serverDraft.eventTime ?? null,

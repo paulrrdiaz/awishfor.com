@@ -79,6 +79,7 @@ model Wishlist {
   invites         Invite[]
   images          WishlistImage[]
   title           String
+  subtitle        String?
   slug            String         @unique
   eventType       EventType
   language        Locale         @default(es)

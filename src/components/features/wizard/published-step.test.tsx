@@ -70,6 +70,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	showHowItWorks: true,
 	gifts: [],
 	...overrides,
+	subtitle: overrides.subtitle ?? "Celebremos juntos",
 });
 
 type PublishSuccessMetadata = {

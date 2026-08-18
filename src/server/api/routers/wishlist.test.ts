@@ -73,6 +73,7 @@ function makeStoredWishlist(overrides: Record<string, unknown> = {}) {
 		ownerId: 42,
 		slug: "lista-de-boda",
 		title: "Lista de boda",
+		subtitle: "Celebramos juntos",
 		eventType: "wedding",
 		language: "es",
 		currency: "PEN",
@@ -354,6 +355,7 @@ describe("wishlistRouter.getById", () => {
 		expect(result).toMatchObject({
 			id: "wishlist_123",
 			slug: "lista-de-boda",
+			subtitle: "Celebramos juntos",
 			welcomeMessageAttribution: "Lucía y Marco",
 			themeId: "cielo-suave",
 			layoutId: "magazine-editorial",
@@ -408,6 +410,89 @@ describe("wishlistRouter.updateSettings", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		authMock.mockResolvedValue({ userId: "clerk_123" });
+	});
+
+	it("persists a subtitle for the owner and revalidates the public page", async () => {
+		const wishlistUpdate = vi.fn().mockResolvedValue({
+			id: "wishlist_123",
+			slug: "lista-de-boda",
+			updatedAt: now,
+		});
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "lista-de-boda",
+				eventType: "wedding",
+			}),
+			wishlistUpdate,
+		});
+
+		await makeCaller(db).updateSettings({
+			id: "wishlist_123",
+			title: "Lista de boda",
+			subtitle: "Celebramos juntos",
+			slug: "lista-de-boda",
+			language: "es",
+			currency: "PEN",
+			showHowItWorks: true,
+		});
+
+		expect(wishlistUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({ subtitle: "Celebramos juntos" }),
+			}),
+		);
+		expect(revalidatePathMock).toHaveBeenCalledWith("/w/lista-de-boda");
+	});
+
+	it("normalizes a cleared subtitle to null", async () => {
+		const wishlistUpdate = vi.fn().mockResolvedValue({
+			id: "wishlist_123",
+			slug: "lista-de-boda",
+			updatedAt: now,
+		});
+		const db = makeWishlistDb({
+			wishlistFindFirst: vi.fn().mockResolvedValue({
+				id: "wishlist_123",
+				slug: "lista-de-boda",
+				eventType: "wedding",
+			}),
+			wishlistUpdate,
+		});
+
+		await makeCaller(db).updateSettings({
+			id: "wishlist_123",
+			title: "Lista de boda",
+			subtitle: "   ",
+			slug: "lista-de-boda",
+			language: "es",
+			currency: "PEN",
+			showHowItWorks: true,
+		});
+
+		expect(wishlistUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({ subtitle: null }),
+			}),
+		);
+	});
+
+	it("rejects a subtitle longer than 160 characters before persistence", async () => {
+		const wishlistUpdate = vi.fn();
+		const db = makeWishlistDb({ wishlistUpdate });
+
+		await expect(
+			makeCaller(db).updateSettings({
+				id: "wishlist_123",
+				title: "Lista de boda",
+				subtitle: "a".repeat(161),
+				slug: "lista-de-boda",
+				language: "es",
+				currency: "PEN",
+				showHowItWorks: true,
+			}),
+		).rejects.toThrow("Subtitle must be at most 160 characters");
+		expect(wishlistUpdate).not.toHaveBeenCalled();
 	});
 
 	it("persists the welcome message attribution for the owner", async () => {

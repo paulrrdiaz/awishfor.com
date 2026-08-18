@@ -35,6 +35,7 @@ export async function seedBirthdayWishlist(db: SeedClient, ownerId: number) {
 		ownerId,
 		makeWishlist({
 			title: "Cumpleaños de Paula",
+			subtitle: null,
 			slug: "cumpleanos-de-paula-2026",
 			eventType: "birthday",
 			currency: "PEN",
@@ -254,6 +255,7 @@ export async function seedBabyShowerWishlist(db: SeedClient, ownerId: number) {
 		ownerId,
 		makeWishlist({
 			title: "Baby Shower de Ana",
+			subtitle: null,
 			slug: "baby-shower-de-ana-2026",
 			eventType: "baby_shower",
 			currency: "USD",
@@ -465,6 +467,7 @@ export async function seedWeddingWishlist(db: SeedClient, ownerId: number) {
 		ownerId,
 		makeWishlist({
 			title: "Nuestra Boda 2026",
+			subtitle: null,
 			slug: "boda-2026",
 			eventType: "wedding",
 			currency: "PEN",

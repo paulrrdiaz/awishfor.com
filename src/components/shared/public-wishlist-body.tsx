@@ -6,6 +6,7 @@ import { DeliveryCard } from "@/components/shared/delivery-card";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
 import { GiftListBand } from "@/components/shared/gift-list-band";
+import { HeroCtas } from "@/components/shared/hero-ctas";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { ProgressSummary } from "@/components/shared/progress-summary";
 import { WishlistMessage } from "@/components/shared/wishlist-message";
@@ -84,6 +85,12 @@ export function PublicWishlistBody({
 					message={wishlist.welcomeMessage}
 					variant={wishlist.welcomeMessageVariant}
 				/>
+			)}
+
+			{!isCompact && (
+				<div className="mx-auto w-full max-w-4xl px-6 pb-10 text-center">
+					<HeroCtas showHowItWorks={wishlist.showHowItWorks} />
+				</div>
 			)}
 
 			{rsvpSection}

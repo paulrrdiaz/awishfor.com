@@ -54,6 +54,7 @@ function makePersistedWishlist(
 			},
 		],
 		...overrides,
+		subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 	};
 }
 
@@ -63,6 +64,7 @@ describe("persistedWishlistToPreviewDraft", () => {
 
 		expect(draft).toMatchObject({
 			title: "Lista de Ana y Luis",
+			subtitle: "",
 			slug: "ana-y-luis",
 			eventType: "wedding",
 			categories: ["Hogar", "Cocina"],
@@ -78,6 +80,14 @@ describe("persistedWishlistToPreviewDraft", () => {
 			publicNote: "",
 			internalNote: "",
 		});
+	});
+
+	it("preserves a stored subtitle for dashboard preview", () => {
+		expect(
+			persistedWishlistToPreviewDraft(
+				makePersistedWishlist({ subtitle: "Nuestra fecha más esperada" }),
+			).subtitle,
+		).toBe("Nuestra fecha más esperada");
 	});
 
 	it("applies pending design values without mutating persisted content", () => {

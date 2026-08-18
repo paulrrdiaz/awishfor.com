@@ -8,6 +8,7 @@ const makeInput = (
 	overrides: Partial<SaveDraftWishlistInput> = {},
 ): SaveDraftWishlistInput => ({
 	title: "Lista de boda",
+	subtitle: "Celebremos juntos",
 	slug: "lista-de-boda",
 	eventType: "wedding",
 	language: "es",
@@ -54,6 +55,7 @@ describe("saveDraftWishlistSchema", () => {
 			makeInput({
 				language: undefined,
 				currency: undefined,
+				subtitle: "   ",
 				welcomeMessage: "",
 				thankYouMessage: "",
 				eventDate: null,
@@ -84,6 +86,7 @@ describe("saveDraftWishlistSchema", () => {
 		expect(result.language).toBe("es");
 		expect(result.currency).toBe("PEN");
 		expect(result.force).toBe(false);
+		expect(result.subtitle).toBeNull();
 		expect(result.welcomeMessage).toBeNull();
 		expect(result.thankYouMessage).toBeNull();
 		expect(result.eventDate).toBeNull();

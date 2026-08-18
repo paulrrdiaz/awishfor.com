@@ -66,6 +66,7 @@ export type PublicWishlistViewModel = {
 	id: string;
 	slug: string;
 	title: string;
+	subtitle: string | null;
 	eventType: string;
 	language: string;
 	currency: string;
@@ -151,6 +152,7 @@ export type DashboardWishlistSummaryViewModel = {
 	id: string;
 	slug: string;
 	title: string;
+	subtitle: string | null;
 	eventType: string;
 	status: string;
 	eventDate: string | null;
@@ -165,6 +167,7 @@ export type DashboardWishlistOverviewViewModel = {
 	id: string;
 	slug: string;
 	title: string;
+	subtitle: string | null;
 	eventType: string;
 	language: string;
 	status: string;
@@ -211,6 +214,7 @@ export type DashboardWishlistCardViewModel = {
 	id: string;
 	slug: string;
 	title: string;
+	subtitle: string | null;
 	eventType: string;
 	language: string;
 	currency: string;

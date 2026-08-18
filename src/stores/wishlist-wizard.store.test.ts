@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import {
 	createWishlistWizardStore,
+	DEFAULT_WISHLIST_SUBTITLE,
 	migratePersistedWishlistWizardState,
 } from "./wishlist-wizard.store";
 
@@ -10,6 +11,51 @@ function makeStore() {
 }
 
 describe("wishlist-wizard store", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	describe("subtitle", () => {
+		it("seeds new and reset drafts with the generic subtitle", () => {
+			const store = makeStore();
+			expect(store.getState().draft.subtitle).toBe(DEFAULT_WISHLIST_SUBTITLE);
+
+			store.getState().setField("subtitle", "Una celebración muy nuestra");
+			store.getState().reset();
+
+			expect(store.getState().draft.subtitle).toBe(DEFAULT_WISHLIST_SUBTITLE);
+		});
+
+		it("supports direct editing and clearing", () => {
+			const store = makeStore();
+			store.getState().setField("subtitle", "Una celebración muy nuestra");
+			expect(store.getState().draft.subtitle).toBe(
+				"Una celebración muy nuestra",
+			);
+
+			store.getState().setField("subtitle", "");
+			expect(store.getState().draft.subtitle).toBe("");
+		});
+
+		it("persists the edited subtitle across rehydration", async () => {
+			const values = new Map<string, string>();
+			const storage = {
+				getItem: (key: string) => values.get(key) ?? null,
+				setItem: (key: string, value: string) => values.set(key, value),
+				removeItem: (key: string) => values.delete(key),
+			};
+			vi.stubGlobal("window", { localStorage: storage });
+			vi.stubGlobal("localStorage", storage);
+
+			const firstStore = makeStore();
+			firstStore.getState().setField("subtitle", "Persistido");
+			const reloadedStore = makeStore();
+			await reloadedStore.persist.rehydrate();
+
+			expect(reloadedStore.getState().draft.subtitle).toBe("Persistido");
+		});
+	});
+
 	describe("setEventType", () => {
 		it("seeds default categories and design from preset", () => {
 			const store = makeStore();
@@ -197,6 +243,7 @@ describe("wishlist-wizard store", () => {
 			} = store.getState();
 			expect(draft.eventType).toBeNull();
 			expect(draft.title).toBe("");
+			expect(draft.subtitle).toBe(DEFAULT_WISHLIST_SUBTITLE);
 			expect(draft.slug).toBe("");
 			expect(draft.gifts).toEqual([]);
 			expect(copyTouched.welcomeMessage).toBe(false);
@@ -243,6 +290,7 @@ describe("wishlist-wizard store", () => {
 				{
 					eventType: "wedding",
 					title: "Versión del dashboard",
+					subtitle: "Celebramos juntos",
 					slug: "version-dashboard",
 					eventDate: "2026-12-24",
 					eventTime: "18:30",
@@ -684,6 +732,7 @@ describe("wishlist-wizard store", () => {
 			const currentState = {
 				draft: {
 					title: "Lista actual",
+					subtitle: "Una celebración actual",
 					images: [
 						{
 							url: "https://example.com/a.jpg",
@@ -698,9 +747,30 @@ describe("wishlist-wizard store", () => {
 				updatedAt: 456,
 			};
 
-			const migrated = migratePersistedWishlistWizardState(currentState, 2);
+			const migrated = migratePersistedWishlistWizardState(currentState, 3);
 
 			expect(migrated).toBe(currentState);
+		});
+
+		it("migrates a v2 draft to an empty subtitle without changing other state", () => {
+			const previousState = {
+				draft: {
+					title: "Lista existente",
+					slug: "lista-existente",
+					welcomeMessage: "Bienvenidos",
+					categories: ["Hogar"],
+				},
+				updatedAt: 456,
+			};
+
+			const migrated = migratePersistedWishlistWizardState(previousState, 2);
+
+			expect(migrated.draft.subtitle).toBe("");
+			expect(migrated.draft.title).toBe("Lista existente");
+			expect(migrated.draft.slug).toBe("lista-existente");
+			expect(migrated.draft.welcomeMessage).toBe("Bienvenidos");
+			expect(migrated.draft.categories).toEqual(["Hogar"]);
+			expect(migrated.updatedAt).toBe(456);
 		});
 
 		it("rehydrates a pre-change (v1) draft without throwing, dropping removed fields", () => {
@@ -749,6 +819,7 @@ describe("wishlist-wizard store", () => {
 			expect(migrated.draft).not.toHaveProperty("coverImageUrl");
 			expect(migrated.draft).not.toHaveProperty("coverImageUrls");
 			expect(migrated.draft.title).toBe("Lista de boda");
+			expect(migrated.draft.subtitle).toBe("");
 			expect(migrated.draft.images).toEqual([]);
 			expect(migrated.draft.headingFont).toBe("lora");
 			expect(migrated.draft.bodyFont).toBe("inter");

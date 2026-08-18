@@ -128,14 +128,13 @@ export function ArchTrioLayout({
 						<p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.2em]">
 							{eventLabel}
 						</p>
-						<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
+						<h1 className="font-heading font-semibold text-4xl leading-none sm:text-7xl">
 							{heading}
 						</h1>
-						{!isCompact && (
-							<HeroCtas
-								className="justify-center lg:justify-start"
-								showHowItWorks={wishlist.showHowItWorks}
-							/>
+						{wishlist.subtitle && (
+							<p className="max-w-2xl text-muted-foreground text-sm leading-relaxed sm:text-base">
+								{wishlist.subtitle}
+							</p>
 						)}
 					</div>
 				</div>
@@ -167,7 +166,7 @@ export function ArchTrioLayout({
 								delivery={delivery}
 							/>
 						</div>
-						<div className="min-w-0 flex-1">
+						<div className="min-w-0 flex-1 space-y-4">
 							<WishlistMessage
 								attribution={wishlist.welcomeMessageAttribution}
 								className="border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
@@ -179,6 +178,12 @@ export function ArchTrioLayout({
 									createdAt={wishlist.createdAt}
 									eventDate={wishlist.eventDate}
 									variant={wishlist.countdownVariant}
+								/>
+							)}
+							{!isCompact && (
+								<HeroCtas
+									className="w-full"
+									showHowItWorks={wishlist.showHowItWorks}
 								/>
 							)}
 						</div>

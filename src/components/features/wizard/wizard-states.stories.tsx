@@ -153,6 +153,7 @@ export const Gifts: Story = {
 const READY_DRAFT: WishlistDraft = {
 	eventType: EventType.baby_shower,
 	title: "Baby shower de Emilia",
+	subtitle: "Una lista creada con cariño para celebrar juntos.",
 	slug: "baby-shower-emilia",
 	eventDate: "2026-09-12",
 	eventTime: "16:00",

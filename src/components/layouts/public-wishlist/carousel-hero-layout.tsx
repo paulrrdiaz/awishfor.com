@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroCarouselGallery } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -46,15 +45,15 @@ export function CarouselHeroLayout({
 					<h1 className="mt-4 font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
+					{wishlist.subtitle && (
+						<p className="mt-3 max-w-2xl text-sm text-white/85 leading-relaxed sm:text-base">
+							{wishlist.subtitle}
+						</p>
+					)}
 					{imageCount < 2 && (
 						<p className="mt-3 font-mono text-[11px] opacity-70">
 							El carrusel aparece al subir 2+ fotos
 						</p>
-					)}
-					{!isCompact && (
-						<div className="mt-6">
-							<HeroCtas showHowItWorks={wishlist.showHowItWorks} />
-						</div>
 					)}
 				</div>
 			</header>

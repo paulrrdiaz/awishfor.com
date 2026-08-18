@@ -183,6 +183,7 @@ const sortDraftGifts = (gifts: SaveDraftGiftInput[]) =>
 
 const wishlistDraftToData = (input: SaveDraftDraftContent) => ({
 	title: input.title,
+	subtitle: input.subtitle ?? null,
 	slug: input.slug,
 	eventType: input.eventType,
 	language: input.language ?? Locale.es,
@@ -212,6 +213,7 @@ const mapServerDraft = (
 	wishlist: DraftWishlistRecord,
 ): SaveDraftServerDraft => ({
 	title: wishlist.title,
+	subtitle: wishlist.subtitle,
 	slug: wishlist.slug,
 	eventType: wishlist.eventType,
 	language: wishlist.language,
@@ -387,6 +389,7 @@ export const createWishlist = async (
 				},
 			},
 			title: input.title,
+			subtitle: input.subtitle ?? null,
 			slug: input.slug,
 			eventType: input.eventType,
 			language: input.language ?? Locale.es,

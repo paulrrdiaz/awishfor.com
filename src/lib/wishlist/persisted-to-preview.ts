@@ -12,6 +12,7 @@ export type PersistedWishlistDesign = Pick<
 export type PersistedWishlistPreviewSource = {
 	eventType: WishlistDraft["eventType"];
 	title: string;
+	subtitle: string | null;
 	slug: string;
 	eventDate: string | null;
 	eventTime: string | null;
@@ -70,6 +71,7 @@ export function persistedWishlistToPreviewDraft(
 	return {
 		eventType: wishlist.eventType,
 		title: wishlist.title,
+		subtitle: wishlist.subtitle ?? "",
 		slug: wishlist.slug,
 		eventDate: wishlist.eventDate,
 		eventTime: wishlist.eventTime,

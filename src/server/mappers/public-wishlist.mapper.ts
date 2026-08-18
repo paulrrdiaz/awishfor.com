@@ -142,6 +142,7 @@ export function mapPublicWishlist(
 		id: wishlist.id,
 		slug: wishlist.slug,
 		title: wishlist.title,
+		subtitle: wishlist.subtitle,
 		eventType: wishlist.eventType,
 		language: wishlist.language,
 		currency: wishlist.currency,

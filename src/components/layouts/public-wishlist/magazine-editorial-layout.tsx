@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { HeroCtas } from "@/components/shared/hero-ctas";
 import { SampleImageMarker } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -50,16 +49,13 @@ export function MagazineEditorialLayout({
 						<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 							{heading}
 						</h1>
+						{wishlist.subtitle && (
+							<p className="mt-2 max-w-2xl text-muted-foreground text-sm leading-relaxed sm:text-base">
+								{wishlist.subtitle}
+							</p>
+						)}
 					</div>
 				</div>
-				{!isCompact && (
-					<div className="mt-6">
-						<HeroCtas
-							className="justify-start"
-							showHowItWorks={wishlist.showHowItWorks}
-						/>
-					</div>
-				)}
 				{stripImages.length > 0 && (
 					<div className="mt-6 grid grid-cols-3 gap-2 pb-8 sm:grid-cols-5">
 						{stripImages.map((image, index) => (

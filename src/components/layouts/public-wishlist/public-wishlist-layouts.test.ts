@@ -23,11 +23,47 @@ const routePath = (...segments: string[]) =>
 	resolve(import.meta.dirname, "../../../app/w", ...segments);
 
 describe("public wishlist drawer integration", () => {
-	it("passes the enabled setting through every non-compact hero CTA", async () => {
-		for (const file of LAYOUT_FILES) {
+	it("renders shared-body CTAs once after the welcome message", async () => {
+		const bodySource = await readFile(
+			sharedPath("public-wishlist-body.tsx"),
+			"utf8",
+		);
+		expect(bodySource.match(/<HeroCtas/g)).toHaveLength(1);
+		expect(bodySource.indexOf("<WishlistMessage")).toBeLessThan(
+			bodySource.indexOf("<HeroCtas"),
+		);
+		expect(bodySource).toContain("showHowItWorks={wishlist.showHowItWorks}");
+
+		for (const file of [
+			"carousel-hero-layout.tsx",
+			"scrapbook-polaroids-layout.tsx",
+			"portrait-frame-split-layout.tsx",
+			"arch-hero-party-layout.tsx",
+			"overlap-duo-layout.tsx",
+			"magazine-editorial-layout.tsx",
+		]) {
 			const source = await readFile(layoutPath(file), "utf8");
+			expect(source).not.toContain("HeroCtas");
+		}
+	});
+
+	it("keeps one non-compact CTA group in every self-contained layout", async () => {
+		for (const file of [
+			"arch-trio-layout.tsx",
+			"split-image-right-layout.tsx",
+			"collage-staggered-layout.tsx",
+		]) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source.match(/<HeroCtas/g), file).toHaveLength(1);
 			expect(source).toContain("showHowItWorks={wishlist.showHowItWorks}");
 			expect(source).toContain('mode === "compact"');
+		}
+	});
+
+	it("renders the optional subtitle in every layout", async () => {
+		for (const file of LAYOUT_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source).toContain("wishlist.subtitle");
 		}
 	});
 
@@ -37,7 +73,7 @@ describe("public wishlist drawer integration", () => {
 			"utf8",
 		);
 
-		expect(source).not.toContain("HowItWorks");
+		expect(source).not.toContain("HowItWorksDrawer");
 		expect(source).not.toContain("como-funciona");
 	});
 });

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { PublicWishlistBody } from "@/components/shared/public-wishlist-body";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
@@ -56,11 +55,10 @@ export function OverlapDuoLayout({
 					<h1 className="font-heading font-semibold text-4xl leading-tight sm:text-5xl">
 						{heading}
 					</h1>
-					{!isCompact && (
-						<HeroCtas
-							className="justify-start"
-							showHowItWorks={wishlist.showHowItWorks}
-						/>
+					{wishlist.subtitle && (
+						<p className="max-w-2xl text-muted-foreground text-sm leading-relaxed sm:text-base">
+							{wishlist.subtitle}
+						</p>
 					)}
 				</div>
 			</header>

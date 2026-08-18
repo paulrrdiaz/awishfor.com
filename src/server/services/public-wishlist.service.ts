@@ -83,6 +83,7 @@ async function loadPublicSnapshot(
 			id: true,
 			slug: true,
 			title: true,
+			subtitle: true,
 			eventType: true,
 			language: true,
 			currency: true,

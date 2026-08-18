@@ -70,6 +70,7 @@ function fixture({
 		id: `audit-${slug}`,
 		slug,
 		title,
+		subtitle: null,
 		eventType: "wedding",
 		language: "es",
 		currency: "PEN",

@@ -31,6 +31,7 @@ function makeDraft(overrides: Partial<WishlistDraft> = {}): WishlistDraft {
 		showHowItWorks: true,
 		gifts: [],
 		...overrides,
+		subtitle: overrides.subtitle ?? "Una celebración especial",
 	};
 }
 
@@ -149,11 +150,16 @@ describe("draftToPreview", () => {
 			const draft = makeDraft();
 			const vm = draftToPreview(draft);
 			expect(vm.title).toBe("Baby shower de Ana");
+			expect(vm.subtitle).toBe("Una celebración especial");
 			expect(vm.slug).toBe("baby-shower-de-ana");
 			expect(vm.themeId).toBe("cielo-suave");
 			expect(vm.layoutId).toBe("magazine-editorial");
 			expect(vm.buttonStyle).toBe("rounded");
 			expect(vm.showHowItWorks).toBe(true);
+		});
+
+		it("omits a cleared subtitle without adding fallback copy", () => {
+			expect(draftToPreview(makeDraft({ subtitle: "" })).subtitle).toBeNull();
 		});
 
 		it("never includes delivery details, since the wizard does not collect them", () => {

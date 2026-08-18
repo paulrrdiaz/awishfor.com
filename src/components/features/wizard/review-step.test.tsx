@@ -150,6 +150,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 		},
 	],
 	...overrides,
+	subtitle: overrides.subtitle ?? "Celebremos juntos",
 });
 
 const renderStep = ({

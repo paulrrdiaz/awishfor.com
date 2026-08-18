@@ -5,7 +5,26 @@ import {
 	updateWishlistSettingsSchema,
 	wishlistCoverImagesSchema,
 	wishlistRestoreTargetStatusSchema,
+	wishlistSubtitleSchema,
 } from "@/server/validators/wishlist.schema";
+
+describe("wishlist subtitle validation", () => {
+	it("accepts, trims, and normalizes optional subtitle values", () => {
+		expect(wishlistSubtitleSchema.parse("  Celebramos juntos  ")).toBe(
+			"Celebramos juntos",
+		);
+		expect(wishlistSubtitleSchema.parse("   ")).toBeNull();
+		expect(wishlistSubtitleSchema.parse(null)).toBeNull();
+		expect(wishlistSubtitleSchema.parse(undefined)).toBeUndefined();
+	});
+
+	it("accepts 160 characters and rejects 161", () => {
+		expect(wishlistSubtitleSchema.parse("a".repeat(160))).toHaveLength(160);
+		expect(() => wishlistSubtitleSchema.parse("a".repeat(161))).toThrow(
+			"Subtitle must be at most 160 characters",
+		);
+	});
+});
 
 describe("wishlist creation validation", () => {
 	it("requires an owner and applies language, currency, and how-it-works defaults", () => {

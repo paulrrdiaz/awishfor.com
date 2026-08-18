@@ -55,6 +55,7 @@ const createWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	createdAt: new Date("2026-06-25T00:00:00.000Z"),
 	updatedAt: new Date("2026-06-25T00:00:00.000Z"),
 	...overrides,
+	subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 });
 
 const createCategoryRecord = (overrides: Partial<Category> = {}): Category => ({

@@ -52,6 +52,7 @@ function makeWishlist(
 		updatedAt: now,
 		...overrides,
 		images: [],
+		subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 	};
 }
 
@@ -110,6 +111,23 @@ function makeCategory(overrides: Partial<Category> = {}): Category {
 }
 
 describe("mapPublicWishlist", () => {
+	it("preserves present and absent subtitles", () => {
+		expect(
+			mapPublicWishlist({
+				...makeWishlist({ subtitle: "Celebramos el amor" }),
+				categories: [],
+				gifts: [],
+			}).subtitle,
+		).toBe("Celebramos el amor");
+		expect(
+			mapPublicWishlist({
+				...makeWishlist(),
+				categories: [],
+				gifts: [],
+			}).subtitle,
+		).toBeNull();
+	});
+
 	it("includes the welcome message attribution", () => {
 		const result = mapPublicWishlist({
 			...makeWishlist({ welcomeMessageAttribution: "Lucía y Marco" }),

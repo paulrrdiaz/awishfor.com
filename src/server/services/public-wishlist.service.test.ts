@@ -123,6 +123,7 @@ const makeWishlist = (overrides: Partial<MockRow> = {}): MockRow => ({
 	images: [],
 	owner: { clerkId: "clerk_owner" },
 	...overrides,
+	subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 });
 
 const makeDb = (row: MockRow | null): PublicWishlistDatabase => ({
@@ -152,6 +153,7 @@ describe("getPublicWishlistBySlug", () => {
 		expect(args?.select?.categories).toEqual({
 			select: { id: true, name: true, sortOrder: true },
 		});
+		expect(args?.select?.subtitle).toBe(true);
 		expect(args?.select?.gifts).toMatchObject({
 			select: { purchases: { select: { guestName: true, quantity: true } } },
 		});
@@ -159,12 +161,20 @@ describe("getPublicWishlistBySlug", () => {
 		expect(JSON.stringify(args)).not.toContain("internalNote");
 	});
 	it("returns published result for a published wishlist", async () => {
-		const db = makeDb(makeWishlist({ status: WishlistStatus.published }));
+		const db = makeDb(
+			makeWishlist({
+				status: WishlistStatus.published,
+				subtitle: "Celebramos juntos",
+			}),
+		);
 		const result = await getPublicWishlistBySlug(db, {
 			slug: "mi-lista",
 			viewerClerkId: null,
 		});
 		expect(result.kind).toBe("published");
+		if (result.kind === "published") {
+			expect(result.wishlist.subtitle).toBe("Celebramos juntos");
+		}
 	});
 
 	it("reuses a tagged published presentation across anonymous requests", async () => {

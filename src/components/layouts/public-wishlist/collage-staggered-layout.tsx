@@ -99,6 +99,11 @@ export function CollageStaggeredLayout({
 					<h1 className="mt-2 px-5 font-heading font-semibold text-[34px] leading-[1.1] sm:text-[42px]">
 						{heading}
 					</h1>
+					{wishlist.subtitle && (
+						<p className="mx-auto mt-2 max-w-2xl px-5 text-muted-foreground text-sm leading-relaxed">
+							{wishlist.subtitle}
+						</p>
+					)}
 					{eventSummary && (
 						<p className="mt-1.5 px-5 text-[13px] text-muted-foreground">
 							{eventSummary}
@@ -143,16 +148,6 @@ export function CollageStaggeredLayout({
 							</div>
 						)}
 					</div>
-					{!isCompact && (
-						<div className="px-5 text-center">
-							<HeroCtas
-								className="gap-2.5"
-								primaryClassName="px-[18px] py-2 text-[13px]"
-								secondaryClassName="px-[18px] py-2 text-[13px] [border-color:var(--border)]! [border-width:1px]!"
-								showHowItWorks={wishlist.showHowItWorks}
-							/>
-						</div>
-					)}
 				</div>
 			</MotifTiltSection>
 
@@ -171,11 +166,27 @@ export function CollageStaggeredLayout({
 							treatment={motifTreatment}
 						/>
 					)}
+					{wishlist.eventDate && (
+						<Countdown
+							className="px-5 py-6 sm:px-7"
+							createdAt={wishlist.createdAt}
+							eventDate={wishlist.eventDate}
+							variant={wishlist.countdownVariant}
+						/>
+					)}
 					<WishlistMessage
 						attribution={wishlist.welcomeMessageAttribution}
 						message={wishlist.welcomeMessage}
 						variant={wishlist.welcomeMessageVariant}
 					/>
+					<div className="px-5 pb-6 text-center sm:px-7">
+						<HeroCtas
+							className="gap-2.5"
+							primaryClassName="px-[18px] py-2 text-[13px]"
+							secondaryClassName="px-[18px] py-2 text-[13px] [border-color:var(--border)]! [border-width:1px]!"
+							showHowItWorks={wishlist.showHowItWorks}
+						/>
+					</div>
 				</>
 			)}
 
@@ -204,16 +215,6 @@ export function CollageStaggeredLayout({
 						showCounts={false}
 						showGridToggle
 						showSort={false}
-						toolbarLeading={
-							wishlist.eventDate ? (
-								<Countdown
-									className="p-0 text-left"
-									createdAt={wishlist.createdAt}
-									eventDate={wishlist.eventDate}
-									variant={wishlist.countdownVariant}
-								/>
-							) : undefined
-						}
 					/>
 				</section>
 			</GiftListBand>

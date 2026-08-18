@@ -20,6 +20,7 @@ import { resolveButtonStyle } from "@/config/public-button-styles";
 import { resolveBodyFont, resolveHeadingFont } from "@/config/public-fonts";
 import { resolveTheme } from "@/config/public-themes";
 import { isValidSlug } from "@/lib/slug";
+import { WISHLIST_SUBTITLE_MAX_LENGTH } from "@/lib/wishlist/subtitle";
 import { api } from "@/trpc/react";
 import { useWizardStore } from "./wizard-provider";
 
@@ -104,6 +105,8 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 		? new Date(`${draft.eventDate}T00:00:00`) <
 			new Date(new Date().toDateString())
 		: false;
+	const subtitleLength = draft.subtitle.trim().length;
+	const subtitleError = subtitleLength > WISHLIST_SUBTITLE_MAX_LENGTH;
 
 	function handleRsvpDeadlineChange(date: Date | null) {
 		const next = dateToDateStr(date);
@@ -150,6 +153,51 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 							Así la identificas en tu panel y así la verán tus invitados — un
 							solo nombre para ambos.
 						</p>
+					</Field>
+
+					<Field className="mt-4 gap-0 border-border border-t pt-4">
+						<div className="mb-[7px] flex items-center justify-between gap-3">
+							<FieldLabel
+								className="mb-0 font-semibold text-[13px] text-foreground"
+								htmlFor="subtitle"
+							>
+								Subtítulo{" "}
+								<span className="font-normal text-muted-foreground">
+									(opcional)
+								</span>
+							</FieldLabel>
+							<span
+								className={
+									subtitleError
+										? "text-[11px] text-destructive"
+										: "text-[11px] text-muted-foreground"
+								}
+							>
+								{subtitleLength}/{WISHLIST_SUBTITLE_MAX_LENGTH}
+							</span>
+						</div>
+						<Input
+							aria-describedby="subtitle-help"
+							aria-invalid={subtitleError}
+							className="min-h-11 rounded-[10px] text-[13.5px]"
+							id="subtitle"
+							onChange={(e) => setField("subtitle", e.target.value)}
+							placeholder="Una frase breve para tus invitados"
+							type="text"
+							value={draft.subtitle}
+						/>
+						<p
+							className="mt-2.5 text-[11.5px] text-muted-foreground leading-relaxed"
+							id="subtitle-help"
+						>
+							Personalízalo ahora; luego podrás cambiarlo o quitarlo desde
+							Configuración.
+						</p>
+						{subtitleError && (
+							<FieldError className="mt-2.5 text-[11.5px]">
+								El subtítulo debe tener como máximo 160 caracteres.
+							</FieldError>
+						)}
 					</Field>
 				</div>
 
@@ -363,10 +411,15 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 						<p className={`mb-2 ${EYEBROW} text-muted-foreground`}>
 							{draft.eventDate || "Fecha por definir"}
 						</p>
-						<p className="mb-2.5 font-heading font-semibold text-[32px] text-foreground">
+						<p className="font-heading font-semibold text-[32px] text-foreground">
 							{draft.title || "Tu wishlist especial"}
 						</p>
-						<p className="mb-4 text-[13px] text-muted-foreground">
+						{draft.subtitle.trim() && (
+							<p className="mt-2 text-[13.5px] text-muted-foreground leading-relaxed">
+								{draft.subtitle}
+							</p>
+						)}
+						<p className="mt-4 mb-4 text-[13px] text-muted-foreground">
 							Así verán tus invitados el encabezado de tu página.
 						</p>
 						<Badge variant="published">

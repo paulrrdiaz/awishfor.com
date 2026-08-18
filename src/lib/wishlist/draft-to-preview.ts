@@ -137,6 +137,7 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		id: "preview",
 		slug: draft.slug || "preview",
 		title: draft.title || "Mi wishlist",
+		subtitle: draft.subtitle.trim() || null,
 		eventType: draft.eventType ?? "general",
 		language: "es",
 		currency: "PEN",

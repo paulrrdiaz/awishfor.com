@@ -12,6 +12,7 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	id: "demo-wishlist",
 	slug: "esperando-a-mateo",
 	title: "Esperando a Mateo",
+	subtitle: "Una lista creada con cariño para celebrar juntos.",
 	eventType: "baby_shower",
 	language: "es",
 	currency: "PEN",

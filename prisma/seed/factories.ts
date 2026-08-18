@@ -34,6 +34,7 @@ export type WishlistData = Omit<Prisma.WishlistUncheckedCreateInput, "ownerId">;
 export function makeWishlist(overrides: Partial<WishlistData>): WishlistData {
 	return {
 		title: "My Wishlist",
+		subtitle: null,
 		slug: "my-wishlist",
 		eventType: "general",
 		language: "es",

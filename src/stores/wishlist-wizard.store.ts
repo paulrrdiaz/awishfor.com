@@ -6,9 +6,11 @@ import type { ImageOrientation } from "@/config/public-layouts";
 import type { EventType, GiftPriority } from "@/generated/prisma/enums";
 import { slugify } from "@/lib/slug";
 import type { WishlistShareMetadata } from "@/lib/wishlist/share";
+import { DEFAULT_WISHLIST_SUBTITLE } from "@/lib/wishlist/subtitle";
 
 const STALE_DAYS = 30;
 export const WISHLIST_WIZARD_STORAGE_KEY = "wishlist-wizard-draft";
+export { DEFAULT_WISHLIST_SUBTITLE } from "@/lib/wishlist/subtitle";
 
 type CopyTouched = {
 	welcomeMessage: boolean;
@@ -40,6 +42,7 @@ export type DraftGift = {
 export type WishlistDraft = {
 	eventType: EventType | null;
 	title: string;
+	subtitle: string;
 	slug: string;
 	eventDate: string | null;
 	eventTime: string | null;
@@ -118,6 +121,7 @@ export type WishlistWizardStore = WishlistWizardState & WishlistWizardActions;
 const emptyDraft = (): WishlistDraft => ({
 	eventType: null,
 	title: "",
+	subtitle: DEFAULT_WISHLIST_SUBTITLE,
 	slug: "",
 	eventDate: null,
 	eventTime: null,
@@ -164,7 +168,7 @@ const isStale = (updatedAt: number | null): boolean => {
 	return updatedAt < cutoff;
 };
 
-export const WISHLIST_WIZARD_STORE_VERSION = 2;
+export const WISHLIST_WIZARD_STORE_VERSION = 3;
 
 const LEGACY_FONT_PAIRING_TO_FONTS: Record<
 	string,
@@ -194,6 +198,7 @@ export const migratePersistedWishlistWizardState = (
 	version: number,
 ): WishlistWizardState => {
 	const state = persistedState as LegacyPersistedWishlistWizardState;
+	let migratedState = state;
 
 	if (version < 2 && state?.draft) {
 		const legacyDraft = state.draft;
@@ -210,7 +215,7 @@ export const migratePersistedWishlistWizardState = (
 			...restDraft
 		} = legacyDraft;
 
-		return {
+		migratedState = {
 			...state,
 			draft: {
 				...emptyDraft(),
@@ -224,10 +229,21 @@ export const migratePersistedWishlistWizardState = (
 				welcomeMessage: Boolean(state.copyTouched?.welcomeMessage),
 				thankYouMessage: Boolean(state.copyTouched?.thankYouMessage),
 			},
+		};
+	}
+
+	if (version < 3 && migratedState?.draft) {
+		return {
+			...migratedState,
+			draft: {
+				...emptyDraft(),
+				...migratedState.draft,
+				subtitle: "",
+			},
 		} as unknown as WishlistWizardState;
 	}
 
-	return state as WishlistWizardState;
+	return migratedState as WishlistWizardState;
 };
 
 export const createWishlistWizardStore = () =>
