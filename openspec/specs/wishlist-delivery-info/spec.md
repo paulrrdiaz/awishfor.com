@@ -34,7 +34,7 @@ The system SHALL NOT present delivery details anywhere when the delivery address
 #### Scenario: No address means no presentation
 
 - **WHEN** a wishlist has a recipient name and a phone but no delivery address
-- **THEN** no delivery card renders on the public wishlist page and no delivery block renders in the purchase modal
+- **THEN** no delivery postscript renders on the public wishlist page and no delivery block renders in the product departure drawer
 
 #### Scenario: Address alone is enough
 
@@ -165,21 +165,26 @@ The delivery card SHALL present each available delivery field on its own line wi
 - **WHEN** the guest activates the card's copy action
 - **THEN** the clipboard receives the single composed delivery line, not the itemized text
 
-### Requirement: Delivery block inside the purchase modal
+### Requirement: Delivery block inside the product departure drawer
 
-The purchase modal SHALL present the delivery details as a contained block within its form phase, visually separated from the guest consent copy so the two do not read as one run of fine print. The block SHALL NOT appear in the modal's success, undo, loading, or error phases.
+The product departure drawer SHALL present delivery details as a contained block when the wishlist has a delivery address. The block SHALL use the existing composed delivery value, visually distinguish the delivery destination from surrounding helper copy, and provide one copy action. Moving this block SHALL NOT alter the delivery postscript rendered by any welcome-message variant.
 
-#### Scenario: Block renders in the form phase
+#### Scenario: Product drawer shows composed delivery
 
-- **WHEN** a guest opens the purchase modal for a wishlist that has a delivery address
-- **THEN** the form phase shows the delivery block with the composed line and a copy action
+- **WHEN** a guest opens the product departure drawer for a wishlist with a delivery address
+- **THEN** the drawer shows the composed recipient, address, and optional phone with one copy action
 
-#### Scenario: Block is absent after confirming
+#### Scenario: Product drawer omits absent delivery
 
-- **WHEN** the guest submits the purchase and the modal moves to its success or undo state
-- **THEN** the delivery block is not shown in those states
+- **WHEN** a guest opens the product departure drawer for a wishlist without a delivery address
+- **THEN** no delivery block or copy action appears in the drawer
 
-#### Scenario: Block is distinct from consent copy
+#### Scenario: Purchase drawer omits delivery
 
-- **WHEN** the delivery block and the guest consent copy both render
-- **THEN** the delivery block is presented as a contained element rather than as another paragraph of muted fine print
+- **WHEN** a guest opens or submits the purchase drawer
+- **THEN** delivery details do not appear in its form, loading, error, success, or undo states
+
+#### Scenario: Welcome-message postscript remains unchanged
+
+- **WHEN** a wishlist with a delivery address renders any supported welcome-message variant
+- **THEN** its existing delivery postscript continues to render with the same content, composition, and copy behavior

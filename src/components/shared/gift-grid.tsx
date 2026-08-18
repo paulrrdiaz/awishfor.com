@@ -24,7 +24,8 @@ type Props = {
 	actionsEnabled?: boolean;
 	categoryNames?: Record<string, string>;
 	columnsAtSmallBreakpoint?: boolean;
-	onGiftAction?: (gift: PublicGiftViewModel) => void;
+	onProductAction?: (gift: PublicGiftViewModel) => void;
+	onPurchaseAction?: (gift: PublicGiftViewModel) => void;
 	motif?: MotifPreset | null;
 	motifTreatment?: MotifTreatment;
 };
@@ -36,7 +37,8 @@ export function GiftGrid({
 	actionsEnabled = false,
 	categoryNames,
 	columnsAtSmallBreakpoint = false,
-	onGiftAction,
+	onProductAction,
+	onPurchaseAction,
 	motif,
 	motifTreatment,
 }: Props) {
@@ -82,7 +84,8 @@ export function GiftGrid({
 					key={`${gift.id}-${giftCardStyle}`}
 					motif={motif}
 					motifTreatment={motifTreatment}
-					onGiftAction={onGiftAction}
+					onProductAction={onProductAction}
+					onPurchaseAction={onPurchaseAction}
 				/>
 			))}
 		</div>

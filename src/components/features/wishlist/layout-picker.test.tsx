@@ -29,7 +29,7 @@ describe("LayoutPicker", () => {
 				<LayoutPicker onSelect={vi.fn()} options={LAYOUTS} selected={null} />,
 			);
 
-			expect(screen.getByText("Editorial Revista")).toBeTruthy();
+			expect(screen.getByText("Imagen Fija")).toBeTruthy();
 		});
 
 		it("opens the modal grid and reports the selected id", async () => {
@@ -78,6 +78,27 @@ describe("LayoutPicker", () => {
 			await user.click(screen.getByRole("button", { name: /trío en arco/i }));
 
 			expect(onSelect).toHaveBeenCalledWith("arch-trio");
+		});
+
+		it("marks unreleased layouts as coming soon and prevents selecting them", async () => {
+			const onSelect = vi.fn();
+			const user = userEvent.setup();
+			render(
+				<LayoutPicker
+					onSelect={onSelect}
+					options={LAYOUTS}
+					selected={null}
+					variant="inline"
+				/>,
+			);
+
+			const unavailable = screen.getByRole("button", {
+				name: /editorial revista/i,
+			});
+			expect(unavailable).toBeDisabled();
+			expect(screen.getAllByText("Coming soon")).toHaveLength(6);
+			await user.click(unavailable);
+			expect(onSelect).not.toHaveBeenCalled();
 		});
 	});
 });

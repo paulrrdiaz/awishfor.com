@@ -149,6 +149,7 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		eventLocation: draft.eventLocation || null,
 		dressCode: draft.dressCode || null,
 		deliveryRecipientName: null,
+		deliveryDocumentId: null,
 		deliveryAddress: null,
 		deliveryPhone: null,
 		images: compositeCoverImages(draft),

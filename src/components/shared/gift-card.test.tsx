@@ -14,31 +14,33 @@ if (!motif) {
 describe("GiftCard collage row", () => {
 	it("offers separate product and purchase actions", async () => {
 		const user = userEvent.setup();
-		const onGiftAction = vi.fn();
+		const onProductAction = vi.fn();
+		const onPurchaseAction = vi.fn();
 
 		render(
 			<GiftCard
 				actionsEnabled
 				cardStyle="collage-row"
 				gift={sampleGift}
-				onGiftAction={onGiftAction}
+				onProductAction={onProductAction}
+				onPurchaseAction={onPurchaseAction}
 			/>,
 		);
 
-		const productLink = screen.getByRole("link", {
-			name: `Abrir ${sampleGift.name} en una nueva pestaña`,
-		});
-		expect(productLink).toHaveAttribute("href", sampleGift.productUrl);
-		expect(productLink).toHaveAttribute("target", "_blank");
-		expect(productLink).toHaveAttribute("rel", "noopener noreferrer");
+		await user.click(
+			screen.getByRole("button", {
+				name: `Ver producto: ${sampleGift.name}`,
+			}),
+		);
+		expect(onProductAction).toHaveBeenCalledWith(sampleGift);
 
 		await user.click(
 			screen.getByRole("button", {
 				name: `Marcar como comprado: ${sampleGift.name}`,
 			}),
 		);
-		expect(onGiftAction).toHaveBeenCalledOnce();
-		expect(onGiftAction).toHaveBeenCalledWith(sampleGift);
+		expect(onPurchaseAction).toHaveBeenCalledOnce();
+		expect(onPurchaseAction).toHaveBeenCalledWith(sampleGift);
 	});
 
 	it("hides both actions once the gift is purchased", () => {
@@ -52,6 +54,49 @@ describe("GiftCard collage row", () => {
 
 		expect(screen.queryByRole("link")).not.toBeInTheDocument();
 		expect(screen.queryByRole("button")).not.toBeInTheDocument();
+	});
+});
+
+describe("GiftCard actions across styles", () => {
+	it.each([
+		"card",
+		"tilted",
+		"collage",
+		"collage-row",
+		"row",
+		"minimal",
+	] as const)("routes product and purchase actions for %s cards", async (cardStyle) => {
+		const user = userEvent.setup();
+		const onProductAction = vi.fn();
+		const onPurchaseAction = vi.fn();
+		const { unmount } = render(
+			<GiftCard
+				actionsEnabled
+				cardStyle={cardStyle}
+				gift={sampleGift}
+				onProductAction={onProductAction}
+				onPurchaseAction={onPurchaseAction}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: /ver producto|ver regalo/i }),
+		);
+		await user.click(screen.getByRole("button", { name: /marcar|regalar/i }));
+
+		expect(onProductAction).toHaveBeenCalledWith(sampleGift);
+		expect(onPurchaseAction).toHaveBeenCalledWith(sampleGift);
+		expect(
+			screen.queryByRole("link", { name: /ver producto|ver regalo/i }),
+		).toBeNull();
+		unmount();
+	});
+
+	it("hides product and purchase actions when preview actions are disabled", () => {
+		render(<GiftCard cardStyle="card" gift={sampleGift} />);
+		expect(
+			screen.queryByRole("button", { name: /ver producto|regalar/i }),
+		).toBeNull();
 	});
 });
 
@@ -84,20 +129,19 @@ describe("GiftCard tilted style", () => {
 describe("GiftCard motif sticker", () => {
 	it("keeps the accessible name of every control unchanged when a motif sticker is added", async () => {
 		const user = userEvent.setup();
-		const onGiftAction = vi.fn();
+		const onPurchaseAction = vi.fn();
 
 		const { unmount } = render(
 			<GiftCard
 				actionsEnabled
 				cardStyle="collage-row"
 				gift={sampleGift}
-				onGiftAction={onGiftAction}
+				onPurchaseAction={onPurchaseAction}
 			/>,
 		);
 		const nameBefore = screen.getByRole("heading").textContent;
-		const linkNameBefore = screen.getByRole("link").getAttribute("aria-label");
 		const buttonNameBefore = screen
-			.getByRole("button")
+			.getByRole("button", { name: /marcar como comprado/i })
 			.getAttribute("aria-label");
 		unmount();
 
@@ -108,19 +152,20 @@ describe("GiftCard motif sticker", () => {
 				gift={sampleGift}
 				motif={motif}
 				motifTreatment="band"
-				onGiftAction={onGiftAction}
+				onPurchaseAction={onPurchaseAction}
 			/>,
 		);
 		expect(screen.getByRole("heading").textContent).toBe(nameBefore);
-		expect(screen.getByRole("link").getAttribute("aria-label")).toBe(
-			linkNameBefore,
-		);
-		expect(screen.getByRole("button").getAttribute("aria-label")).toBe(
-			buttonNameBefore,
-		);
+		expect(
+			screen
+				.getByRole("button", { name: /marcar como comprado/i })
+				.getAttribute("aria-label"),
+		).toBe(buttonNameBefore);
 
-		await user.click(screen.getByRole("button"));
-		expect(onGiftAction).toHaveBeenCalledWith(sampleGift);
+		await user.click(
+			screen.getByRole("button", { name: /marcar como comprado/i }),
+		);
+		expect(onPurchaseAction).toHaveBeenCalledWith(sampleGift);
 	});
 
 	it("marks every motif element aria-hidden so it never registers a role", () => {

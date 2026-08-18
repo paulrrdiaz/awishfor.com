@@ -3,12 +3,16 @@
 import gsap from "gsap";
 import {
 	type ReactNode,
+	useCallback,
 	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
 } from "react";
-import { PurchaseGiftModal } from "@/components/features/wishlist/purchase-gift-modal";
+import {
+	GuestGiftDrawer,
+	type GuestGiftDrawerView,
+} from "@/components/features/wishlist/guest-gift-drawer";
 import { EmptyState } from "@/components/shared/empty-state";
 import { GiftGrid } from "@/components/shared/gift-grid";
 import {
@@ -115,6 +119,12 @@ export function PublicGiftFilters({
 	const [selectedGift, setSelectedGift] = useState<PublicGiftViewModel | null>(
 		null,
 	);
+	const [drawerView, setDrawerView] = useState<GuestGiftDrawerView>("purchase");
+	const [productFromPurchase, setProductFromPurchase] = useState(false);
+	const [drawerContainer, setDrawerContainer] = useState<HTMLElement | null>(
+		null,
+	);
+	const actionTriggerRef = useRef<HTMLElement | null>(null);
 	const resultsRef = useRef<HTMLDivElement>(null);
 	const reducedMotion = useReducedMotion();
 
@@ -153,6 +163,25 @@ export function PublicGiftFilters({
 	function setCategoryFilter(categoryId: string) {
 		setActiveFilter({ kind: "category", categoryId });
 	}
+
+	function openGift(gift: PublicGiftViewModel, view: GuestGiftDrawerView) {
+		actionTriggerRef.current = document.activeElement as HTMLElement | null;
+		setSelectedGift(gift);
+		setDrawerView(view);
+		setProductFromPurchase(false);
+	}
+
+	function closeGiftDrawer() {
+		setSelectedGift(null);
+		setProductFromPurchase(false);
+		window.setTimeout(() => actionTriggerRef.current?.focus());
+	}
+
+	const setDrawerRoot = useCallback((node: HTMLDivElement | null) => {
+		if (node) {
+			setDrawerContainer(node.closest<HTMLElement>(".public-theme"));
+		}
+	}, []);
 
 	const activeFilterKey =
 		activeFilter.kind === "status"
@@ -198,7 +227,7 @@ export function PublicGiftFilters({
 	}
 
 	return (
-		<div>
+		<div ref={setDrawerRoot}>
 			<div
 				className={
 					compact
@@ -331,7 +360,8 @@ export function PublicGiftFilters({
 						gifts={filteredGifts}
 						motif={motif}
 						motifTreatment={motifTreatment}
-						onGiftAction={setSelectedGift}
+						onProductAction={(gift) => openGift(gift, "product")}
+						onPurchaseAction={(gift) => openGift(gift, "purchase")}
 					/>
 				) : (
 					<GiftGrid
@@ -347,18 +377,28 @@ export function PublicGiftFilters({
 						gifts={filteredGifts}
 						motif={motif}
 						motifTreatment={motifTreatment}
-						onGiftAction={setSelectedGift}
+						onProductAction={(gift) => openGift(gift, "product")}
+						onPurchaseAction={(gift) => openGift(gift, "purchase")}
 					/>
 				)}
 			</div>
-			{actionsEnabled && selectedGift && (
-				<PurchaseGiftModal
+			{actionsEnabled && selectedGift && drawerContainer && (
+				<GuestGiftDrawer
+					container={drawerContainer}
 					delivery={delivery}
 					gift={selectedGift}
 					onOpenChange={(open) => {
-						if (!open) setSelectedGift(null);
+						if (!open) closeGiftDrawer();
+					}}
+					onViewChange={(nextView) => {
+						setProductFromPurchase(
+							drawerView === "purchase" && nextView === "product",
+						);
+						setDrawerView(nextView);
 					}}
 					open
+					productFromPurchase={productFromPurchase}
+					view={drawerView}
 				/>
 			)}
 		</div>

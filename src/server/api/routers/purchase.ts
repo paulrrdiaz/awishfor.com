@@ -50,6 +50,7 @@ export const purchaseRouter = createTRPCRouter({
 			return {
 				purchase: mapOwnerPurchaseRecord(result.purchase),
 				undoToken: result.undoToken,
+				undoExpiresAt: result.purchase.undoExpiresAt?.toISOString() ?? null,
 			};
 		}),
 

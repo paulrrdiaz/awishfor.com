@@ -402,6 +402,7 @@ export const createWishlist = async (
 			eventLocation: input.eventLocation ?? null,
 			dressCode: input.dressCode ?? null,
 			deliveryRecipientName: input.deliveryRecipientName ?? null,
+			deliveryDocumentId: input.deliveryDocumentId ?? null,
 			deliveryAddress: input.deliveryAddress ?? null,
 			deliveryPhone: input.deliveryPhone ?? null,
 			images: {

@@ -92,6 +92,7 @@ model Wishlist {
   eventLocation   String?
   dressCode       String?
   deliveryRecipientName String?
+  deliveryDocumentId String?
   deliveryAddress String?
   deliveryPhone   String?
   themeId         String?

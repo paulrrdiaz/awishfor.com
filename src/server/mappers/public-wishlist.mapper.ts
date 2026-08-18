@@ -154,6 +154,7 @@ export function mapPublicWishlist(
 		eventLocation: wishlist.eventLocation,
 		dressCode: wishlist.dressCode,
 		deliveryRecipientName: wishlist.deliveryRecipientName,
+		deliveryDocumentId: wishlist.deliveryDocumentId,
 		deliveryAddress: wishlist.deliveryAddress,
 		deliveryPhone: wishlist.deliveryPhone,
 		images: mapImages(wishlist.images),

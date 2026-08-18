@@ -129,6 +129,7 @@ export const wishlistRouter = createTRPCRouter({
 				eventLocation: wishlist.eventLocation,
 				dressCode: wishlist.dressCode,
 				deliveryRecipientName: wishlist.deliveryRecipientName,
+				deliveryDocumentId: wishlist.deliveryDocumentId,
 				deliveryAddress: wishlist.deliveryAddress,
 				deliveryPhone: wishlist.deliveryPhone,
 				images: wishlist.images.map((image) => ({
@@ -414,6 +415,7 @@ export const wishlistRouter = createTRPCRouter({
 						),
 						welcomeMessageAttribution: input.welcomeMessageAttribution ?? null,
 						deliveryRecipientName: input.deliveryRecipientName ?? null,
+						deliveryDocumentId: input.deliveryDocumentId ?? null,
 						deliveryAddress: input.deliveryAddress ?? null,
 						deliveryPhone: input.deliveryPhone ?? null,
 						thankYouMessage: input.thankYouMessage ?? null,

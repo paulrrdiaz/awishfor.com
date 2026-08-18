@@ -53,6 +53,7 @@ export function CollageStaggeredLayout({ wishlist, layout, mode }: Props) {
 		wishlist.deliveryRecipientName,
 		wishlist.deliveryAddress,
 		wishlist.deliveryPhone,
+		wishlist.deliveryDocumentId,
 	);
 	const heroRef = useRef<HTMLElement>(null);
 	useMotifTilt(heroRef);

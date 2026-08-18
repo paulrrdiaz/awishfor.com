@@ -106,11 +106,10 @@ Avoid:
 1. Guest opens `/w/[slug]`.
 2. Guest browses gifts.
 3. Guest chooses available gift.
-4. Guest clicks `Marcar como comprado`.
-5. Guest enters name and optional contact/message.
-6. Guest confirms quantity.
-7. Gift progress updates.
-8. Guest sees thank-you success state and short undo option.
+4. Guest opens `Ver producto` to review delivery details before leaving for the store, or chooses `Marcar como comprado`.
+5. Guest enters required name plus optional email/message, then confirms quantity when needed.
+6. Gift progress updates.
+7. Guest sees the thank-you drawer and can use the server-backed 60-second `Deshacer` action.
 
 ### Journey 3 — Owner manages wishlist
 
@@ -333,7 +332,7 @@ Default copy:
 Available/partial gifts:
 
 - Primary CTA: `Marcar como comprado`
-- Secondary CTA if `productUrl`: `Ver producto`
+- Secondary CTA if `productUrl`: `Ver producto`, which opens the themed departure drawer before the external store link.
 
 Fully purchased gifts:
 
@@ -1095,7 +1094,11 @@ Rules:
 - Guest undo deletes only the just-created purchase record.
 - Owner can view, delete, and manually add purchase records.
 
-### Purchase modal fields
+### Guest gift drawer
+
+All guest product, purchase, and success states share one themed bottom drawer. The product view opens the store URL only from `Ir a la tienda` in a new tab; it shows a copyable delivery block only when an address exists and reminds the guest to return and mark the gift. When reached from the purchase form, that store action restores the preserved form in the original tab; direct gift-card entry stays on the product view until dismissal.
+
+### Purchase drawer fields
 
 Required:
 
@@ -1104,7 +1107,6 @@ Required:
 Optional:
 
 - `guestEmail`, valid email
-- `guestPhone`, 6–30 chars
 - `message`, max 500 chars
 
 Quantity:
@@ -1113,11 +1115,13 @@ Quantity:
 - min 1
 - max remaining
 
+The public purchase drawer does not collect phone data or show delivery details. Existing stored phone data and owner purchase management remain supported.
+
 ### Guest success state
 
-> ¡Gracias, María!  
-> Tu regalo fue marcado como comprado.  
-> Gracias por tu cariño y por ser parte de este momento.
+> ÉXITO
+> ¡Gracias, María! Tu regalo quedó marcado.
+> Gracias por ser parte de este momento.
 
 Actions:
 
@@ -1126,10 +1130,11 @@ Actions:
 
 Undo window:
 
-- 60 seconds.
+- 60 seconds, based on the serialized server expiry.
 - Current browser only.
 - Server returns raw token once.
 - Store hash in DB.
+- No countdown or duplicate success toast.
 
 ### Owner purchase management
 
@@ -1333,9 +1338,7 @@ defined by the Claude Design canvas:
 
 - **GiftCard / giftcard variants (§9):** `available · partial · purchased · hidden`
   (purchased de-emphasized; `hidden` shows `Oculto` + owner `Mostrar`/`Editar`).
-- **PurchaseGiftModal (6 states):** `form · loading · success · undo-available ·
-  undo-expired · purchase-error` — all derived from the existing `markGiftPurchased`
-  mutation lifecycle and undo countdown (no new mutations).
+- **GuestGiftDrawer (3 views):** `product · purchase · success`; purchase loading/errors and undo errors remain inline, and `Deshacer` hides at the server expiry without a visible countdown.
 - **Creation wizard (§4):** `event · details · design · gifts · publish` + pre-publish
   auth gate, indicated via shared `StepProgress`.
 - **Dashboard states:** wishlist-list empty state; responsive `Tabs → Select` detail nav
@@ -1455,7 +1458,7 @@ Shared:
   GiftGrid/GiftList
   HowItWorks
   WishlistFooter
-  PurchaseGiftModal
+  GuestGiftDrawer
 ```
 
 ### Component structure

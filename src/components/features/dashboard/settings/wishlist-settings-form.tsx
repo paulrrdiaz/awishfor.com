@@ -175,6 +175,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [deliveryRecipientName, setDeliveryRecipientName] = useState(
 		wishlist.deliveryRecipientName ?? "",
 	);
+	const [deliveryDocumentId, setDeliveryDocumentId] = useState(
+		wishlist.deliveryDocumentId ?? "",
+	);
 	const [deliveryAddress, setDeliveryAddress] = useState(
 		wishlist.deliveryAddress ?? "",
 	);
@@ -294,6 +297,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			welcomeMessage: welcomeMessage || null,
 			welcomeMessageAttribution: welcomeMessageAttribution || null,
 			deliveryRecipientName: deliveryRecipientName || null,
+			deliveryDocumentId: deliveryDocumentId || null,
 			deliveryAddress: deliveryAddress || null,
 			deliveryPhone: deliveryPhone || null,
 			thankYouMessage: thankYouMessage || null,
@@ -498,6 +502,22 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							onChange={(e) => setDeliveryRecipientName(e.target.value)}
 							placeholder="Ej. Ana Beltrán"
 							value={deliveryRecipientName}
+						/>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label htmlFor="deliveryDocumentId">
+							DNI o documento de identidad{" "}
+							<span className="font-normal text-muted-foreground text-xs">
+								(opcional)
+							</span>
+						</Label>
+						<Input
+							id="deliveryDocumentId"
+							maxLength={40}
+							onChange={(e) => setDeliveryDocumentId(e.target.value)}
+							placeholder="Ej. 46737335"
+							value={deliveryDocumentId}
 						/>
 					</div>
 

@@ -60,6 +60,7 @@ export function SplitImageRightLayout({
 		wishlist.deliveryRecipientName,
 		wishlist.deliveryAddress,
 		wishlist.deliveryPhone,
+		wishlist.deliveryDocumentId,
 	);
 
 	return (

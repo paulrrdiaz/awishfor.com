@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { composeDelivery } from "@/lib/format/delivery";
 
 const NAME = "Ana Beltrán";
+const DOCUMENT_ID = "46737335";
 const ADDRESS = "Av. Universidad 1500, Col. Narvarte, CDMX";
 const PHONE = "+52 55 1122 3344";
 
@@ -13,16 +14,17 @@ describe("composeDelivery", () => {
 		expect(composeDelivery(NAME, null, PHONE)).toBeNull();
 	});
 
-	it("composes all three fields with no doubled, leading, or trailing separator", () => {
-		const result = composeDelivery(NAME, ADDRESS, PHONE);
+	it("composes all four fields with no doubled, leading, or trailing separator", () => {
+		const result = composeDelivery(NAME, ADDRESS, PHONE, DOCUMENT_ID);
 		expect(result).toEqual({
-			line: `${NAME}, ${ADDRESS} · ${PHONE}`,
+			line: `${NAME}, DNI: ${DOCUMENT_ID}, ${ADDRESS} · ${PHONE}`,
 			recipientName: NAME,
+			documentId: DOCUMENT_ID,
 			address: ADDRESS,
 			phone: PHONE,
 			rest: `${ADDRESS} · ${PHONE}`,
 		});
-		expect(result?.line).not.toMatch(/[👤📍📱]/u);
+		expect(result?.line).not.toMatch(/[👤🪪📍📱]/u);
 	});
 
 	it("ends after the address with no trailing separator when the phone is absent", () => {
@@ -30,6 +32,7 @@ describe("composeDelivery", () => {
 		expect(result).toEqual({
 			line: `${NAME}, ${ADDRESS}`,
 			recipientName: NAME,
+			documentId: null,
 			address: ADDRESS,
 			phone: null,
 			rest: ADDRESS,
@@ -41,6 +44,7 @@ describe("composeDelivery", () => {
 		expect(result).toEqual({
 			line: `${ADDRESS} · ${PHONE}`,
 			recipientName: null,
+			documentId: null,
 			address: ADDRESS,
 			phone: PHONE,
 			rest: `${ADDRESS} · ${PHONE}`,
@@ -52,6 +56,7 @@ describe("composeDelivery", () => {
 		expect(result).toEqual({
 			line: ADDRESS,
 			recipientName: null,
+			documentId: null,
 			address: ADDRESS,
 			phone: null,
 			rest: ADDRESS,

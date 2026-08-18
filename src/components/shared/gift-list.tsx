@@ -6,7 +6,8 @@ type Props = {
 	gifts: PublicGiftViewModel[];
 	giftCardStyle?: GiftCardStyle;
 	actionsEnabled?: boolean;
-	onGiftAction?: (gift: PublicGiftViewModel) => void;
+	onProductAction?: (gift: PublicGiftViewModel) => void;
+	onPurchaseAction?: (gift: PublicGiftViewModel) => void;
 	motif?: MotifPreset | null;
 	motifTreatment?: MotifTreatment;
 };
@@ -15,7 +16,8 @@ export function GiftList({
 	gifts,
 	giftCardStyle = "row",
 	actionsEnabled = false,
-	onGiftAction,
+	onProductAction,
+	onPurchaseAction,
 	motif,
 	motifTreatment,
 }: Props) {
@@ -31,7 +33,8 @@ export function GiftList({
 					key={gift.id}
 					motif={motif}
 					motifTreatment={motifTreatment}
-					onGiftAction={onGiftAction}
+					onProductAction={onProductAction}
+					onPurchaseAction={onPurchaseAction}
 				/>
 			))}
 		</div>

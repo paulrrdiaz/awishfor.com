@@ -56,6 +56,7 @@ export function ArchTrioLayout({ wishlist, layout, mode }: Props) {
 		wishlist.deliveryRecipientName,
 		wishlist.deliveryAddress,
 		wishlist.deliveryPhone,
+		wishlist.deliveryDocumentId,
 	);
 	const hasEventDetails = Boolean(
 		wishlist.eventDate || wishlist.eventLocation || wishlist.dressCode,

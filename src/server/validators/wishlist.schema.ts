@@ -151,6 +151,10 @@ export const wishlistDressCodeSchema = optionalNullableTrimmedString(
 );
 export const wishlistDeliveryRecipientNameSchema =
 	optionalNullableTrimmedString("Delivery recipient name", 120);
+export const wishlistDeliveryDocumentIdSchema = optionalNullableTrimmedString(
+	"Delivery document ID",
+	40,
+);
 export const wishlistDeliveryAddressSchema = optionalNullableTrimmedString(
 	"Delivery address",
 	240,
@@ -226,6 +230,7 @@ const wishlistCreateUpdateShape = {
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
 	deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
+	deliveryDocumentId: wishlistDeliveryDocumentIdSchema,
 	deliveryAddress: wishlistDeliveryAddressSchema,
 	deliveryPhone: wishlistDeliveryPhoneSchema,
 	coverImages: wishlistCoverImagesSchema.default([]),
@@ -258,6 +263,7 @@ export const updateWishlistSchema = z.object({
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
 	deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
+	deliveryDocumentId: wishlistDeliveryDocumentIdSchema,
 	deliveryAddress: wishlistDeliveryAddressSchema,
 	deliveryPhone: wishlistDeliveryPhoneSchema,
 	coverImages: wishlistCoverImagesSchema.optional(),
@@ -297,6 +303,7 @@ export type CreateWishlistInput = {
 	eventLocation?: string | null;
 	dressCode?: string | null;
 	deliveryRecipientName?: string | null;
+	deliveryDocumentId?: string | null;
 	deliveryAddress?: string | null;
 	deliveryPhone?: string | null;
 	coverImages?: WishlistCoverImageInput[];
@@ -323,6 +330,7 @@ export type UpdateWishlistInput = {
 	eventLocation?: string | null;
 	dressCode?: string | null;
 	deliveryRecipientName?: string | null;
+	deliveryDocumentId?: string | null;
 	deliveryAddress?: string | null;
 	deliveryPhone?: string | null;
 	coverImages?: WishlistCoverImageInput[];
@@ -353,6 +361,7 @@ export const updateWishlistSettingsSchema = z
 		welcomeMessage: wishlistWelcomeMessageSchema,
 		welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
 		deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
+		deliveryDocumentId: wishlistDeliveryDocumentIdSchema,
 		deliveryAddress: wishlistDeliveryAddressSchema,
 		deliveryPhone: wishlistDeliveryPhoneSchema,
 		thankYouMessage: wishlistThankYouMessageSchema,

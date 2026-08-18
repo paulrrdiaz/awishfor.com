@@ -133,20 +133,25 @@ export function LayoutPicker({
 
 	const renderOption = (option: PublicLayoutPreset) => {
 		const isSelected = currentLayout.id === option.id;
+		const isUnavailable = !option.isAvailable;
 		return (
 			<button
-				aria-pressed={isSelected}
+				aria-pressed={isSelected && !isUnavailable}
 				className={cn(
-					"bg-card text-left transition-all hover:-translate-y-0.5 hover:shadow-sm",
+					"relative bg-card text-left transition-all",
+					isUnavailable
+						? "cursor-not-allowed opacity-55"
+						: "hover:-translate-y-0.5 hover:shadow-sm",
 					variant === "inline"
 						? "rounded-[14px] border p-2.5"
 						: "rounded-xl border-2 p-2.5",
-					isSelected
+					isSelected && !isUnavailable
 						? variant === "inline"
 							? "border-primary ring-1 ring-primary"
 							: "border-primary shadow-sm ring-1 ring-primary/20"
 						: "border-border",
 				)}
+				disabled={isUnavailable}
 				key={option.id}
 				onClick={() => {
 					onSelect(option.id);
@@ -155,6 +160,11 @@ export function LayoutPicker({
 				type="button"
 			>
 				{LAYOUT_THUMBNAILS[option.id]}
+				{isUnavailable ? (
+					<span className="absolute top-3 right-3 rounded-full bg-foreground px-1.5 py-0.5 font-medium text-[9px] text-background leading-none">
+						Coming soon
+					</span>
+				) : null}
 				<span
 					className={cn(
 						"block text-foreground",

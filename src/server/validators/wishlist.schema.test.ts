@@ -140,22 +140,26 @@ describe("wishlist delivery details validation", () => {
 		const result = updateWishlistSettingsSchema.parse({
 			...validSettings,
 			deliveryRecipientName: "  Ana Beltrán  ",
+			deliveryDocumentId: "  46737335  ",
 			deliveryAddress: "  Av. Universidad 1500  ",
 			deliveryPhone: "  +52 55 1122 3344  ",
 		});
 
 		expect(result.deliveryRecipientName).toBe("Ana Beltrán");
+		expect(result.deliveryDocumentId).toBe("46737335");
 		expect(result.deliveryAddress).toBe("Av. Universidad 1500");
 		expect(result.deliveryPhone).toBe("+52 55 1122 3344");
 
 		const blank = updateWishlistSettingsSchema.parse({
 			...validSettings,
 			deliveryRecipientName: "   ",
+			deliveryDocumentId: "   ",
 			deliveryAddress: "   ",
 			deliveryPhone: "   ",
 		});
 
 		expect(blank.deliveryRecipientName).toBeNull();
+		expect(blank.deliveryDocumentId).toBeNull();
 		expect(blank.deliveryAddress).toBeNull();
 		expect(blank.deliveryPhone).toBeNull();
 	});
@@ -167,6 +171,15 @@ describe("wishlist delivery details validation", () => {
 				deliveryRecipientName: "a".repeat(121),
 			}),
 		).toThrow("Delivery recipient name must be at most 120 characters");
+	});
+
+	it("limits the document ID to 40 characters", () => {
+		expect(() =>
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				deliveryDocumentId: "a".repeat(41),
+			}),
+		).toThrow("Delivery document ID must be at most 40 characters");
 	});
 
 	it("limits the address to 240 characters", () => {

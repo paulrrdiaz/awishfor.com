@@ -109,6 +109,38 @@ describe("purchaseRouter — undoRecentPurchase (public)", () => {
 	});
 });
 
+describe("purchaseRouter — markGiftPurchased (public)", () => {
+	beforeEach(() => vi.clearAllMocks());
+
+	it("returns the created purchase undo expiry as an ISO string", async () => {
+		const undoExpiresAt = new Date("2026-08-17T12:01:00.000Z");
+		markGiftPurchasedPublicMock.mockResolvedValue({
+			purchase: {
+				id: "purchase_1",
+				giftId: "gift_1",
+				guestName: "Ana",
+				guestEmail: null,
+				guestPhone: null,
+				message: null,
+				quantity: 1,
+				createdAt: new Date("2026-08-17T12:00:00.000Z"),
+				updatedAt: new Date("2026-08-17T12:00:00.000Z"),
+				undoExpiresAt,
+			},
+			undoToken: "raw-token",
+		});
+		const caller = createCaller(makeDb() as never);
+
+		const result = await caller.markGiftPurchased({
+			giftId: "gift_1",
+			guestName: "Ana",
+			quantity: 1,
+		});
+
+		expect(result.undoExpiresAt).toBe(undoExpiresAt.toISOString());
+	});
+});
+
 describe("purchaseRouter — owner authorization", () => {
 	beforeEach(() => vi.clearAllMocks());
 

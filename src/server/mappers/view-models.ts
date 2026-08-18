@@ -78,6 +78,7 @@ export type PublicWishlistViewModel = {
 	eventLocation: string | null;
 	dressCode: string | null;
 	deliveryRecipientName: string | null;
+	deliveryDocumentId: string | null;
 	deliveryAddress: string | null;
 	deliveryPhone: string | null;
 	images: WishlistImageViewModel[];

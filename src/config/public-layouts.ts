@@ -13,6 +13,8 @@ export type PublicLayoutPreset = {
 	id: string;
 	label: string;
 	description: string;
+	/** Whether creators can currently select this layout. */
+	isAvailable: boolean;
 	giftColumns: number;
 	giftCardStyle: "card" | "row" | "minimal" | "collage" | "tilted";
 	showCategoryDividers: boolean;
@@ -53,6 +55,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "split-image-right",
 		label: "Imagen Fija",
 		description: "Texto a la izquierda, imagen fija a la derecha",
+		isAvailable: true,
 		giftColumns: 2,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
@@ -64,6 +67,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "collage-staggered",
 		label: "Collage Escalonado",
 		description: "Collage escalonado de 3 imágenes",
+		isAvailable: true,
 		giftColumns: 2,
 		giftCardStyle: "collage",
 		showCategoryDividers: true,
@@ -79,6 +83,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "magazine-editorial",
 		label: "Editorial Revista",
 		description: "Editorial asimétrico con numeral decorativo",
+		isAvailable: false,
 		giftColumns: 2,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
@@ -90,6 +95,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "overlap-duo",
 		label: "Dúo Superpuesto",
 		description: "Dos fotos superpuestas junto al contenido",
+		isAvailable: false,
 		giftColumns: 2,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
@@ -101,6 +107,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "arch-hero-party",
 		label: "Arco Festivo",
 		description: "Héroe con arco y tarjetas flotantes",
+		isAvailable: false,
 		giftColumns: 3,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
@@ -112,6 +119,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "arch-trio",
 		label: "Trío en Arco",
 		description: "Tres imágenes circulares en arco",
+		isAvailable: true,
 		giftColumns: 3,
 		giftCardStyle: "tilted",
 		showCategoryDividers: true,
@@ -127,6 +135,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "carousel-hero",
 		label: "Carrusel Principal",
 		description: "Galería de portada con carrusel",
+		isAvailable: false,
 		giftColumns: 3,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
@@ -138,6 +147,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "scrapbook-polaroids",
 		label: "Polaroids",
 		description: "Polaroids dispersas con regalos como etiquetas",
+		isAvailable: false,
 		giftColumns: 3,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
@@ -149,6 +159,7 @@ const layoutList: PublicLayoutPreset[] = [
 		id: "portrait-frame-split",
 		label: "Retrato Enmarcado",
 		description: "Retrato enmarcado con estilo boutique",
+		isAvailable: false,
 		giftColumns: 2,
 		giftCardStyle: "card",
 		showCategoryDividers: true,
@@ -158,7 +169,7 @@ const layoutList: PublicLayoutPreset[] = [
 	},
 ];
 
-export const DEFAULT_LAYOUT_ID = "magazine-editorial";
+export const DEFAULT_LAYOUT_ID = "split-image-right";
 
 const layouts: Record<string, PublicLayoutPreset> = Object.fromEntries(
 	layoutList.map((layout) => [layout.id, layout]),

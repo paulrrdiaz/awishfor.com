@@ -10,6 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import {
+	hasClerkErrorCode,
+	normalizeClerkAuthError,
+} from "@/lib/auth/clerk-api-errors";
 import { resolveRedirectPath } from "@/lib/auth/safe-redirect";
 import { CheckEmail } from "./check-email";
 import {
@@ -18,6 +22,11 @@ import {
 	resetPasswordSchema,
 	resetRequestSchema,
 } from "./schemas";
+
+const CLIENT_STATE_INVALID_MESSAGE =
+	"No pudimos iniciar la recuperación. Inténtalo de nuevo.";
+const SESSION_EXISTS_MESSAGE =
+	"Ya tienes una sesión activa. Cierra sesión antes de restablecer tu contraseña.";
 
 export function ForgotPasswordForm() {
 	const router = useRouter();
@@ -38,26 +47,56 @@ export function ForgotPasswordForm() {
 		resolver: zodResolver(resetPasswordSchema),
 	});
 
+	async function showRequestError(error: unknown) {
+		if (hasClerkErrorCode(error, "client_state_invalid")) {
+			await signIn.reset();
+			setClerkError(CLIENT_STATE_INVALID_MESSAGE);
+			return;
+		}
+		if (hasClerkErrorCode(error, "session_exists")) {
+			setClerkError(SESSION_EXISTS_MESSAGE);
+			return;
+		}
+
+		const normalized = normalizeClerkAuthError(error);
+		if (normalized.email.length) {
+			requestForm.setError("email", {
+				type: "server",
+				message: normalized.email.join(" "),
+			});
+		}
+		if (normalized.general.length) {
+			setClerkError(normalized.general.join(" "));
+		}
+	}
+
 	async function onRequest(values: ResetRequestValues) {
 		setClerkError(null);
+		requestForm.clearErrors("email");
 		try {
+			// Password recovery always starts a new SignIn attempt. Clearing the
+			// local Future first prevents a stale login/reset attempt from being
+			// reused after navigation, HMR, or another auth flow.
+			const { error: resetError } = await signIn.reset();
+			if (resetError) {
+				await showRequestError(resetError);
+				return;
+			}
 			const { error } = await signIn.create({ identifier: values.email });
 			if (error) {
-				setClerkError(
-					error.longMessage ?? "Algo salió mal. Inténtalo de nuevo.",
-				);
+				await showRequestError(error);
 				return;
 			}
 			const { error: sendError } =
 				await signIn.resetPasswordEmailCode.sendCode();
 			if (sendError) {
-				setClerkError(sendError.longMessage ?? "No se pudo enviar el código.");
+				await showRequestError(sendError);
 				return;
 			}
 			setEmail(values.email);
 			setStage("reset");
-		} catch {
-			setClerkError("Algo salió mal. Inténtalo de nuevo.");
+		} catch (error) {
+			await showRequestError(error);
 		}
 	}
 

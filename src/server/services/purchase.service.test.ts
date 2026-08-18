@@ -408,6 +408,7 @@ const makeWishlistRecord = (overrides: Partial<Wishlist> = {}): Wishlist => ({
 	eventLocation: null,
 	dressCode: null,
 	deliveryRecipientName: null,
+	deliveryDocumentId: null,
 	deliveryAddress: null,
 	deliveryPhone: null,
 	themeId: null,

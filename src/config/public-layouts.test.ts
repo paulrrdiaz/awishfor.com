@@ -62,6 +62,12 @@ describe("getAllLayouts", () => {
 		}
 	});
 
+	it("makes only the released layouts available for selection", () => {
+		expect(
+			layouts.filter((layout) => layout.isAvailable).map((layout) => layout.id),
+		).toEqual(["split-image-right", "collage-staggered", "arch-trio"]);
+	});
+
 	it("default layout resolves within the catalog", () => {
 		const ids = layouts.map((layout) => layout.id);
 		expect(ids).toContain(DEFAULT_LAYOUT_ID);

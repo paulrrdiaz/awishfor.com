@@ -1,6 +1,7 @@
 export type ComposedDelivery = {
 	line: string;
 	recipientName: string | null;
+	documentId: string | null;
 	address: string;
 	phone: string | null;
 	rest: string;
@@ -16,18 +17,26 @@ export function composeDelivery(
 	recipientName: string | null | undefined,
 	address: string | null | undefined,
 	phone: string | null | undefined,
+	documentId?: string | null,
 ): ComposedDelivery | null {
 	if (!address) {
 		return null;
 	}
 
 	const rest = phone ? `${address} · ${phone}` : address;
-	const namedLine = [recipientName, address].filter(Boolean).join(", ");
+	const namedLine = [
+		recipientName,
+		documentId ? `DNI: ${documentId}` : null,
+		address,
+	]
+		.filter(Boolean)
+		.join(", ");
 	const line = phone ? `${namedLine} · ${phone}` : namedLine;
 
 	return {
 		line,
 		recipientName: recipientName ?? null,
+		documentId: documentId ?? null,
 		address,
 		phone: phone ?? null,
 		rest,

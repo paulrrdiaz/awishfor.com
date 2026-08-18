@@ -1580,40 +1580,38 @@ Notes/out-of-scope:
 
 - No guest account creation.
 
-### 6.2 Add public purchase modal
+### 6.2 Add public guest gift drawer
 
 Priority: P0
 
 Details:
 
-Guest enters name, optional contact/message, quantity, and consent.
+Guests use one themed bottom drawer for product departure, purchase, and success. The purchase view collects name, optional email/message, quantity, and consent.
 
 Tasks:
 
-- [x] Add `PurchaseGiftModal`.
+- [x] Add `GuestGiftDrawer`.
 - [x] Add required name field.
 - [x] Add optional email field.
-- [x] Add optional phone field.
 - [x] Add optional message field.
 - [x] Add quantity selector if remaining > 1.
 - [x] Add consent copy.
 - [x] Add loading/error states.
-- [x] Disable product link for purchased gifts.
-- [x] Render as bottom sheet on mobile, centered dialog ≥ md; sticky 48px footer actions.
+- [x] Route product actions through a departure view and disable both actions for purchased gifts.
+- [x] Render as a bottom drawer at every viewport with sticky actions.
 - [x] Use exact consent copy: "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."
 
 Acceptance criteria:
 
 - Name is required, 2–80 chars.
 - Email validates if present.
-- Phone validates if present.
 - Message max 500 chars.
 - Quantity min 1 and max remaining; selector only renders when remaining > 1.
 - Consent copy visible.
 
 Affected areas:
 
-- `src/components/features/wishlist/purchase-gift-modal.tsx`
+- `src/components/features/wishlist/guest-gift-drawer.tsx`
 - `src/components/shared/gift-card.tsx`
 
 Notes/out-of-scope:
@@ -1630,15 +1628,15 @@ Guest sees thank-you state and can undo briefly.
 
 Tasks:
 
-- [x] Add success state copy: "¡Gracias, {nombre}! Tu regalo fue marcado como comprado. Gracias por tu cariño y por ser parte de este momento."
-- [x] Add `Deshacer` action with live 8s countdown.
+- [x] Add success state copy: "¡Gracias, {nombre}! Tu regalo quedó marcado."
+- [x] Add plain `Deshacer` action backed by the 60-second server expiry.
 - [x] Add `Cerrar` action.
 - [x] Add `purchase.undoRecentPurchase` mutation.
 - [x] Validate token hash.
 - [x] Validate token expiry.
 - [x] Delete purchase record on valid undo.
 - [x] Update UI after undo.
-- [x] Show "el tiempo para deshacer expiró" on expiry.
+- [x] Hide `Deshacer` on expiry without a visible countdown.
 
 Acceptance criteria:
 
@@ -1651,7 +1649,7 @@ Affected areas:
 
 - `src/server/services/purchase.service.ts`
 - `src/server/api/routers/purchase.ts`
-- `src/components/features/wishlist/purchase-gift-modal.tsx`
+- `src/components/features/wishlist/guest-gift-drawer.tsx`
 
 Notes/out-of-scope:
 
@@ -2510,25 +2508,24 @@ Affected areas:
 - `src/lib/gsap/*`
 - Consuming product components.
 
-### 10.3 Complete the PurchaseGiftModal state machine
+### 10.3 Complete the GuestGiftDrawer state machine
 
 Priority: P0
 
 Tasks:
 
-- [ ] Expand `Phase` to `form | loading | success | undo-available | undo-expired | purchase-error`.
-- [ ] Wire `loading` to mutation `isPending`; `purchase-error` to `onError` + retry (no new mutations).
-- [ ] Wire `undo-available` countdown ring + `undo-expired` copy; surface undo toast via Sonner; success-check motion on `success`.
-- [ ] Keep `purchase-gift-modal.test.tsx` green; extend for new transitions.
+- [x] Use product, purchase, and success views in one drawer.
+- [x] Wire loading, retryable purchase error, and inline undo error to existing mutations.
+- [x] Use the server expiry to hide plain `Deshacer` without countdown or toast.
+- [x] Cover drawer transitions in `guest-gift-drawer.test.tsx`.
 
 Acceptance criteria:
 
-- Modal renders all six canvas states from the existing mutation lifecycle.
-- No new server contract.
+- Drawer preserves product/purchase state and uses the additive expiry contract.
 
 Affected areas:
 
-- `src/components/features/wishlist/purchase-gift-modal.tsx`
+- `src/components/features/wishlist/guest-gift-drawer.tsx`
 
 ### 10.4 Confirm GiftCard + dashboard state coverage
 
@@ -2557,7 +2554,7 @@ Priority: P1
 
 Tasks:
 
-- [ ] Add `PurchaseGiftModal` stories covering all six states with stubbed handlers.
+- [x] Add `GuestGiftDrawer` stories for product, purchase, success, expiry, and inline error states.
 - [ ] Add creation-wizard step stories (`event · details · design · gifts · publish`) + auth gate.
 - [ ] Add dashboard-state stories: empty state, `Tabs → Select` nav, slug warning, share copy success/error, archive/restore dialog.
 - [ ] Verify stories render under the seven-theme toolbar with no real network calls.

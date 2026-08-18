@@ -27,7 +27,8 @@ type Props = {
 	categoryName?: string;
 	actionsEnabled?: boolean;
 	status?: GiftCardStatus;
-	onGiftAction?: (gift: PublicGiftViewModel) => void;
+	onProductAction?: (gift: PublicGiftViewModel) => void;
+	onPurchaseAction?: (gift: PublicGiftViewModel) => void;
 	motif?: MotifPreset | null;
 	motifTreatment?: MotifTreatment;
 };
@@ -108,10 +109,12 @@ function formatPrice(amount: string, currency: string): string {
 
 function GiftMeta({
 	gift,
-	isDisabled,
+	showProductAction,
+	onProductAction,
 }: {
 	gift: PublicGiftViewModel;
-	isDisabled: boolean;
+	showProductAction: boolean;
+	onProductAction?: (gift: PublicGiftViewModel) => void;
 }) {
 	return (
 		<div className="mt-2 flex flex-wrap gap-3 text-muted-foreground text-sm">
@@ -121,17 +124,14 @@ function GiftMeta({
 				</span>
 			)}
 			{gift.storeName && <span>{gift.storeName}</span>}
-			{gift.productUrl && (
-				<a
-					aria-disabled={isDisabled}
+			{gift.productUrl && showProductAction && (
+				<button
 					className="underline underline-offset-2"
-					href={isDisabled ? undefined : gift.productUrl}
-					rel="noopener noreferrer"
-					style={{ pointerEvents: isDisabled ? "none" : undefined }}
-					target="_blank"
+					onClick={() => onProductAction?.(gift)}
+					type="button"
 				>
 					Ver producto
-				</a>
+				</button>
 			)}
 		</div>
 	);
@@ -143,7 +143,8 @@ export function GiftCard({
 	categoryName,
 	actionsEnabled = false,
 	status = gift.status,
-	onGiftAction,
+	onProductAction,
+	onPurchaseAction,
 	motif,
 	motifTreatment,
 }: Props) {
@@ -152,6 +153,7 @@ export function GiftCard({
 	const isPartial = status === "partial";
 	const isHidden = status === "hidden";
 	const showAction = actionsEnabled && !isPurchased && !isHidden;
+	const showProductAction = showAction && Boolean(gift.productUrl);
 	const isCollage = cardStyle === "collage";
 	const isCollageRow = cardStyle === "collage-row";
 
@@ -225,22 +227,21 @@ export function GiftCard({
 				</div>
 				{showAction && (
 					<div className="col-span-3 col-start-1 flex w-full shrink-0 items-center justify-end gap-2 self-center sm:col-auto sm:w-auto">
-						{gift.productUrl && (
-							<a
-								aria-label={`Abrir ${gift.name} en una nueva pestaña`}
+						{showProductAction && (
+							<button
+								aria-label={`Ver producto: ${gift.name}`}
 								className="public-btn inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap border border-border bg-card px-3 font-medium text-foreground text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-								href={gift.productUrl}
-								rel="noopener noreferrer"
-								target="_blank"
+								onClick={() => onProductAction?.(gift)}
+								type="button"
 							>
 								<ExternalLink aria-hidden="true" className="size-3.5" />
 								<span>Ver regalo</span>
-							</a>
+							</button>
 						)}
 						<button
 							aria-label={`Marcar como comprado: ${gift.name}`}
 							className="public-btn inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap bg-primary px-3 font-medium text-primary-foreground text-xs transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-							onClick={() => onGiftAction?.(gift)}
+							onClick={() => onPurchaseAction?.(gift)}
 							type="button"
 						>
 							<Check aria-hidden="true" className="size-3.5" />
@@ -276,7 +277,11 @@ export function GiftCard({
 						{gift.priority === "high" && <PriorityBadge priority="high" />}
 						<StatusBadge status={status} />
 					</div>
-					<GiftMeta gift={gift} isDisabled={isPurchased || isHidden} />
+					<GiftMeta
+						gift={gift}
+						onProductAction={onProductAction}
+						showProductAction={showProductAction}
+					/>
 					{gift.publicNote && (
 						<p className="mt-1 text-muted-foreground text-sm">
 							{gift.publicNote}
@@ -291,7 +296,7 @@ export function GiftCard({
 				{showAction && (
 					<button
 						className="public-btn shrink-0 bg-primary px-4 py-2 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
-						onClick={() => onGiftAction?.(gift)}
+						onClick={() => onPurchaseAction?.(gift)}
 						type="button"
 					>
 						Regalar
@@ -371,24 +376,19 @@ export function GiftCard({
 							/>
 						</div>
 					)}
-					{gift.productUrl && (
-						<a
-							aria-disabled={isPurchased || isHidden}
+					{showProductAction && (
+						<button
 							className="mt-1.5 w-fit text-[11px] text-muted-foreground underline underline-offset-2"
-							href={isPurchased || isHidden ? undefined : gift.productUrl}
-							rel="noopener noreferrer"
-							style={{
-								pointerEvents: isPurchased || isHidden ? "none" : undefined,
-							}}
-							target="_blank"
+							onClick={() => onProductAction?.(gift)}
+							type="button"
 						>
 							Ver producto
-						</a>
+						</button>
 					)}
 					{showAction && (
 						<button
 							className="public-btn mt-3 w-full bg-primary px-4 py-1.5 text-primary-foreground text-xs leading-4 transition-colors hover:bg-primary/90"
-							onClick={() => onGiftAction?.(gift)}
+							onClick={() => onPurchaseAction?.(gift)}
 							type="button"
 						>
 							Marcar comprado
@@ -429,7 +429,11 @@ export function GiftCard({
 					</h3>
 					{gift.priority === "high" && <PriorityBadge priority="high" />}
 				</div>
-				<GiftMeta gift={gift} isDisabled={isPurchased || isHidden} />
+				<GiftMeta
+					gift={gift}
+					onProductAction={onProductAction}
+					showProductAction={showProductAction}
+				/>
 				{gift.publicNote && (
 					<p className="mt-2 text-muted-foreground text-sm leading-relaxed">
 						{gift.publicNote}
@@ -443,7 +447,7 @@ export function GiftCard({
 					{showAction && (
 						<button
 							className="public-btn ml-auto bg-primary px-4 py-2 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
-							onClick={() => onGiftAction?.(gift)}
+							onClick={() => onPurchaseAction?.(gift)}
 							type="button"
 						>
 							Regalar
