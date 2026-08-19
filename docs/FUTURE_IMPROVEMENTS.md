@@ -17,6 +17,8 @@ Future ideas stay out of MVP tasks unless required for launch.
 
 ## Sharing & invitations
 
+Transactional email infrastructure (Resend, `src/lib/email/`) exists — see `openspec/changes/add-transactional-email`. Items below that send mail are template + call-site work, not provider setup.
+
 - Custom WhatsApp message editor.
 - Invitation card export.
 - Branded QR codes.
@@ -37,7 +39,7 @@ Future ideas stay out of MVP tasks unless required for launch.
 - Couple/family shared accounts.
 - Invite co-owner by email.
 - Activity log.
-- Owner notifications when gifts are purchased.
+- Owner notifications when gifts are purchased (sender available, see Sharing & invitations).
 - Commenting/notes between collaborators.
 
 ## Gift intelligence

@@ -1,13 +1,26 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const findUnique = vi.hoisted(() => vi.fn());
 const imageResponse = vi.hoisted(() => vi.fn());
+const arrayBufferMock = vi.hoisted(() =>
+	vi.fn(async () => new Uint8Array([1, 2, 3]).buffer),
+);
 const ImageResponseMock = vi.hoisted(
 	() =>
 		class ImageResponseMock {
+			status = 200;
+			headers = new Headers({ "content-type": "image/png" });
+			#element: unknown;
 			constructor(element: unknown, init: unknown) {
+				this.#element = element;
 				imageResponse(element, init);
+			}
+			async arrayBuffer() {
+				return arrayBufferMock();
+			}
+			get element() {
+				return this.#element;
 			}
 		},
 );
@@ -30,46 +43,101 @@ const publishedRow = {
 	],
 };
 
-describe("public Open Graph image", () => {
-	it("renders the fixed branded image from the first safe cover", async () => {
-		findUnique.mockResolvedValueOnce(publishedRow);
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(
-				async () =>
-					new Response(new Uint8Array([1, 2, 3]), {
-						headers: { "content-type": "image/png", "content-length": "3" },
-						status: 200,
-					}),
-			),
-		);
+function stubFetch(handler: (input: unknown, init?: RequestInit) => Response) {
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: unknown, init?: RequestInit) => handler(input, init)),
+	);
+}
 
-		await OpenGraphImage({
+function renderedMarkup(callIndex: number) {
+	return renderToStaticMarkup(
+		imageResponse.mock.calls[callIndex]?.[0] as Parameters<
+			typeof renderToStaticMarkup
+		>[0],
+	);
+}
+
+afterEach(() => {
+	imageResponse.mockClear();
+	arrayBufferMock.mockClear();
+	findUnique.mockReset();
+	vi.unstubAllGlobals();
+	vi.useRealTimers();
+});
+
+describe("public Open Graph image", () => {
+	it("renders the hero composition when the cover image is reachable", async () => {
+		findUnique.mockResolvedValueOnce(publishedRow);
+		stubFetch(() => new Response(null, { status: 200 }));
+
+		const response = await OpenGraphImage({
 			params: Promise.resolve({ slug: "lista-publica" }),
 		});
+
+		expect(response).toBeInstanceOf(Response);
 		expect(imageResponse).toHaveBeenCalledWith(expect.anything(), size);
-		expect(JSON.stringify(imageResponse.mock.calls[0]?.[0])).toContain(
-			"first-cover.png",
-		);
+		expect(renderedMarkup(0)).toContain("first-cover.png");
 		expect(contentType).toBe("image/png");
 	});
 
-	it("uses a branded fallback when the cover cannot be read", async () => {
-		findUnique.mockResolvedValueOnce(publishedRow);
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(async () => new Response(null, { status: 500 })),
-		);
+	it("uses the branded fallback when the wishlist has no cover image", async () => {
+		findUnique.mockResolvedValueOnce({ ...publishedRow, images: [] });
+		stubFetch(() => new Response(null, { status: 200 }));
 
 		await OpenGraphImage({
 			params: Promise.resolve({ slug: "lista-publica" }),
 		});
-		expect(JSON.stringify(imageResponse.mock.calls[1]?.[0])).not.toContain(
-			"first-cover.png",
-		);
-		expect(JSON.stringify(imageResponse.mock.calls[1]?.[0])).toContain(
-			"A Wish For",
-		);
+
+		expect(renderedMarkup(0)).not.toContain("first-cover.png");
+		expect(renderedMarkup(0)).toContain("A Wish For");
+	});
+
+	it("uses the branded fallback when the cover image HEAD check fails", async () => {
+		findUnique.mockResolvedValueOnce(publishedRow);
+		stubFetch(() => new Response(null, { status: 404 }));
+
+		await OpenGraphImage({
+			params: Promise.resolve({ slug: "lista-publica" }),
+		});
+
+		expect(imageResponse).toHaveBeenCalledTimes(1);
+		expect(renderedMarkup(0)).not.toContain("first-cover.png");
+		expect(renderedMarkup(0)).toContain("A Wish For");
+	});
+
+	it("uses the branded fallback when the hero render throws", async () => {
+		findUnique.mockResolvedValueOnce(publishedRow);
+		stubFetch(() => new Response(null, { status: 200 }));
+		imageResponse.mockImplementationOnce(() => {
+			throw new Error("render failed");
+		});
+
+		await OpenGraphImage({
+			params: Promise.resolve({ slug: "lista-publica" }),
+		});
+
+		expect(imageResponse).toHaveBeenCalledTimes(2);
+		expect(renderedMarkup(1)).not.toContain("first-cover.png");
+		expect(renderedMarkup(1)).toContain("A Wish For");
+	});
+
+	it("uses the branded fallback when the hero render hangs past the timeout", async () => {
+		findUnique.mockResolvedValueOnce(publishedRow);
+		stubFetch(() => new Response(null, { status: 200 }));
+		arrayBufferMock.mockImplementationOnce(() => new Promise(() => {}));
+
+		vi.useFakeTimers();
+		const resultPromise = OpenGraphImage({
+			params: Promise.resolve({ slug: "lista-publica" }),
+		});
+		await vi.advanceTimersByTimeAsync(5_000);
+		await resultPromise;
+		vi.useRealTimers();
+
+		expect(imageResponse).toHaveBeenCalledTimes(2);
+		expect(renderedMarkup(1)).not.toContain("first-cover.png");
+		expect(renderedMarkup(1)).toContain("A Wish For");
 	});
 
 	it("returns not-found for non-public and unknown lifecycle states", async () => {
@@ -89,15 +157,12 @@ describe("public Open Graph image", () => {
 
 	it("never receives personalized or owner-only values", async () => {
 		findUnique.mockResolvedValueOnce(publishedRow);
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(async () => new Response(null, { status: 500 })),
-		);
+		stubFetch(() => new Response(null, { status: 200 }));
 		await OpenGraphImage({
 			params: Promise.resolve({ slug: "lista-publica" }),
 		});
 
-		const rendered = JSON.stringify(imageResponse.mock.calls[2]?.[0]);
+		const rendered = renderedMarkup(0);
 		expect(rendered).not.toContain("guest-slug");
 		expect(rendered).not.toContain("delivery");
 		expect(rendered).not.toContain("purchase");
@@ -108,15 +173,12 @@ describe("public Open Graph image", () => {
 			...publishedRow,
 			title: '<script>alert("not executable")</script>',
 		});
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(async () => new Response(null, { status: 500 })),
-		);
+		stubFetch(() => new Response(null, { status: 200 }));
 		await OpenGraphImage({
 			params: Promise.resolve({ slug: "lista-publica" }),
 		});
 
-		const markup = renderToStaticMarkup(imageResponse.mock.calls[3]?.[0]);
+		const markup = renderedMarkup(0);
 		expect(markup).toContain("&lt;script&gt;");
 		expect(markup).not.toContain("<script>");
 	});

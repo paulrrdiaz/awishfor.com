@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines privacy-safe, crawler-readable social metadata and branded preview images for shared public wishlist links without making those links discoverable in search.
-
 ## Requirements
-
 ### Requirement: Published wishlist social metadata
 
 A published wishlist at `/w/<slug>` SHALL return crawler-readable metadata in the initial HTML containing its wishlist title, a non-empty description, an absolute canonical URL, Open Graph website fields, a Twitter summary-large-image card, and at least one absolute 1200×630 preview-image URL. The canonical and social URLs SHALL use the configured public application origin and the clean `/w/<slug>` path.
@@ -23,17 +21,17 @@ A published wishlist at `/w/<slug>` SHALL return crawler-readable metadata in th
 
 ### Requirement: Branded preview image
 
-Each published wishlist SHALL expose a 1200×630 branded preview image that includes the A Wish For identity and the wishlist title. The image SHALL use the first ordered cover image when it can be rendered safely and SHALL fall back to a deterministic branded composition when the wishlist has no cover image or the cover image cannot be loaded.
+Each published wishlist SHALL expose a 1200×630 branded preview image that includes the A Wish For identity and the wishlist title. When the wishlist has a first ordered cover image, that image SHALL be the dominant visual of the composition, with the wishlist identity, event type, and title rendered as a legible overlay on top of it. The image SHALL fall back to a deterministic, text-only branded composition when the wishlist has no cover image or the cover image cannot be rendered. The preview image response SHALL complete within a bounded time even when the remote cover-image host is slow or unreachable, degrading to the fallback composition rather than remaining pending or returning an error.
 
 #### Scenario: First cover image is available
 
-- **WHEN** a published wishlist has one or more ordered cover images and the first image is readable
-- **THEN** its social preview uses that first image in the branded 1200×630 composition
+- **WHEN** a published wishlist has one or more ordered cover images
+- **THEN** its social preview renders that first image as the dominant visual of the branded 1200×630 composition, with the title and identity overlaid legibly on top of it
 
 #### Scenario: Cover image is unavailable
 
-- **WHEN** the wishlist has no cover image or the first image cannot be loaded
-- **THEN** the social preview still returns a valid branded 1200×630 image without a broken external-image dependency
+- **WHEN** the wishlist has no cover image, or the first image cannot be rendered within a bounded time
+- **THEN** the social preview still returns a valid branded 1200×630 image using the text-only fallback composition, without the response hanging on or erroring from the remote host's availability or latency
 
 ### Requirement: Social metadata preserves wishlist privacy
 
@@ -74,3 +72,4 @@ Rich social metadata SHALL coexist with the existing unlisted policy. Every publ
 
 - **WHEN** a published wishlist emits complete Open Graph and Twitter Card metadata
 - **THEN** the same response emits `noindex, nofollow`
+

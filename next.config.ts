@@ -3,6 +3,18 @@ import "./src/env";
 import type { NextConfig } from "next";
 
 const config: NextConfig = {
+	// "immediate" gives revalidateTag/updateTag callers a way to force a hard,
+	// synchronous cache expiration outside Server Actions. Next's built-in
+	// "max" profile is for long-lived content (1yr expire / 30d revalidate)
+	// and only marks tags stale, not expired — wrong for post-mutation
+	// invalidation, which needs the cached entry gone immediately.
+	cacheLife: {
+		immediate: {
+			stale: 0,
+			revalidate: 0,
+			expire: 0,
+		},
+	},
 	images: {
 		remotePatterns: [
 			{

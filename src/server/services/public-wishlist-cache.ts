@@ -40,9 +40,9 @@ export function invalidatePublicWishlist({
 	const slugs = new Set(
 		[slug, previousSlug].filter((value): value is string => Boolean(value)),
 	);
-	revalidateTag(publicWishlistIdTag(wishlistId), "max");
+	revalidateTag(publicWishlistIdTag(wishlistId), "immediate");
 	for (const publicSlug of slugs) {
-		revalidateTag(publicWishlistSlugTag(publicSlug), "max");
+		revalidateTag(publicWishlistSlugTag(publicSlug), "immediate");
 		revalidatePath(`/w/${publicSlug}`);
 		revalidatePath(`/w/${publicSlug}/opengraph-image`);
 	}

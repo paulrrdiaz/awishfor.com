@@ -1,41 +1,224 @@
 import { ImageResponse } from "next/og";
-import { resolveTheme } from "@/config/public-themes";
+import { resolveTheme, type ThemePreset } from "@/config/public-themes";
 import { db } from "@/server/db";
 import {
 	getPublishedWishlistMetadata,
 	type PublicWishlistMetadataDatabase,
+	type PublishedWishlistMetadataProjection,
 } from "@/server/services/public-wishlist-metadata.service";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const publicMetadataDb = db as unknown as PublicWishlistMetadataDatabase;
-const MAX_COVER_BYTES = 2 * 1024 * 1024;
-const COVER_TIMEOUT_MS = 1_500;
+const COVER_EXISTENCE_TIMEOUT_MS = 800;
+// Measured against a real ~2MB UploadThing-hosted cover photo: ~674ms cold,
+// ~350-375ms warm end-to-end fetch+rasterize. 1.5s keeps headroom over cold
+// starts while staying well under typical social-crawler fetch budgets.
+const HERO_RENDER_TIMEOUT_MS = 1_500;
 
-async function safeCoverImage(url: string | undefined): Promise<string | null> {
-	if (!url) return null;
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+	return new Promise<T>((resolve, reject) => {
+		const timer = setTimeout(() => reject(new Error("timeout")), ms);
+		promise.then(
+			(value) => {
+				clearTimeout(timer);
+				resolve(value);
+			},
+			(error) => {
+				clearTimeout(timer);
+				reject(error);
+			},
+		);
+	});
+}
+
+/**
+ * `ImageResponse` (Satori) can silently skip an unreachable `<img>` instead of
+ * throwing, so a broken cover URL can't be caught by wrapping the render in
+ * try/catch alone. A HEAD-only check (no body buffering) rules that out before
+ * the hero composition is attempted.
+ */
+async function coverImageIsReachable(url: string): Promise<boolean> {
 	const controller = new AbortController();
-	const timeout = setTimeout(() => controller.abort(), COVER_TIMEOUT_MS);
+	const timeout = setTimeout(
+		() => controller.abort(),
+		COVER_EXISTENCE_TIMEOUT_MS,
+	);
 	try {
-		const response = await fetch(url, { signal: controller.signal });
-		const type = response.headers.get("content-type") ?? "";
-		const length = Number(response.headers.get("content-length") ?? 0);
-		if (
-			!response.ok ||
-			!type.startsWith("image/") ||
-			length > MAX_COVER_BYTES
-		) {
-			return null;
-		}
-		// Consume a bounded response so a misleading Content-Length cannot make the
-		// image endpoint a large remote transfer proxy.
-		const body = await response.arrayBuffer();
-		return body.byteLength <= MAX_COVER_BYTES ? url : null;
+		const response = await fetch(url, {
+			method: "HEAD",
+			signal: controller.signal,
+		});
+		return response.ok;
 	} catch {
-		return null;
+		return false;
 	} finally {
 		clearTimeout(timeout);
+	}
+}
+
+function IdentityBadge({ theme }: { theme: ThemePreset }) {
+	return (
+		<div
+			style={{
+				background: theme.vars["--primary"],
+				borderRadius: 999,
+				color: theme.vars["--primary-foreground"],
+				display: "flex",
+				fontSize: 24,
+				fontWeight: 700,
+				left: 40,
+				padding: "10px 22px",
+				position: "absolute",
+				top: 40,
+			}}
+		>
+			A Wish For
+		</div>
+	);
+}
+
+function heroComposition(
+	coverUrl: string,
+	wishlist: PublishedWishlistMetadataProjection,
+	theme: ThemePreset,
+) {
+	return (
+		<div
+			style={{
+				display: "flex",
+				height: "100%",
+				position: "relative",
+				width: "100%",
+			}}
+		>
+			{/* biome-ignore lint/performance/noImgElement: ImageResponse requires a direct image source. */}
+			<img
+				alt=""
+				src={coverUrl}
+				style={{
+					height: 630,
+					left: 0,
+					objectFit: "cover",
+					position: "absolute",
+					top: 0,
+					width: 1200,
+				}}
+			/>
+			<div
+				style={{
+					backgroundImage:
+						"linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.82) 100%)",
+					display: "flex",
+					height: "100%",
+					position: "absolute",
+					width: "100%",
+				}}
+			/>
+			<IdentityBadge theme={theme} />
+			<div
+				style={{
+					bottom: 54,
+					color: "#ffffff",
+					display: "flex",
+					flexDirection: "column",
+					left: 54,
+					position: "absolute",
+					right: 54,
+				}}
+			>
+				<div
+					style={{ fontSize: 26, opacity: 0.88, textTransform: "uppercase" }}
+				>
+					{wishlist.eventType.replaceAll("_", " ")}
+				</div>
+				<div
+					style={{
+						fontSize: 64,
+						fontWeight: 700,
+						lineHeight: 1.08,
+						marginTop: 14,
+					}}
+				>
+					{wishlist.title.slice(0, 120)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function fallbackComposition(
+	wishlist: PublishedWishlistMetadataProjection,
+	theme: ThemePreset,
+) {
+	return (
+		<div
+			style={{
+				background: theme.vars["--background"],
+				color: theme.vars["--foreground"],
+				display: "flex",
+				height: "100%",
+				position: "relative",
+				width: "100%",
+			}}
+		>
+			<IdentityBadge theme={theme} />
+			<div
+				style={{
+					bottom: 54,
+					display: "flex",
+					flexDirection: "column",
+					left: 54,
+					position: "absolute",
+					right: 54,
+				}}
+			>
+				<div
+					style={{
+						color: theme.vars["--muted-foreground"],
+						fontSize: 26,
+						textTransform: "uppercase",
+					}}
+				>
+					{wishlist.eventType.replaceAll("_", " ")}
+				</div>
+				<div
+					style={{
+						fontSize: 64,
+						fontWeight: 700,
+						lineHeight: 1.08,
+						marginTop: 14,
+					}}
+				>
+					{wishlist.title.slice(0, 120)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+/** Renders the hero composition fully (bounded) so failures can fall back before headers are sent. */
+async function renderHeroComposition(
+	coverUrl: string,
+	wishlist: PublishedWishlistMetadataProjection,
+	theme: ThemePreset,
+): Promise<Response | null> {
+	try {
+		const response = new ImageResponse(
+			heroComposition(coverUrl, wishlist, theme),
+			size,
+		);
+		const buffer = await withTimeout(
+			response.arrayBuffer(),
+			HERO_RENDER_TIMEOUT_MS,
+		);
+		return new Response(buffer, {
+			headers: response.headers,
+			status: response.status,
+		});
+	} catch {
+		return null;
 	}
 }
 
@@ -51,63 +234,12 @@ export default async function OpenGraphImage({
 	}
 
 	const theme = resolveTheme(wishlist.themeId);
-	const cover = await safeCoverImage(wishlist.images[0]?.url);
-	return new ImageResponse(
-		<div
-			style={{
-				background: theme.vars["--background"],
-				color: theme.vars["--foreground"],
-				display: "flex",
-				height: "100%",
-				padding: 54,
-				position: "relative",
-				width: "100%",
-			}}
-		>
-			{cover && (
-				// biome-ignore lint/performance/noImgElement: ImageResponse requires a direct image source.
-				<img
-					alt=""
-					height="100%"
-					src={cover}
-					style={{
-						borderRadius: 28,
-						objectFit: "cover",
-						opacity: 0.34,
-						position: "absolute",
-						right: 54,
-						top: 54,
-						width: 440,
-					}}
-				/>
-			)}
-			<div style={{ display: "flex", flexDirection: "column", maxWidth: 760 }}>
-				<div
-					style={{
-						color: theme.vars["--primary"],
-						fontSize: 36,
-						fontWeight: 700,
-					}}
-				>
-					A Wish For
-				</div>
-				<div
-					style={{ fontSize: 30, marginTop: 96, textTransform: "uppercase" }}
-				>
-					{wishlist.eventType.replaceAll("_", " ")}
-				</div>
-				<div
-					style={{
-						fontSize: 72,
-						fontWeight: 700,
-						lineHeight: 1.06,
-						marginTop: 20,
-					}}
-				>
-					{wishlist.title.slice(0, 120)}
-				</div>
-			</div>
-		</div>,
-		size,
-	);
+	const coverUrl = wishlist.images[0]?.url;
+
+	if (coverUrl && (await coverImageIsReachable(coverUrl))) {
+		const hero = await renderHeroComposition(coverUrl, wishlist, theme);
+		if (hero) return hero;
+	}
+
+	return new ImageResponse(fallbackComposition(wishlist, theme), size);
 }

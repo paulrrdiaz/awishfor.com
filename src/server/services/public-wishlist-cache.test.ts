@@ -25,9 +25,9 @@ describe("public wishlist invalidation", () => {
 		});
 
 		expect(revalidateTagMock.mock.calls).toEqual([
-			["public-wishlist:wishlist_1", "max"],
-			["public-wishlist-slug:new-slug", "max"],
-			["public-wishlist-slug:old-slug", "max"],
+			["public-wishlist:wishlist_1", "immediate"],
+			["public-wishlist-slug:new-slug", "immediate"],
+			["public-wishlist-slug:old-slug", "immediate"],
 		]);
 		expect(revalidatePathMock.mock.calls).toEqual([
 			["/w/new-slug"],
@@ -54,7 +54,7 @@ describe("public wishlist invalidation", () => {
 		});
 		expect(revalidateTagMock).toHaveBeenCalledWith(
 			"public-wishlist:wishlist_1",
-			"max",
+			"immediate",
 		);
 	});
 
