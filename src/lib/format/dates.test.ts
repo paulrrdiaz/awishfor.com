@@ -47,13 +47,25 @@ describe("formatEventDate", () => {
 		expect(result).toMatch(/june/i);
 	});
 
-	it("preserves the stored calendar day for viewers west of UTC", () => {
+	it("begins with the capitalized Spanish weekday name", () => {
+		const date = new Date("2026-12-25T00:00:00Z");
+		const result = formatEventDate(date, "es");
+		expect(result).toMatch(/^Viernes, /);
+	});
+
+	it("begins with the capitalized English weekday name", () => {
+		const date = new Date("2026-12-25T00:00:00Z");
+		const result = formatEventDate(date, "en");
+		expect(result).toMatch(/^Friday, /);
+	});
+
+	it("preserves the stored calendar day and weekday for viewers west of UTC", () => {
 		const previousTimezone = process.env.TZ;
 		process.env.TZ = "America/Lima";
 
 		try {
 			const result = formatEventDate("2026-09-26T00:00:00.000Z", "es");
-			expect(result).toMatch(/^26 de (septiembre|setiembre) de 2026$/i);
+			expect(result).toMatch(/^Sábado, 26 de (septiembre|setiembre) de 2026$/i);
 		} finally {
 			if (previousTimezone === undefined) {
 				delete process.env.TZ;

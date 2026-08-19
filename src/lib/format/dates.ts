@@ -36,6 +36,7 @@ export function formatEventDate(
 ): string {
 	const d = typeof date === "string" ? new Date(date) : date;
 	const formattedDate = new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+		weekday: "long",
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -43,10 +44,15 @@ export function formatEventDate(
 		// in the viewer's local timezone can shift the displayed day backwards.
 		timeZone: "UTC",
 	}).format(d);
+	// CLDR places the weekday first for es-PE/en-US, but es-PE returns it
+	// lowercase — capitalize index 0 (no-op for en-US). Revisit if a future
+	// locale doesn't lead with the weekday.
+	const capitalizedDate =
+		formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
 	return time
-		? `${formattedDate} · ${formatEventTime(time, locale)}`
-		: formattedDate;
+		? `${capitalizedDate} · ${formatEventTime(time, locale)}`
+		: capitalizedDate;
 }
 
 /** Post meta line form, e.g. "14 ago 2026". */
