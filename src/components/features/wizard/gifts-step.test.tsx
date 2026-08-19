@@ -235,6 +235,26 @@ describe("GiftsStep", () => {
 		]);
 	});
 
+	it("shows a friendly error and keeps the URL when metadata is unavailable", async () => {
+		importFromUrlMock.mockResolvedValue({
+			ok: false,
+			error: { kind: "metadata_unavailable" },
+		});
+		const user = userEvent.setup();
+		const { store } = renderStep(makeDraft({ gifts: [] }));
+
+		const urlInput = screen.getByPlaceholderText(/tienda.com/i);
+		await user.type(urlInput, "https://tienda.com/sin-datos");
+		await user.click(screen.getByRole("button", { name: /^importar$/i }));
+
+		expect(screen.getByText(/no encontramos datos del producto/i)).toBeTruthy();
+		expect(store.getState().draft.gifts).toEqual([]);
+		expect(urlInput).toHaveValue("https://tienda.com/sin-datos");
+		expect(
+			screen.getByRole("button", { name: /agregar regalo manualmente/i }),
+		).toBeTruthy();
+	});
+
 	it("renders icon-only category actions with category-specific accessible labels", () => {
 		renderStep();
 

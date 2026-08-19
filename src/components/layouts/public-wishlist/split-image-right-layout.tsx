@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
-import { DeliveryCard } from "@/components/shared/delivery-card";
-import { GiftListBand } from "@/components/shared/gift-list-band";
+import { GiftSection } from "@/components/shared/gift-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { HeroImageSlot } from "@/components/shared/hero-gallery";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
@@ -112,7 +111,6 @@ export function SplitImageRightLayout({
 										</div>
 									))}
 							</div>
-							<DeliveryCard className="mt-4" delivery={delivery} />
 
 							{wishlist.eventDate && (
 								<div className="mt-6 flex justify-center">
@@ -152,7 +150,11 @@ export function SplitImageRightLayout({
 
 					{rsvpSection}
 
-					<GiftListBand className="-mx-6 sm:-mx-7">
+					<GiftSection
+						className="-mx-6 sm:-mx-7"
+						delivery={delivery}
+						deliveryContentClassName="px-6 sm:px-7"
+					>
 						<section
 							className="scroll-mt-[59px] px-6 pt-5 pb-3 sm:px-7"
 							id="regalos"
@@ -175,7 +177,7 @@ export function SplitImageRightLayout({
 								showSort={false}
 							/>
 						</section>
-					</GiftListBand>
+					</GiftSection>
 				</div>
 
 				<div

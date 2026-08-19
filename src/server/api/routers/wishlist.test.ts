@@ -9,6 +9,7 @@ const currentUserMock = vi.hoisted(() => vi.fn());
 const publishWishlistMock = vi.hoisted(() => vi.fn());
 const publishWishlistFromWizardMock = vi.hoisted(() => vi.fn());
 const saveWishlistDraftMock = vi.hoisted(() => vi.fn());
+const persistDraftGiftImagesMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
 const revalidateTagMock = vi.hoisted(() => vi.fn());
 
@@ -27,6 +28,12 @@ vi.mock("@/server/services/wishlist.service", async (importOriginal) => {
 		saveWishlistDraft: saveWishlistDraftMock,
 	};
 });
+
+vi.mock("@/server/services/imported-image.service", () => ({
+	persistDraftGiftImages: persistDraftGiftImagesMock,
+}));
+
+persistDraftGiftImagesMock.mockImplementation(async (gifts) => [...gifts]);
 
 vi.mock("next/cache", () => ({
 	revalidatePath: revalidatePathMock,

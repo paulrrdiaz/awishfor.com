@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
-import { DeliveryCard } from "@/components/shared/delivery-card";
 import { EventDetails } from "@/components/shared/event-details";
-import { GiftListBand } from "@/components/shared/gift-list-band";
+import { GiftSection } from "@/components/shared/gift-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroCarouselGallery,
@@ -158,7 +157,6 @@ export function CollageStaggeredLayout({
 						variant="compact"
 						wishlist={wishlist}
 					/>
-					<DeliveryCard className="mx-5 mb-5" delivery={delivery} />
 					{motif && (
 						<MotifDivider
 							motif={motif}
@@ -192,11 +190,13 @@ export function CollageStaggeredLayout({
 
 			{rsvpSection}
 
-			<GiftListBand
+			<GiftSection
 				className={cn(
 					"relative",
 					isEmbedded ? "w-full" : "left-1/2 w-screen -translate-x-1/2",
 				)}
+				delivery={delivery}
+				deliveryContentClassName="mx-auto w-full max-w-[1160px] px-5 sm:px-[22px]"
 			>
 				<section
 					className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-[18px] pb-16 sm:px-[22px]"
@@ -217,7 +217,7 @@ export function CollageStaggeredLayout({
 						showSort={false}
 					/>
 				</section>
-			</GiftListBand>
+			</GiftSection>
 
 			{!isCompact && (
 				<WishlistThankYou

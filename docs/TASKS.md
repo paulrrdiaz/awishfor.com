@@ -1299,6 +1299,7 @@ Notes/out-of-scope:
 
 - No JavaScript execution.
 - No Puppeteer/Playwright.
+- 2026-08-18: `fix-silent-url-import-failures` — automatic import now requires meaningful metadata (name, image, or price) to return `ok: true`; a metadata-empty direct response retries once through Bright Data before returning the typed `metadata_unavailable` error instead of a sparse draft.
 
 ### 5.2 Add URL cleanup and store display mapping
 

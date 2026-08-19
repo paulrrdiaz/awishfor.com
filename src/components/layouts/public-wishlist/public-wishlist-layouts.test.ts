@@ -157,9 +157,9 @@ describe("public wishlist gift list band", () => {
 		for (const file of SELF_CONTAINED_FILES) {
 			const source = await readFile(layoutPath(file), "utf8");
 			expect(source).toContain(
-				'import { GiftListBand } from "@/components/shared/gift-list-band"',
+				'import { GiftSection } from "@/components/shared/gift-section"',
 			);
-			expect(source).toContain("<GiftListBand");
+			expect(source).toContain("<GiftSection");
 			expect(source).toContain('id="regalos"');
 		}
 	});
@@ -170,9 +170,9 @@ describe("public wishlist gift list band", () => {
 			"utf8",
 		);
 		expect(bodySource).toContain(
-			'import { GiftListBand } from "@/components/shared/gift-list-band"',
+			'import { GiftSection } from "@/components/shared/gift-section"',
 		);
-		expect(bodySource).toContain("<GiftListBand");
+		expect(bodySource).toContain("<GiftSection");
 		expect(bodySource).toContain('id="regalos"');
 	});
 });

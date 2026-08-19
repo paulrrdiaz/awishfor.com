@@ -64,6 +64,30 @@ const optionalUrl = (fieldName: string) =>
 			.optional(),
 	);
 
+const nullableOptionalUrl = (fieldName: string) =>
+	z.preprocess(
+		(v) => (typeof v === "string" && v.trim() === "" ? null : v),
+		z
+			.url(`${fieldName} must be a valid URL`)
+			.max(
+				GIFT_URL_MAX_LENGTH,
+				`${fieldName} must be at most ${GIFT_URL_MAX_LENGTH} characters`,
+			)
+			.refine(
+				(url) => {
+					try {
+						const { protocol } = new URL(url);
+						return protocol === "http:" || protocol === "https:";
+					} catch {
+						return false;
+					}
+				},
+				{ message: `${fieldName} must use http or https scheme` },
+			)
+			.nullable()
+			.optional(),
+	);
+
 const optionalTrimmedString = (fieldName: string, maxLength: number) =>
 	z.preprocess(
 		(v) =>
@@ -105,7 +129,7 @@ export const updateGiftSchema = z.object({
 	categoryId: z.string().nullable().optional(),
 	name: giftNameSchema.optional(),
 	productUrl: optionalUrl("Product URL"),
-	imageUrl: optionalUrl("Image URL"),
+	imageUrl: nullableOptionalUrl("Image URL"),
 	storeName: optionalTrimmedString("Store name", GIFT_STORE_NAME_MAX_LENGTH),
 	size: optionalTrimmedString("Size", GIFT_SIZE_MAX_LENGTH),
 	priceAmount: giftPriceAmountSchema,

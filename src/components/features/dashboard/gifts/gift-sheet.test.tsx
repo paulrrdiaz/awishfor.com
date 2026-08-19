@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
@@ -8,10 +8,12 @@ import { GiftSheet } from "./gift-sheet";
 
 const importFromUrlMock = vi.hoisted(() => vi.fn());
 const toastInfoMock = vi.hoisted(() => vi.fn());
+const toastWarningMock = vi.hoisted(() => vi.fn());
+const updateGiftActionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/app/(protected)/dashboard/wishlists/[id]/gifts/actions", () => ({
 	createGiftAction: vi.fn(),
-	updateGiftAction: vi.fn(),
+	updateGiftAction: updateGiftActionMock,
 }));
 
 vi.mock("@/components/features/wishlist/image-upload", () => ({
@@ -25,7 +27,7 @@ vi.mock("sonner", () => ({
 		error: vi.fn(),
 		info: toastInfoMock,
 		success: vi.fn(),
-		warning: vi.fn(),
+		warning: toastWarningMock,
 	},
 }));
 
@@ -175,5 +177,42 @@ describe("GiftSheet re-import", () => {
 		expect(toastInfoMock).toHaveBeenCalledWith(
 			"La tienda devolvió la misma imagen. Si sigue sin cargar, súbela manualmente.",
 		);
+	});
+
+	it("removes a blocked retailer image after re-import", async () => {
+		importFromUrlMock.mockResolvedValue({
+			ok: true,
+			draft: {
+				productUrl: gift.productUrl,
+			},
+		});
+		const user = userEvent.setup();
+
+		render(
+			<GiftSheet
+				gift={gift}
+				onOpenChange={vi.fn()}
+				open
+				wishlistId="wishlist-1"
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Reimportar datos" }));
+
+		expect(screen.getByTestId("image-upload")).toHaveAttribute(
+			"data-value",
+			"",
+		);
+		expect(toastWarningMock).toHaveBeenCalledWith(
+			"La tienda bloqueó la imagen anterior. La retiramos; puedes subir una nueva manualmente.",
+		);
+
+		await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		await waitFor(() => {
+			expect(updateGiftActionMock).toHaveBeenCalledWith(
+				"wishlist-1",
+				expect.objectContaining({ imageUrl: null }),
+			);
+		});
 	});
 });

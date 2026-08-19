@@ -25,6 +25,7 @@ import {
 	mapDashboardWishlistOverview,
 	mapDashboardWishlistSummary,
 } from "@/server/mappers/dashboard-wishlist.mapper";
+import { persistDraftGiftImages } from "@/server/services/imported-image.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import { invalidatePublicWishlist } from "@/server/services/public-wishlist-cache";
 import {
@@ -276,11 +277,13 @@ export const wishlistRouter = createTRPCRouter({
 		.input(saveDraftWishlistSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
+			const gifts = await persistDraftGiftImages(input.gifts);
 
 			try {
 				const published = await publishWishlistFromWizard(ctx.db, {
 					ownerId,
 					...input,
+					gifts,
 				});
 				if (published.status === "published") {
 					invalidatePublicWishlist({
@@ -305,10 +308,12 @@ export const wishlistRouter = createTRPCRouter({
 		.input(saveDraftWishlistSchema)
 		.mutation(async ({ ctx, input }) => {
 			const ownerId = await getLocalUserId(ctx);
+			const gifts = await persistDraftGiftImages(input.gifts);
 
 			return saveWishlistDraft(ctx.db, {
 				ownerId,
 				...input,
+				gifts,
 			});
 		}),
 

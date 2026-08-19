@@ -41,6 +41,8 @@ const IMPORT_ERROR_MESSAGES: Record<string, string> = {
 	too_many_redirects: "Ese enlace redirige demasiadas veces.",
 	oversized: "La página es demasiado grande para importarla.",
 	invalid_url: "Ingresa un enlace válido que empiece con http o https.",
+	metadata_unavailable:
+		"No encontramos datos del producto en ese enlace. Intenta con otro enlace o completa los datos manualmente.",
 };
 
 const EYEBROW = "font-mono text-[11px] font-medium uppercase tracking-[0.14em]";

@@ -16,7 +16,8 @@ type Props = {
 	wishlist: EventDetailsWishlist;
 	variant?: EventDetailsVariant;
 	size?: EventDetailsSize;
-	grouped?: boolean;
+	/** Compact-only: one column, divider lines between rows, no gaps. */
+	stacked?: boolean;
 	className?: string;
 };
 
@@ -29,7 +30,7 @@ export function EventDetails({
 	wishlist,
 	variant = "block",
 	size = "sm",
-	grouped = false,
+	stacked = false,
 	className,
 }: Props) {
 	const details = [
@@ -64,7 +65,7 @@ export function EventDetails({
 	if (variant === "compact") {
 		const isMd = size === "md";
 
-		if (grouped) {
+		if (stacked) {
 			return (
 				<section
 					className={cn(

@@ -103,66 +103,23 @@ The delivery presentation SHALL render for any visitor of a published wishlist's
 - **WHEN** a guest opens their personalized wishlist link
 - **THEN** the delivery card renders with the same content as the anonymous route
 
-### Requirement: Delivery card in the event-details card set
-
-The public wishlist page SHALL present the delivery details in a dedicated card that reads as a peer of the event-detail cards (date, location, dress code). The card SHALL carry the eyebrow label `ENVÍO A DOMICILIO` in the same treatment as its sibling cards' labels, followed by the line `Si prefieres enviarlo a casa`, followed by the delivery details and the copy action. The card SHALL NOT render as an entry inside the event-details grid, and SHALL NOT alter the labels, order, or presentation of the existing event-detail cards.
-
-#### Scenario: Card renders with the event details
-
-- **WHEN** a published wishlist has a delivery address and at least one event detail
-- **THEN** the delivery card renders alongside the event-detail cards with the eyebrow `ENVÍO A DOMICILIO`
-
-#### Scenario: Intro line is exact
-
-- **WHEN** the delivery card renders
-- **THEN** the line `Si prefieres enviarlo a casa` appears between the eyebrow label and the delivery details
-
-#### Scenario: Card renders when there are no event details
-
-- **WHEN** a published wishlist has a delivery address but no event date, no location, and no dress code
-- **THEN** the delivery card still renders, even though no event-detail cards render
-
-#### Scenario: Event details are unaffected
-
-- **WHEN** the delivery card renders next to the event-detail cards
-- **THEN** the date, location, and dress code cards show the same labels and values they showed before this capability existed
-
-### Requirement: Delivery card placement adapts to the layout
-
-The delivery card SHALL render on every public wishlist layout. Where the event details are presented as a single-column panel, the card SHALL be positioned as the last item of that panel. Where the event details are presented as a horizontal band, the card SHALL be positioned directly beneath that band and SHALL NOT leave an orphaned cell in the band's grid.
-
-#### Scenario: Single-column details panel
-
-- **WHEN** a layout presents its event details as a vertical single-column panel
-- **THEN** the delivery card renders as the final card in that panel
-
-#### Scenario: Horizontal details band
-
-- **WHEN** a layout presents its event details as a horizontal multi-column band
-- **THEN** the delivery card renders as a full-width element directly below the band rather than as an extra cell inside it
-
-#### Scenario: Every layout is covered
-
-- **WHEN** a wishlist with a delivery address is rendered under any available public layout
-- **THEN** the delivery card renders in that layout
-
 ### Requirement: Delivery details keep their itemized presentation
 
-The delivery card SHALL present each available delivery field on its own line with a leading pictogram — recipient name, address, and phone — omitting the line for any absent field, while the copy action continues to write the single composed line. The pictograms SHALL be hidden from assistive technology.
+The product departure drawer SHALL present each available delivery field on its own line with a leading pictogram — recipient name, address, and phone — omitting the line for any absent field, while the copy action continues to write the single composed line. The pictograms SHALL be hidden from assistive technology. The top-level delivery bar SHALL NOT use this itemized presentation; it shows the composed line as specified in "Delivery bar presentation".
 
 #### Scenario: All three fields present
 
-- **WHEN** the wishlist has a recipient name, an address, and a phone
-- **THEN** the card shows three lines, one per field, each with its pictogram
+- **WHEN** the product departure drawer renders for a wishlist with a recipient name, an address, and a phone
+- **THEN** the drawer shows three lines, one per field, each with its pictogram
 
 #### Scenario: Only the address is present
 
-- **WHEN** the wishlist has an address but no recipient name and no phone
-- **THEN** the card shows only the address line
+- **WHEN** the product departure drawer renders for a wishlist with an address but no recipient name and no phone
+- **THEN** the drawer shows only the address line
 
 #### Scenario: Copy still writes the composed line
 
-- **WHEN** the guest activates the card's copy action
+- **WHEN** the guest activates the drawer's copy action
 - **THEN** the clipboard receives the single composed delivery line, not the itemized text
 
 ### Requirement: Delivery block inside the product departure drawer
@@ -188,3 +145,47 @@ The product departure drawer SHALL present delivery details as a contained block
 
 - **WHEN** a wishlist with a delivery address renders any supported welcome-message variant
 - **THEN** its existing delivery postscript continues to render with the same content, composition, and copy behavior
+
+### Requirement: Delivery presentation renders after the gift list
+
+The delivery presentation SHALL render immediately after the gift list section on every public wishlist layout and in every render mode, including `compact`, whenever the wishlist has a delivery address. It SHALL NOT render before, inside, or alongside the event-details cards, and its position relative to the gift list SHALL be identical across all layouts rather than varying by each layout's event-details composition.
+
+#### Scenario: Delivery renders after the gift list
+
+- **WHEN** a published wishlist has a delivery address
+- **THEN** the delivery presentation renders directly after the gift list section, before the thank-you message
+
+#### Scenario: Every layout places it identically
+
+- **WHEN** a wishlist with a delivery address is rendered under any available public layout
+- **THEN** the delivery presentation renders in the same position relative to the gift list in every layout
+
+#### Scenario: Compact mode shows delivery when present
+
+- **WHEN** a wishlist with a delivery address renders in `compact` mode
+- **THEN** the delivery presentation renders after the gift list, matching `full` and `preview` mode behavior
+
+#### Scenario: No address means no presentation
+
+- **WHEN** a wishlist has no delivery address
+- **THEN** no delivery presentation renders in any render mode, and the gift list and thank-you message keep their normal spacing
+
+### Requirement: Delivery bar presentation
+
+The top-level delivery presentation SHALL render as a full-width bar distinct from the event-detail cards: an icon badge, the eyebrow label `Envíos a domicilio`, the composed delivery line rendered as a single line of text, and one copy action using the button treatment (not the compact text-link treatment). It SHALL NOT present the delivery fields as separate pictogram-per-field rows; that itemized presentation remains exclusive to the product departure drawer.
+
+#### Scenario: Bar shows the composed line
+
+- **WHEN** the delivery bar renders for a wishlist with a recipient name, address, and phone
+- **THEN** it shows one bold line combining all three, matching the composed delivery line, without separate pictogram rows
+
+#### Scenario: Bar shows a button-style copy action
+
+- **WHEN** the delivery bar renders
+- **THEN** its copy action uses the button treatment and writes the composed delivery line to the clipboard, confirming and reverting per the existing copy-action behavior
+
+#### Scenario: Bar omits absent fields from the line
+
+- **WHEN** the delivery bar renders for a wishlist with only an address
+- **THEN** the composed line shows only the address, with no doubled, leading, or trailing separators
+

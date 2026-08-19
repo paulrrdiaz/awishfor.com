@@ -22,7 +22,8 @@ export type ImportErrorKind =
 	| "blocked_host"
 	| "too_many_redirects"
 	| "oversized"
-	| "invalid_url";
+	| "invalid_url"
+	| "metadata_unavailable";
 
 export type ImportResult =
 	| { ok: true; draft: ImportedGiftDraft }
@@ -511,71 +512,140 @@ function mergeMetadata(sources: MetadataFields[]): MetadataFields {
 	return result;
 }
 
+// storeName/domain alone doesn't prove extraction worked, so it's excluded here.
+export function hasMeaningfulMetadata(meta: MetadataFields): boolean {
+	return Boolean(
+		meta.name?.trim() ||
+			meta.imageUrl?.trim() ||
+			(meta.priceAmount !== undefined && Number.isFinite(meta.priceAmount)),
+	);
+}
+
+type MetadataCandidate = {
+	meta: MetadataFields;
+	domain: string;
+};
+
+function buildMetadataCandidate(
+	html: string,
+	finalUrl: string,
+): MetadataCandidate {
+	const jsonLd = extractJsonLd(html, finalUrl);
+	const og = extractOpenGraph(html);
+	const twitter = extractTwitterCard(html);
+	const title = extractTitle(html);
+	const domain = domainFromUrl(finalUrl);
+
+	const meta = mergeMetadata([
+		jsonLd,
+		og,
+		twitter,
+		{ name: title },
+		{ storeName: domain },
+	]);
+
+	return { meta, domain };
+}
+
 // --- Public API ---
 
 export type ImporterDeps = {
 	fetch?: FetchFn;
 	brightDataApiKey?: string;
 	brightDataWebUnlockerZone?: string;
+	persistImage?: (url: string) => Promise<string | undefined>;
 };
+
+async function persistImportedImage(
+	imageUrl: string | undefined,
+	persistImage: ImporterDeps["persistImage"],
+): Promise<string | undefined> {
+	if (!imageUrl || !persistImage) return imageUrl;
+
+	try {
+		return await persistImage(imageUrl);
+	} catch {
+		// Product metadata is still useful when a retailer blocks its image.
+		return undefined;
+	}
+}
+
+async function buildSuccessResult(
+	page: { html: string; finalUrl: string },
+	candidate: MetadataCandidate,
+	deps: ImporterDeps,
+): Promise<ImportResult> {
+	const imageUrl = await persistImportedImage(
+		candidate.meta.imageUrl,
+		deps.persistImage,
+	);
+
+	return {
+		ok: true,
+		draft: {
+			name: candidate.meta.name,
+			productUrl: page.finalUrl,
+			imageUrl,
+			storeName: candidate.meta.storeName ?? candidate.domain,
+			priceAmount: candidate.meta.priceAmount,
+			priceCurrency: candidate.meta.priceCurrency,
+		},
+	};
+}
 
 export async function importGiftFromUrl(
 	deps: ImporterDeps,
 	input: { url: string },
 ): Promise<ImportResult> {
 	const fetchFn = deps.fetch ?? globalThis.fetch;
+	const brightDataConfig =
+		deps.brightDataApiKey && deps.brightDataWebUnlockerZone
+			? { apiKey: deps.brightDataApiKey, zone: deps.brightDataWebUnlockerZone }
+			: undefined;
 
 	try {
 		let page: { html: string; finalUrl: string };
+		let usedFallback = false;
 		try {
 			page = await safeFetch(input.url, fetchFn);
 		} catch (err) {
 			const shouldUseBrightDataFallback =
 				err instanceof ImportFetchError && err.kind === "blocked";
 
-			if (
-				shouldUseBrightDataFallback &&
-				deps.brightDataApiKey &&
-				deps.brightDataWebUnlockerZone
-			) {
+			if (shouldUseBrightDataFallback && brightDataConfig) {
 				page = await fetchViaBrightData(
 					input.url,
 					fetchFn,
-					deps.brightDataApiKey,
-					deps.brightDataWebUnlockerZone,
+					brightDataConfig.apiKey,
+					brightDataConfig.zone,
 				);
+				usedFallback = true;
 			} else {
 				throw err;
 			}
 		}
 
-		const { html, finalUrl } = page;
+		let candidate = buildMetadataCandidate(page.html, page.finalUrl);
 
-		const jsonLd = extractJsonLd(html, finalUrl);
-		const og = extractOpenGraph(html);
-		const twitter = extractTwitterCard(html);
-		const title = extractTitle(html);
-		const domain = domainFromUrl(finalUrl);
+		if (
+			!hasMeaningfulMetadata(candidate.meta) &&
+			!usedFallback &&
+			brightDataConfig
+		) {
+			page = await fetchViaBrightData(
+				input.url,
+				fetchFn,
+				brightDataConfig.apiKey,
+				brightDataConfig.zone,
+			);
+			candidate = buildMetadataCandidate(page.html, page.finalUrl);
+		}
 
-		const meta = mergeMetadata([
-			jsonLd,
-			og,
-			twitter,
-			{ name: title },
-			{ storeName: domain },
-		]);
+		if (!hasMeaningfulMetadata(candidate.meta)) {
+			return { ok: false, error: { kind: "metadata_unavailable" } };
+		}
 
-		return {
-			ok: true,
-			draft: {
-				name: meta.name,
-				productUrl: finalUrl,
-				imageUrl: meta.imageUrl,
-				storeName: meta.storeName ?? domain,
-				priceAmount: meta.priceAmount,
-				priceCurrency: meta.priceCurrency,
-			},
-		};
+		return await buildSuccessResult(page, candidate, deps);
 	} catch (err) {
 		if (err instanceof ImportFetchError) {
 			return { ok: false, error: { kind: err.kind } };

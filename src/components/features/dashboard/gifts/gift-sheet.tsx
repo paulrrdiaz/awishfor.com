@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { isManagedGiftImageUrl } from "@/lib/wishlist/gift-image";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import {
 	GIFT_NAME_MAX_LENGTH,
@@ -176,9 +177,17 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 				setImportError("No pudimos importar ese enlace.");
 				return;
 			}
+			const removedBlockedRetailerImage = Boolean(
+				!result.draft.imageUrl &&
+					previousImageUrl &&
+					!isManagedGiftImageUrl(previousImageUrl),
+			);
 			if (result.draft.name) form.setValue("name", result.draft.name);
-			if (result.draft.imageUrl)
+			if (result.draft.imageUrl) {
 				form.setValue("imageUrl", result.draft.imageUrl);
+			} else if (removedBlockedRetailerImage) {
+				form.setValue("imageUrl", null);
+			}
 			if (result.draft.storeName)
 				form.setValue("storeName", result.draft.storeName);
 			if (result.draft.priceAmount != null)
@@ -195,6 +204,10 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 					);
 				} else if (result.draft.imageUrl) {
 					toast.success("Datos reimportados. Guarda los cambios.");
+				} else if (removedBlockedRetailerImage) {
+					toast.warning(
+						"La tienda bloqueó la imagen anterior. La retiramos; puedes subir una nueva manualmente.",
+					);
 				} else {
 					toast.warning(
 						"La tienda no devolvió una imagen. Puedes subirla manualmente.",
@@ -219,7 +232,6 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 					priceCurrency: values.priceCurrency || undefined,
 					quantityNeeded: values.quantityNeeded,
 					productUrl: values.productUrl || undefined,
-					imageUrl: values.imageUrl || undefined,
 					publicNote: values.publicNote || undefined,
 					priority: values.priority,
 					visibilityStatus: values.visibilityStatus,
@@ -228,6 +240,7 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 				if (mode === "create") {
 					await createGiftAction({
 						...shared,
+						imageUrl: values.imageUrl ?? undefined,
 						wishlistId,
 						categoryId: values.categoryId || undefined,
 						sortOrder: 0,
@@ -237,6 +250,7 @@ export function GiftSheet({ open, onOpenChange, wishlistId, gift }: Props) {
 					await updateGiftAction(wishlistId, {
 						...shared,
 						giftId: gift.id,
+						imageUrl: values.imageUrl,
 						categoryId: values.categoryId || null,
 					});
 					toast.success("Cambios guardados");

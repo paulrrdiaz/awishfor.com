@@ -104,6 +104,12 @@ describe("gift validation", () => {
 		).toThrow();
 	});
 
+	it("accepts null to clear an image on update", () => {
+		expect(
+			updateGiftSchema.parse({ giftId: "gift_1", imageUrl: null }),
+		).toMatchObject({ imageUrl: null });
+	});
+
 	it("rejects negative price amounts", () => {
 		expect(() =>
 			createGiftSchema.parse({ ...baseCreate, priceAmount: -1 }),

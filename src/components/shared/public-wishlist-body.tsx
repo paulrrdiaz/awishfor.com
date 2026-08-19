@@ -2,10 +2,9 @@ import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import type { PublicWishlistMode } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { Countdown } from "@/components/shared/countdown";
-import { DeliveryCard } from "@/components/shared/delivery-card";
 import { EventDetails } from "@/components/shared/event-details";
 import { GiftGrid } from "@/components/shared/gift-grid";
-import { GiftListBand } from "@/components/shared/gift-list-band";
+import { GiftSection } from "@/components/shared/gift-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import { MotifDivider } from "@/components/shared/motif/motif-divider";
 import { ProgressSummary } from "@/components/shared/progress-summary";
@@ -56,12 +55,6 @@ export function PublicWishlistBody({
 	return (
 		<>
 			{!isCompact && <EventDetails wishlist={wishlist} />}
-			{!isCompact && (
-				<DeliveryCard
-					className="mx-auto mb-6 w-[calc(100%-3rem)] max-w-4xl"
-					delivery={delivery}
-				/>
-			)}
 
 			{!isCompact && wishlist.eventDate && (
 				<Countdown
@@ -95,7 +88,11 @@ export function PublicWishlistBody({
 
 			{rsvpSection}
 
-			<GiftListBand className="relative left-1/2 w-screen -translate-x-1/2">
+			<GiftSection
+				className="relative left-1/2 w-screen -translate-x-1/2"
+				delivery={delivery}
+				deliveryContentClassName={`mx-auto w-full ${maxWidth} px-6`}
+			>
 				<section
 					className={`mx-auto w-full ${maxWidth} px-6 py-12`}
 					id="regalos"
@@ -122,7 +119,7 @@ export function PublicWishlistBody({
 						/>
 					)}
 				</section>
-			</GiftListBand>
+			</GiftSection>
 
 			{!isCompact && (
 				<WishlistThankYou

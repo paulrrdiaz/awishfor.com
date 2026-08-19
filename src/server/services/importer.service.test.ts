@@ -272,6 +272,56 @@ describe("importGiftFromUrl metadata priority chain", () => {
 		expect(result.draft.priceCurrency).toBe("USD");
 	});
 
+	it("persists an imported image instead of returning the retailer URL", async () => {
+		const persistImage = vi
+			.fn()
+			.mockResolvedValue("https://abc.ufs.sh/f/owned-image.jpg");
+		const result = await importGiftFromUrl(
+			{ fetch: makeOkFetch(HTML_WITH_JSON_LD), persistImage },
+			{ url: "https://example.com/product" },
+		);
+
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(persistImage).toHaveBeenCalledWith(
+			"https://cdn.example.com/mug.jpg",
+		);
+		expect(result.draft.imageUrl).toBe("https://abc.ufs.sh/f/owned-image.jpg");
+	});
+
+	it("omits an image when the retailer prevents it from being persisted", async () => {
+		const result = await importGiftFromUrl(
+			{
+				fetch: makeOkFetch(HTML_WITH_JSON_LD),
+				persistImage: vi.fn().mockResolvedValue(undefined),
+			},
+			{ url: "https://example.com/product" },
+		);
+
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.draft.imageUrl).toBeUndefined();
+	});
+
+	it("keeps the remaining metadata when image persistence throws", async () => {
+		const result = await importGiftFromUrl(
+			{
+				fetch: makeOkFetch(HTML_WITH_JSON_LD),
+				persistImage: vi.fn().mockRejectedValue(new Error("blocked image")),
+			},
+			{ url: "https://example.com/product" },
+		);
+
+		expect(result).toMatchObject({
+			ok: true,
+			draft: {
+				name: "Fancy Mug",
+				imageUrl: undefined,
+				priceAmount: 24.99,
+			},
+		});
+	});
+
 	it("falls back to OG when JSON-LD absent", async () => {
 		const result = await importGiftFromUrl(
 			{ fetch: makeOkFetch(HTML_WITH_OG_ONLY) },
@@ -330,10 +380,30 @@ describe("importGiftFromUrl metadata priority chain", () => {
 	});
 });
 
-// --- Sparse draft ---
+// --- Metadata-empty fallback ---
 
-describe("importGiftFromUrl sparse draft", () => {
-	it("returns at minimum the source URL and domain store name for empty HTML", async () => {
+describe("importGiftFromUrl metadata-empty fallback", () => {
+	it("returns a meaningful direct result without invoking Bright Data", async () => {
+		const fetchFn = vi.fn().mockResolvedValue(
+			new Response(HTML_WITH_JSON_LD, {
+				status: 200,
+				headers: { "content-type": "text/html" },
+			}),
+		);
+		const result = await importGiftFromUrl(
+			{
+				fetch: fetchFn,
+				brightDataApiKey: "bright-key",
+				brightDataWebUnlockerZone: "product-import-zone",
+			},
+			{ url: "https://example.com/product" },
+		);
+
+		expect(result.ok).toBe(true);
+		expect(fetchFn).toHaveBeenCalledTimes(1);
+	});
+
+	it("returns metadata_unavailable when the direct response is empty and no fallback is configured", async () => {
 		const fetchFn = vi
 			.fn()
 			.mockResolvedValue(new Response(HTML_EMPTY, { status: 200 }));
@@ -341,12 +411,82 @@ describe("importGiftFromUrl sparse draft", () => {
 			{ fetch: fetchFn },
 			{ url: "https://minimal.example.com/item" },
 		);
-		expect(result.ok).toBe(true);
-		if (!result.ok) return;
-		expect(result.draft.productUrl).toBe("https://minimal.example.com/item");
-		expect(result.draft.storeName).toBe("minimal.example.com");
-		expect(result.draft.name).toBeUndefined();
-		expect(result.draft.imageUrl).toBeUndefined();
+
+		expect(result).toEqual({
+			ok: false,
+			error: { kind: "metadata_unavailable" },
+		});
+		expect(fetchFn).toHaveBeenCalledTimes(1);
+	});
+
+	it("retries a metadata-empty direct response through Bright Data and succeeds", async () => {
+		const fetchFn = vi
+			.fn()
+			.mockResolvedValueOnce(new Response(HTML_EMPTY, { status: 200 }))
+			.mockResolvedValueOnce(
+				new Response(HTML_WITH_JSON_LD, {
+					status: 200,
+					headers: { "content-type": "text/html" },
+				}),
+			);
+		const result = await importGiftFromUrl(
+			{
+				fetch: fetchFn,
+				brightDataApiKey: "bright-key",
+				brightDataWebUnlockerZone: "product-import-zone",
+			},
+			{ url: "https://minimal.example.com/item" },
+		);
+
+		expect(result).toMatchObject({
+			ok: true,
+			draft: { name: "Fancy Mug", priceAmount: 24.99 },
+		});
+		expect(fetchFn).toHaveBeenCalledTimes(2);
+	});
+
+	it("returns metadata_unavailable after a single metadata-empty fallback attempt", async () => {
+		const fetchFn = vi
+			.fn()
+			.mockResolvedValueOnce(new Response(HTML_EMPTY, { status: 200 }))
+			.mockResolvedValueOnce(new Response(HTML_EMPTY, { status: 200 }));
+		const result = await importGiftFromUrl(
+			{
+				fetch: fetchFn,
+				brightDataApiKey: "bright-key",
+				brightDataWebUnlockerZone: "product-import-zone",
+			},
+			{ url: "https://minimal.example.com/item" },
+		);
+
+		expect(result).toEqual({
+			ok: false,
+			error: { kind: "metadata_unavailable" },
+		});
+		expect(fetchFn).toHaveBeenCalledTimes(2);
+	});
+
+	it("does not make a second Bright Data attempt when the blocked-page fallback is also metadata-empty", async () => {
+		const fetchFn = vi
+			.fn()
+			.mockResolvedValueOnce(
+				new Response("<html><title>Blocked</title></html>", { status: 403 }),
+			)
+			.mockResolvedValueOnce(new Response(HTML_EMPTY, { status: 200 }));
+		const result = await importGiftFromUrl(
+			{
+				fetch: fetchFn,
+				brightDataApiKey: "bright-key",
+				brightDataWebUnlockerZone: "product-import-zone",
+			},
+			{ url: "https://shop.example.com.pe/producto-123" },
+		);
+
+		expect(result).toEqual({
+			ok: false,
+			error: { kind: "metadata_unavailable" },
+		});
+		expect(fetchFn).toHaveBeenCalledTimes(2);
 	});
 });
 

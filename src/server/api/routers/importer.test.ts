@@ -2,7 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { importerRouter } from "@/server/api/routers/importer";
 import { createCallerFactory } from "@/server/api/trpc";
 
+const authMock = vi.hoisted(() => vi.fn());
 const importGiftFromUrlMock = vi.hoisted(() => vi.fn());
+const persistImportedGiftImageMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@clerk/nextjs/server", () => ({
+	auth: authMock,
+}));
 
 vi.mock("@/server/db", () => ({
 	db: {},
@@ -10,6 +16,10 @@ vi.mock("@/server/db", () => ({
 
 vi.mock("@/server/services/importer.service", () => ({
 	importGiftFromUrl: importGiftFromUrlMock,
+}));
+
+vi.mock("@/server/services/imported-image.service", () => ({
+	persistImportedGiftImage: persistImportedGiftImageMock,
 }));
 
 const createCaller = createCallerFactory(importerRouter);
@@ -23,9 +33,10 @@ const makeCtx = () =>
 describe("importerRouter.importFromUrl", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		authMock.mockResolvedValue({ userId: null });
 	});
 
-	it("allows a signed-out caller", async () => {
+	it("allows a signed-out caller without persisting an image", async () => {
 		importGiftFromUrlMock.mockResolvedValue({
 			ok: true,
 			draft: { productUrl: "https://example.com/product" },
@@ -34,7 +45,10 @@ describe("importerRouter.importFromUrl", () => {
 		await expect(
 			caller.importFromUrl({ url: "https://example.com/product" }),
 		).resolves.toMatchObject({ ok: true });
-		expect(importGiftFromUrlMock).toHaveBeenCalled();
+		expect(importGiftFromUrlMock).toHaveBeenCalledWith(
+			expect.objectContaining({ persistImage: undefined }),
+			{ url: "https://example.com/product" },
+		);
 	});
 
 	it("rejects an invalid URL with a validation error", async () => {
@@ -53,6 +67,7 @@ describe("importerRouter.importFromUrl", () => {
 	});
 
 	it("returns the draft from the service on a valid request", async () => {
+		authMock.mockResolvedValue({ userId: "clerk_owner" });
 		const draft = {
 			name: "Cool Widget",
 			productUrl: "https://example.com/widget",
@@ -73,6 +88,7 @@ describe("importerRouter.importFromUrl", () => {
 			{
 				brightDataApiKey: undefined,
 				brightDataWebUnlockerZone: undefined,
+				persistImage: persistImportedGiftImageMock,
 			},
 			{ url: "https://example.com/widget" },
 		);
@@ -90,5 +106,22 @@ describe("importerRouter.importFromUrl", () => {
 		});
 
 		expect(result).toEqual({ ok: false, error: { kind: "timeout" } });
+	});
+
+	it("passes through a metadata_unavailable error result unchanged", async () => {
+		importGiftFromUrlMock.mockResolvedValue({
+			ok: false,
+			error: { kind: "metadata_unavailable" },
+		});
+		const caller = createCaller(makeCtx());
+
+		const result = await caller.importFromUrl({
+			url: "https://minimal.example.com/item",
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			error: { kind: "metadata_unavailable" },
+		});
 	});
 });

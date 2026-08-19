@@ -47,8 +47,8 @@ vi.mock("@/components/shared/event-details", () => ({
 	EventDetails: () => <section data-testid="event-details" />,
 }));
 
-vi.mock("@/components/shared/delivery-card", () => ({
-	DeliveryCard: () => null,
+vi.mock("@/components/shared/delivery-bar", () => ({
+	DeliveryBar: () => <div data-testid="delivery-bar" />,
 }));
 
 vi.mock("@/components/shared/countdown", () => ({
@@ -217,6 +217,28 @@ describe("self-contained layout section ordering", () => {
 			const next = order[index + 1];
 			if (!(current && next)) throw new Error("Invalid ordering fixture");
 			expectBefore(elements[current], elements[next]);
+		}
+	});
+});
+
+describe("delivery presentation position", () => {
+	it("renders the delivery bar after the gift list in every layout and render mode", () => {
+		for (const layoutId of LAYOUT_IDS) {
+			for (const mode of MODES) {
+				render(
+					<PublicWishlistPage
+						mode={mode}
+						wishlist={wishlist(layoutId, SUBTITLE)}
+					/>,
+				);
+
+				expectBefore(
+					screen.getByTestId("gifts"),
+					screen.getByTestId("delivery-bar"),
+				);
+
+				cleanup();
+			}
 		}
 	});
 });

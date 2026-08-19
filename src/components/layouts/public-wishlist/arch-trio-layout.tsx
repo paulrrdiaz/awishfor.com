@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import { PublicGiftFilters } from "@/components/features/wishlist/public-filters";
 import { Countdown } from "@/components/shared/countdown";
-import { DeliveryCard } from "@/components/shared/delivery-card";
 import { EventDetails } from "@/components/shared/event-details";
-import { GiftListBand } from "@/components/shared/gift-list-band";
+import { GiftSection } from "@/components/shared/gift-section";
 import { HeroCtas } from "@/components/shared/hero-ctas";
 import {
 	HeroCarouselGallery,
@@ -73,9 +72,6 @@ export function ArchTrioLayout({
 		wishlist.deliveryPhone,
 		wishlist.deliveryDocumentId,
 	);
-	const hasEventDetails = Boolean(
-		wishlist.eventDate || wishlist.eventLocation || wishlist.dressCode,
-	);
 
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
@@ -143,28 +139,19 @@ export function ArchTrioLayout({
 			{!isCompact && (
 				<>
 					<div className="flex flex-col gap-8 px-5 py-5 lg:flex-row lg:items-center lg:gap-16 lg:px-4">
-						<div
-							className={
-								delivery && hasEventDetails
-									? "flex min-w-0 flex-col lg:w-96 lg:shrink-0"
-									: "flex min-w-0 flex-col gap-4 lg:w-96 lg:shrink-0"
-							}
-						>
+						<div className="flex min-w-0 flex-col gap-4 lg:w-96 lg:shrink-0">
 							<EventDetails
-								className={delivery ? "rounded-b-none border-b-0" : undefined}
-								grouped
 								size="md"
+								stacked
 								variant="compact"
 								wishlist={wishlist}
 							/>
-							<DeliveryCard
-								className={
-									hasEventDetails
-										? "rounded-[16px] rounded-t-none border-border border-t px-5 py-4"
-										: "rounded-[16px] px-5 py-4"
-								}
-								delivery={delivery}
-							/>
+							{!isCompact && (
+								<HeroCtas
+									className="w-full"
+									showHowItWorks={wishlist.showHowItWorks}
+								/>
+							)}
 						</div>
 						<div className="min-w-0 flex-1 space-y-4">
 							<WishlistMessage
@@ -178,12 +165,6 @@ export function ArchTrioLayout({
 									createdAt={wishlist.createdAt}
 									eventDate={wishlist.eventDate}
 									variant={wishlist.countdownVariant}
-								/>
-							)}
-							{!isCompact && (
-								<HeroCtas
-									className="w-full"
-									showHowItWorks={wishlist.showHowItWorks}
 								/>
 							)}
 						</div>
@@ -215,11 +196,13 @@ export function ArchTrioLayout({
 					/>
 				)}
 
-				<GiftListBand
+				<GiftSection
 					className={cn(
 						"relative",
 						isEmbedded ? "w-full" : "left-1/2 w-screen -translate-x-1/2",
 					)}
+					delivery={delivery}
+					deliveryContentClassName="mx-auto w-full max-w-[1160px] px-5 sm:px-7"
 				>
 					<section
 						className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-6 pb-16 sm:px-7"
@@ -246,7 +229,7 @@ export function ArchTrioLayout({
 							showSort={false}
 						/>
 					</section>
-				</GiftListBand>
+				</GiftSection>
 			</div>
 
 			{!isCompact && (

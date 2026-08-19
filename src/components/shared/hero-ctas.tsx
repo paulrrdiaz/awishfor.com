@@ -57,7 +57,7 @@ export function HeroCtas({
 			{/* biome-ignore lint/a11y/useValidAnchor: This is still hash navigation; the handler only adds scoped smooth scrolling. */}
 			<a
 				className={cn(
-					"public-btn px-5 py-2.5 text-sm transition-colors",
+					"public-btn px-4 py-1 text-sm transition-colors",
 					isOnPhoto
 						? "bg-white text-gray-900 hover:bg-white/90"
 						: "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -66,12 +66,12 @@ export function HeroCtas({
 				href="#regalos"
 				onClick={scrollToSection}
 			>
-				Ver regalos disponibles
+				Ver lista de regalos
 			</a>
 			<HowItWorksDrawer
 				showHowItWorks={showHowItWorks}
 				triggerClassName={cn(
-					"public-btn border px-5 py-2.5 text-sm transition-colors",
+					"public-btn border px-4 py-1 text-sm transition-colors",
 					isOnPhoto
 						? "border-white/40 text-white hover:bg-white/10"
 						: "border-current/25 hover:bg-foreground/5",
