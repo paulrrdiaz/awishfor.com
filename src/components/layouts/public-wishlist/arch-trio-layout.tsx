@@ -146,12 +146,6 @@ export function ArchTrioLayout({
 								variant="compact"
 								wishlist={wishlist}
 							/>
-							{!isCompact && (
-								<HeroCtas
-									className="w-full"
-									showHowItWorks={wishlist.showHowItWorks}
-								/>
-							)}
 						</div>
 						<div className="order-1 min-w-0 flex-1 space-y-4 lg:order-2">
 							<WishlistMessage
@@ -165,6 +159,12 @@ export function ArchTrioLayout({
 									createdAt={wishlist.createdAt}
 									eventDate={wishlist.eventDate}
 									variant={wishlist.countdownVariant}
+								/>
+							)}
+							{!isCompact && (
+								<HeroCtas
+									className="w-full"
+									showHowItWorks={wishlist.showHowItWorks}
 								/>
 							)}
 						</div>

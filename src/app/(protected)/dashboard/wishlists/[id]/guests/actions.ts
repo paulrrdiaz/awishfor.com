@@ -4,8 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db";
+import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import {
-	assertOwnedWishlist,
 	createInvite,
 	deleteInvite,
 	getOwnedInvite,
@@ -20,7 +20,7 @@ import {
 	updateInviteSchema,
 } from "@/server/validators/invite.schema";
 
-async function getLocalOwnerId(): Promise<number> {
+async function getLocalUserId(): Promise<number> {
 	const { userId } = await auth();
 	if (!userId) {
 		throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -36,9 +36,9 @@ export async function createInviteAction(
 	input: CreateInviteInput,
 ): Promise<void> {
 	const parsed = createInviteSchema.parse(input);
-	const ownerId = await getLocalOwnerId();
-	await assertOwnedWishlist(db as unknown as InviteDatabase, {
-		ownerId,
+	const localUserId = await getLocalUserId();
+	await assertWishlistAccess(db as unknown as InviteDatabase, {
+		localUserId,
 		wishlistId: parsed.wishlistId,
 	});
 	await createInvite(db as unknown as InviteDatabase, parsed);
@@ -50,9 +50,9 @@ export async function updateInviteAction(
 	input: UpdateInviteInput,
 ): Promise<void> {
 	const parsed = updateInviteSchema.parse(input);
-	const ownerId = await getLocalOwnerId();
+	const localUserId = await getLocalUserId();
 	const existing = await getOwnedInvite(db as unknown as InviteDatabase, {
-		ownerId,
+		localUserId,
 		inviteId: parsed.inviteId,
 	});
 	await updateInvite(db as unknown as InviteDatabase, {
@@ -66,8 +66,11 @@ export async function deleteInviteAction(
 	wishlistId: string,
 	inviteId: string,
 ): Promise<void> {
-	const ownerId = await getLocalOwnerId();
-	await getOwnedInvite(db as unknown as InviteDatabase, { ownerId, inviteId });
+	const localUserId = await getLocalUserId();
+	await getOwnedInvite(db as unknown as InviteDatabase, {
+		localUserId,
+		inviteId,
+	});
 	await deleteInvite(db as unknown as InviteDatabase, { inviteId });
 	revalidateGuestsRoute(wishlistId);
 }

@@ -1,6 +1,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import type { db } from "@/server/db";
+import {
+	type ClaimDatabase,
+	claimInvitationsForVerifiedEmail,
+} from "@/server/services/invitation-claim.service";
 
 type LocalUserContext = {
 	db: typeof db;
@@ -31,10 +35,11 @@ export async function getOrCreateLocalUserId(
 		throw new TRPCError({ code: "UNAUTHORIZED" });
 	}
 
+	const primaryAddress = clerkUser.emailAddresses.find(
+		(address) => address.id === clerkUser.primaryEmailAddressId,
+	);
 	const primaryEmail =
-		clerkUser.emailAddresses.find(
-			(address) => address.id === clerkUser.primaryEmailAddressId,
-		)?.emailAddress ??
+		primaryAddress?.emailAddress ??
 		clerkUser.emailAddresses[0]?.emailAddress ??
 		"";
 
@@ -53,6 +58,13 @@ export async function getOrCreateLocalUserId(
 		},
 		update: {},
 	});
+
+	if (primaryAddress?.verification?.status === "verified") {
+		await claimInvitationsForVerifiedEmail(ctx.db as unknown as ClaimDatabase, {
+			email: primaryAddress.emailAddress,
+			localUserId: user.id,
+		});
+	}
 
 	return user.id;
 }

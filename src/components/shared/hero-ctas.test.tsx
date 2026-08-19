@@ -36,7 +36,7 @@ describe("HeroCtas", () => {
 		);
 
 		const [, secondGiftLink] = screen.getAllByRole("link", {
-			name: "Ver regalos disponibles",
+			name: "Ver lista de regalos",
 		});
 		if (!secondGiftLink) {
 			throw new Error("Expected a second template gift link");
@@ -70,7 +70,7 @@ describe("HeroCtas", () => {
 		);
 
 		await user.click(
-			screen.getByRole("link", { name: "Ver regalos disponibles" }),
+			screen.getByRole("link", { name: "Ver lista de regalos" }),
 		);
 
 		expect(scrollIntoView).toHaveBeenCalledWith({

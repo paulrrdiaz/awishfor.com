@@ -87,6 +87,7 @@ const wishlist = {
 	motifPalette: null,
 	showHowItWorks: true,
 	status: "draft",
+	isOwner: true,
 };
 
 beforeEach(() => updateSettingsMock.mockReset());
@@ -131,5 +132,25 @@ describe("WishlistSettingsForm subtitle", () => {
 		expect(
 			screen.getByRole("button", { name: "Guardar cambios" }),
 		).toBeDisabled();
+	});
+});
+
+describe("WishlistSettingsForm owner-reserved controls", () => {
+	it("shows the danger zone for the owner", () => {
+		render(
+			<WishlistSettingsForm
+				wishlist={{ ...wishlist, isOwner: true } as never}
+			/>,
+		);
+		expect(screen.getByText("Zona peligrosa")).toBeInTheDocument();
+	});
+
+	it("hides the danger zone for a collaborator", () => {
+		render(
+			<WishlistSettingsForm
+				wishlist={{ ...wishlist, isOwner: false } as never}
+			/>,
+		);
+		expect(screen.queryByText("Zona peligrosa")).not.toBeInTheDocument();
 	});
 });

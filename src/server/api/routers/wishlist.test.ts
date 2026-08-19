@@ -145,12 +145,14 @@ function makeCaller(db: Record<string, unknown>) {
 function makeWishlistDb({
 	userFindUnique = vi.fn().mockResolvedValue({ id: 42 }),
 	wishlistFindFirst = vi.fn(),
+	wishlistFindMany = vi.fn().mockResolvedValue([]),
 	wishlistUpdate = vi.fn(),
 	imageDeleteMany = vi.fn().mockResolvedValue({ count: 0 }),
 	imageCreateMany = vi.fn().mockResolvedValue({ count: 0 }),
 }: {
 	userFindUnique?: ReturnType<typeof vi.fn>;
 	wishlistFindFirst?: ReturnType<typeof vi.fn>;
+	wishlistFindMany?: ReturnType<typeof vi.fn>;
 	wishlistUpdate?: ReturnType<typeof vi.fn>;
 	imageDeleteMany?: ReturnType<typeof vi.fn>;
 	imageCreateMany?: ReturnType<typeof vi.fn>;
@@ -161,6 +163,7 @@ function makeWishlistDb({
 		},
 		wishlist: {
 			findFirst: wishlistFindFirst,
+			findMany: wishlistFindMany,
 			update: wishlistUpdate,
 		},
 		wishlistImage: {
@@ -216,7 +219,7 @@ describe("wishlistRouter.saveDraft", () => {
 				user: expect.any(Object),
 			}),
 			expect.objectContaining({
-				ownerId: 42,
+				localUserId: 42,
 				title: "Lista de boda",
 			}),
 		);
@@ -304,7 +307,7 @@ describe("wishlistRouter.saveDraft", () => {
 		});
 		expect(saveWishlistDraftMock).toHaveBeenCalledWith(
 			expect.objectContaining({ user: expect.any(Object) }),
-			expect.objectContaining({ ownerId: 99 }),
+			expect.objectContaining({ localUserId: 99 }),
 		);
 	});
 
@@ -338,6 +341,67 @@ describe("wishlistRouter.saveDraft", () => {
 	});
 });
 
+describe("wishlistRouter.list", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		authMock.mockResolvedValue({ userId: "clerk_123" });
+	});
+
+	it("returns shared wishlists with the owner's name for a collaborator", async () => {
+		const wishlistFindMany = vi
+			.fn()
+			.mockResolvedValueOnce([
+				{
+					id: "wl_owned",
+					title: "Mi lista",
+					status: "draft",
+					eventType: "wedding",
+				},
+			])
+			.mockResolvedValueOnce([
+				{
+					id: "wl_shared",
+					title: "Lista de Marco",
+					status: "published",
+					eventType: "birthday",
+					owner: { name: "Marco Pérez", email: "marco@example.com" },
+				},
+			]);
+		const db = makeWishlistDb({ wishlistFindMany });
+		const caller = makeCaller(db);
+
+		const result = await caller.list();
+
+		expect(result.owned).toEqual([
+			{
+				id: "wl_owned",
+				title: "Mi lista",
+				status: "draft",
+				eventType: "wedding",
+			},
+		]);
+		expect(result.shared).toEqual([
+			{
+				id: "wl_shared",
+				title: "Lista de Marco",
+				status: "published",
+				eventType: "birthday",
+				ownerName: "Marco Pérez",
+			},
+		]);
+	});
+
+	it("returns no shared wishlists for an account with no memberships", async () => {
+		const db = makeWishlistDb({});
+		const caller = makeCaller(db);
+
+		const result = await caller.list();
+
+		expect(result.owned).toEqual([]);
+		expect(result.shared).toEqual([]);
+	});
+});
+
 describe("wishlistRouter.getById", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -355,7 +419,6 @@ describe("wishlistRouter.getById", () => {
 			expect.objectContaining({
 				where: {
 					id: "wishlist_123",
-					ownerId: 42,
 				},
 			}),
 		);
@@ -783,7 +846,6 @@ describe("wishlistRouter.updateDesign", () => {
 		expect(wishlistFindFirst).toHaveBeenCalledWith({
 			where: {
 				id: "wishlist_123",
-				ownerId: 42,
 			},
 			select: {
 				id: true,
@@ -875,7 +937,6 @@ describe("wishlistRouter.updateDesign", () => {
 			expect.objectContaining({
 				where: {
 					id: "wishlist_published",
-					ownerId: 42,
 				},
 			}),
 		);
@@ -970,7 +1031,7 @@ describe("wishlistRouter.publish", () => {
 				user: expect.any(Object),
 			}),
 			{
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 			},
 		);
@@ -1030,7 +1091,7 @@ describe("wishlistRouter.publishWizard", () => {
 				user: expect.any(Object),
 			}),
 			expect.objectContaining({
-				ownerId: 42,
+				localUserId: 42,
 				title: "Lista de boda",
 				savedWishlistId: null,
 			}),

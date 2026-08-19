@@ -19,9 +19,10 @@ const STATUS_STYLES: Record<string, string> = {
 
 type Props = {
 	wishlist: DashboardWishlistSummaryViewModel;
+	ownerName?: string;
 };
 
-export function WishlistCard({ wishlist }: Props) {
+export function WishlistCard({ wishlist, ownerName }: Props) {
 	const progress =
 		wishlist.totalUnits > 0
 			? Math.round((wishlist.purchasedUnits / wishlist.totalUnits) * 100)
@@ -41,6 +42,11 @@ export function WishlistCard({ wishlist }: Props) {
 					<h2 className="mt-1 truncate font-heading font-semibold text-xl">
 						{wishlist.title}
 					</h2>
+					{ownerName && (
+						<p className="mt-0.5 truncate text-muted-foreground text-xs">
+							Compartida por {ownerName}
+						</p>
+					)}
 				</div>
 				<span
 					className={cn(

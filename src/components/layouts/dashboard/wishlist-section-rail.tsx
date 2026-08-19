@@ -11,16 +11,18 @@ import { cn } from "@/lib/utils";
 import {
 	activeSegmentFromPathname,
 	hrefFor,
-	NAV_ITEMS,
+	navItemsFor,
 } from "./wishlist-sections";
 
 type Props = {
 	wishlistId: string;
+	isOwner: boolean;
 };
 
-export function WishlistSectionRail({ wishlistId }: Props) {
+export function WishlistSectionRail({ wishlistId, isOwner }: Props) {
 	const pathname = usePathname();
 	const activeSegment = activeSegmentFromPathname(pathname, wishlistId);
+	const navItems = navItemsFor(isOwner);
 
 	return (
 		<nav
@@ -28,7 +30,7 @@ export function WishlistSectionRail({ wishlistId }: Props) {
 			className="shrink-0 border-border border-b bg-card md:w-[60px] md:border-r md:border-b-0"
 		>
 			<ul className="flex gap-2 overflow-x-auto px-3 py-2.5 md:flex-col md:items-center md:gap-2.5 md:overflow-visible md:px-0 md:py-4">
-				{NAV_ITEMS.map((item) => {
+				{navItems.map((item) => {
 					const isActive = item.segment === activeSegment;
 					const Icon = item.icon;
 					return (

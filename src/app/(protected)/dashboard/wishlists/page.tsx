@@ -2,7 +2,7 @@ import { WishlistCardGrid } from "@/components/features/dashboard/wishlist-card-
 import { api } from "@/trpc/server";
 
 export default async function DashboardWishlistsPage() {
-	const wishlists = await api.wishlist.summaryList();
+	const { owned, shared } = await api.wishlist.summaryList();
 
 	return (
 		<div className="min-h-0 flex-1 overflow-y-auto">
@@ -14,7 +14,7 @@ export default async function DashboardWishlistsPage() {
 						resumen de cada wishlist.
 					</p>
 				</div>
-				<WishlistCardGrid wishlists={wishlists} />
+				<WishlistCardGrid owned={owned} shared={shared} />
 			</div>
 		</div>
 	);

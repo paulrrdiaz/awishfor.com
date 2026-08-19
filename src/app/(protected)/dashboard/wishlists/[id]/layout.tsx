@@ -19,13 +19,14 @@ export default async function DashboardWishlistDetailLayout({
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<WishlistTopbar
+				isOwner={wishlist.isOwner}
 				publicUrlPath={wishlist.publicUrlPath}
 				status={wishlist.status}
 				title={wishlist.title}
 				wishlistId={id}
 			/>
 			<div className="flex min-h-0 flex-1 flex-col md:flex-row">
-				<WishlistSectionRail wishlistId={id} />
+				<WishlistSectionRail isOwner={wishlist.isOwner} wishlistId={id} />
 				<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
 					<WishlistTitleBlock
 						publicUrlPath={wishlist.publicUrlPath}

@@ -1,5 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import type { Category, Prisma, Wishlist } from "@/generated/prisma/client";
+import type { Category, Prisma } from "@/generated/prisma/client";
+import {
+	assertWishlistAccess,
+	type WishlistAccessDatabase,
+} from "@/server/services/collaboration.service";
 import type {
 	AddCategoryInput,
 	DeleteCategoryInput,
@@ -29,15 +33,10 @@ type GiftDelegate = {
 	count(args: Prisma.GiftCountArgs): Promise<number>;
 };
 
-type WishlistDelegate = {
-	findFirst(args: Prisma.WishlistFindFirstArgs): Promise<Wishlist | null>;
-};
-
 type CategoryTransaction = {
 	category: CategoryDelegate;
 	gift: GiftDelegate;
-	wishlist: WishlistDelegate;
-};
+} & WishlistAccessDatabase;
 
 export type CategoryDatabase = CategoryTransaction & {
 	$transaction<T>(
@@ -49,8 +48,8 @@ type CategoryWithCountPayload = Category & { _count: { gifts: number } };
 
 export type CategoryWithGiftCount = Category & { giftCount: number };
 
-type CategoryOwnerInput = {
-	ownerId: number;
+type CategoryCallerInput = {
+	localUserId: number;
 };
 
 const orderedCategoryFields = [
@@ -65,42 +64,22 @@ const descendingCategoryFields = [
 
 const normalizeCategoryName = (name: string) => name.trim().toLocaleLowerCase();
 
-const getOwnedWishlist = async (
-	db: CategoryTransaction,
-	{ ownerId, wishlistId }: CategoryOwnerInput & { wishlistId: string },
-) => {
-	const wishlist = await db.wishlist.findFirst({
-		where: {
-			id: wishlistId,
-			ownerId,
-		},
-	});
-
-	if (!wishlist) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
-	}
-
-	return wishlist;
-};
-
 const getOwnedCategory = async (
 	db: CategoryTransaction,
-	{ ownerId, categoryId }: CategoryOwnerInput & { categoryId: string },
+	{ localUserId, categoryId }: CategoryCallerInput & { categoryId: string },
 ) => {
 	const category = await db.category.findFirst({
-		where: {
-			id: categoryId,
-			wishlist: {
-				is: {
-					ownerId,
-				},
-			},
-		},
+		where: { id: categoryId },
 	});
 
 	if (!category) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Category not found" });
 	}
+
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId: category.wishlistId,
+	});
 
 	return category;
 };
@@ -194,9 +173,9 @@ const assertValidCategoryReorder = (
 
 export const listCategories = async (
 	db: CategoryDatabase,
-	input: CategoryOwnerInput & ListCategoriesInput,
+	input: CategoryCallerInput & ListCategoriesInput,
 ): Promise<CategoryWithGiftCount[]> => {
-	await getOwnedWishlist(db, input);
+	await assertWishlistAccess(db, input);
 
 	const categories = (await db.category.findMany({
 		where: {
@@ -224,9 +203,9 @@ export const listCategories = async (
 
 export const getUncategorizedGiftCount = async (
 	db: CategoryDatabase,
-	input: CategoryOwnerInput & UncategorizedCountInput,
+	input: CategoryCallerInput & UncategorizedCountInput,
 ) => {
-	await getOwnedWishlist(db, input);
+	await assertWishlistAccess(db, input);
 
 	return db.gift.count({
 		where: {
@@ -239,9 +218,9 @@ export const getUncategorizedGiftCount = async (
 
 export const addCategory = async (
 	db: CategoryDatabase,
-	input: CategoryOwnerInput & AddCategoryInput,
+	input: CategoryCallerInput & AddCategoryInput,
 ) => {
-	await getOwnedWishlist(db, input);
+	await assertWishlistAccess(db, input);
 	await assertUniqueCategoryName(db, {
 		wishlistId: input.wishlistId,
 		name: input.name,
@@ -264,7 +243,7 @@ export const addCategory = async (
 
 export const renameCategory = async (
 	db: CategoryDatabase,
-	input: CategoryOwnerInput & RenameCategoryInput,
+	input: CategoryCallerInput & RenameCategoryInput,
 ) => {
 	const category = await getOwnedCategory(db, input);
 
@@ -286,7 +265,7 @@ export const renameCategory = async (
 
 export const deleteCategory = async (
 	db: CategoryDatabase,
-	input: CategoryOwnerInput & DeleteCategoryInput,
+	input: CategoryCallerInput & DeleteCategoryInput,
 ) => {
 	await getOwnedCategory(db, input);
 
@@ -299,10 +278,10 @@ export const deleteCategory = async (
 
 export const reorderCategories = async (
 	db: CategoryDatabase,
-	input: CategoryOwnerInput & ReorderCategoriesInput,
+	input: CategoryCallerInput & ReorderCategoriesInput,
 ) =>
 	db.$transaction(async (tx) => {
-		await getOwnedWishlist(tx, input);
+		await assertWishlistAccess(tx, input);
 
 		const existingCategories = await tx.category.findMany({
 			where: {
@@ -339,9 +318,9 @@ export const reorderCategories = async (
 
 export const seedDefaultCategories = async (
 	db: CategoryDatabase,
-	input: CategoryOwnerInput & SeedDefaultCategoriesInput,
+	input: CategoryCallerInput & SeedDefaultCategoriesInput,
 ) => {
-	await getOwnedWishlist(db, input);
+	await assertWishlistAccess(db, input);
 
 	if (input.names.length === 0) {
 		return [];

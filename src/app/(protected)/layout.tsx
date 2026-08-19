@@ -8,14 +8,19 @@ export default async function ProtectedLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	let wishlists: {
+	type SidebarWishlistItem = {
 		id: string;
 		title: string;
 		status: string;
 		eventType: string;
-	}[] = [];
+	};
+
+	let owned: SidebarWishlistItem[] = [];
+	let shared: (SidebarWishlistItem & { ownerName: string })[] = [];
 	try {
-		wishlists = await api.wishlist.list();
+		const result = await api.wishlist.list();
+		owned = result.owned;
+		shared = result.shared;
 	} catch {
 		// User not yet synced — render empty sidebar
 	}
@@ -24,7 +29,7 @@ export default async function ProtectedLayout({
 		<ClerkApplicationLayout>
 			<div className="h-svh p-2 md:p-4">
 				<SidebarProvider className="h-[calc(100svh-1rem)] min-h-0 overflow-hidden rounded-xl md:h-[calc(100svh-2rem)]">
-					<AppSidebar wishlists={wishlists} />
+					<AppSidebar owned={owned} shared={shared} />
 					<SidebarInset className="min-h-0">{children}</SidebarInset>
 				</SidebarProvider>
 			</div>

@@ -1,6 +1,10 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
+import {
+	type ClaimDatabase,
+	claimInvitationsForVerifiedEmail,
+} from "@/server/services/invitation-claim.service";
 
 export async function POST(req: NextRequest) {
 	let evt: Awaited<ReturnType<typeof verifyWebhook>>;
@@ -16,10 +20,11 @@ export async function POST(req: NextRequest) {
 			const data = evt.data;
 			const clerkId = data.id;
 
+			const primaryAddress = data.email_addresses?.find(
+				(e) => e.id === data.primary_email_address_id,
+			);
 			const primaryEmail =
-				data.email_addresses?.find(
-					(e) => e.id === data.primary_email_address_id,
-				)?.email_address ??
+				primaryAddress?.email_address ??
 				data.email_addresses?.[0]?.email_address ??
 				"";
 
@@ -31,11 +36,21 @@ export async function POST(req: NextRequest) {
 
 			const imageUrl = data.image_url ?? null;
 
-			await db.user.upsert({
+			const user = await db.user.upsert({
 				where: { clerkId },
 				create: { clerkId, email: primaryEmail, name, imageUrl },
 				update: { email: primaryEmail, name, imageUrl },
 			});
+
+			if (
+				evt.type === "user.created" &&
+				primaryAddress?.verification?.status === "verified"
+			) {
+				await claimInvitationsForVerifiedEmail(db as unknown as ClaimDatabase, {
+					email: primaryAddress.email_address,
+					localUserId: user.id,
+				});
+			}
 		} else if (evt.type === "user.deleted") {
 			const clerkId = evt.data.id;
 			if (clerkId) {

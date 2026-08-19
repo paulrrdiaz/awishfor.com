@@ -237,7 +237,7 @@ export function GuestGiftDrawer({
 							? "Abrirás la tienda en una pestaña nueva."
 							: renderedView === "success"
 								? "Tu regalo quedó marcado en esta lista."
-								: "Comparte tu nombre para que el creador de la lista sepa quién lo regaló."}
+								: "Comparte tu nombre para que quienes organizan la lista sepan quién lo regaló."}
 					</DrawerDescription>
 					<DrawerClose asChild>
 						<Button
@@ -407,7 +407,8 @@ export function GuestGiftDrawer({
 							)}
 							<p className="text-muted-foreground text-xs leading-relaxed">
 								Al marcar este regalo como comprado, compartiremos tu nombre y
-								los datos opcionales que ingreses con el creador de la lista.
+								los datos opcionales que ingreses con quienes organizan la
+								lista.
 							</p>
 						</div>
 						<DrawerFooter className="border-border border-t bg-popover px-6 pt-3 pb-5">

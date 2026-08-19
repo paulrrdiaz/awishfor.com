@@ -121,7 +121,13 @@ const createMockDatabase = ({
 	const wishlist: CategoryDatabase["wishlist"] = {
 		findFirst: async (args: Prisma.WishlistFindFirstArgs) => {
 			const wishlistId = args.where?.id;
-			const ownerId = args.where?.ownerId;
+			const where = args.where as {
+				ownerId?: number;
+				OR?: Array<{ ownerId?: number }>;
+			};
+			const ownerId =
+				where.ownerId ??
+				where.OR?.find((clause) => typeof clause.ownerId === "number")?.ownerId;
 
 			return (
 				state.wishlists.find(
@@ -364,7 +370,7 @@ describe("category service", () => {
 
 		await expect(
 			listCategories(db, {
-				ownerId: 999,
+				localUserId: 999,
 				wishlistId: "wishlist_123",
 			}),
 		).rejects.toMatchObject({
@@ -373,7 +379,7 @@ describe("category service", () => {
 
 		await expect(
 			deleteCategory(db, {
-				ownerId: 999,
+				localUserId: 999,
 				categoryId: "category_1",
 			}),
 		).rejects.toMatchObject({
@@ -382,7 +388,7 @@ describe("category service", () => {
 
 		await expect(
 			getUncategorizedGiftCount(db, {
-				ownerId: 999,
+				localUserId: 999,
 				wishlistId: "wishlist_123",
 			}),
 		).rejects.toMatchObject({
@@ -415,7 +421,7 @@ describe("category service", () => {
 		});
 
 		const categories = await listCategories(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 		});
 
@@ -447,7 +453,7 @@ describe("category service", () => {
 		});
 
 		const categories = await listCategories(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 		});
 
@@ -482,7 +488,7 @@ describe("category service", () => {
 
 		await expect(
 			getUncategorizedGiftCount(db, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 			}),
 		).resolves.toBe(2);
@@ -497,7 +503,7 @@ describe("category service", () => {
 		});
 
 		const category = await addCategory(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 			name: "Baño",
 		});
@@ -516,7 +522,7 @@ describe("category service", () => {
 
 		await expect(
 			renameCategory(db, {
-				ownerId: 42,
+				localUserId: 42,
 				categoryId: "category_2",
 				name: "cocina",
 			}),
@@ -526,7 +532,7 @@ describe("category service", () => {
 		});
 
 		const renamedCategory = await renameCategory(db, {
-			ownerId: 42,
+			localUserId: 42,
 			categoryId: "category_2",
 			name: "Invitados",
 		});
@@ -540,7 +546,7 @@ describe("category service", () => {
 		});
 
 		await deleteCategory(db, {
-			ownerId: 42,
+			localUserId: 42,
 			categoryId: "category_1",
 		});
 
@@ -579,7 +585,7 @@ describe("category service", () => {
 
 		await expect(
 			reorderCategories(db, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 				categoryIds: ["category_2"],
 			}),
@@ -589,7 +595,7 @@ describe("category service", () => {
 
 		await expect(
 			reorderCategories(db, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 				categoryIds: ["category_2", "category_3"],
 			}),
@@ -598,7 +604,7 @@ describe("category service", () => {
 		});
 
 		const categories = await reorderCategories(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 			categoryIds: ["category_2", "category_1"],
 		});
@@ -616,7 +622,7 @@ describe("category service", () => {
 
 		await expect(
 			seedDefaultCategories(duplicateDb, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 				names: ["Cocina", "cocina"],
 			}),
@@ -628,7 +634,7 @@ describe("category service", () => {
 		const { db } = createMockDatabase();
 
 		const categories = await seedDefaultCategories(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 			names: ["Cocina", "Dormitorio", "Sala"],
 		});
@@ -649,7 +655,7 @@ describe("category service", () => {
 
 		await expect(
 			seedDefaultCategories(db, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 				names: [],
 			}),

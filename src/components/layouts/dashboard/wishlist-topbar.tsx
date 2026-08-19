@@ -25,6 +25,7 @@ type Props = {
 	title: string;
 	status: string;
 	publicUrlPath: string;
+	isOwner: boolean;
 };
 
 export function WishlistTopbar({
@@ -32,6 +33,7 @@ export function WishlistTopbar({
 	title,
 	status,
 	publicUrlPath,
+	isOwner,
 }: Props) {
 	const pathname = usePathname();
 	const activeSegment = activeSegmentFromPathname(pathname, wishlistId);
@@ -73,6 +75,7 @@ export function WishlistTopbar({
 					</Link>
 				</Button>
 				<WishlistActionsMenu
+					isOwner={isOwner}
 					publicUrlPath={publicUrlPath}
 					status={status}
 					wishlistId={wishlistId}

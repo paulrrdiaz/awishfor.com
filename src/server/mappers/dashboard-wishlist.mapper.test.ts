@@ -285,6 +285,7 @@ describe("mapDashboardWishlistOverview", () => {
 				],
 			},
 			{
+				isOwner: true,
 				publicUrlPath: "/w/my-wishlist",
 				publicUrl: "https://awishfor.com/w/my-wishlist",
 				whatsAppUrl: "https://wa.me/?text=hello",

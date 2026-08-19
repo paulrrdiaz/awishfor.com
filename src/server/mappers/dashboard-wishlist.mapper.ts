@@ -31,6 +31,7 @@ function mapImages(images: WishlistImage[] = []): WishlistImageViewModel[] {
 type PurchaseWithGiftName = Purchase & { gift: Pick<Gift, "id" | "name"> };
 
 type DashboardWishlistOverviewOptions = {
+	isOwner: boolean;
 	publicUrlPath: string;
 	publicUrl: string;
 	whatsAppUrl: string;
@@ -155,6 +156,7 @@ export function mapDashboardWishlistSummary(
 export function mapDashboardWishlistOverview(
 	wishlist: WishlistWithGifts,
 	{
+		isOwner,
 		publicUrlPath,
 		publicUrl,
 		whatsAppUrl,
@@ -166,6 +168,7 @@ export function mapDashboardWishlistOverview(
 
 	return {
 		id: wishlist.id,
+		isOwner,
 		slug: wishlist.slug,
 		title: wishlist.title,
 		subtitle: wishlist.subtitle,

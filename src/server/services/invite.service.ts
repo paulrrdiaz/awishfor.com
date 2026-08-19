@@ -9,6 +9,8 @@ import {
 	deriveGuestSlug,
 	isGuestSlugAvailable,
 } from "@/lib/wishlist/guest-slug";
+import type { WishlistAccessDatabase } from "@/server/services/collaboration.service";
+import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import type {
 	CreateInviteInput,
 	UpdateInviteInput,
@@ -28,39 +30,25 @@ type InviteDelegate = {
 	findMany(args: Prisma.InviteFindManyArgs): Promise<InviteWithExtras[]>;
 };
 
-type WishlistDelegate = {
-	findFirst(args: Prisma.WishlistFindFirstArgs): Promise<{ id: string } | null>;
-};
-
 export type InviteDatabase = {
 	invite: InviteDelegate;
-	wishlist: WishlistDelegate;
-};
-
-export const assertOwnedWishlist = async (
-	db: InviteDatabase,
-	{ ownerId, wishlistId }: { ownerId: number; wishlistId: string },
-): Promise<void> => {
-	const wishlist = await db.wishlist.findFirst({
-		where: { id: wishlistId, ownerId },
-		select: { id: true },
-	});
-	if (!wishlist) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
-	}
-};
+} & WishlistAccessDatabase;
 
 export const getOwnedInvite = async (
 	db: InviteDatabase,
-	{ ownerId, inviteId }: { ownerId: number; inviteId: string },
+	{ localUserId, inviteId }: { localUserId: number; inviteId: string },
 ): Promise<InviteWithExtras> => {
 	const invite = await db.invite.findFirst({
-		where: { id: inviteId, wishlist: { ownerId } },
+		where: { id: inviteId },
 		include: { extraGuests: extraGuestsOrder },
 	});
 	if (!invite) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
 	}
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId: invite.wishlistId,
+	});
 	return invite;
 };
 

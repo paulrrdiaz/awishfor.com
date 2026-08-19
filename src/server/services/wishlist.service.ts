@@ -22,6 +22,7 @@ import {
 	evaluatePublishReadiness,
 	PublishReadinessError,
 } from "@/lib/wishlist/publish-readiness";
+import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import type {
 	CreateWishlistInput,
 	WishlistRestoreTargetStatus,
@@ -262,14 +263,18 @@ const mapServerDraft = (
 	lastSavedAt: wishlist.updatedAt.getTime(),
 });
 
-const getOwnedDraftWithRelations = async (
+/**
+ * Fetches a draft by id only — no authorization. Safe to call right after
+ * creating or updating a row the caller was already authorized against;
+ * callers that have not yet authorized must call assertWishlistAccess first.
+ */
+const findDraftWithRelations = async (
 	db: WishlistTransaction,
-	{ ownerId, wishlistId }: { ownerId: number; wishlistId: string },
+	{ wishlistId }: { wishlistId: string },
 ) => {
 	const wishlist = await db.wishlist.findFirst({
 		where: {
 			id: wishlistId,
-			ownerId,
 			status: WishlistStatus.draft,
 		},
 		include: draftWishlistInclude,
@@ -425,7 +430,7 @@ export const createWishlist = async (
 
 export const saveWishlistDraft = async (
 	db: WishlistDatabase,
-	input: SaveDraftWishlistInput & { ownerId: number },
+	input: SaveDraftWishlistInput & { localUserId: number },
 ): Promise<SaveDraftResult> => {
 	const orderedGifts = sortDraftGifts(input.gifts);
 	const wishlistData = wishlistDraftToData(input);
@@ -436,7 +441,7 @@ export const saveWishlistDraft = async (
 				data: {
 					owner: {
 						connect: {
-							id: input.ownerId,
+							id: input.localUserId,
 						},
 					},
 					...wishlistData,
@@ -454,8 +459,7 @@ export const saveWishlistDraft = async (
 				coverImages: input.coverImages,
 			});
 
-			const savedDraft = await getOwnedDraftWithRelations(tx, {
-				ownerId: input.ownerId,
+			const savedDraft = await findDraftWithRelations(tx, {
 				wishlistId: wishlist.id,
 			});
 
@@ -470,8 +474,12 @@ export const saveWishlistDraft = async (
 	const savedWishlistId = input.savedWishlistId;
 
 	return db.$transaction(async (tx) => {
-		const existingDraft = await getOwnedDraftWithRelations(tx, {
-			ownerId: input.ownerId,
+		await assertWishlistAccess(tx, {
+			localUserId: input.localUserId,
+			wishlistId: savedWishlistId,
+		});
+
+		const existingDraft = await findDraftWithRelations(tx, {
 			wishlistId: savedWishlistId,
 		});
 
@@ -488,7 +496,6 @@ export const saveWishlistDraft = async (
 		const updateResult = await tx.wishlist.updateMany({
 			where: {
 				id: savedWishlistId,
-				ownerId: input.ownerId,
 				status: WishlistStatus.draft,
 				updatedAt: input.force
 					? undefined
@@ -503,8 +510,7 @@ export const saveWishlistDraft = async (
 		});
 
 		if (updateResult.count === 0) {
-			const currentDraft = await getOwnedDraftWithRelations(tx, {
-				ownerId: input.ownerId,
+			const currentDraft = await findDraftWithRelations(tx, {
 				wishlistId: savedWishlistId,
 			});
 
@@ -522,8 +528,7 @@ export const saveWishlistDraft = async (
 			coverImages: input.coverImages,
 		});
 
-		const savedDraft = await getOwnedDraftWithRelations(tx, {
-			ownerId: input.ownerId,
+		const savedDraft = await findDraftWithRelations(tx, {
 			wishlistId: savedWishlistId,
 		});
 
@@ -538,16 +543,13 @@ export const saveWishlistDraft = async (
 export const publishWishlist = async (
 	db: WishlistDatabase,
 	{
-		ownerId,
+		localUserId,
 		wishlistId,
 		now = new Date(),
-	}: { ownerId: number; wishlistId: string; now?: Date },
+	}: { localUserId: number; wishlistId: string; now?: Date },
 ) => {
 	const wishlist = await db.wishlist.findFirst({
-		where: {
-			id: wishlistId,
-			ownerId,
-		},
+		where: { id: wishlistId },
 	});
 
 	if (!wishlist) {
@@ -556,6 +558,8 @@ export const publishWishlist = async (
 			message: "Wishlist not found",
 		});
 	}
+
+	await assertWishlistAccess(db, { localUserId, wishlistId });
 
 	if (wishlist.status !== WishlistStatus.draft) {
 		throw new TRPCError({
@@ -603,7 +607,7 @@ export const publishWishlist = async (
 
 export const publishWishlistFromWizard = async (
 	db: WishlistDatabase,
-	input: SaveDraftWishlistInput & { ownerId: number; now?: Date },
+	input: SaveDraftWishlistInput & { localUserId: number; now?: Date },
 ): Promise<WizardPublishResult> => {
 	const saveResult = await saveWishlistDraft(db, input);
 
@@ -612,7 +616,7 @@ export const publishWishlistFromWizard = async (
 	}
 
 	const publishedWishlist = await publishWishlist(db, {
-		ownerId: input.ownerId,
+		localUserId: input.localUserId,
 		wishlistId: saveResult.wishlistId,
 		now: input.now,
 	});
@@ -630,16 +634,15 @@ export const archiveWishlist = async (
 	db: WishlistDatabase,
 	{
 		wishlistId,
-		ownerId,
+		localUserId,
 		now = new Date(),
-	}: { wishlistId: string; ownerId: number; now?: Date },
+	}: { wishlistId: string; localUserId: number; now?: Date },
 ) => {
-	const owned = await db.wishlist.findFirst({
-		where: { id: wishlistId, ownerId },
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId,
+		requireOwner: true,
 	});
-	if (!owned) {
-		throw new TRPCError({ code: "UNAUTHORIZED" });
-	}
 	return db.wishlist.update({
 		where: { id: wishlistId },
 		data: {
@@ -653,22 +656,21 @@ export const restoreWishlist = async (
 	db: WishlistDatabase,
 	{
 		wishlistId,
-		ownerId,
+		localUserId,
 		targetStatus,
 		now = new Date(),
 	}: {
 		wishlistId: string;
-		ownerId: number;
+		localUserId: number;
 		targetStatus: WishlistRestoreTargetStatus;
 		now?: Date;
 	},
 ) => {
-	const owned = await db.wishlist.findFirst({
-		where: { id: wishlistId, ownerId },
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId,
+		requireOwner: true,
 	});
-	if (!owned) {
-		throw new TRPCError({ code: "UNAUTHORIZED" });
-	}
 
 	const existingWishlist = (await db.wishlist.findUniqueOrThrow({
 		where: { id: wishlistId },

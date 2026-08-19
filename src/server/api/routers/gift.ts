@@ -3,13 +3,13 @@ import { GiftVisibilityStatus } from "@/generated/prisma/client";
 import type { createTRPCContext } from "@/server/api/trpc";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { mapDashboardGift } from "@/server/mappers/dashboard-gift.mapper";
+import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import type {
 	DashboardGiftDatabase,
 	GiftDatabase,
 	ReorderGiftDatabase,
 } from "@/server/services/gift.service";
 import {
-	assertOwnedWishlist,
 	createGift,
 	getOwnedGift,
 	groupDashboardGifts,
@@ -56,9 +56,9 @@ export const giftRouter = createTRPCRouter({
 	create: protectedProcedure
 		.input(createGiftSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
-			await assertOwnedWishlist(asDashboardDb(ctx), {
-				ownerId,
+			const localUserId = await getLocalUserId(ctx);
+			await assertWishlistAccess(asDashboardDb(ctx), {
+				localUserId,
 				wishlistId: input.wishlistId,
 			});
 			const gift = await createGift(asGiftDb(ctx), input);
@@ -69,9 +69,9 @@ export const giftRouter = createTRPCRouter({
 	list: protectedProcedure
 		.input(z.object({ wishlistId: z.string().min(1) }))
 		.query(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const gifts = await listDashboardGifts(asDashboardDb(ctx), {
-				ownerId,
+				localUserId,
 				wishlistId: input.wishlistId,
 			});
 			const rows = gifts.map(mapDashboardGift);
@@ -81,9 +81,9 @@ export const giftRouter = createTRPCRouter({
 	update: protectedProcedure
 		.input(updateGiftSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const existing = await getOwnedGift(asDashboardDb(ctx), {
-				ownerId,
+				localUserId,
 				giftId: input.giftId,
 			});
 			const gift = await updateGift(ctx.db, input);
@@ -101,9 +101,9 @@ export const giftRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const existing = await getOwnedGift(asDashboardDb(ctx), {
-				ownerId,
+				localUserId,
 				giftId: input.giftId,
 			});
 			const gift = await updateGift(ctx.db, {
@@ -117,9 +117,9 @@ export const giftRouter = createTRPCRouter({
 	delete: protectedProcedure
 		.input(deleteGiftSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const existing = await getOwnedGift(asDashboardDb(ctx), {
-				ownerId,
+				localUserId,
 				giftId: input.giftId,
 			});
 			const gift = await softDeleteGift(ctx.db, input);
@@ -130,8 +130,8 @@ export const giftRouter = createTRPCRouter({
 	reorder: protectedProcedure
 		.input(reorderGiftsSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
-			await reorderGifts(asReorderDb(ctx), { ownerId, ...input });
+			const localUserId = await getLocalUserId(ctx);
+			await reorderGifts(asReorderDb(ctx), { localUserId, ...input });
 			await invalidateWishlist(ctx, input.wishlistId);
 		}),
 });

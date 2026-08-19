@@ -30,12 +30,14 @@ type Props = {
 	wishlistId: string;
 	status: string;
 	publicUrlPath: string;
+	isOwner: boolean;
 };
 
 export function WishlistActionsMenu({
 	wishlistId,
 	status,
 	publicUrlPath,
+	isOwner,
 }: Props) {
 	const router = useRouter();
 	const [archiveOpen, setArchiveOpen] = useState(false);
@@ -91,18 +93,19 @@ export function WishlistActionsMenu({
 					<DropdownMenuItem onSelect={() => void handleCopyLink()}>
 						Copiar enlace
 					</DropdownMenuItem>
-					{isArchived ? (
-						<DropdownMenuItem onSelect={() => setRestoreOpen(true)}>
-							Restaurar
-						</DropdownMenuItem>
-					) : (
-						<DropdownMenuItem
-							onSelect={() => setArchiveOpen(true)}
-							variant="destructive"
-						>
-							Archivar
-						</DropdownMenuItem>
-					)}
+					{isOwner &&
+						(isArchived ? (
+							<DropdownMenuItem onSelect={() => setRestoreOpen(true)}>
+								Restaurar
+							</DropdownMenuItem>
+						) : (
+							<DropdownMenuItem
+								onSelect={() => setArchiveOpen(true)}
+								variant="destructive"
+							>
+								Archivar
+							</DropdownMenuItem>
+						))}
 				</DropdownMenuContent>
 			</DropdownMenu>
 

@@ -76,9 +76,9 @@ export const purchaseRouter = createTRPCRouter({
 	listForGift: protectedProcedure
 		.input(listGiftPurchasesSchema)
 		.query(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const purchases = await listOwnerGiftPurchases(asOwnerPurchaseDb(ctx), {
-				ownerId,
+				localUserId,
 				giftId: input.giftId,
 			});
 			return purchases.map(mapOwnerPurchaseRecord);
@@ -87,9 +87,9 @@ export const purchaseRouter = createTRPCRouter({
 	createManual: protectedProcedure
 		.input(createOwnerManualPurchaseSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const purchase = await createOwnerManualPurchase(asOwnerPurchaseDb(ctx), {
-				ownerId,
+				localUserId,
 				...input,
 			});
 			await invalidateGiftWishlist(ctx, purchase.giftId);
@@ -99,9 +99,9 @@ export const purchaseRouter = createTRPCRouter({
 	delete: protectedProcedure
 		.input(deleteOwnerPurchaseSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const purchase = await deleteOwnerPurchase(asOwnerPurchaseDb(ctx), {
-				ownerId,
+				localUserId,
 				purchaseId: input.purchaseId,
 			});
 			await invalidateGiftWishlist(ctx, purchase.giftId);

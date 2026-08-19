@@ -6,6 +6,10 @@ import type {
 	Purchase,
 } from "@/generated/prisma/client";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
+import {
+	assertWishlistAccess,
+	type WishlistAccessDatabase,
+} from "@/server/services/collaboration.service";
 import type {
 	CreateGiftInput,
 	DeleteGiftInput,
@@ -34,23 +38,17 @@ type DashboardGiftDelegate = {
 	update(args: Prisma.GiftUpdateArgs): Promise<Gift>;
 };
 
-type WishlistDelegate = {
-	findFirst(args: Prisma.WishlistFindFirstArgs): Promise<{ id: string } | null>;
-};
-
 export type DashboardGiftDatabase = {
 	gift: DashboardGiftDelegate;
-	wishlist: WishlistDelegate;
-};
+} & WishlistAccessDatabase;
 
 export type ReorderGiftDatabase = {
 	gift: {
 		findMany(args: Prisma.GiftFindManyArgs): Promise<{ id: string }[]>;
 		update(args: Prisma.GiftUpdateArgs): Promise<Gift>;
 	};
-	wishlist: WishlistDelegate;
 	$transaction(ops: Promise<unknown>[]): Promise<unknown[]>;
-};
+} & WishlistAccessDatabase;
 
 export type GroupedDashboardGifts = {
 	available: DashboardGiftRowViewModel[];
@@ -64,20 +62,7 @@ export type DuplicateGiftDatabase = {
 		findMany(args: Prisma.GiftFindManyArgs): Promise<{ sortOrder: number }[]>;
 		create(args: Prisma.GiftCreateArgs): Promise<Gift>;
 	};
-};
-
-export const assertOwnedWishlist = async (
-	db: { wishlist: WishlistDelegate },
-	{ ownerId, wishlistId }: { ownerId: number; wishlistId: string },
-): Promise<void> => {
-	const wishlist = await db.wishlist.findFirst({
-		where: { id: wishlistId, ownerId },
-		select: { id: true },
-	});
-	if (!wishlist) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Wishlist not found" });
-	}
-};
+} & WishlistAccessDatabase;
 
 export const listGifts = (
 	db: GiftDatabase,
@@ -168,9 +153,9 @@ export const findActiveGift = (db: GiftDatabase, giftId: string) =>
 
 export const listDashboardGifts = async (
 	db: DashboardGiftDatabase,
-	{ ownerId, wishlistId }: { ownerId: number; wishlistId: string },
+	{ localUserId, wishlistId }: { localUserId: number; wishlistId: string },
 ): Promise<GiftWithPurchases[]> => {
-	await assertOwnedWishlist(db, { ownerId, wishlistId });
+	await assertWishlistAccess(db, { localUserId, wishlistId });
 	return db.gift.findMany({
 		where: { wishlistId, deletedAt: null },
 		orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -180,30 +165,30 @@ export const listDashboardGifts = async (
 
 export const getOwnedGift = async (
 	db: DashboardGiftDatabase,
-	{ ownerId, giftId }: { ownerId: number; giftId: string },
+	{ localUserId, giftId }: { localUserId: number; giftId: string },
 ): Promise<Gift> => {
 	const gift = await db.gift.findFirst({
-		where: {
-			id: giftId,
-			deletedAt: null,
-			wishlist: { ownerId },
-		},
+		where: { id: giftId, deletedAt: null },
 	});
 	if (!gift) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 	}
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId: gift.wishlistId,
+	});
 	return gift;
 };
 
 export const reorderGifts = async (
 	db: ReorderGiftDatabase,
 	{
-		ownerId,
+		localUserId,
 		wishlistId,
 		orderedGiftIds,
-	}: { ownerId: number } & ReorderGiftsInput,
+	}: { localUserId: number } & ReorderGiftsInput,
 ): Promise<void> => {
-	await assertOwnedWishlist(db, { ownerId, wishlistId });
+	await assertWishlistAccess(db, { localUserId, wishlistId });
 
 	const existingGifts = await db.gift.findMany({
 		where: { wishlistId, deletedAt: null },
@@ -230,18 +215,18 @@ export const reorderGifts = async (
 
 export const duplicateGift = async (
 	db: DuplicateGiftDatabase,
-	{ ownerId, giftId }: { ownerId: number; giftId: string },
+	{ localUserId, giftId }: { localUserId: number; giftId: string },
 ): Promise<Gift> => {
 	const original = await db.gift.findFirst({
-		where: {
-			id: giftId,
-			deletedAt: null,
-			wishlist: { ownerId },
-		},
+		where: { id: giftId, deletedAt: null },
 	});
 	if (!original) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 	}
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId: original.wishlistId,
+	});
 
 	const [lastGift] = await db.gift.findMany({
 		where: { wishlistId: original.wishlistId, deletedAt: null },

@@ -25,11 +25,12 @@ import {
 	mapDashboardWishlistOverview,
 	mapDashboardWishlistSummary,
 } from "@/server/mappers/dashboard-wishlist.mapper";
+import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import { persistDraftGiftImages } from "@/server/services/imported-image.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import { invalidatePublicWishlist } from "@/server/services/public-wishlist-cache";
 import {
-	listOwnerWishlistRecentPurchases,
+	listWishlistRecentPurchases,
 	type WishlistRecentPurchaseDatabase,
 } from "@/server/services/purchase.service";
 import { checkSlugAvailability } from "@/server/services/slug.service";
@@ -93,20 +94,52 @@ const asWishlistRecentPurchaseDb = (
 
 export const wishlistRouter = createTRPCRouter({
 	list: protectedProcedure.query(async ({ ctx }) => {
-		const ownerId = await getLocalUserId(ctx);
-		return ctx.db.wishlist.findMany({
-			where: { ownerId, status: { not: "archived" } },
-			select: { id: true, title: true, status: true, eventType: true },
-			orderBy: { createdAt: "desc" },
-		});
+		const localUserId = await getLocalUserId(ctx);
+		const sidebarSelect = {
+			id: true,
+			title: true,
+			status: true,
+			eventType: true,
+		} satisfies Prisma.WishlistSelect;
+
+		const [owned, shared] = await Promise.all([
+			ctx.db.wishlist.findMany({
+				where: { ownerId: localUserId, status: { not: "archived" } },
+				select: sidebarSelect,
+				orderBy: { createdAt: "desc" },
+			}),
+			ctx.db.wishlist.findMany({
+				where: {
+					status: { not: "archived" },
+					members: { some: { userId: localUserId } },
+				},
+				select: {
+					...sidebarSelect,
+					owner: { select: { name: true, email: true } },
+				},
+				orderBy: { createdAt: "desc" },
+			}),
+		]);
+
+		return {
+			owned,
+			shared: shared.map(({ owner, ...wishlist }) => ({
+				...wishlist,
+				ownerName: owner.name ?? owner.email,
+			})),
+		};
 	}),
 
 	getById: protectedProcedure
 		.input(z.object({ id: wishlistIdSchema }))
 		.query(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
+			const { isOwner } = await assertWishlistAccess(ctx.db, {
+				localUserId,
+				wishlistId: input.id,
+			});
 			const wishlist = await ctx.db.wishlist.findFirst({
-				where: { id: input.id, ownerId },
+				where: { id: input.id },
 				include: wishlistDetailInclude,
 			});
 
@@ -116,6 +149,7 @@ export const wishlistRouter = createTRPCRouter({
 
 			return {
 				id: wishlist.id,
+				isOwner,
 				slug: wishlist.slug,
 				title: wishlist.title,
 				subtitle: wishlist.subtitle,
@@ -182,22 +216,48 @@ export const wishlistRouter = createTRPCRouter({
 		}),
 
 	summaryList: protectedProcedure.query(async ({ ctx }) => {
-		const ownerId = await getLocalUserId(ctx);
-		const wishlists = await ctx.db.wishlist.findMany({
-			where: { ownerId, status: { not: WishlistStatus.archived } },
-			include: wishlistWithGiftsInclude,
-			orderBy: { createdAt: "desc" },
-		});
+		const localUserId = await getLocalUserId(ctx);
+		const [owned, shared] = await Promise.all([
+			ctx.db.wishlist.findMany({
+				where: {
+					ownerId: localUserId,
+					status: { not: WishlistStatus.archived },
+				},
+				include: wishlistWithGiftsInclude,
+				orderBy: { createdAt: "desc" },
+			}),
+			ctx.db.wishlist.findMany({
+				where: {
+					status: { not: WishlistStatus.archived },
+					members: { some: { userId: localUserId } },
+				},
+				include: {
+					...wishlistWithGiftsInclude,
+					owner: { select: { name: true, email: true } },
+				},
+				orderBy: { createdAt: "desc" },
+			}),
+		]);
 
-		return wishlists.map(mapDashboardWishlistSummary);
+		return {
+			owned: owned.map(mapDashboardWishlistSummary),
+			shared: shared.map((wishlist) => ({
+				...mapDashboardWishlistSummary(wishlist),
+				ownerName: wishlist.owner.name ?? wishlist.owner.email,
+			})),
+		};
 	}),
 
 	overview: protectedProcedure
 		.input(z.object({ wishlistId: wishlistIdSchema }))
 		.query(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
+			const { isOwner } = await assertWishlistAccess(ctx.db, {
+				localUserId,
+				wishlistId: input.wishlistId,
+			});
 			const wishlist = await ctx.db.wishlist.findFirst({
-				where: { id: input.wishlistId, ownerId },
+				where: { id: input.wishlistId },
 				include: wishlistWithGiftsInclude,
 			});
 
@@ -223,15 +283,15 @@ export const wishlistRouter = createTRPCRouter({
 			});
 			const publicUrlPath = `/w/${wishlist.slug}`;
 			const publicUrl = toCanonicalWishlistUrl(publicUrlPath);
-			const recentPurchases = await listOwnerWishlistRecentPurchases(
+			const recentPurchases = await listWishlistRecentPurchases(
 				asWishlistRecentPurchaseDb(ctx),
 				{
-					ownerId,
 					wishlistId: input.wishlistId,
 				},
 			);
 
 			return mapDashboardWishlistOverview(wishlist, {
+				isOwner,
 				publicUrlPath,
 				publicUrl,
 				whatsAppUrl: toWhatsAppShareUrl(publicUrl, wishlist.eventType),
@@ -249,11 +309,11 @@ export const wishlistRouter = createTRPCRouter({
 	publish: protectedProcedure
 		.input(publishWishlistSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 
 			try {
 				const published = await publishWishlist(ctx.db, {
-					ownerId,
+					localUserId,
 					...input,
 				});
 				invalidatePublicWishlist({
@@ -276,12 +336,12 @@ export const wishlistRouter = createTRPCRouter({
 	publishWizard: protectedProcedure
 		.input(saveDraftWishlistSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const gifts = await persistDraftGiftImages(input.gifts);
 
 			try {
 				const published = await publishWishlistFromWizard(ctx.db, {
-					ownerId,
+					localUserId,
 					...input,
 					gifts,
 				});
@@ -307,11 +367,11 @@ export const wishlistRouter = createTRPCRouter({
 	saveDraft: protectedProcedure
 		.input(saveDraftWishlistSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const gifts = await persistDraftGiftImages(input.gifts);
 
 			return saveWishlistDraft(ctx.db, {
-				ownerId,
+				localUserId,
 				...input,
 				gifts,
 			});
@@ -320,12 +380,13 @@ export const wishlistRouter = createTRPCRouter({
 	updateDesign: protectedProcedure
 		.input(updateWishlistDesignSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
+			await assertWishlistAccess(ctx.db, {
+				localUserId,
+				wishlistId: input.id,
+			});
 			const wishlist = await ctx.db.wishlist.findFirst({
-				where: {
-					id: input.id,
-					ownerId,
-				},
+				where: { id: input.id },
 				select: {
 					id: true,
 					slug: true,
@@ -394,9 +455,13 @@ export const wishlistRouter = createTRPCRouter({
 	updateSettings: protectedProcedure
 		.input(updateWishlistSettingsSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
+			await assertWishlistAccess(ctx.db, {
+				localUserId,
+				wishlistId: input.id,
+			});
 			const existing = await ctx.db.wishlist.findFirst({
-				where: { id: input.id, ownerId },
+				where: { id: input.id },
 				select: { id: true, slug: true, eventType: true },
 			});
 
@@ -479,19 +544,11 @@ export const wishlistRouter = createTRPCRouter({
 	archive: protectedProcedure
 		.input(z.object({ id: wishlistIdSchema }))
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
-			const existing = await ctx.db.wishlist.findFirst({
-				where: { id: input.id, ownerId },
-				select: { id: true, slug: true },
-			});
-
-			if (!existing) {
-				throw new TRPCError({ code: "NOT_FOUND" });
-			}
+			const localUserId = await getLocalUserId(ctx);
 
 			const archived = await archiveWishlist(ctx.db, {
-				wishlistId: existing.id,
-				ownerId,
+				wishlistId: input.id,
+				localUserId,
 			});
 			invalidatePublicWishlist({
 				wishlistId: archived.id,
@@ -507,19 +564,11 @@ export const wishlistRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
-			const existing = await ctx.db.wishlist.findFirst({
-				where: { id: input.id, ownerId },
-				select: { id: true, slug: true },
-			});
-
-			if (!existing) {
-				throw new TRPCError({ code: "NOT_FOUND" });
-			}
+			const localUserId = await getLocalUserId(ctx);
 
 			const restored = await restoreWishlist(ctx.db, {
-				wishlistId: existing.id,
-				ownerId,
+				wishlistId: input.id,
+				localUserId,
 				targetStatus: input.targetStatus,
 			});
 			invalidatePublicWishlist({

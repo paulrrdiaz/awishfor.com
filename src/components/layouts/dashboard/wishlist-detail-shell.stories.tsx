@@ -18,13 +18,14 @@ function DashboardWishlistShell({ status }: { status: string }) {
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<WishlistTopbar
+				isOwner
 				publicUrlPath={PUBLIC_URL_PATH}
 				status={status}
 				title={DEMO_WISHLIST.title}
 				wishlistId={WISHLIST_ID}
 			/>
 			<div className="flex min-h-0 flex-1 flex-col md:flex-row">
-				<WishlistSectionRail wishlistId={WISHLIST_ID} />
+				<WishlistSectionRail isOwner wishlistId={WISHLIST_ID} />
 				<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
 					<WishlistTitleBlock
 						publicUrlPath={PUBLIC_URL_PATH}

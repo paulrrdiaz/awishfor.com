@@ -34,10 +34,10 @@ Transactional email infrastructure (Resend, `src/lib/email/`) exists — see `op
 
 ## Collaboration
 
-- Wishlist collaborators.
-- Owner/editor/viewer roles.
-- Couple/family shared accounts.
-- Invite co-owner by email.
+Wishlist collaborators and invite-by-email shipped in `add-wishlist-collaborators`. Remaining ideas:
+
+- Owner/editor/viewer roles (today every collaborator has the same permissions).
+- Couple/family shared logins (superseded by per-person accounts with collaboration instead).
 - Activity log.
 - Owner notifications when gifts are purchased (sender available, see Sharing & invitations).
 - Commenting/notes between collaborators.

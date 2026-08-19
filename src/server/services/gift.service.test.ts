@@ -197,22 +197,22 @@ const makeDashboardDb = (
 		...overrides.gift,
 	},
 	wishlist: {
-		findFirst: async () => ({ id: "wishlist_123" }),
+		findFirst: async () => ({ id: "wishlist_123", ownerId: 42 }),
 		...overrides.wishlist,
 	},
 });
 
 describe("listDashboardGifts", () => {
-	it("throws NOT_FOUND when wishlist is not owned by user", async () => {
+	it("throws NOT_FOUND when caller has no access to the wishlist", async () => {
 		const db = makeDashboardDb({
 			wishlist: { findFirst: async () => null },
 		});
 		await expect(
-			listDashboardGifts(db, { ownerId: 42, wishlistId: "wl_1" }),
+			listDashboardGifts(db, { localUserId: 42, wishlistId: "wl_1" }),
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
 	});
 
-	it("returns gifts with purchases when wishlist is owned", async () => {
+	it("returns gifts with purchases when caller has access", async () => {
 		const giftWithPurchases: GiftWithPurchases = {
 			...createGiftRecord(),
 			purchases: [createPurchaseRecord()],
@@ -221,7 +221,7 @@ describe("listDashboardGifts", () => {
 			gift: { findMany: async () => [giftWithPurchases] },
 		});
 		const result = await listDashboardGifts(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 		});
 		expect(result).toHaveLength(1);
@@ -238,7 +238,10 @@ describe("listDashboardGifts", () => {
 				},
 			},
 		});
-		await listDashboardGifts(db, { ownerId: 42, wishlistId: "wishlist_123" });
+		await listDashboardGifts(db, {
+			localUserId: 42,
+			wishlistId: "wishlist_123",
+		});
 		expect(capturedWhere).toMatchObject({ deletedAt: null });
 	});
 
@@ -251,7 +254,7 @@ describe("listDashboardGifts", () => {
 			gift: { findMany: async () => [hiddenGift] },
 		});
 		const result = await listDashboardGifts(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 		});
 		expect(result[0]?.visibilityStatus).toBe("hidden");
@@ -259,21 +262,34 @@ describe("listDashboardGifts", () => {
 });
 
 describe("getOwnedGift", () => {
-	it("returns gift when it belongs to owner", async () => {
+	it("returns gift when the caller has access to its wishlist", async () => {
 		const gift = createGiftRecord();
 		const db = makeDashboardDb({
 			gift: { findFirst: async () => gift },
 		});
-		const result = await getOwnedGift(db, { ownerId: 42, giftId: "gift_1" });
+		const result = await getOwnedGift(db, {
+			localUserId: 42,
+			giftId: "gift_1",
+		});
 		expect(result.id).toBe("gift_1");
 	});
 
-	it("throws NOT_FOUND when gift does not belong to owner", async () => {
+	it("throws NOT_FOUND when the gift does not exist", async () => {
 		const db = makeDashboardDb({
 			gift: { findFirst: async () => null },
 		});
 		await expect(
-			getOwnedGift(db, { ownerId: 42, giftId: "gift_1" }),
+			getOwnedGift(db, { localUserId: 42, giftId: "gift_1" }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+
+	it("throws NOT_FOUND when the caller has no access to the gift's wishlist", async () => {
+		const db = makeDashboardDb({
+			gift: { findFirst: async () => createGiftRecord() },
+			wishlist: { findFirst: async () => null },
+		});
+		await expect(
+			getOwnedGift(db, { localUserId: 99, giftId: "gift_1" }),
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
 	});
 });
@@ -321,7 +337,7 @@ const makeReorderDb = (
 		...overrides.gift,
 	},
 	wishlist: {
-		findFirst: async () => ({ id: "wishlist_123" }),
+		findFirst: async () => ({ id: "wishlist_123", ownerId: 42 }),
 		...overrides.wishlist,
 	},
 	$transaction: overrides.$transaction ?? (async (ops) => Promise.all(ops)),
@@ -343,7 +359,7 @@ describe("reorderGifts", () => {
 		});
 
 		await reorderGifts(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 			orderedGiftIds: ["g2", "g3", "g1"],
 		});
@@ -363,7 +379,7 @@ describe("reorderGifts", () => {
 		});
 	});
 
-	it("throws NOT_FOUND and makes no writes when wishlist is not owned by user", async () => {
+	it("throws NOT_FOUND and makes no writes when caller has no access to the wishlist", async () => {
 		const updateCalls: unknown[] = [];
 		const db = makeReorderDb({
 			wishlist: { findFirst: async () => null },
@@ -377,7 +393,7 @@ describe("reorderGifts", () => {
 
 		await expect(
 			reorderGifts(db, {
-				ownerId: 99,
+				localUserId: 99,
 				wishlistId: "wishlist_123",
 				orderedGiftIds: ["g1", "g2", "g3"],
 			}),
@@ -399,7 +415,7 @@ describe("reorderGifts", () => {
 
 		await expect(
 			reorderGifts(db, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 				orderedGiftIds: ["g1", "g2"],
 			}),
@@ -421,7 +437,7 @@ describe("reorderGifts", () => {
 
 		await expect(
 			reorderGifts(db, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 				orderedGiftIds: ["g1", "g2", "foreign_id"],
 			}),
@@ -432,7 +448,10 @@ describe("reorderGifts", () => {
 });
 
 const makeDuplicateDb = (
-	overrides: Partial<DuplicateGiftDatabase["gift"]> = {},
+	overrides: Partial<{
+		gift: Partial<DuplicateGiftDatabase["gift"]>;
+		wishlist: Partial<DuplicateGiftDatabase["wishlist"]>;
+	}> = {},
 ): DuplicateGiftDatabase => ({
 	gift: {
 		findFirst: async () => createGiftRecord(),
@@ -442,15 +461,26 @@ const makeDuplicateDb = (
 				id: "gift_copy",
 				name: (data as Prisma.GiftUncheckedCreateInput).name as string,
 			}),
-		...overrides,
+		...overrides.gift,
+	},
+	wishlist: {
+		findFirst: async () => ({ id: "wishlist_123", ownerId: 42 }),
+		...overrides.wishlist,
 	},
 });
 
 describe("duplicateGift", () => {
-	it("throws NOT_FOUND when the gift does not belong to the owner", async () => {
-		const db = makeDuplicateDb({ findFirst: async () => null });
+	it("throws NOT_FOUND when the gift does not exist", async () => {
+		const db = makeDuplicateDb({ gift: { findFirst: async () => null } });
 		await expect(
-			duplicateGift(db, { ownerId: 42, giftId: "gift_1" }),
+			duplicateGift(db, { localUserId: 42, giftId: "gift_1" }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+
+	it("throws NOT_FOUND when the caller has no access to the gift's wishlist", async () => {
+		const db = makeDuplicateDb({ wishlist: { findFirst: async () => null } });
+		await expect(
+			duplicateGift(db, { localUserId: 99, giftId: "gift_1" }),
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
 	});
 
@@ -467,15 +497,20 @@ describe("duplicateGift", () => {
 		});
 		let capturedData: Prisma.GiftUncheckedCreateInput | undefined;
 		const db = makeDuplicateDb({
-			findFirst: async () => original,
-			findMany: async () => [{ sortOrder: 4 }],
-			create: async (args) => {
-				capturedData = args.data as Prisma.GiftUncheckedCreateInput;
-				return createGiftRecord({ id: "gift_copy" });
+			gift: {
+				findFirst: async () => original,
+				findMany: async () => [{ sortOrder: 4 }],
+				create: async (args) => {
+					capturedData = args.data as Prisma.GiftUncheckedCreateInput;
+					return createGiftRecord({ id: "gift_copy" });
+				},
 			},
 		});
 
-		const result = await duplicateGift(db, { ownerId: 42, giftId: "gift_1" });
+		const result = await duplicateGift(db, {
+			localUserId: 42,
+			giftId: "gift_1",
+		});
 
 		expect(result.id).toBe("gift_copy");
 		expect(capturedData?.name).toBe("Original");
@@ -489,14 +524,16 @@ describe("duplicateGift", () => {
 	it("appends at sortOrder 0 when the wishlist has no other gifts", async () => {
 		let capturedData: Prisma.GiftUncheckedCreateInput | undefined;
 		const db = makeDuplicateDb({
-			findMany: async () => [],
-			create: async (args) => {
-				capturedData = args.data as Prisma.GiftUncheckedCreateInput;
-				return createGiftRecord({ id: "gift_copy" });
+			gift: {
+				findMany: async () => [],
+				create: async (args) => {
+					capturedData = args.data as Prisma.GiftUncheckedCreateInput;
+					return createGiftRecord({ id: "gift_copy" });
+				},
 			},
 		});
 
-		await duplicateGift(db, { ownerId: 42, giftId: "gift_1" });
+		await duplicateGift(db, { localUserId: 42, giftId: "gift_1" });
 
 		expect(capturedData?.sortOrder).toBe(0);
 	});

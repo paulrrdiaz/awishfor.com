@@ -154,6 +154,15 @@ describe("GuestGiftDrawer", () => {
 		).toHaveAttribute("rel", "noopener noreferrer");
 	});
 
+	it("shows the exact consent copy naming the organizers, not a single creator", () => {
+		renderDrawer("purchase");
+		expect(
+			screen.getByText(
+				"Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con quienes organizan la lista.",
+			),
+		).toBeInTheDocument();
+	});
+
 	it("omits delivery details from product view when no address exists", () => {
 		renderDrawer("product", { delivery: null });
 		expect(screen.queryByText(/envíalo a esta dirección/i)).toBeNull();

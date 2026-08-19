@@ -5,8 +5,8 @@ import {
 	publicProcedure,
 } from "@/server/api/trpc";
 import { mapDashboardInvite } from "@/server/mappers/dashboard-invite.mapper";
+import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import {
-	assertOwnedWishlist,
 	createInvite,
 	deleteInvite,
 	getOwnedInvite,
@@ -46,9 +46,9 @@ export const inviteRouter = createTRPCRouter({
 	list: protectedProcedure
 		.input(listInvitesSchema)
 		.query(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
-			await assertOwnedWishlist(asInviteDb(ctx), {
-				ownerId,
+			const localUserId = await getLocalUserId(ctx);
+			await assertWishlistAccess(asInviteDb(ctx), {
+				localUserId,
 				wishlistId: input.wishlistId,
 			});
 			const invites = await listInvites(asInviteDb(ctx), {
@@ -60,9 +60,9 @@ export const inviteRouter = createTRPCRouter({
 	create: protectedProcedure
 		.input(createInviteSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
-			await assertOwnedWishlist(asInviteDb(ctx), {
-				ownerId,
+			const localUserId = await getLocalUserId(ctx);
+			await assertWishlistAccess(asInviteDb(ctx), {
+				localUserId,
 				wishlistId: input.wishlistId,
 			});
 			const invite = await createInvite(asInviteDb(ctx), input);
@@ -72,9 +72,9 @@ export const inviteRouter = createTRPCRouter({
 	update: protectedProcedure
 		.input(updateInviteSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			const existing = await getOwnedInvite(asInviteDb(ctx), {
-				ownerId,
+				localUserId,
 				inviteId: input.inviteId,
 			});
 			const invite = await updateInvite(asInviteDb(ctx), {
@@ -87,9 +87,9 @@ export const inviteRouter = createTRPCRouter({
 	delete: protectedProcedure
 		.input(deleteInviteSchema)
 		.mutation(async ({ ctx, input }) => {
-			const ownerId = await getLocalUserId(ctx);
+			const localUserId = await getLocalUserId(ctx);
 			await getOwnedInvite(asInviteDb(ctx), {
-				ownerId,
+				localUserId,
 				inviteId: input.inviteId,
 			});
 			await deleteInvite(asInviteDb(ctx), { inviteId: input.inviteId });

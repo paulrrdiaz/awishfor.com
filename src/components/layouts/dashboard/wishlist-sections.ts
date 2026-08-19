@@ -3,18 +3,34 @@ import {
 	LayoutGridIcon,
 	PaletteIcon,
 	SettingsIcon,
+	Users2Icon,
 	UsersIcon,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
-	{ label: "Resumen", segment: "", icon: LayoutGridIcon },
-	{ label: "Regalos", segment: "gifts", icon: GiftIcon },
-	{ label: "Invitados", segment: "guests", icon: UsersIcon },
-	{ label: "Diseño", segment: "design", icon: PaletteIcon },
-	{ label: "Configuración", segment: "settings", icon: SettingsIcon },
+	{ label: "Resumen", segment: "", icon: LayoutGridIcon, ownerOnly: false },
+	{ label: "Regalos", segment: "gifts", icon: GiftIcon, ownerOnly: false },
+	{ label: "Invitados", segment: "guests", icon: UsersIcon, ownerOnly: false },
+	{ label: "Diseño", segment: "design", icon: PaletteIcon, ownerOnly: false },
+	{
+		label: "Colaboradores",
+		segment: "collaborators",
+		icon: Users2Icon,
+		ownerOnly: true,
+	},
+	{
+		label: "Configuración",
+		segment: "settings",
+		icon: SettingsIcon,
+		ownerOnly: false,
+	},
 ] as const;
 
 export type WishlistSection = (typeof NAV_ITEMS)[number]["segment"];
+
+export function navItemsFor(isOwner: boolean) {
+	return NAV_ITEMS.filter((item) => isOwner || !item.ownerOnly);
+}
 
 const SEGMENT_ALIASES: Record<string, WishlistSection> = {
 	categories: "gifts",

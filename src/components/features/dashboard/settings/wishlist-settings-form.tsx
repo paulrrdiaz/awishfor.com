@@ -703,85 +703,92 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			</form>
 
 			{/* Zona peligrosa */}
-			<div className="mt-10 rounded-2xl border border-destructive/30 bg-card p-5 shadow-sm">
-				<h2 className="mb-1 font-medium text-base text-destructive">
-					Zona peligrosa
-				</h2>
-				<p className="mb-4 text-muted-foreground text-sm">
-					Estas acciones modifican el estado de tu lista y no se pueden deshacer
-					fácilmente.
-				</p>
+			{wishlist.isOwner && (
+				<div className="mt-10 rounded-2xl border border-destructive/30 bg-card p-5 shadow-sm">
+					<h2 className="mb-1 font-medium text-base text-destructive">
+						Zona peligrosa
+					</h2>
+					<p className="mb-4 text-muted-foreground text-sm">
+						Estas acciones modifican el estado de tu lista y no se pueden
+						deshacer fácilmente.
+					</p>
 
-				{wishlist.status === "archived" ? (
-					<div className="space-y-3">
-						<p className="text-sm">
-							Tu lista está archivada. Puedes restaurarla como publicada o como
-							borrador.
-						</p>
-						<Dialog>
-							<DialogTrigger asChild>
-								<Button disabled={restoreMutation.isPending} variant="outline">
-									Restaurar lista
-								</Button>
-							</DialogTrigger>
-							<DialogContent>
-								<RestoreWishlistDialogContent
-									disabled={restoreMutation.isPending}
-									onRestoreDraft={() =>
-										restoreMutation.mutate({
-											id: wishlist.id,
-											targetStatus: "draft",
-										})
-									}
-									onRestorePublished={() =>
-										restoreMutation.mutate({
-											id: wishlist.id,
-											targetStatus: "published",
-										})
-									}
-								/>
-							</DialogContent>
-						</Dialog>
-					</div>
-				) : (
-					<div className="space-y-3">
-						<p className="text-sm">
-							Archivar ocultará tu lista del público. Podrás restaurarla en
-							cualquier momento.
-						</p>
-						<AlertDialog>
-							<AlertDialogTrigger asChild>
-								<Button
-									className="border-destructive/50 text-destructive hover:bg-destructive/10"
-									disabled={archiveMutation.isPending}
-									variant="outline"
-								>
-									Archivar lista
-								</Button>
-							</AlertDialogTrigger>
-							<AlertDialogContent>
-								<AlertDialogHeader>
-									<AlertDialogTitle>¿Archivar esta lista?</AlertDialogTitle>
-									<AlertDialogDescription>
-										La lista dejará de ser pública. Podrás restaurarla desde
-										esta misma página cuando quieras.
-									</AlertDialogDescription>
-								</AlertDialogHeader>
-								<AlertDialogFooter>
-									<AlertDialogCancel>Cancelar</AlertDialogCancel>
-									<AlertDialogAction
-										disabled={archiveMutation.isPending}
-										onClick={() => archiveMutation.mutate({ id: wishlist.id })}
-										variant="destructive"
+					{wishlist.status === "archived" ? (
+						<div className="space-y-3">
+							<p className="text-sm">
+								Tu lista está archivada. Puedes restaurarla como publicada o
+								como borrador.
+							</p>
+							<Dialog>
+								<DialogTrigger asChild>
+									<Button
+										disabled={restoreMutation.isPending}
+										variant="outline"
 									>
-										{archiveMutation.isPending ? "Archivando…" : "Archivar"}
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogContent>
-						</AlertDialog>
-					</div>
-				)}
-			</div>
+										Restaurar lista
+									</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<RestoreWishlistDialogContent
+										disabled={restoreMutation.isPending}
+										onRestoreDraft={() =>
+											restoreMutation.mutate({
+												id: wishlist.id,
+												targetStatus: "draft",
+											})
+										}
+										onRestorePublished={() =>
+											restoreMutation.mutate({
+												id: wishlist.id,
+												targetStatus: "published",
+											})
+										}
+									/>
+								</DialogContent>
+							</Dialog>
+						</div>
+					) : (
+						<div className="space-y-3">
+							<p className="text-sm">
+								Archivar ocultará tu lista del público. Podrás restaurarla en
+								cualquier momento.
+							</p>
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button
+										className="border-destructive/50 text-destructive hover:bg-destructive/10"
+										disabled={archiveMutation.isPending}
+										variant="outline"
+									>
+										Archivar lista
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>¿Archivar esta lista?</AlertDialogTitle>
+										<AlertDialogDescription>
+											La lista dejará de ser pública. Podrás restaurarla desde
+											esta misma página cuando quieras.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Cancelar</AlertDialogCancel>
+										<AlertDialogAction
+											disabled={archiveMutation.isPending}
+											onClick={() =>
+												archiveMutation.mutate({ id: wishlist.id })
+											}
+											variant="destructive"
+										>
+											{archiveMutation.isPending ? "Archivando…" : "Archivar"}
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
+						</div>
+					)}
+				</div>
+			)}
 		</div>
 	);
 }

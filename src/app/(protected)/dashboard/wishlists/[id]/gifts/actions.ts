@@ -8,8 +8,8 @@ import type {
 	GiftVisibilityStatus,
 } from "@/generated/prisma/enums";
 import { db } from "@/server/db";
+import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import {
-	assertOwnedWishlist,
 	createGift,
 	type DashboardGiftDatabase,
 	type DuplicateGiftDatabase,
@@ -35,7 +35,7 @@ import {
 	updateGiftSchema,
 } from "@/server/validators/gift.schema";
 
-async function getLocalOwnerId(): Promise<number> {
+async function getLocalUserId(): Promise<number> {
 	const { userId } = await auth();
 	if (!userId) {
 		throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -65,9 +65,9 @@ function assertGiftWishlist(
 
 export async function createGiftAction(input: CreateGiftInput): Promise<void> {
 	const parsed = createGiftSchema.parse(input);
-	const ownerId = await getLocalOwnerId();
-	await assertOwnedWishlist(db as unknown as DashboardGiftDatabase, {
-		ownerId,
+	const localUserId = await getLocalUserId();
+	await assertWishlistAccess(db as unknown as DashboardGiftDatabase, {
+		localUserId,
 		wishlistId: parsed.wishlistId,
 	});
 	await createGift(db as unknown as GiftDatabase, parsed);
@@ -80,9 +80,9 @@ export async function updateGiftAction(
 	input: UpdateGiftInput,
 ): Promise<void> {
 	const parsed = updateGiftSchema.parse(input);
-	const ownerId = await getLocalOwnerId();
+	const localUserId = await getLocalUserId();
 	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
-		ownerId,
+		localUserId,
 		giftId: parsed.giftId,
 	});
 	assertGiftWishlist(existing.wishlistId, wishlistId);
@@ -95,14 +95,14 @@ export async function duplicateGiftAction(
 	wishlistId: string,
 	giftId: string,
 ): Promise<void> {
-	const ownerId = await getLocalOwnerId();
+	const localUserId = await getLocalUserId();
 	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
-		ownerId,
+		localUserId,
 		giftId,
 	});
 	assertGiftWishlist(existing.wishlistId, wishlistId);
 	const gift = await duplicateGift(db as unknown as DuplicateGiftDatabase, {
-		ownerId,
+		localUserId,
 		giftId,
 	});
 	await invalidateWishlist(gift.wishlistId);
@@ -114,9 +114,9 @@ export async function setGiftVisibilityAction(
 	giftId: string,
 	visibilityStatus: GiftVisibilityStatus,
 ): Promise<void> {
-	const ownerId = await getLocalOwnerId();
+	const localUserId = await getLocalUserId();
 	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
-		ownerId,
+		localUserId,
 		giftId,
 	});
 	assertGiftWishlist(existing.wishlistId, wishlistId);
@@ -133,9 +133,9 @@ export async function setGiftPriorityAction(
 	giftId: string,
 	priority: GiftPriority,
 ): Promise<void> {
-	const ownerId = await getLocalOwnerId();
+	const localUserId = await getLocalUserId();
 	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
-		ownerId,
+		localUserId,
 		giftId,
 	});
 	assertGiftWishlist(existing.wishlistId, wishlistId);
@@ -148,9 +148,9 @@ export async function setGiftPriorityAction(
 }
 
 export async function deleteGiftAction(wishlistId: string, giftId: string) {
-	const ownerId = await getLocalOwnerId();
+	const localUserId = await getLocalUserId();
 	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
-		ownerId,
+		localUserId,
 		giftId,
 	});
 	assertGiftWishlist(existing.wishlistId, wishlistId);
@@ -161,9 +161,9 @@ export async function deleteGiftAction(wishlistId: string, giftId: string) {
 
 export async function reorderGiftsAction(input: ReorderGiftsInput) {
 	const parsed = reorderGiftsSchema.parse(input);
-	const ownerId = await getLocalOwnerId();
+	const localUserId = await getLocalUserId();
 	await reorderGifts(db as unknown as ReorderGiftDatabase, {
-		ownerId,
+		localUserId,
 		...parsed,
 	});
 	await invalidateWishlist(parsed.wishlistId);

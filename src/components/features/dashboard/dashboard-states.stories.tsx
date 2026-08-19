@@ -16,7 +16,7 @@ export default meta;
 type Story = StoryObj;
 
 export const EmptyState: Story = {
-	render: () => <WishlistCardGrid wishlists={[]} />,
+	render: () => <WishlistCardGrid owned={[]} shared={[]} />,
 };
 
 export const SlugWarning: Story = {

@@ -74,9 +74,9 @@ const createWishlistInput = () => ({
 });
 
 const makeDraftInput = (
-	overrides: Partial<SaveDraftWishlistInput & { ownerId: number }> = {},
-): SaveDraftWishlistInput & { ownerId: number } => ({
-	ownerId: 42,
+	overrides: Partial<SaveDraftWishlistInput & { localUserId: number }> = {},
+): SaveDraftWishlistInput & { localUserId: number } => ({
+	localUserId: 42,
 	title: "Lista de boda",
 	slug: "lista-de-boda",
 	eventType: EventType.wedding,
@@ -237,6 +237,18 @@ const createMockDatabase = (
 				if (where.id !== undefined && wishlist.id !== where.id) return false;
 				if (where.ownerId !== undefined && wishlist.ownerId !== where.ownerId) {
 					return false;
+				}
+				if (where.OR !== undefined) {
+					const orClauses = where.OR as Array<{
+						ownerId?: number;
+						members?: { some: { userId: number } };
+					}>;
+					const matchesOr = orClauses.some(
+						(clause) =>
+							clause.ownerId !== undefined &&
+							wishlist.ownerId === clause.ownerId,
+					);
+					if (!matchesOr) return false;
 				}
 				if (where.status !== undefined && wishlist.status !== where.status) {
 					return false;
@@ -1066,16 +1078,13 @@ describe("wishlist service", () => {
 		const now = new Date("2026-06-25T10:00:00.000Z");
 
 		const wishlist = await publishWishlist(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 			now,
 		});
 
 		expect(findFirst).toHaveBeenCalledWith({
-			where: {
-				id: "wishlist_123",
-				ownerId: 42,
-			},
+			where: { id: "wishlist_123" },
 		});
 		expect(count).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -1111,7 +1120,7 @@ describe("wishlist service", () => {
 		});
 
 		await expect(
-			publishWishlist(db, { ownerId: 42, wishlistId: "wishlist_123" }),
+			publishWishlist(db, { localUserId: 42, wishlistId: "wishlist_123" }),
 		).rejects.toBeInstanceOf(PublishReadinessError);
 
 		expect(update).not.toHaveBeenCalled();
@@ -1129,7 +1138,7 @@ describe("wishlist service", () => {
 		});
 
 		const error = await publishWishlist(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 		}).catch((e) => e);
 
@@ -1147,7 +1156,7 @@ describe("wishlist service", () => {
 		});
 
 		const error = await publishWishlist(db, {
-			ownerId: 42,
+			localUserId: 42,
 			wishlistId: "wishlist_123",
 		}).catch((e) => e);
 
@@ -1163,7 +1172,7 @@ describe("wishlist service", () => {
 			imageCount: 3,
 		});
 
-		await publishWishlist(db, { ownerId: 42, wishlistId: "wishlist_123" });
+		await publishWishlist(db, { localUserId: 42, wishlistId: "wishlist_123" });
 
 		expect(update).toHaveBeenCalled();
 	});
@@ -1173,7 +1182,7 @@ describe("wishlist service", () => {
 
 		await expect(
 			publishWishlist(db, {
-				ownerId: 7,
+				localUserId: 7,
 				wishlistId: "wishlist_123",
 			}),
 		).rejects.toMatchObject({
@@ -1196,7 +1205,7 @@ describe("wishlist service", () => {
 
 		await expect(
 			publishWishlist(db, {
-				ownerId: 42,
+				localUserId: 42,
 				wishlistId: "wishlist_123",
 			}),
 		).rejects.toMatchObject({
@@ -1304,7 +1313,7 @@ describe("wishlist service", () => {
 
 		const wishlist = await archiveWishlist(db, {
 			wishlistId: "wishlist_123",
-			ownerId: 42,
+			localUserId: 42,
 			now,
 		});
 
@@ -1331,7 +1340,7 @@ describe("wishlist service", () => {
 
 		const wishlist = await restoreWishlist(db, {
 			wishlistId: "wishlist_123",
-			ownerId: 42,
+			localUserId: 42,
 			targetStatus: WishlistStatus.draft,
 		});
 
@@ -1358,7 +1367,7 @@ describe("wishlist service", () => {
 
 		const wishlist = await restoreWishlist(db, {
 			wishlistId: "wishlist_123",
-			ownerId: 42,
+			localUserId: 42,
 			targetStatus: WishlistStatus.published,
 			now,
 		});

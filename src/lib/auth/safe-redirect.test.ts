@@ -34,4 +34,10 @@ describe("resolveRedirectPath", () => {
 	it("honors a custom fallback", () => {
 		expect(resolveRedirectPath(null, "/create")).toBe("/create");
 	});
+
+	it("accepts an invitation link as a post-authentication redirect target", () => {
+		expect(resolveRedirectPath("/invitations/abc123token")).toBe(
+			"/invitations/abc123token",
+		);
+	});
 });

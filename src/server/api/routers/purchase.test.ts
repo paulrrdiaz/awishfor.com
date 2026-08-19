@@ -163,7 +163,7 @@ describe("purchaseRouter — owner authorization", () => {
 			select: { id: true },
 		});
 		expect(listOwnerGiftPurchasesMock).toHaveBeenCalledWith(expect.anything(), {
-			ownerId: 42,
+			localUserId: 42,
 			giftId: "gift_1",
 		});
 	});
@@ -190,7 +190,7 @@ describe("purchaseRouter — owner authorization", () => {
 		await caller.delete({ purchaseId: "purchase_1" });
 
 		expect(deleteOwnerPurchaseMock).toHaveBeenCalledWith(expect.anything(), {
-			ownerId: 42,
+			localUserId: 42,
 			purchaseId: "purchase_1",
 		});
 	});

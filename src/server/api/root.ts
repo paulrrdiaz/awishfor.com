@@ -1,4 +1,5 @@
 import { categoryRouter } from "@/server/api/routers/category";
+import { collaborationRouter } from "@/server/api/routers/collaboration";
 import { giftRouter } from "@/server/api/routers/gift";
 import { importerRouter } from "@/server/api/routers/importer";
 import { inviteRouter } from "@/server/api/routers/invite";
@@ -28,6 +29,7 @@ import {
  */
 export const appRouter = createTRPCRouter({
 	category: categoryRouter,
+	collaboration: collaborationRouter,
 	gift: giftRouter,
 	importer: importerRouter,
 	invite: inviteRouter,

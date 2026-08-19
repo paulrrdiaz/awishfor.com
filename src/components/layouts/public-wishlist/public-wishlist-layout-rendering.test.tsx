@@ -146,7 +146,7 @@ describe("public wishlist subtitle and relocated CTA behavior", () => {
 					}
 
 					const giftLinks = screen.queryAllByRole("link", {
-						name: "Ver regalos disponibles",
+						name: "Ver lista de regalos",
 					});
 					if (mode === "compact") {
 						expect(giftLinks).toHaveLength(0);
@@ -180,7 +180,7 @@ describe("public wishlist subtitle and relocated CTA behavior", () => {
 			);
 
 			expect(
-				screen.getByRole("link", { name: "Ver regalos disponibles" }),
+				screen.getByRole("link", { name: "Ver lista de regalos" }),
 			).toBeInTheDocument();
 			expect(
 				screen.queryByRole("button", { name: "Cómo funciona" }),
@@ -206,7 +206,7 @@ describe("self-contained layout section ordering", () => {
 
 		const elements = {
 			countdown: screen.getByTestId("countdown"),
-			cta: screen.getByRole("link", { name: "Ver regalos disponibles" }),
+			cta: screen.getByRole("link", { name: "Ver lista de regalos" }),
 			gifts: screen.getByTestId("gifts"),
 			rsvp: screen.getByTestId("rsvp"),
 			welcome: screen.getByTestId("welcome"),

@@ -40,7 +40,6 @@ Primary Spanish CTA:
 - No premium plans.
 - No custom domains.
 - No RSVP.
-- No collaborators.
 - No AI-generated gift recommendations.
 - No browser/Puppeteer scraping in MVP.
 - No hard delete for wishlists/gifts in MVP.
@@ -1627,11 +1626,11 @@ mailto:contact@awishfor.com?subject=Reportar%20lista
 
 Purchase modal:
 
-> Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista.
+> Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con quienes organizan la lista.
 
 Also acceptable:
 
-> Tu nombre será visible solo para el creador de la lista.
+> Tu nombre será visible para quienes organizan la lista.
 
 ### Owner publish consent
 
@@ -2085,7 +2084,6 @@ Recommended limits:
 - Marketplace.
 - Premium subscriptions.
 - Affiliate links.
-- Collaborators.
 - Guest accounts.
 - Public search/discovery.
 - Password-protected wishlists.

@@ -1606,7 +1606,7 @@ Tasks:
 - [x] Add loading/error states.
 - [x] Route product actions through a departure view and disable both actions for purchased gifts.
 - [x] Render as a bottom drawer at every viewport with sticky actions.
-- [x] Use exact consent copy: "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."
+- [x] Use exact consent copy: "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con quienes organizan la lista." (updated in `add-wishlist-collaborators` — a wishlist can now have collaborators, not just a single creator)
 
 Acceptance criteria:
 

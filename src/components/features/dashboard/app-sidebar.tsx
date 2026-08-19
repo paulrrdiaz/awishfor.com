@@ -11,6 +11,7 @@ import {
 	MoreHorizontal,
 	Plus,
 	Settings,
+	Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,8 +37,11 @@ type WishlistItem = {
 	eventType: string;
 };
 
+type SharedWishlistItem = WishlistItem & { ownerName: string };
+
 type Props = {
-	wishlists: WishlistItem[];
+	owned: WishlistItem[];
+	shared: SharedWishlistItem[];
 };
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
@@ -64,7 +68,7 @@ function getStatusMeta(status: string) {
 	);
 }
 
-export function AppSidebar({ wishlists }: Props) {
+export function AppSidebar({ owned, shared }: Props) {
 	const pathname = usePathname();
 	const { user } = useUser();
 	const isWishlistRoute = pathname.startsWith("/dashboard/wishlists/");
@@ -146,14 +150,14 @@ export function AppSidebar({ wishlists }: Props) {
 									<ChevronDown className="ml-auto size-3 text-[#7c8494] group-data-[collapsible=icon]:hidden" />
 								</SidebarMenuButton>
 							</SidebarMenuItem>
-							{wishlists.length === 0 && (
+							{owned.length === 0 && (
 								<SidebarMenuItem>
 									<span className="block px-8 py-1.5 text-[#7c8494] text-xs group-data-[collapsible=icon]:hidden">
 										Sin listas aún
 									</span>
 								</SidebarMenuItem>
 							)}
-							{wishlists.map((wishlist) => {
+							{owned.map((wishlist) => {
 								const href = `/dashboard/wishlists/${wishlist.id}/gifts`;
 								const isActive = pathname.startsWith(
 									`/dashboard/wishlists/${wishlist.id}`,
@@ -207,6 +211,67 @@ export function AppSidebar({ wishlists }: Props) {
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
+
+				{shared.length > 0 && (
+					<SidebarGroup className="mt-2 p-0">
+						<SidebarGroupContent>
+							<SidebarMenu className="gap-1">
+								<SidebarMenuItem>
+									<SidebarMenuButton
+										className="h-8 rounded-lg px-3 font-semibold text-[#17213a] hover:bg-[#f7f7f2] data-active:bg-[#f3f6ec] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
+										tooltip="Compartidas conmigo"
+									>
+										<Users />
+										<span className="group-data-[collapsible=icon]:hidden">
+											Compartidas conmigo
+										</span>
+										<ChevronDown className="ml-auto size-3 text-[#7c8494] group-data-[collapsible=icon]:hidden" />
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+								{shared.map((wishlist) => {
+									const href = `/dashboard/wishlists/${wishlist.id}/gifts`;
+									const isActive = pathname.startsWith(
+										`/dashboard/wishlists/${wishlist.id}`,
+									);
+									const status = getStatusMeta(wishlist.status);
+									return (
+										<SidebarMenuItem key={wishlist.id}>
+											<SidebarMenuButton
+												asChild
+												className="h-auto rounded-md px-3 py-1.5 pl-8 text-[#596273] text-xs hover:bg-[#f7f7f2] data-active:bg-[#edf7e9] data-active:font-semibold data-active:text-[#17213a] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
+												isActive={isActive}
+												tooltip={wishlist.title}
+											>
+												<Link href={href}>
+													<Circle
+														className={cn(
+															"mt-1 size-1.5 shrink-0 self-start fill-[#a9afb8] text-[#a9afb8]",
+															isActive && "fill-[#438b52] text-[#438b52]",
+														)}
+													/>
+													<span className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
+														<span className="truncate">{wishlist.title}</span>
+														<span className="truncate text-[#a9afb8] text-[10px]">
+															de {wishlist.ownerName}
+														</span>
+													</span>
+													<span
+														className={cn(
+															"ml-auto shrink-0 rounded-full px-1.5 py-0.5 font-medium text-[9px] group-data-[collapsible=icon]:hidden",
+															status.className,
+														)}
+													>
+														{status.label}
+													</span>
+												</Link>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									);
+								})}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				)}
 
 				<SidebarGroup className="mt-2 border-[#ecece6] border-t p-0 pt-2">
 					<SidebarGroupContent>

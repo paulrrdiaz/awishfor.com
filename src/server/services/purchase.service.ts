@@ -2,6 +2,10 @@ import { createHash, randomBytes } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import type { Gift, Purchase, Wishlist } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
+import {
+	assertWishlistAccess,
+	type WishlistAccessDatabase,
+} from "@/server/services/collaboration.service";
 import type {
 	CreateOwnerManualPurchaseInput,
 	CreatePurchaseInput,
@@ -32,7 +36,7 @@ type OwnerPurchaseClient = {
 		findMany(args: Prisma.PurchaseFindManyArgs): Promise<Purchase[]>;
 	};
 	gift: GiftDelegate;
-};
+} & WishlistAccessDatabase;
 
 export type OwnerPurchaseDatabase = OwnerPurchaseClient & {
 	$transaction<T>(
@@ -94,34 +98,37 @@ export const OWNER_MANUAL_PURCHASE_DEFAULT_NAME = "Registrado por el creador";
 
 export const listOwnerGiftPurchases = async (
 	db: OwnerPurchaseDatabase,
-	{ ownerId, giftId }: { ownerId: number; giftId: string },
+	{ localUserId, giftId }: { localUserId: number; giftId: string },
 ): Promise<Purchase[]> => {
 	const gift = await db.gift.findFirst({
-		where: { id: giftId, deletedAt: null, wishlist: { ownerId } },
+		where: { id: giftId, deletedAt: null },
 	});
 	if (!gift) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 	}
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId: gift.wishlistId,
+	});
 	return db.purchase.findMany({
 		where: { giftId },
 		orderBy: { createdAt: "desc" },
 	});
 };
 
-export const listOwnerWishlistRecentPurchases = async (
+/**
+ * Recent purchases for a wishlist the caller has already been authorized
+ * against (via assertWishlistAccess at the call site) — no owner check here.
+ */
+export const listWishlistRecentPurchases = async (
 	db: WishlistRecentPurchaseDatabase,
-	{
-		ownerId,
-		wishlistId,
-		take = 5,
-	}: { ownerId: number; wishlistId: string; take?: number },
+	{ wishlistId, take = 5 }: { wishlistId: string; take?: number },
 ): Promise<WishlistRecentPurchase[]> =>
 	db.purchase.findMany({
 		where: {
 			gift: {
 				wishlistId,
 				deletedAt: null,
-				wishlist: { ownerId },
 			},
 		},
 		include: {
@@ -139,21 +146,25 @@ export const listOwnerWishlistRecentPurchases = async (
 export const createOwnerManualPurchase = async (
 	db: OwnerPurchaseDatabase,
 	{
-		ownerId,
+		localUserId,
 		giftId,
 		guestName,
 		guestEmail,
 		guestPhone,
 		message,
 		quantity,
-	}: { ownerId: number } & CreateOwnerManualPurchaseInput,
+	}: { localUserId: number } & CreateOwnerManualPurchaseInput,
 ): Promise<Purchase> => {
 	const gift = await db.gift.findFirst({
-		where: { id: giftId, deletedAt: null, wishlist: { ownerId } },
+		where: { id: giftId, deletedAt: null },
 	});
 	if (!gift) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 	}
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId: gift.wishlistId,
+	});
 
 	return db.$transaction(async (tx) => {
 		const remaining = await getRemainingQuantity(tx, gift);
@@ -179,7 +190,7 @@ export const createOwnerManualPurchase = async (
 
 export const deleteOwnerPurchase = async (
 	db: OwnerPurchaseDatabase,
-	{ ownerId, purchaseId }: { ownerId: number; purchaseId: string },
+	{ localUserId, purchaseId }: { localUserId: number; purchaseId: string },
 ): Promise<Purchase> => {
 	return db.$transaction(async (tx) => {
 		const purchase = await tx.purchase.findFirst({
@@ -190,11 +201,15 @@ export const deleteOwnerPurchase = async (
 		}
 
 		const gift = await tx.gift.findFirst({
-			where: { id: purchase.giftId, wishlist: { ownerId } },
+			where: { id: purchase.giftId },
 		});
 		if (!gift) {
-			throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+			throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
 		}
+		await assertWishlistAccess(tx, {
+			localUserId,
+			wishlistId: gift.wishlistId,
+		});
 
 		try {
 			return await tx.purchase.delete({ where: { id: purchaseId } });

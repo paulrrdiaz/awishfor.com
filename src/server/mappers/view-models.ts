@@ -163,8 +163,12 @@ export type DashboardWishlistSummaryViewModel = {
 	createdAt: string;
 };
 
+export type SharedDashboardWishlistSummaryViewModel =
+	DashboardWishlistSummaryViewModel & { ownerName: string };
+
 export type DashboardWishlistOverviewViewModel = {
 	id: string;
+	isOwner: boolean;
 	slug: string;
 	title: string;
 	subtitle: string | null;
