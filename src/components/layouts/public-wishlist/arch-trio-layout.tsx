@@ -92,7 +92,7 @@ export function ArchTrioLayout({
 					<div className="relative h-[255px] w-full shrink-0 sm:mx-auto sm:h-[300px] sm:w-[360px] lg:mx-0 lg:h-[360px] lg:w-[460px]">
 						<HeroCarouselGallery
 							alt={`${heading} 1`}
-							className="absolute left-8 z-[2] size-[260px] overflow-hidden rounded-full border-[3px] border-white shadow-[0_16px_40px_rgba(80,30,60,.18)] sm:top-4 sm:top-4.5 sm:left-0 sm:size-[250px] sm:border-[5px] lg:size-[320px]"
+							className="absolute left-0 z-[2] size-[60vw] overflow-hidden rounded-full border-[3px] border-white shadow-[0_16px_40px_rgba(80,30,60,.18)] sm:top-4 sm:top-4.5 sm:left-0 sm:size-[250px] sm:border-[5px] lg:size-[320px]"
 							controlsVariant="compact"
 							images={carouselImages}
 							priority={!isCompact}
@@ -100,14 +100,14 @@ export function ArchTrioLayout({
 						/>
 						<HeroImageSlot
 							alt={`${heading} 2`}
-							className="absolute right-8 bottom-0 z-[1] size-[160px] rounded-full border-[3px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)] sm:-right-4.5 sm:-right-6 sm:size-[150px] sm:border-[5px] lg:size-[200px]"
+							className="absolute right-0 bottom-0 z-[1] size-[38vw] rounded-full border-[3px] border-card shadow-[0_12px_30px_rgba(80,30,60,.15)] sm:-right-0.5 sm:-right-6 sm:size-[150px] sm:border-[5px] lg:size-[200px]"
 							isSample={staticSlots[0]?.isSample}
 							sizes="(min-width: 1024px) 200px, (min-width: 640px) 150px, 125px"
 							src={staticSlots[0]?.url ?? null}
 						/>
 						<HeroImageSlot
 							alt={`${heading} 3`}
-							className="absolute -top-3.5 right-20 z-[3] size-[120px] rounded-full border-[3px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)] sm:-top-4 sm:right-4.5 sm:right-6 sm:size-[120px] sm:border-[5px] lg:size-[160px]"
+							className="absolute -top-3.5 right-8 z-[3] size-[30vw] rounded-full border-[3px] border-card shadow-[0_10px_24px_rgba(80,30,60,.14)] sm:-top-4 sm:right-4.5 sm:right-6 sm:size-[120px] sm:border-[5px] lg:size-[160px]"
 							isSample={staticSlots[1]?.isSample}
 							sizes="(min-width: 1024px) 160px, (min-width: 640px) 120px, 100px"
 							src={staticSlots[1]?.url ?? null}
@@ -124,7 +124,7 @@ export function ArchTrioLayout({
 						<p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.2em]">
 							{eventLabel}
 						</p>
-						<h1 className="font-heading font-semibold text-4xl leading-none sm:text-7xl">
+						<h1 className="font-heading font-semibold text-5xl leading-none sm:text-7xl">
 							{heading}
 						</h1>
 						{wishlist.subtitle && (
@@ -139,7 +139,7 @@ export function ArchTrioLayout({
 			{!isCompact && (
 				<>
 					<div className="flex flex-col gap-8 px-5 py-5 lg:flex-row lg:items-center lg:gap-16 lg:px-4">
-						<div className="flex min-w-0 flex-col gap-4 lg:w-96 lg:shrink-0">
+						<div className="order-2 flex min-w-0 flex-col gap-4 lg:order-1 lg:w-96 lg:shrink-0">
 							<EventDetails
 								size="md"
 								stacked
@@ -153,7 +153,7 @@ export function ArchTrioLayout({
 								/>
 							)}
 						</div>
-						<div className="min-w-0 flex-1 space-y-4">
+						<div className="order-1 min-w-0 flex-1 space-y-4 lg:order-2">
 							<WishlistMessage
 								attribution={wishlist.welcomeMessageAttribution}
 								className="border-b-0 px-0 pb-0 sm:px-0 sm:pb-0"
