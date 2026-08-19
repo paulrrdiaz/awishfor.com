@@ -65,7 +65,7 @@ describe("formatEventDate", () => {
 
 		try {
 			const result = formatEventDate("2026-09-26T00:00:00.000Z", "es");
-			expect(result).toMatch(/^Sábado, 26 de (septiembre|setiembre) de 2026$/i);
+			expect(result).toMatch(/^Sábado, 26 de septiembre de 2026$/i);
 		} finally {
 			if (previousTimezone === undefined) {
 				delete process.env.TZ;

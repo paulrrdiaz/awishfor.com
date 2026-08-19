@@ -1,7 +1,9 @@
 import type { Locale } from "@/generated/prisma/enums";
 
 const INTL_LOCALE: Record<Locale, string> = {
-	es: "es-PE",
+	// es-419 (Latin American Spanish) instead of es-PE: es-PE's ICU data
+	// spells September as "setiembre" instead of the standard "septiembre".
+	es: "es-419",
 	en: "en-US",
 };
 
