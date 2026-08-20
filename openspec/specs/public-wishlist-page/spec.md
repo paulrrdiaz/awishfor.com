@@ -137,7 +137,9 @@ The drawer SHALL use the same bottom-drawer presentation at every viewport width
 
 ### Requirement: Guest purchase drawer
 
-The public wishlist page SHALL allow a guest to open a modal purchase drawer from a non-purchased gift's primary action. The drawer SHALL require a guest name of 2 to 80 characters; accept an optional email validated when present and an optional message of at most 500 characters; omit phone collection; show a quantity selector only when the gift's remaining quantity is greater than one, constrained between one and the remaining quantity; display the exact guest consent copy "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."; and surface loading and error states while submitting.
+The public wishlist page SHALL allow a guest to open a modal purchase drawer from a non-purchased gift's primary action. The drawer SHALL require a guest name of 2 to 80 characters; accept an optional email validated when present and an optional message of at most 500 characters; omit phone collection; show a quantity selector only when the gift's remaining quantity is greater than one, constrained between one and the remaining quantity; display the exact guest consent copy "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con quienes organizan la lista."; and surface loading and error states while submitting.
+
+The consent copy SHALL NOT describe the recipients of a guest's purchase details as a single person, because a wishlist may be shared with collaborators who can all see purchase records. It SHALL remain accurate for a wishlist with no collaborators.
 
 The purchase view SHALL NOT show delivery details. When the gift has a product URL, it SHALL show a small `Ver producto` helper that switches the same drawer to the product departure view. The drawer SHALL use a bottom-drawer presentation at every viewport width, full-width on narrow screens and centered with a constrained width on wider screens, with a scrollable form body and a sticky primary action area.
 
@@ -156,7 +158,13 @@ The purchase view SHALL NOT show delivery details. When the gift has a product U
 #### Scenario: Consent copy is exact
 
 - **WHEN** the purchase drawer renders
-- **THEN** it shows the consent copy "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con el creador de la lista."
+- **THEN** it shows the consent copy "Al marcar este regalo como comprado, compartiremos tu nombre y los datos opcionales que ingreses con quienes organizan la lista."
+
+#### Scenario: Consent copy holds when the wishlist is shared
+
+- **WHEN** the purchase drawer renders for a wishlist that has collaborators
+- **THEN** the consent copy accurately describes that the guest's name and optional details are visible to the people organizing the list
+- **AND** the copy is identical to the copy shown for a wishlist with no collaborators
 
 #### Scenario: Guest name is required
 
@@ -319,3 +327,4 @@ Performance optimization SHALL preserve filtering, sorting, product departure, p
 
 - **WHEN** a purchase or undo refreshes an optimized public page
 - **THEN** the active gift filter and sort selection remain applied as already specified
+
