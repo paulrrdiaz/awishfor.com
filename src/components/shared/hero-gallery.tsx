@@ -11,6 +11,23 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 
+/**
+ * Every hero slot renders `fill` + `object-cover` inside a box whose aspect
+ * ratio (circle, 3:4 frame, etc.) rarely matches the source photo's. `sizes`
+ * only bounds fetch width, so a landscape photo cropped into a taller box
+ * arrives short on height and gets stretched to cover — a visible upscale.
+ * Inflating the px values in `sizes` requests enough extra resolution to
+ * absorb that crop in either axis for typical photo aspect ratios.
+ */
+const SIZES_OVERSAMPLE_FACTOR = 1.5;
+
+function inflateSizes(sizes: string, factor: number = SIZES_OVERSAMPLE_FACTOR) {
+	return sizes.replace(
+		/(\d+(?:\.\d+)?)px/g,
+		(_match, value: string) => `${Math.round(Number(value) * factor)}px`,
+	);
+}
+
 type PlaceholderProps = {
 	className?: string;
 };
@@ -67,7 +84,7 @@ export function HeroImageSlot({
 				className="object-cover"
 				fill
 				priority={priority}
-				sizes={sizes}
+				sizes={inflateSizes(sizes)}
 				src={src}
 			/>
 			{isSample && <SampleImageMarker />}
@@ -229,7 +246,7 @@ export function HeroCarouselGallery({
 								className="object-cover"
 								fill
 								priority={priority && index === 0}
-								sizes={sizes}
+								sizes={inflateSizes(sizes)}
 								src={image.url}
 							/>
 							{image.isSample && <SampleImageMarker />}
