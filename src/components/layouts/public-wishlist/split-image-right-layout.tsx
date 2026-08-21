@@ -154,6 +154,8 @@ export function SplitImageRightLayout({
 						className="-mx-6 sm:-mx-7"
 						delivery={delivery}
 						deliveryContentClassName="px-6 sm:px-7"
+						giftListMessage={wishlist.giftListMessage}
+						giftListMessageContentClassName="max-w-none px-6 pt-6 sm:px-7"
 					>
 						<section
 							className="scroll-mt-[59px] px-6 pt-5 pb-3 sm:px-7"

@@ -392,6 +392,22 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 								Se muestra después de que un invitado reserva un regalo
 							</p>
 						</Field>
+
+						<Field className="gap-0">
+							<FieldLabel
+								className="mb-[7px] font-semibold text-[13px] text-foreground"
+								htmlFor="giftListMessage"
+							>
+								Mensaje de la lista de regalos
+							</FieldLabel>
+							<Textarea
+								className="rounded-[10px] text-[13.5px]"
+								id="giftListMessage"
+								onChange={(e) => setField("giftListMessage", e.target.value)}
+								placeholder="Escribe una breve introducción a tu lista de regalos"
+								value={draft.giftListMessage}
+							/>
+						</Field>
 					</FieldGroup>
 				</div>
 			</div>

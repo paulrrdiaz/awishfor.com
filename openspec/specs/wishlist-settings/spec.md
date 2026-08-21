@@ -20,15 +20,17 @@ The system SHALL serve a settings page at `/dashboard/wishlists/[id]/settings` t
 
 ### Requirement: Edit core wishlist content
 
-The settings form SHALL allow the owner to edit a single wishlist name (`title`), event date and time (chosen through a single `DateTimePicker` field combining a calendar popover and time input), an optional RSVP deadline date, event location, dress code, welcome and thank-you copy, the message signature, optional delivery details (recipient name, delivery address, delivery phone), the presentation variant for the countdown, welcome message, and thank-you message, the motif selection (motif, treatment and palette) when the event type permits it, language, currency, and the How-it-works toggle, and persist them via an owner-scoped mutation. The form SHALL NOT expose a separate display name or hero title, since the wishlist has one name that serves both the owner's dashboard and the public page.
+The settings form SHALL allow the owner to edit a single wishlist name (`title`), event date and time (chosen through a single `DateTimePicker` field combining a calendar popover and time input), an optional RSVP deadline date, event location, dress code, welcome and thank-you copy, an optional gift list message, the message signature, optional delivery details (recipient name, delivery address, delivery phone), the presentation variant for the countdown, welcome message, and thank-you message, the motif selection (motif, treatment and palette) when the event type permits it, language, currency, and the How-it-works toggle, and persist them via an owner-scoped mutation. The form SHALL NOT expose a separate display name or hero title, since the wishlist has one name that serves both the owner's dashboard and the public page.
 
 The RSVP deadline SHALL be optional and SHALL be presented adjacent to the event date and time field. When an event date is set, the mutation SHALL reject an RSVP deadline that falls after it.
 
 The message signature field SHALL be presented as a single page-wide signature that appears beneath both the welcome and thank-you messages.
 
+The gift list message field SHALL be grouped with the welcome and thank-you copy fields, since it is another optional piece of public-page copy rather than a delivery or motif setting.
+
 The delivery detail fields SHALL be grouped together immediately after the message signature field, since they decorate the same welcome message card. They SHALL be the only place the owner edits delivery details; the creation wizard SHALL NOT collect them.
 
-The welcome message SHALL be required; every other content field named here that is not already required SHALL remain optional.
+The welcome message SHALL be required; every other content field named here that is not already required SHALL remain optional, including the gift list message.
 
 #### Scenario: Save content changes
 
@@ -102,6 +104,16 @@ The welcome message SHALL be required; every other content field named here that
 
 - **WHEN** the settings form renders
 - **THEN** the three delivery fields appear grouped immediately after the message signature field
+
+#### Scenario: Setting a gift list message
+
+- **WHEN** the owner types a gift list message and saves
+- **THEN** the mutation persists it and the public wishlist page renders it above the gift list after revalidation
+
+#### Scenario: Clearing the gift list message
+
+- **WHEN** the owner clears the gift list message and saves
+- **THEN** the mutation persists it as absent and the public wishlist page renders no line above the gift list
 
 ### Requirement: Owner can edit the optional wishlist subtitle
 

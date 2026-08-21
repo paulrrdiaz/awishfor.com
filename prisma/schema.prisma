@@ -92,6 +92,7 @@ model Wishlist {
   welcomeMessage  String
   welcomeMessageAttribution String?
   thankYouMessage String?
+  giftListMessage String?
   eventDate       DateTime?
   eventTime       String?
   rsvpDeadline    DateTime?

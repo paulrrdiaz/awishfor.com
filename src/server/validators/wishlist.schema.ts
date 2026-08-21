@@ -126,6 +126,10 @@ export const wishlistThankYouMessageSchema = optionalNullableTrimmedString(
 	"Thank-you message",
 	2_000,
 );
+export const wishlistGiftListMessageSchema = optionalNullableTrimmedString(
+	"Gift list message",
+	2_000,
+);
 export const wishlistEventTimeSchema = z.preprocess((value) => {
 	if (value === undefined) {
 		return undefined;
@@ -231,6 +235,7 @@ const wishlistCreateUpdateShape = {
 	welcomeMessage: wishlistWelcomeMessageSchema,
 	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
+	giftListMessage: wishlistGiftListMessageSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
@@ -265,6 +270,7 @@ export const updateWishlistSchema = z.object({
 	welcomeMessage: wishlistWelcomeMessageSchema,
 	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
 	thankYouMessage: wishlistThankYouMessageSchema,
+	giftListMessage: wishlistGiftListMessageSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
@@ -306,6 +312,7 @@ export type CreateWishlistInput = {
 	welcomeMessage?: string | null;
 	welcomeMessageAttribution?: string | null;
 	thankYouMessage?: string | null;
+	giftListMessage?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
 	eventLocation?: string | null;
@@ -334,6 +341,7 @@ export type UpdateWishlistInput = {
 	welcomeMessage?: string | null;
 	welcomeMessageAttribution?: string | null;
 	thankYouMessage?: string | null;
+	giftListMessage?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
 	eventLocation?: string | null;
@@ -375,6 +383,7 @@ export const updateWishlistSettingsSchema = z
 		deliveryAddress: wishlistDeliveryAddressSchema,
 		deliveryPhone: wishlistDeliveryPhoneSchema,
 		thankYouMessage: wishlistThankYouMessageSchema,
+		giftListMessage: wishlistGiftListMessageSchema,
 		countdownVariant: wishlistCountdownVariantSchema,
 		welcomeMessageVariant: wishlistWelcomeMessageVariantSchema,
 		thankYouMessageVariant: wishlistThankYouMessageVariantSchema,

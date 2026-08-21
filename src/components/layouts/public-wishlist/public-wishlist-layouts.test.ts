@@ -175,6 +175,21 @@ describe("public wishlist gift list band", () => {
 		expect(bodySource).toContain("<GiftSection");
 		expect(bodySource).toContain('id="regalos"');
 	});
+
+	it("passes the gift list message into every GiftSection call site", async () => {
+		for (const file of SELF_CONTAINED_FILES) {
+			const source = await readFile(layoutPath(file), "utf8");
+			expect(source, file).toContain(
+				"giftListMessage={wishlist.giftListMessage}",
+			);
+		}
+
+		const bodySource = await readFile(
+			sharedPath("public-wishlist-body.tsx"),
+			"utf8",
+		);
+		expect(bodySource).toContain("giftListMessage={wishlist.giftListMessage}");
+	});
 });
 
 describe("public wishlist footer integration", () => {

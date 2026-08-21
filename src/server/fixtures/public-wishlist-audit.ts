@@ -78,6 +78,8 @@ function fixture({
 			"Una lista determinista para verificar la experiencia pública de A Wish For.",
 		welcomeMessageAttribution: "A Wish For",
 		thankYouMessage: "Gracias por acompañarnos.",
+		giftListMessage:
+			"Tu presencia es el mejor regalo, pero si quieres traer algo, aquí tienes algunas ideas.",
 		eventDate: "2027-06-26T00:00:00.000Z",
 		eventTime: "18:00",
 		rsvpDeadline: null,

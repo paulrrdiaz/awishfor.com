@@ -73,6 +73,7 @@ export type PublicWishlistViewModel = {
 	welcomeMessage: string;
 	welcomeMessageAttribution: string | null;
 	thankYouMessage: string | null;
+	giftListMessage: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
 	rsvpDeadline: string | null;
@@ -225,6 +226,7 @@ export type DashboardWishlistCardViewModel = {
 	welcomeMessage: string;
 	welcomeMessageAttribution: string | null;
 	thankYouMessage: string | null;
+	giftListMessage: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
 	eventLocation: string | null;

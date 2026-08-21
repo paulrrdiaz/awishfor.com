@@ -113,6 +113,8 @@ The Event Details step SHALL let the user edit the draft's name (`title`), an op
 
 The welcome message SHALL be required. The step SHALL surface a visible validation error when the welcome message is empty and SHALL NOT advance past the step until it holds a value. Because selecting an event type seeds the field with that event type's preset copy, this error is reached only when the user deliberately clears it.
 
+The step SHALL let the user edit an optional gift list message, grouped with the welcome and thank-you copy fields. Unlike welcome and thank-you copy, the gift list message SHALL NOT be seeded from an event-type preset and SHALL NOT be tracked by `copyTouched`, since it has no preset default to protect from being overwritten. It SHALL remain optional: an empty value SHALL NOT block advancing past the step.
+
 The step SHALL NOT collect delivery details; those are edited only in wishlist settings.
 
 #### Scenario: Editing details persists to the draft
@@ -164,6 +166,21 @@ The step SHALL NOT collect delivery details; those are edited only in wishlist s
 
 - **WHEN** the Event Details step renders
 - **THEN** it shows no delivery recipient, address, or phone field
+
+#### Scenario: Gift list message persists to the draft
+
+- **WHEN** the user types a gift list message
+- **THEN** the draft store holds it and the step remains valid
+
+#### Scenario: Gift list message is optional
+
+- **WHEN** the user leaves the gift list message empty and tries to advance
+- **THEN** the step advances without a validation error
+
+#### Scenario: Gift list message is never preset-seeded
+
+- **WHEN** the user selects or changes the event type
+- **THEN** the gift list message field is left exactly as the user last set it, whether empty or filled
 
 ### Requirement: Wizard provides an optional wishlist subtitle
 

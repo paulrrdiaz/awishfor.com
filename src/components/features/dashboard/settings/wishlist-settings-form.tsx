@@ -189,6 +189,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [thankYouMessage, setThankYouMessage] = useState(
 		wishlist.thankYouMessage ?? "",
 	);
+	const [giftListMessage, setGiftListMessage] = useState(
+		wishlist.giftListMessage ?? "",
+	);
 	const [countdownVariant, setCountdownVariant] = useState(
 		resolveCountdownVariant(wishlist.countdownVariant).id,
 	);
@@ -307,6 +310,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			deliveryAddress: deliveryAddress || null,
 			deliveryPhone: deliveryPhone || null,
 			thankYouMessage: thankYouMessage || null,
+			giftListMessage: giftListMessage || null,
 			countdownVariant,
 			welcomeMessageVariant,
 			thankYouMessageVariant,
@@ -621,6 +625,23 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 							onSelect={setThankYouMessageVariant}
 							options={THANK_YOU_VARIANTS}
 							selected={thankYouMessageVariant}
+						/>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label htmlFor="giftListMessage">
+							Mensaje de la lista de regalos{" "}
+							<span className="font-normal text-muted-foreground text-xs">
+								(opcional)
+							</span>
+						</Label>
+						<textarea
+							className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+							id="giftListMessage"
+							onChange={(e) => setGiftListMessage(e.target.value)}
+							placeholder="Escribe una breve introducción a tu lista de regalos…"
+							rows={4}
+							value={giftListMessage}
 						/>
 					</div>
 

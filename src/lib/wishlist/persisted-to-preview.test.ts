@@ -24,6 +24,7 @@ function makePersistedWishlist(
 		],
 		welcomeMessage: "Gracias por acompañarnos",
 		thankYouMessage: "Con cariño",
+		giftListMessage: null,
 		categories: [{ name: "Hogar" }, { name: "Cocina" }],
 		themeId: "cielo-suave",
 		layoutId: "magazine-editorial",

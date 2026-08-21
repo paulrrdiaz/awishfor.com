@@ -197,6 +197,8 @@ export function CollageStaggeredLayout({
 				)}
 				delivery={delivery}
 				deliveryContentClassName="mx-auto w-full max-w-[1160px] px-5 sm:px-[22px]"
+				giftListMessage={wishlist.giftListMessage}
+				giftListMessageContentClassName="mx-auto w-full max-w-[1160px] px-5 pt-6 sm:px-[22px]"
 			>
 				<section
 					className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-[18px] pb-16 sm:px-[22px]"

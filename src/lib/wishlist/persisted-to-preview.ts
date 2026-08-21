@@ -22,6 +22,7 @@ export type PersistedWishlistPreviewSource = {
 	images: DraftCoverImage[];
 	welcomeMessage: string | null;
 	thankYouMessage: string | null;
+	giftListMessage: string | null;
 	categories: Array<{ name: string }>;
 	gifts: Array<
 		Omit<
@@ -81,6 +82,7 @@ export function persistedWishlistToPreviewDraft(
 		images: design.images ?? wishlist.images,
 		welcomeMessage: wishlist.welcomeMessage ?? "",
 		thankYouMessage: wishlist.thankYouMessage ?? "",
+		giftListMessage: wishlist.giftListMessage ?? "",
 		categories: wishlist.categories.map((category) => category.name),
 		themeId: designValue("themeId"),
 		layoutId: designValue("layoutId"),

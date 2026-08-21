@@ -11,7 +11,7 @@ Its hero SHALL be arranged as a two-column grid at the `lg` breakpoint and above
 
 The media column SHALL present three circular cover-image slots in an overlapping arc: a large primary slot, a medium slot offset to the lower right, and a small slot offset to the upper right. The medium and small slots SHALL carry a ring in the theme's card color. The large carousel frame SHALL carry a white ring whose responsive thickness matches the medium and small rings. The text column SHALL present, in order, the event-type eyebrow, the wishlist title, the event summary line, the guest welcome section, and the hero CTA group.
 
-Below the hero the layout SHALL render, in the required section order: the event-details cards in their compact presentation, the countdown in the variant selected for the wishlist, the welcome message in its selected variant when one exists, a divider, the gift-list heading with an inline availability summary, the filtered gift list, and the thank-you message in its selected variant.
+Below the hero the layout SHALL render, in the required section order: the event-details cards in their compact presentation, the countdown in the variant selected for the wishlist, the welcome message in its selected variant when one exists, a divider, the gift list message when one exists, the gift-list heading with an inline availability summary, the filtered gift list, and the thank-you message in its selected variant.
 
 Its gift filter SHALL expose the status filters alone — all, available, purchased, and starred — without category filters, matching the design canvas.
 
@@ -44,6 +44,11 @@ Its gift filter SHALL expose the status filters alone — all, available, purcha
 
 - **WHEN** the `arch-trio` layout renders its gift section for a wishlist whose gifts span several categories
 - **THEN** the filter row offers all, available, purchased and starred, and no category filters
+
+#### Scenario: Gift list message renders before the heading
+
+- **WHEN** the `arch-trio` layout renders a wishlist with a gift list message
+- **THEN** the message renders immediately above the "Lista de regalos" heading
 
 ### Requirement: Tilted gift card presentation
 
@@ -151,11 +156,11 @@ The how-it-works drawer portal SHALL mount within the `.public-theme` instance t
 
 ### Requirement: Required section order
 
-The system SHALL render the public page sections in this order: hero, event details, countdown, welcome-message content, shared CTA group, RSVP, gift list, thank-you message, footer. Layout-specific composition MAY colocate the countdown with the welcome-message content; in that case the shared CTA group SHALL follow both. The RSVP section SHALL be present only on a personalized render (one carrying guest context) and SHALL be absent otherwise. Sections whose backing data is absent SHALL be omitted, preserving the relative order of the remaining sections. How-it-works guidance SHALL be drawer content opened from the shared CTA group and SHALL NOT occupy an inline position in the document section order.
+The system SHALL render the public page sections in this order: hero, event details, countdown, welcome-message content, shared CTA group, RSVP, gift list message, gift list, thank-you message, footer. Layout-specific composition MAY colocate the countdown with the welcome-message content; in that case the shared CTA group SHALL follow both. The RSVP section SHALL be present only on a personalized render (one carrying guest context) and SHALL be absent otherwise. Sections whose backing data is absent SHALL be omitted, preserving the relative order of the remaining sections. How-it-works guidance SHALL be drawer content opened from the shared CTA group and SHALL NOT occupy an inline position in the document section order.
 
 #### Scenario: All inline sections render in order
 
-- **WHEN** a wishlist has hero, event details, event date, welcome message, gifts, and a thank-you message
+- **WHEN** a wishlist has hero, event details, event date, welcome message, a gift list message, gifts, and a thank-you message
 - **THEN** the inline sections appear in the required order from hero through footer
 - **AND** the shared CTA group appears after the welcome-message content and any countdown colocated with it
 - **AND** no how-it-works section appears between gifts and thank-you content
@@ -163,12 +168,12 @@ The system SHALL render the public page sections in this order: hero, event deta
 #### Scenario: Personalized render places RSVP directly before the gift list
 
 - **WHEN** the public wishlist view model carries guest context
-- **THEN** the RSVP section renders after the shared CTA group and immediately before the gift list
+- **THEN** the RSVP section renders after the shared CTA group and immediately before the gift list message (or the gift list itself, when no message is set)
 
 #### Scenario: Plain render omits the RSVP section
 
 - **WHEN** the public wishlist view model has no guest context
-- **THEN** no RSVP section renders and the gift list follows the shared CTA group
+- **THEN** no RSVP section renders and the gift list message (or the gift list itself, when no message is set) follows the shared CTA group
 
 #### Scenario: Optional sections omitted when data absent
 
@@ -178,7 +183,12 @@ The system SHALL render the public page sections in this order: hero, event deta
 #### Scenario: How it works respects its toggle
 
 - **WHEN** a wishlist has `showHowItWorks` set to false
-- **THEN** the shared CTA group omits the “Cómo funciona” control and no how-it-works drawer content is rendered
+- **THEN** the shared CTA group omits the "Cómo funciona" control and no how-it-works drawer content is rendered
+
+#### Scenario: Gift list message omitted when absent
+
+- **WHEN** a wishlist has no gift list message
+- **THEN** no gift list message section renders and the gift list keeps its position in the order
 
 ### Requirement: Layout variants
 
@@ -221,7 +231,7 @@ The shared shell SHALL own the mode-dependent outer wrapper, the page header (br
 
 ### Requirement: Shared section components
 
-The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `GiftGrid`/`GiftList`, `HowItWorksDrawer`, and `WishlistFooter` components consumed by every layout variant, each driven by the public wishlist view model. The `Countdown`, welcome-message, and thank-you-message components SHALL each render the presentation variant selected for the wishlist rather than a single fixed appearance, and SHALL derive all color from the active theme's tokens.
+The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `GiftGrid`/`GiftList`, `HowItWorksDrawer`, and `WishlistFooter` components consumed by every layout variant, each driven by the public wishlist view model. The `Countdown`, welcome-message, and thank-you-message components SHALL each render the presentation variant selected for the wishlist rather than a single fixed appearance, and SHALL derive all color from the active theme's tokens. A shared gift-list-message component SHALL render immediately before the gift list in every layout variant, including the `collage-staggered` layout and the layouts composed through the shared public wishlist body, regardless of whether that layout also prints a "Lista de regalos" heading; it SHALL render nothing when the wishlist has no gift list message.
 
 #### Scenario: Gift card reflects status
 
@@ -242,6 +252,16 @@ The system SHALL provide reusable `WishlistHero`, `Countdown`, `GiftCard`, `Gift
 
 - **WHEN** a wishlist has a welcome message
 - **THEN** it renders the welcome variant selected for that wishlist, not a fixed italic block
+
+#### Scenario: Gift list message renders in every layout
+
+- **WHEN** a wishlist has a gift list message and renders in the `collage-staggered` layout or any layout composed through the shared public wishlist body
+- **THEN** the message renders above the gift list even though that layout has no "Lista de regalos" heading
+
+#### Scenario: Gift list message renders nothing when absent
+
+- **WHEN** a wishlist has no gift list message
+- **THEN** the shared gift-list-message component renders nothing in any layout
 
 ### Requirement: Countdown formatting
 
@@ -511,7 +531,7 @@ Links in the shared footer body that target marketing-page sections SHALL use ro
 
 The `split-image-right` layout SHALL render as a self-contained page rather than delegating its body to the shared public wishlist body component. It SHALL provide its own page header (brand isotype, published status badge, share control), a centered content wrapper constrained to a maximum width, and its own compact footer, matching the composition pattern established by `collage-staggered`.
 
-Its content SHALL be arranged as a two-column grid at the `lg` breakpoint and above: a flexible left column separated from the right column by a border, and a fixed-width right column of 340px. The left column SHALL present, in order, the event-type eyebrow, the wishlist title, the event summary line, the guest welcome section, the hero CTA group, a two-up event-details grid (date and location), the countdown in the variant selected for the wishlist, the welcome message in its selected variant when one exists, a divider, the gift-list heading, and the filtered gift list. The right column SHALL hold exactly two cover-image slots.
+Its content SHALL be arranged as a two-column grid at the `lg` breakpoint and above: a flexible left column separated from the right column by a border, and a fixed-width right column of 340px. The left column SHALL present, in order, the event-type eyebrow, the wishlist title, the event summary line, the guest welcome section, the hero CTA group, a two-up event-details grid (date and location), the countdown in the variant selected for the wishlist, the welcome message in its selected variant when one exists, a divider, the gift list message when one exists, the gift-list heading, and the filtered gift list. The right column SHALL hold exactly two cover-image slots.
 
 Below the `lg` breakpoint the grid SHALL collapse to a single column with the two images rendered as a fixed-height stacked pair above the text content.
 
@@ -534,6 +554,11 @@ Below the `lg` breakpoint the grid SHALL collapse to a single column with the tw
 
 - **WHEN** the `split-image-right` layout renders a wishlist with a future event date
 - **THEN** the countdown renders in the left column above the welcome message in the variant selected for that wishlist, and no countdown is passed into the gift filter toolbar
+
+#### Scenario: Gift list message renders before the heading
+
+- **WHEN** the `split-image-right` layout renders a wishlist with a gift list message
+- **THEN** the message renders immediately above the "Lista de regalos" heading
 
 ### Requirement: Split image right sticky photo rail
 
@@ -627,3 +652,4 @@ This allocation SHALL apply to `arch-trio` and `collage-staggered` in full, prev
 
 - **WHEN** the same ordered image collection renders in full, preview, or compact mode
 - **THEN** each mode assigns the same images to the two primary static frames and the carousel
+

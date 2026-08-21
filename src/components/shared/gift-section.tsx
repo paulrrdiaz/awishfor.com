@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { DeliveryBar } from "@/components/shared/delivery-bar";
 import { GiftListBand } from "@/components/shared/gift-list-band";
+import { GiftListMessage } from "@/components/shared/gift-list-message";
 import type { ComposedDelivery } from "@/lib/format/delivery";
 
 type Props = {
@@ -9,6 +10,9 @@ type Props = {
 	delivery?: ComposedDelivery | null;
 	/** Width/padding of the delivery bar's inner content — match this layout's own content wrapper. */
 	deliveryContentClassName?: string;
+	giftListMessage?: string | null;
+	/** Width/padding of the gift list message's inner content — match this layout's own content wrapper. */
+	giftListMessageContentClassName?: string;
 };
 
 /**
@@ -24,10 +28,18 @@ export function GiftSection({
 	className,
 	delivery,
 	deliveryContentClassName,
+	giftListMessage,
+	giftListMessageContentClassName,
 }: Props) {
 	return (
 		<>
-			<GiftListBand className={className}>{children}</GiftListBand>
+			<GiftListBand className={className}>
+				<GiftListMessage
+					className={giftListMessageContentClassName}
+					message={giftListMessage}
+				/>
+				{children}
+			</GiftListBand>
 			{delivery && (
 				<DeliveryBar
 					className={className}

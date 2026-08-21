@@ -300,6 +300,7 @@ describe("wishlist-wizard store", () => {
 					images: [],
 					welcomeMessage: "Bienvenidos",
 					thankYouMessage: "Gracias",
+					giftListMessage: "",
 					categories: ["Hogar"],
 					themeId: "soft",
 					layoutId: "editorial",

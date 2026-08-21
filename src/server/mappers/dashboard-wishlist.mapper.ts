@@ -108,6 +108,7 @@ export function mapDashboardWishlist(
 		welcomeMessage: wishlist.welcomeMessage,
 		welcomeMessageAttribution: wishlist.welcomeMessageAttribution,
 		thankYouMessage: wishlist.thankYouMessage,
+		giftListMessage: wishlist.giftListMessage,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
 		eventLocation: wishlist.eventLocation,

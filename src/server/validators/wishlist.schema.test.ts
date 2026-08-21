@@ -220,6 +220,42 @@ describe("wishlist delivery details validation", () => {
 	});
 });
 
+describe("wishlist gift list message validation", () => {
+	const validSettings = {
+		id: "wishlist_123",
+		title: "Lista de boda",
+		slug: "lista-de-boda",
+		language: "es",
+		currency: "PEN",
+		showHowItWorks: true,
+	};
+
+	it("trims a gift list message and turns an empty value into null", () => {
+		expect(
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				giftListMessage: "  Tu presencia es el mejor regalo  ",
+			}).giftListMessage,
+		).toBe("Tu presencia es el mejor regalo");
+
+		expect(
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				giftListMessage: "   ",
+			}).giftListMessage,
+		).toBeNull();
+	});
+
+	it("limits the gift list message to 2000 characters", () => {
+		expect(() =>
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				giftListMessage: "a".repeat(2001),
+			}),
+		).toThrow("Gift list message must be at most 2000 characters");
+	});
+});
+
 describe("wishlist cover images validation", () => {
 	it("accepts up to six url/width/height records", () => {
 		const images = Array.from({ length: 6 }, (_, index) => ({

@@ -203,6 +203,8 @@ export function ArchTrioLayout({
 					)}
 					delivery={delivery}
 					deliveryContentClassName="mx-auto w-full max-w-[1160px] px-5 sm:px-7"
+					giftListMessage={wishlist.giftListMessage}
+					giftListMessageContentClassName="mx-auto w-full max-w-[1160px] px-5 pt-6 sm:px-7"
 				>
 					<section
 						className="mx-auto w-full max-w-[1160px] scroll-mt-[59px] px-5 pt-6 pb-16 sm:px-7"

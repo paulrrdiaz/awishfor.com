@@ -170,6 +170,7 @@ const READY_DRAFT: WishlistDraft = {
 	],
 	welcomeMessage: "Nos emociona celebrar contigo.",
 	thankYouMessage: "Gracias por acompañarnos en este momento.",
+	giftListMessage: "",
 	categories: ["Dormitorio", "Baño"],
 	themeId: "dulce-rosa",
 	layoutId: "magazine-editorial",

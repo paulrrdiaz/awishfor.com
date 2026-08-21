@@ -77,7 +77,7 @@ async function loadPublicSnapshot(
 	db: PublicWishlistDatabase,
 	where: { id?: string; slug: string; status?: WishlistStatus },
 ): Promise<WishlistPublicRow | null> {
-	return (await db.wishlist.findUnique({
+	const result = await db.wishlist.findUnique({
 		where,
 		select: {
 			id: true,
@@ -90,6 +90,7 @@ async function loadPublicSnapshot(
 			welcomeMessage: true,
 			welcomeMessageAttribution: true,
 			thankYouMessage: true,
+			giftListMessage: true,
 			eventDate: true,
 			eventTime: true,
 			rsvpDeadline: true,
@@ -139,7 +140,8 @@ async function loadPublicSnapshot(
 			},
 			owner: { select: { clerkId: true } },
 		},
-	})) as WishlistPublicRow | null;
+	});
+	return result;
 }
 
 async function loadPublishedSnapshot(

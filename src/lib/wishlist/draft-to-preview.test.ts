@@ -16,6 +16,7 @@ function makeDraft(overrides: Partial<WishlistDraft> = {}): WishlistDraft {
 		images: [],
 		welcomeMessage: "Gracias por venir",
 		thankYouMessage: "Gracias por el regalo",
+		giftListMessage: "",
 		categories: ["Pañales", "Ropa", "Otros"],
 		themeId: "cielo-suave",
 		layoutId: "magazine-editorial",

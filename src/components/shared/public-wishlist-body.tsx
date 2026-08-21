@@ -92,6 +92,8 @@ export function PublicWishlistBody({
 				className="relative left-1/2 w-screen -translate-x-1/2"
 				delivery={delivery}
 				deliveryContentClassName={`mx-auto w-full ${maxWidth} px-6`}
+				giftListMessage={wishlist.giftListMessage}
+				giftListMessageContentClassName={`mx-auto w-full ${maxWidth} px-6 pt-6`}
 			>
 				<section
 					className={`mx-auto w-full ${maxWidth} px-6 py-12`}

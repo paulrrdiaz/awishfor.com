@@ -120,6 +120,7 @@ const makeDraft = (overrides: Partial<WishlistDraft> = {}): WishlistDraft => ({
 	],
 	welcomeMessage: "Bienvenidos",
 	thankYouMessage: "Gracias",
+	giftListMessage: "",
 	categories: ["Hogar"],
 	themeId: "soft",
 	layoutId: "magazine-editorial",

@@ -52,6 +52,7 @@ export type WishlistDraft = {
 	images: DraftCoverImage[];
 	welcomeMessage: string;
 	thankYouMessage: string;
+	giftListMessage: string;
 	categories: string[];
 	themeId: string | null;
 	layoutId: string | null;
@@ -131,6 +132,7 @@ const emptyDraft = (): WishlistDraft => ({
 	images: [],
 	welcomeMessage: "",
 	thankYouMessage: "",
+	giftListMessage: "",
 	categories: [],
 	themeId: null,
 	layoutId: null,
