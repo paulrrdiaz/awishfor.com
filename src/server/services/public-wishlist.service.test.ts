@@ -194,12 +194,55 @@ describe("getPublicWishlistBySlug", () => {
 		expect(db.wishlist.findUnique).toHaveBeenCalledTimes(3);
 		expect(unstableCacheMock).toHaveBeenLastCalledWith(
 			expect.any(Function),
-			["public-wishlist-presentation", "wl_1", "mi-lista"],
+			[
+				"public-wishlist-presentation",
+				"wl_1",
+				"mi-lista",
+				"2026-06-26T00:00:00.000Z",
+			],
 			{
 				revalidate: false,
 				tags: ["public-wishlist:wl_1", "public-wishlist-slug:mi-lista"],
 			},
 		);
+	});
+
+	it("versions published presentation after a wishlist content update", async () => {
+		const row = makeWishlist({
+			title: "Aella",
+			thankYouMessage: "Mensaje anterior",
+		});
+		const db = makeDb(row);
+
+		const first = await getPublicWishlistBySlug(db, {
+			slug: "mi-lista",
+			viewerClerkId: null,
+		});
+
+		row.title = "Aella Juliette";
+		row.thankYouMessage = "Mensaje actualizado";
+		row.updatedAt = new Date("2026-06-27T00:00:00.000Z");
+
+		const second = await getPublicWishlistBySlug(db, {
+			slug: "mi-lista",
+			viewerClerkId: null,
+		});
+
+		expect(first).toMatchObject({
+			kind: "published",
+			wishlist: {
+				title: "Aella",
+				thankYouMessage: "Mensaje anterior",
+			},
+		});
+		expect(second).toMatchObject({
+			kind: "published",
+			wishlist: {
+				title: "Aella Juliette",
+				thankYouMessage: "Mensaje actualizado",
+			},
+		});
+		expect(unstableCacheMock).toHaveBeenCalledTimes(2);
 	});
 
 	it("keeps draft owner previews outside the shared published cache", async () => {

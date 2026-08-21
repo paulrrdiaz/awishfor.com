@@ -54,6 +54,7 @@ type LifecycleRow = {
 	status: WishlistStatus;
 	slug: string;
 	title: string;
+	updatedAt: Date;
 	owner: { clerkId: string };
 };
 
@@ -68,6 +69,7 @@ async function resolveLifecycle(
 			status: true,
 			slug: true,
 			title: true,
+			updatedAt: true,
 			owner: { select: { clerkId: true } },
 		},
 	})) as LifecycleRow | null;
@@ -165,11 +167,14 @@ async function loadPublishedSnapshot(
  */
 async function getCachedPublishedSnapshot(
 	db: PublicWishlistDatabase,
-	{ id, slug }: { id: string; slug: string },
+	{ id, slug, version }: { id: string; slug: string; version: string },
 ): Promise<PublicWishlistViewModel | null> {
 	return unstable_cache(
 		() => loadPublishedSnapshot(db, { id, slug }),
-		["public-wishlist-presentation", id, slug],
+		// The update timestamp naturally versions changes to wishlist-owned
+		// presentation fields. This prevents a stale Data Cache entry from
+		// disagreeing with fresh metadata if a cache invalidation is delayed.
+		["public-wishlist-presentation", id, slug, version],
 		{
 			revalidate: false,
 			tags: [publicWishlistIdTag(id), publicWishlistSlugTag(slug)],
@@ -209,6 +214,7 @@ async function getPublicWishlistBySlugImpl(
 		const wishlist = await getCachedPublishedSnapshot(db, {
 			id: lifecycle.id,
 			slug: lifecycle.slug,
+			version: lifecycle.updatedAt.toISOString(),
 		});
 		return wishlist ? { kind: "published", wishlist } : { kind: "notFound" };
 	}
