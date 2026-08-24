@@ -96,9 +96,18 @@ type WishlistTransaction = {
 	wishlistImage: WishlistImageDelegate;
 };
 
+type WishlistTransactionOptions = {
+	timeout?: number;
+};
+
+const DRAFT_TRANSACTION_OPTIONS = {
+	timeout: 20_000,
+} satisfies WishlistTransactionOptions;
+
 export type WishlistDatabase = WishlistTransaction & {
 	$transaction<T>(
 		callback: (tx: WishlistTransaction) => Promise<T>,
+		options?: WishlistTransactionOptions,
 	): Promise<T>;
 };
 
@@ -474,7 +483,7 @@ export const saveWishlistDraft = async (
 				wishlistId: savedDraft.id,
 				lastSavedAt: savedDraft.updatedAt.getTime(),
 			};
-		});
+		}, DRAFT_TRANSACTION_OPTIONS);
 	}
 
 	const savedWishlistId = input.savedWishlistId;
@@ -543,7 +552,7 @@ export const saveWishlistDraft = async (
 			wishlistId: savedDraft.id,
 			lastSavedAt: savedDraft.updatedAt.getTime(),
 		};
-	});
+	}, DRAFT_TRANSACTION_OPTIONS);
 };
 
 export const publishWishlist = async (

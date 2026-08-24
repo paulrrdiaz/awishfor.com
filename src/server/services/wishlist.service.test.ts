@@ -807,6 +807,17 @@ describe("wishlist service", () => {
 		]);
 	});
 
+	it("uses an extended timeout for draft save transactions", async () => {
+		const { db } = createMockDatabase({ wishlists: [] });
+		const transactionSpy = vi.spyOn(db, "$transaction");
+
+		await saveWishlistDraft(db, makeDraftInput());
+
+		expect(transactionSpy).toHaveBeenCalledWith(expect.any(Function), {
+			timeout: 20_000,
+		});
+	});
+
 	it("substitutes the event type's preset welcome message for an empty draft save", async () => {
 		const { db, state } = createMockDatabase({ wishlists: [] });
 
