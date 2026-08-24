@@ -15,7 +15,7 @@ import {
 } from "@/config/motifs";
 import type { PublicLayoutPreset } from "@/config/public-layouts";
 import type { EventType } from "@/generated/prisma/enums";
-import { formatEventDate } from "@/lib/format/dates";
+import { formatEventDate, formatEventTimeRange } from "@/lib/format/dates";
 import { composeDelivery } from "@/lib/format/delivery";
 import { resolveHeroSlots } from "@/lib/hero-slots";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,8 @@ type Props = {
 	surface?: PublicWishlistSurface;
 	rsvpSection?: ReactNode;
 };
+
+type EventDetail = { label: string; value: ReactNode };
 
 export function SplitImageRightLayout({
 	wishlist,
@@ -61,6 +63,39 @@ export function SplitImageRightLayout({
 		wishlist.deliveryPhone,
 		wishlist.deliveryDocumentId,
 	);
+	const eventTimeRange = formatEventTimeRange(
+		wishlist.eventTime,
+		wishlist.endTime,
+		wishlist.language as "es" | "en",
+	);
+	const eventDetailItems: Array<EventDetail | null> = [
+		wishlist.eventDate
+			? {
+					label: "Fecha",
+					value: (
+						<>
+							<span>
+								{formatEventDate(
+									wishlist.eventDate,
+									wishlist.language as "es" | "en",
+								)}
+							</span>
+							{eventTimeRange && (
+								<span className="mt-1 block whitespace-nowrap">
+									{eventTimeRange}
+								</span>
+							)}
+						</>
+					),
+				}
+			: null,
+		wishlist.eventLocation
+			? { label: "Lugar", value: wishlist.eventLocation }
+			: null,
+	];
+	const eventDetails = eventDetailItems.filter(
+		(detail): detail is EventDetail => detail !== null,
+	);
 
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
@@ -81,35 +116,19 @@ export function SplitImageRightLayout({
 					{!isCompact && (
 						<>
 							<div className="mt-7 grid grid-cols-2 gap-2.5">
-								{(
-									[
-										[
-											"Fecha",
-											wishlist.eventDate
-												? formatEventDate(
-														wishlist.eventDate,
-														wishlist.language as "es" | "en",
-														wishlist.eventTime,
-													)
-												: null,
-										],
-										["Lugar", wishlist.eventLocation],
-									] as const
-								)
-									.filter(([, value]) => value)
-									.map(([label, value]) => (
-										<div
-											className="rounded-[14px] border border-border bg-card px-3.5 py-3"
-											key={label}
-										>
-											<p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.16em]">
-												{label}
-											</p>
-											<p className="mt-1 font-heading font-semibold text-sm">
-												{value}
-											</p>
-										</div>
-									))}
+								{eventDetails.map(({ label, value }) => (
+									<div
+										className="rounded-[14px] border border-border bg-card px-3.5 py-3"
+										key={label}
+									>
+										<p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.16em]">
+											{label}
+										</p>
+										<p className="mt-1 font-heading font-semibold text-sm">
+											{value}
+										</p>
+									</div>
+								))}
 							</div>
 
 							{wishlist.eventDate && (

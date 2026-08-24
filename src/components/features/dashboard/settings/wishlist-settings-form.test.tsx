@@ -135,6 +135,25 @@ describe("WishlistSettingsForm subtitle", () => {
 	});
 });
 
+describe("WishlistSettingsForm event times", () => {
+	it("submits the configured end time", async () => {
+		const user = userEvent.setup();
+		render(<WishlistSettingsForm wishlist={wishlist as never} />);
+		fireEvent.change(screen.getByLabelText("Hora de inicio"), {
+			target: { value: "16:00" },
+		});
+		fireEvent.change(screen.getByLabelText("Hora de fin"), {
+			target: { value: "20:00" },
+		});
+
+		await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+		expect(updateSettingsMock).toHaveBeenCalledWith(
+			expect.objectContaining({ eventTime: "16:00", endTime: "20:00" }),
+		);
+	});
+});
+
 describe("WishlistSettingsForm owner-reserved controls", () => {
 	it("shows the danger zone for the owner", () => {
 		render(

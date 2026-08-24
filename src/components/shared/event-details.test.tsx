@@ -6,6 +6,7 @@ import { EventDetails } from "./event-details";
 const wishlist = {
 	eventDate: "2026-03-05T00:00:00.000Z",
 	eventTime: "18:00",
+	endTime: "20:00",
 	eventLocation: "Casa de Ana",
 	dressCode: "Casual",
 	language: "es",
@@ -19,12 +20,24 @@ describe("EventDetails", () => {
 		expect(screen.getByText("Casa de Ana")).toBeInTheDocument();
 	});
 
+	it("renders the date and time range on separate lines in the Fecha block", () => {
+		render(<EventDetails wishlist={wishlist} />);
+		expect(screen.getByText(/Jueves, 5 de marzo de 2026/i)).toBeInTheDocument();
+		expect(screen.getByText(/6:00.*–.*8:00/i)).toBeInTheDocument();
+	});
+
+	it("keeps showing the start time for lists without an end time", () => {
+		render(<EventDetails wishlist={{ ...wishlist, endTime: null }} />);
+		expect(screen.getByText(/^6:00/i)).toBeInTheDocument();
+	});
+
 	it("omits the section when no details are present", () => {
 		const { container } = render(
 			<EventDetails
 				wishlist={{
 					eventDate: null,
 					eventTime: null,
+					endTime: null,
 					eventLocation: null,
 					dressCode: null,
 					language: "es",

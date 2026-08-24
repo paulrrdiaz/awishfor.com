@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DetailsStep } from "@/components/features/wizard/details-step";
@@ -11,6 +11,24 @@ import { createWishlistWizardStore } from "@/stores/wishlist-wizard.store";
 vi.mock("@/components/layouts/public-wishlist/public-theme-provider", () => ({
 	PublicThemeProvider: ({ children }: { children: React.ReactNode }) =>
 		children,
+}));
+
+vi.mock("@/components/ui/date-picker", () => ({
+	DatePicker: ({
+		id,
+		onDateChange,
+	}: {
+		id: string;
+		onDateChange: (date: Date | null) => void;
+	}) => (
+		<button
+			id={id}
+			onClick={() => onDateChange(new Date(2026, 8, 27))}
+			type="button"
+		>
+			Seleccionar fecha
+		</button>
+	),
 }));
 
 vi.mock("@/trpc/react", () => ({
@@ -66,5 +84,30 @@ describe("DetailsStep subtitle", () => {
 			screen.queryByText("Una historia que recién empieza"),
 		).not.toBeInTheDocument();
 		expect(store.getState().draft.subtitle).toBe("");
+	});
+});
+
+describe("DetailsStep event schedule", () => {
+	it("writes the event date, start time, and end time to the wizard draft", () => {
+		const store = createWishlistWizardStore();
+		render(
+			<WizardProvider rehydrate={false} store={store}>
+				<DetailsStep />
+			</WizardProvider>,
+		);
+
+		fireEvent.click(screen.getByLabelText("Fecha del evento"));
+		fireEvent.change(screen.getByLabelText("Hora de inicio"), {
+			target: { value: "16:00" },
+		});
+		fireEvent.change(screen.getByLabelText("Hora de fin"), {
+			target: { value: "20:00" },
+		});
+
+		expect(store.getState().draft).toMatchObject({
+			eventDate: "2026-09-27",
+			eventTime: "16:00",
+			endTime: "20:00",
+		});
 	});
 });

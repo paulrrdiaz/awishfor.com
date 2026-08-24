@@ -4,6 +4,7 @@ import {
 	formatBlogPostDate,
 	formatEventDate,
 	formatEventTime,
+	formatEventTimeRange,
 	formatRelativeDate,
 } from "@/lib/format/dates";
 
@@ -105,6 +106,18 @@ describe("formatEventTime", () => {
 	it("formats noon and midnight correctly", () => {
 		expect(formatEventTime("12:00", "en")).toMatch(/^12:00/);
 		expect(formatEventTime("00:00", "en")).toMatch(/^12:00/);
+	});
+});
+
+describe("formatEventTimeRange", () => {
+	it("formats a same-day time range", () => {
+		const result = formatEventTimeRange("16:00", "20:00", "es");
+		expect(result).toMatch(/^4:00.*–.*8:00/i);
+		expect(result).not.toContain("16:00");
+	});
+
+	it("keeps the start time for legacy events without an end time", () => {
+		expect(formatEventTimeRange("16:00", null, "es")).toMatch(/^4:00/i);
 	});
 });
 

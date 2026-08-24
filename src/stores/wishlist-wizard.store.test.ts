@@ -294,6 +294,7 @@ describe("wishlist-wizard store", () => {
 					slug: "version-dashboard",
 					eventDate: "2026-12-24",
 					eventTime: "18:30",
+					endTime: null,
 					rsvpDeadline: null,
 					eventLocation: "Barranco",
 					dressCode: "",

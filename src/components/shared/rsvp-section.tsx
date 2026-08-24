@@ -21,6 +21,7 @@ export type RsvpSectionProps = {
 	rsvpDeadline: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
+	endTime?: string | null;
 	eventLocation: string | null;
 	className?: string;
 };
@@ -109,6 +110,7 @@ function RsvpForm({
 	rsvpDeadline,
 	eventDate,
 	eventTime,
+	endTime,
 	eventLocation,
 	className,
 }: RsvpFormProps) {
@@ -340,7 +342,7 @@ function RsvpForm({
 								{!isDeclined && eventDate && (
 									<div className="mt-0.5 text-[12px] text-muted-foreground">
 										Te esperamos el{" "}
-										{formatEventDate(eventDate, Locale.es, eventTime)}
+										{formatEventDate(eventDate, Locale.es, eventTime, endTime)}
 										{eventLocation ? ` · ${eventLocation}` : ""}
 									</div>
 								)}

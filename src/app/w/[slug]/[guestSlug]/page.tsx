@@ -62,6 +62,7 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 			mode="full"
 			rsvpSection={
 				<RsvpSection
+					endTime={result.wishlist.endTime}
 					eventDate={result.wishlist.eventDate}
 					eventLocation={result.wishlist.eventLocation}
 					eventTime={result.wishlist.eventTime}

@@ -152,6 +152,7 @@ export function mapPublicWishlist(
 		giftListMessage: wishlist.giftListMessage,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
+		endTime: wishlist.endTime,
 		rsvpDeadline: wishlist.rsvpDeadline?.toISOString() ?? null,
 		eventLocation: wishlist.eventLocation,
 		dressCode: wishlist.dressCode,

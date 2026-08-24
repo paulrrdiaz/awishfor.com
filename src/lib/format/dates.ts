@@ -31,10 +31,25 @@ export function formatEventTime(time: string, locale: Locale): string {
 	);
 }
 
+/** Formats a start time, optionally followed by a same-day end time. */
+export function formatEventTimeRange(
+	startTime: string | null | undefined,
+	endTime: string | null | undefined,
+	locale: Locale,
+): string | null {
+	if (!startTime) return null;
+
+	const formattedStartTime = formatEventTime(startTime, locale);
+	return endTime
+		? `${formattedStartTime} – ${formatEventTime(endTime, locale)}`
+		: formattedStartTime;
+}
+
 export function formatEventDate(
 	date: Date | string,
 	locale: Locale,
 	time?: string | null,
+	endTime?: string | null,
 ): string {
 	const d = typeof date === "string" ? new Date(date) : date;
 	const formattedDate = new Intl.DateTimeFormat(INTL_LOCALE[locale], {
@@ -52,9 +67,8 @@ export function formatEventDate(
 	const capitalizedDate =
 		formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
-	return time
-		? `${capitalizedDate} · ${formatEventTime(time, locale)}`
-		: capitalizedDate;
+	const timeRange = formatEventTimeRange(time, endTime, locale);
+	return timeRange ? `${capitalizedDate} · ${timeRange}` : capitalizedDate;
 }
 
 /** Post meta line form, e.g. "14 ago 2026". */

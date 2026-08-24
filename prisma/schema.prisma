@@ -95,6 +95,7 @@ model Wishlist {
   giftListMessage String?
   eventDate       DateTime?
   eventTime       String?
+  endTime         String?
   rsvpDeadline    DateTime?
   eventLocation   String?
   dressCode       String?

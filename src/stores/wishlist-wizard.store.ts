@@ -46,6 +46,7 @@ export type WishlistDraft = {
 	slug: string;
 	eventDate: string | null;
 	eventTime: string | null;
+	endTime?: string | null;
 	rsvpDeadline: string | null;
 	eventLocation: string;
 	dressCode: string;
@@ -126,6 +127,7 @@ const emptyDraft = (): WishlistDraft => ({
 	slug: "",
 	eventDate: null,
 	eventTime: null,
+	endTime: null,
 	rsvpDeadline: null,
 	eventLocation: "",
 	dressCode: "",

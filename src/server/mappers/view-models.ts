@@ -76,6 +76,7 @@ export type PublicWishlistViewModel = {
 	giftListMessage: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
+	endTime: string | null;
 	rsvpDeadline: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
@@ -229,6 +230,7 @@ export type DashboardWishlistCardViewModel = {
 	giftListMessage: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
+	endTime: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
 	images: WishlistImageViewModel[];

@@ -16,6 +16,7 @@ export type PersistedWishlistPreviewSource = {
 	slug: string;
 	eventDate: string | null;
 	eventTime: string | null;
+	endTime?: string | null;
 	rsvpDeadline: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
@@ -76,6 +77,7 @@ export function persistedWishlistToPreviewDraft(
 		slug: wishlist.slug,
 		eventDate: wishlist.eventDate,
 		eventTime: wishlist.eventTime,
+		endTime: wishlist.endTime,
 		rsvpDeadline: wishlist.rsvpDeadline,
 		eventLocation: wishlist.eventLocation ?? "",
 		dressCode: wishlist.dressCode ?? "",

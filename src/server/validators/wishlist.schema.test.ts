@@ -99,13 +99,28 @@ describe("wishlist creation validation", () => {
 				eventType: "wedding",
 				eventDate,
 				eventTime: "08:15",
+				endTime: "10:30",
 				eventLocation: "Barranco, Lima",
 			}),
 		).toMatchObject({
 			eventDate,
 			eventTime: "08:15",
+			endTime: "10:30",
 			eventLocation: "Barranco, Lima",
 		});
+	});
+
+	it("rejects an end time that would fall on the next day", () => {
+		expect(() =>
+			createWishlistSchema.parse({
+				ownerId: 42,
+				title: "Lista de boda",
+				slug: "lista-de-boda",
+				eventType: "wedding",
+				eventTime: "20:00",
+				endTime: "18:00",
+			}),
+		).toThrow("End time must be later than the event start time");
 	});
 });
 

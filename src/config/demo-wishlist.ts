@@ -24,6 +24,7 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 		"Tu presencia es el mejor regalo, pero si quieres traer algo, aquí tienes algunas ideas.",
 	eventDate: "2026-09-13",
 	eventTime: "16:00",
+	endTime: null,
 	rsvpDeadline: null,
 	eventLocation: "Jardín Las Acacias",
 	dressCode: "Casual chic, tonos pastel",

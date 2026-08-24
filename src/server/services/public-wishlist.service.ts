@@ -95,6 +95,7 @@ async function loadPublicSnapshot(
 			giftListMessage: true,
 			eventDate: true,
 			eventTime: true,
+			endTime: true,
 			rsvpDeadline: true,
 			eventLocation: true,
 			dressCode: true,

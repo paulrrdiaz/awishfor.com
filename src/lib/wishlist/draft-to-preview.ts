@@ -147,6 +147,7 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		giftListMessage: draft.giftListMessage || null,
 		eventDate: draft.eventDate,
 		eventTime: draft.eventTime,
+		endTime: draft.endTime ?? null,
 		rsvpDeadline: draft.rsvpDeadline,
 		eventLocation: draft.eventLocation || null,
 		dressCode: draft.dressCode || null,

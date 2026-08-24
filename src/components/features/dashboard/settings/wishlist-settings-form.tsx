@@ -22,7 +22,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
-import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -160,6 +159,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		wishlist.eventDate ? wishlist.eventDate.split("T")[0] : "",
 	);
 	const [eventTime, setEventTime] = useState(wishlist.eventTime ?? "");
+	const [endTime, setEndTime] = useState(wishlist.endTime ?? "");
 	const [rsvpDeadline, setRsvpDeadline] = useState(
 		wishlist.rsvpDeadline ? wishlist.rsvpDeadline.split("T")[0] : "",
 	);
@@ -274,11 +274,15 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const welcomeMessageError = welcomeMessage.trim().length === 0;
 	const subtitleLength = subtitle.trim().length;
 	const subtitleError = subtitleLength > WISHLIST_SUBTITLE_MAX_LENGTH;
+	const eventTimeRangeError = Boolean(
+		eventTime && endTime && endTime <= eventTime,
+	);
 
 	const canSave =
 		title.trim().length > 0 &&
 		!subtitleError &&
 		!welcomeMessageError &&
+		!eventTimeRangeError &&
 		slugStatus !== "taken" &&
 		slugStatus !== "invalid" &&
 		!rsvpDeadlineError &&
@@ -300,6 +304,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			slug,
 			eventDate: (eventDate || null) as unknown as Date | null,
 			eventTime: eventTime || null,
+			endTime: endTime || null,
 			rsvpDeadline: (rsvpDeadline || null) as unknown as Date | null,
 			eventLocation: eventLocation || null,
 			dressCode: dressCode || null,
@@ -435,16 +440,40 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					<h2 className="font-medium text-base">Detalles del evento</h2>
 
 					<div className="space-y-1.5">
-						<Label htmlFor="eventDateTime">Fecha y hora del evento</Label>
-						<DateTimePicker
+						<Label htmlFor="eventDate">Fecha del evento</Label>
+						<DatePicker
 							date={eventDate ? new Date(`${eventDate}T00:00:00`) : null}
-							id="eventDateTime"
+							id="eventDate"
 							onDateChange={(date) =>
 								setEventDate(date ? format(date, "yyyy-MM-dd") : "")
 							}
-							onTimeChange={(time) => setEventTime(time ?? "")}
-							time={eventTime || null}
 						/>
+					</div>
+
+					<div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+						<div className="space-y-1.5">
+							<Label htmlFor="eventTime">Hora de inicio</Label>
+							<Input
+								id="eventTime"
+								onChange={(e) => setEventTime(e.target.value)}
+								type="time"
+								value={eventTime}
+							/>
+						</div>
+						<div className="space-y-1.5">
+							<Label htmlFor="endTime">Hora de fin</Label>
+							<Input
+								id="endTime"
+								onChange={(e) => setEndTime(e.target.value)}
+								type="time"
+								value={endTime}
+							/>
+							{eventTimeRangeError && (
+								<p className="text-destructive text-xs">
+									La hora de fin debe ser posterior a la hora de inicio.
+								</p>
+							)}
+						</div>
 					</div>
 
 					<div className="space-y-1.5">

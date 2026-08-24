@@ -132,6 +132,7 @@ export const saveDraftDraftContentSchema = z.object({
 		.nullable()
 		.optional(),
 	eventTime: wishlistEventTimeSchema,
+	endTime: wishlistEventTimeSchema,
 	rsvpDeadline: z
 		.string()
 		.regex(ISO_DATE_PATTERN, "RSVP deadline must use YYYY-MM-DD format")
@@ -226,6 +227,14 @@ export const saveDraftWishlistSchema = saveDraftDraftContentSchema
 				code: z.ZodIssueCode.custom,
 				message: "RSVP deadline cannot be after the event date",
 				path: ["rsvpDeadline"],
+			});
+		}
+
+		if (value.eventTime && value.endTime && value.endTime <= value.eventTime) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "End time must be later than the event start time",
+				path: ["endTime"],
 			});
 		}
 

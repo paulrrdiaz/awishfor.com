@@ -1,9 +1,11 @@
-import { formatEventDate } from "@/lib/format/dates";
+import type { ReactNode } from "react";
+import { formatEventDate, formatEventTimeRange } from "@/lib/format/dates";
 import { cn } from "@/lib/utils";
 
 type EventDetailsWishlist = {
 	eventDate: string | null;
 	eventTime: string | null;
+	endTime?: string | null;
 	eventLocation: string | null;
 	dressCode: string | null;
 	language: string;
@@ -26,6 +28,8 @@ const DRESS_CODE_LABEL: Record<EventDetailsVariant, string> = {
 	compact: "Dresscode",
 };
 
+type EventDetail = { label: string; value: ReactNode };
+
 export function EventDetails({
 	wishlist,
 	variant = "block",
@@ -33,14 +37,29 @@ export function EventDetails({
 	stacked = false,
 	className,
 }: Props) {
-	const details = [
+	const eventTimeRange = formatEventTimeRange(
+		wishlist.eventTime,
+		wishlist.endTime,
+		wishlist.language as "es" | "en",
+	);
+	const detailItems: Array<EventDetail | null> = [
 		wishlist.eventDate
 			? {
 					label: "Fecha",
-					value: formatEventDate(
-						wishlist.eventDate,
-						wishlist.language as "es" | "en",
-						wishlist.eventTime,
+					value: (
+						<>
+							<span>
+								{formatEventDate(
+									wishlist.eventDate,
+									wishlist.language as "es" | "en",
+								)}
+							</span>
+							{eventTimeRange && (
+								<span className="mt-1 block whitespace-nowrap">
+									{eventTimeRange}
+								</span>
+							)}
+						</>
 					),
 				}
 			: null,
@@ -56,8 +75,9 @@ export function EventDetails({
 					value: wishlist.dressCode,
 				}
 			: null,
-	].filter((detail): detail is { label: string; value: string } =>
-		Boolean(detail),
+	];
+	const details = detailItems.filter(
+		(detail): detail is EventDetail => detail !== null,
 	);
 
 	if (details.length === 0) return null;

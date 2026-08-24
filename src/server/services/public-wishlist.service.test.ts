@@ -95,6 +95,7 @@ const makeWishlist = (overrides: Partial<MockRow> = {}): MockRow => ({
 	giftListMessage: null,
 	eventDate: null,
 	eventTime: null,
+	endTime: null,
 	rsvpDeadline: null,
 	eventLocation: null,
 	dressCode: null,

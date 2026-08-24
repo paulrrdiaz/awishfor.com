@@ -111,6 +111,7 @@ export function mapDashboardWishlist(
 		giftListMessage: wishlist.giftListMessage,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
+		endTime: wishlist.endTime,
 		eventLocation: wishlist.eventLocation,
 		dressCode: wishlist.dressCode,
 		images: mapImages(wishlist.images),

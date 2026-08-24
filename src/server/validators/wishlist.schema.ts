@@ -103,6 +103,19 @@ const optionalNullableDate = z.preprocess((value) => {
 	return value;
 }, z.coerce.date().nullable().optional());
 
+const validateEventTimeRange = (
+	value: { eventTime?: string | null; endTime?: string | null },
+	ctx: z.RefinementCtx,
+) => {
+	if (value.eventTime && value.endTime && value.endTime <= value.eventTime) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: "End time must be later than the event start time",
+			path: ["endTime"],
+		});
+	}
+};
+
 export const wishlistTitleSchema = requiredTrimmedString("Title", 120);
 export const wishlistSubtitleSchema = optionalNullableTrimmedString(
 	"Subtitle",
@@ -238,6 +251,7 @@ const wishlistCreateUpdateShape = {
 	giftListMessage: wishlistGiftListMessageSchema,
 	eventDate: optionalNullableDate,
 	eventTime: wishlistEventTimeSchema,
+	endTime: wishlistEventTimeSchema,
 	eventLocation: wishlistEventLocationSchema,
 	dressCode: wishlistDressCodeSchema,
 	deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
@@ -253,40 +267,45 @@ const wishlistCreateUpdateShape = {
 	showHowItWorks: z.boolean().default(true),
 } satisfies z.ZodRawShape;
 
-export const createWishlistSchema = z.object({
-	ownerId: wishlistOwnerIdSchema,
-	...wishlistCreateUpdateShape,
-});
+export const createWishlistSchema = z
+	.object({
+		ownerId: wishlistOwnerIdSchema,
+		...wishlistCreateUpdateShape,
+	})
+	.superRefine(validateEventTimeRange);
 
-export const updateWishlistSchema = z.object({
-	wishlistId: wishlistIdSchema,
-	ownerId: wishlistOwnerIdSchema.optional(),
-	title: wishlistTitleSchema.optional(),
-	subtitle: wishlistSubtitleSchema,
-	slug: wishlistSlugSchema.optional(),
-	eventType: eventTypeSchema.optional(),
-	language: localeSchema.optional(),
-	currency: currencySchema.optional(),
-	welcomeMessage: wishlistWelcomeMessageSchema,
-	welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
-	thankYouMessage: wishlistThankYouMessageSchema,
-	giftListMessage: wishlistGiftListMessageSchema,
-	eventDate: optionalNullableDate,
-	eventTime: wishlistEventTimeSchema,
-	eventLocation: wishlistEventLocationSchema,
-	dressCode: wishlistDressCodeSchema,
-	deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
-	deliveryDocumentId: wishlistDeliveryDocumentIdSchema,
-	deliveryAddress: wishlistDeliveryAddressSchema,
-	deliveryPhone: wishlistDeliveryPhoneSchema,
-	coverImages: wishlistCoverImagesSchema.optional(),
-	themeId: wishlistThemeIdSchema,
-	layoutId: wishlistLayoutIdSchema,
-	buttonStyle: wishlistButtonStyleSchema,
-	headingFont: wishlistHeadingFontSchema,
-	bodyFont: wishlistBodyFontSchema,
-	showHowItWorks: z.boolean().optional(),
-});
+export const updateWishlistSchema = z
+	.object({
+		wishlistId: wishlistIdSchema,
+		ownerId: wishlistOwnerIdSchema.optional(),
+		title: wishlistTitleSchema.optional(),
+		subtitle: wishlistSubtitleSchema,
+		slug: wishlistSlugSchema.optional(),
+		eventType: eventTypeSchema.optional(),
+		language: localeSchema.optional(),
+		currency: currencySchema.optional(),
+		welcomeMessage: wishlistWelcomeMessageSchema,
+		welcomeMessageAttribution: wishlistWelcomeMessageAttributionSchema,
+		thankYouMessage: wishlistThankYouMessageSchema,
+		giftListMessage: wishlistGiftListMessageSchema,
+		eventDate: optionalNullableDate,
+		eventTime: wishlistEventTimeSchema,
+		endTime: wishlistEventTimeSchema,
+		eventLocation: wishlistEventLocationSchema,
+		dressCode: wishlistDressCodeSchema,
+		deliveryRecipientName: wishlistDeliveryRecipientNameSchema,
+		deliveryDocumentId: wishlistDeliveryDocumentIdSchema,
+		deliveryAddress: wishlistDeliveryAddressSchema,
+		deliveryPhone: wishlistDeliveryPhoneSchema,
+		coverImages: wishlistCoverImagesSchema.optional(),
+		themeId: wishlistThemeIdSchema,
+		layoutId: wishlistLayoutIdSchema,
+		buttonStyle: wishlistButtonStyleSchema,
+		headingFont: wishlistHeadingFontSchema,
+		bodyFont: wishlistBodyFontSchema,
+		showHowItWorks: z.boolean().optional(),
+	})
+	.superRefine(validateEventTimeRange);
 
 export const publishWishlistSchema = z.object({
 	wishlistId: wishlistIdSchema,
@@ -315,6 +334,7 @@ export type CreateWishlistInput = {
 	giftListMessage?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
+	endTime?: string | null;
 	eventLocation?: string | null;
 	dressCode?: string | null;
 	deliveryRecipientName?: string | null;
@@ -344,6 +364,7 @@ export type UpdateWishlistInput = {
 	giftListMessage?: string | null;
 	eventDate?: Date | string | null;
 	eventTime?: string | null;
+	endTime?: string | null;
 	eventLocation?: string | null;
 	dressCode?: string | null;
 	deliveryRecipientName?: string | null;
@@ -373,6 +394,7 @@ export const updateWishlistSettingsSchema = z
 		slug: wishlistSlugSchema,
 		eventDate: optionalNullableDate,
 		eventTime: wishlistEventTimeSchema,
+		endTime: wishlistEventTimeSchema,
 		rsvpDeadline: wishlistRsvpDeadlineSchema,
 		eventLocation: wishlistEventLocationSchema,
 		dressCode: wishlistDressCodeSchema,
@@ -404,7 +426,8 @@ export const updateWishlistSettingsSchema = z
 				"La fecha límite de confirmación no puede ser posterior a la fecha del evento",
 			path: ["rsvpDeadline"],
 		},
-	);
+	)
+	.superRefine(validateEventTimeRange);
 
 export const updateWishlistDesignSchema = z.object({
 	id: wishlistIdSchema,

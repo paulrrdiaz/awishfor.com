@@ -7,7 +7,6 @@ import { PublicThemeProvider } from "@/components/layouts/public-wishlist/public
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
 	Field,
 	FieldError,
@@ -210,19 +209,17 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 						<Field className="gap-0">
 							<FieldLabel
 								className="mb-[7px] font-semibold text-[13px] text-foreground"
-								htmlFor="eventDateTime"
+								htmlFor="eventDate"
 							>
-								Fecha y hora
+								Fecha del evento
 							</FieldLabel>
-							<DateTimePicker
+							<DatePicker
 								className="rounded-[10px] text-[13.5px]"
 								date={dateStrToDate(draft.eventDate)}
-								id="eventDateTime"
+								id="eventDate"
 								onDateChange={(date) =>
 									setField("eventDate", dateToDateStr(date))
 								}
-								onTimeChange={(time) => setField("eventTime", time)}
-								time={draft.eventTime}
 							/>
 							{isPastDate && (
 								<p className="mt-2 rounded-lg border border-[#F0DBA8] bg-[#FBF1DC] px-3 py-2 text-[#8A6512] text-sm">
@@ -231,6 +228,42 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 								</p>
 							)}
 						</Field>
+
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+							<Field className="gap-0">
+								<FieldLabel
+									className="mb-[7px] font-semibold text-[13px] text-foreground"
+									htmlFor="eventTime"
+								>
+									Hora de inicio
+								</FieldLabel>
+								<Input
+									className="min-h-11 rounded-[10px] text-[13.5px]"
+									id="eventTime"
+									onChange={(e) =>
+										setField("eventTime", e.target.value || null)
+									}
+									type="time"
+									value={draft.eventTime ?? ""}
+								/>
+							</Field>
+
+							<Field className="gap-0">
+								<FieldLabel
+									className="mb-[7px] font-semibold text-[13px] text-foreground"
+									htmlFor="endTime"
+								>
+									Hora de fin
+								</FieldLabel>
+								<Input
+									className="min-h-11 rounded-[10px] text-[13.5px]"
+									id="endTime"
+									onChange={(e) => setField("endTime", e.target.value || null)}
+									type="time"
+									value={draft.endTime ?? ""}
+								/>
+							</Field>
+						</div>
 
 						<Field className="gap-0">
 							<FieldLabel

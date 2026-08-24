@@ -157,6 +157,7 @@ const READY_DRAFT: WishlistDraft = {
 	slug: "baby-shower-emilia",
 	eventDate: "2026-09-12",
 	eventTime: "16:00",
+	endTime: null,
 	rsvpDeadline: null,
 	eventLocation: "Miraflores, Lima",
 	dressCode: "",
