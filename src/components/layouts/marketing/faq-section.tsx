@@ -6,6 +6,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { captureMarketingEvent } from "@/lib/analytics";
 
 import { MarketingContainer } from "./marketing-container";
 
@@ -55,6 +56,13 @@ export function FaqSection() {
 					className="mx-auto max-w-[640px]"
 					collapsible
 					defaultValue="what-is-awishfor"
+					onValueChange={(value) => {
+						if (!value) return;
+						captureMarketingEvent("faq_opened", {
+							question: value,
+							visitor_intent: "creator",
+						});
+					}}
 					type="single"
 				>
 					{FAQS.map((faq, index) => (

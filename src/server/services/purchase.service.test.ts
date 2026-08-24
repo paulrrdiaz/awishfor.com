@@ -19,6 +19,7 @@ import {
 	PUBLIC_UNDO_TOKEN_EXPIRY_SECONDS,
 	type PublicPurchaseDatabase,
 	type PurchaseDatabase,
+	type PurchaseMutationDatabase,
 	undoPurchase,
 } from "@/server/services/purchase.service";
 
@@ -66,9 +67,12 @@ const makeDb = (
 	purchasedSum: number,
 	gift: Gift | null = createGiftRecord(),
 	overrides: Partial<PurchaseDatabase["purchase"]> = {},
-): PurchaseDatabase => ({
+): PurchaseMutationDatabase => ({
 	gift: {
 		findFirst: async () => gift,
+	},
+	wishlist: {
+		update: async () => ({}) as Wishlist,
 	},
 	purchase: {
 		create: async ({ data }) =>
@@ -92,6 +96,31 @@ const makeDb = (
 			}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
 		...overrides,
 	},
+	$transaction: async (callback) =>
+		callback({
+			gift: {
+				findFirst: async () => gift,
+			},
+			wishlist: {
+				update: async () => ({}) as Wishlist,
+			},
+			purchase: {
+				create: async ({ data }) =>
+					createPurchaseRecord({
+						quantity:
+							((data as Prisma.PurchaseUncheckedCreateInput)
+								.quantity as number) ?? 1,
+					}),
+				delete: async ({ where }) =>
+					createPurchaseRecord({ id: where.id as string }),
+				findFirst: async () => null,
+				aggregate: async () =>
+					({
+						_sum: { quantity: purchasedSum },
+					}) as Prisma.GetPurchaseAggregateType<Prisma.PurchaseAggregateArgs>,
+				...overrides,
+			},
+		}),
 });
 
 describe("getPurchasedQuantity", () => {
@@ -234,6 +263,7 @@ const makeOwnerDb = (
 		},
 		wishlist: {
 			findFirst: async () => ({ id: "wishlist_123", ownerId: 1 }),
+			update: async () => ({}) as Wishlist,
 			...wishlistOverrides,
 		},
 		purchase: {
@@ -474,6 +504,9 @@ const makePublicDb = (
 		gift: {
 			findFirst: async () => gift,
 		},
+		wishlist: {
+			update: async () => ({}) as Wishlist,
+		},
 		purchase: {
 			aggregate: async () =>
 				({
@@ -519,6 +552,24 @@ describe("markGiftPurchasedPublic", () => {
 		expect(result.purchase.quantity).toBe(1);
 		expect(typeof result.undoToken).toBe("string");
 		expect(result.undoToken.length).toBeGreaterThan(0);
+	});
+
+	it("advances the wishlist cache version with the new purchase", async () => {
+		const gift = createGiftRecord();
+		const wishlist = makeWishlistRecord({ status: "published" });
+		const db = makePublicDb({ ...gift, wishlist });
+		let updateArgs: Prisma.WishlistUpdateArgs | undefined;
+		db.wishlist.update = async (args) => {
+			updateArgs = args;
+			return wishlist;
+		};
+
+		await markGiftPurchasedPublic(db, publicInput);
+
+		expect(updateArgs).toMatchObject({
+			where: { id: gift.wishlistId },
+			data: { updatedAt: expect.any(Date) },
+		});
 	});
 
 	it("stores hash of undo token, not raw token", async () => {

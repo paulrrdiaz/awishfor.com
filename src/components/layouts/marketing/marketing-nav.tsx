@@ -1,5 +1,6 @@
 /* biome-ignore-all lint/performance/noImgElement: local SVG marks do not need the next/image client runtime. */
 import { H2bNavController } from "./h2b-nav-controller";
+import { MarketingCtaLink } from "./marketing-cta-link";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 
 type MarketingNavProps = {
@@ -92,12 +93,13 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
 								>
 									Iniciar sesión
 								</a>
-								<a
+								<MarketingCtaLink
 									className="rounded-full bg-[var(--mlime)] px-5 py-[10px] font-semibold text-[#1B3A12] text-[13.5px] shadow-[0_8px_22px_rgba(140,200,60,0.4)] transition-[padding,transform] duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 group-data-[scrolled=true]/h2b:px-4 group-data-[scrolled=true]/h2b:py-2 group-data-[scrolled=true]/h2b:text-[12.5px] motion-reduce:transition-none"
 									href="/create"
+									placement="desktop_nav"
 								>
 									Crear mi wishlist
-								</a>
+								</MarketingCtaLink>
 							</div>
 						</div>
 					</div>
@@ -147,19 +149,24 @@ function DefaultMarketingNav() {
 				>
 					Iniciar sesión
 				</a>
-				<a
+				<MarketingCtaLink
 					className="!px-[22px] !py-[11px] !text-[14px] m-btn m-btn-lime"
 					href="/create"
+					placement="desktop_nav"
 				>
 					Crear mi wishlist
-				</a>
+				</MarketingCtaLink>
 			</div>
 
 			{/* condensed nav, below md */}
 			<div className="flex items-center gap-2 md:hidden">
-				<a className="!px-4 !text-[13.5px] m-btn m-btn-lime" href="/create">
+				<MarketingCtaLink
+					className="!px-4 !text-[13.5px] m-btn m-btn-lime"
+					href="/create"
+					placement="mobile_nav"
+				>
 					Crear
-				</a>
+				</MarketingCtaLink>
 				<MobileNavDrawer isSignedIn={false} />
 			</div>
 		</nav>

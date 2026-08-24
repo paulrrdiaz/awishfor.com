@@ -269,10 +269,29 @@ describe("GiftsStep", () => {
 		).toBeTruthy();
 	});
 
-	it("renders the preview pane with guest-styled gift cards", () => {
-		renderStep();
+	it("renders every visible gift in the guest preview", () => {
+		const gifts = Array.from({ length: 5 }, (_, index) => ({
+			id: `gift_${index + 1}`,
+			name: `Regalo ${index + 1}`,
+			productUrl: null,
+			imageUrl: null,
+			priceAmount: null,
+			category: "",
+			quantityNeeded: 1,
+			priority: "medium" as const,
+			publicNote: "",
+			internalNote: "",
+			hidden: false,
+			sortOrder: index,
+		}));
+		renderStep(makeDraft({ gifts }));
 
 		expect(screen.getByText(/así los verán tus invitados/i)).toBeTruthy();
-		expect(screen.getAllByText("Lámpara de mesa").length).toBeGreaterThan(0);
+		const preview = screen.getByRole("region", {
+			name: "Vista previa de regalos",
+		});
+		for (const gift of gifts) {
+			expect(preview).toHaveTextContent(gift.name);
+		}
 	});
 });

@@ -2,6 +2,7 @@ import { HeroExampleRail } from "./hero-example-rail";
 import { HERO_OCCASIONS, HERO_SCRIM_VALUES } from "./hero-occasions";
 import { HeroRotatorLoader } from "./hero-rotator-loader";
 import { MarketingContainer } from "./marketing-container";
+import { MarketingCtaLink } from "./marketing-cta-link";
 
 export function H2bHero() {
 	const wedding = HERO_OCCASIONS[0];
@@ -9,6 +10,7 @@ export function H2bHero() {
 	return (
 		<section
 			className="relative min-h-[700px] w-full overflow-visible"
+			data-analytics-section="first_fold"
 			data-h2b-hero
 			data-hero-rotator
 			style={HERO_SCRIM_VALUES[wedding.scrim]}
@@ -86,12 +88,13 @@ export function H2bHero() {
 							</span>
 						</p>
 						<div className="mt-8 flex flex-wrap items-center gap-3 lg:mt-8">
-							<a
+							<MarketingCtaLink
 								className="rounded-full bg-[var(--mlime)] px-5 py-3 font-semibold text-[#1B3A12] text-[14px] shadow-[0_8px_22px_rgba(140,200,60,0.4)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4 lg:px-[26px] lg:py-[14px] lg:text-[15px]"
 								href="/create"
+								placement="hero"
 							>
 								Crear mi wishlist →
-							</a>
+							</MarketingCtaLink>
 							<a
 								className="rounded-full border border-white/[.42] bg-white/[.14] px-5 py-3 font-semibold text-[14px] text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4 lg:px-[26px] lg:py-[14px] lg:text-[15px]"
 								href="#ejemplo"

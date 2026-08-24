@@ -63,7 +63,7 @@ The system SHALL capture named engagement events describing how a visitor moves 
 
 ### Requirement: Visitor identity continuity
 
-The system SHALL resolve a single visitor to a single analytics identity across the marketing route and the application shell, so that a visitor who moves from the landing page into the creation wizard is not recorded as two people. Person profiles SHALL be created only for identified users; anonymous visitors and wishlist guests MUST NOT produce person profiles.
+The system SHALL resolve a single visitor to a single analytics identity across the marketing route, public-wishlist route, and application shell, so that a visitor who moves from the landing page into the creation wizard or a public wishlist is not recorded as multiple people. Person profiles SHALL be created only for identified users; anonymous visitors and wishlist guests MUST NOT produce person profiles.
 
 #### Scenario: A visitor crosses from marketing into the application
 
@@ -77,11 +77,100 @@ The system SHALL resolve a single visitor to a single analytics identity across 
 - **THEN** the analytics identity is associated with their authentication user id
 - **AND** events captured before authentication remain attributed to the same person
 
+#### Scenario: A guest crosses from the finder into a public wishlist
+
+- **WHEN** a visitor uses the landing-page guest finder and navigates to a published `/w/<slug>` page
+- **THEN** `guest_finder_used` and `public_wishlist_viewed` share one anonymous visitor identifier
+- **AND** the visitor is not identified or promoted to a person profile
+
 #### Scenario: Anonymous traffic creates no profiles
 
 - **WHEN** an anonymous visitor browses the landing page or a public wishlist without authenticating
 - **THEN** their events are captured
 - **AND** no person profile is created for them
+
+### Requirement: Public-wishlist guest funnel capture
+
+The system SHALL capture exactly this public-wishlist v1 event surface from the client: `public_wishlist_viewed`, `gift_store_opened`, `gift_purchase_started`, `gift_marked_purchased`, `gift_purchase_failed`, `gift_purchase_undone`, and `rsvp_submitted`. Public filter, sort, scroll, and generic click interactions MUST NOT emit analytics events in this change. Analytics failure MUST NOT delay or break navigation, public mutations, refresh, or user feedback.
+
+#### Scenario: A published public wishlist is viewed
+
+- **WHEN** a published `/w/<slug>` page renders with analytics configured
+- **THEN** exactly one `public_wishlist_viewed` event is captured for the navigation
+- **AND** the event identifies the route variant as `public`
+
+#### Scenario: A personalized public wishlist is viewed
+
+- **WHEN** a valid published `/w/<slug>/<guestSlug>` page renders with analytics configured
+- **THEN** exactly one `public_wishlist_viewed` event is captured for the navigation
+- **AND** the event identifies the route variant as `personalized`
+
+#### Scenario: A draft-owner preview is viewed
+
+- **WHEN** an owner opens a draft wishlist through `/w/<slug>`
+- **THEN** no `public_wishlist_viewed` event is captured
+
+#### Scenario: A published owner view uses the anonymous hot path
+
+- **WHEN** a signed-in owner opens their own published `/w/<slug>` page
+- **THEN** the view MAY be counted as `public_wishlist_viewed`
+- **AND** analytics does not add an authentication lookup to distinguish the owner from a guest
+
+#### Scenario: A guest opens the external store
+
+- **WHEN** a guest activates a gift's external-store action
+- **THEN** `gift_store_opened` is captured with the internal wishlist and gift identifiers
+- **AND** capture does not delay or block opening the store
+
+#### Scenario: A guest starts the purchase flow
+
+- **WHEN** a guest opens the purchase form for a gift
+- **THEN** `gift_purchase_started` is captured with the internal wishlist and gift identifiers
+
+#### Scenario: A purchase succeeds
+
+- **WHEN** `markGiftPurchased` returns success to the browser
+- **THEN** `gift_marked_purchased` is captured from the success callback
+- **AND** no success event is emitted before the server confirms the mutation
+
+#### Scenario: A purchase fails
+
+- **WHEN** `markGiftPurchased` returns an error to the browser
+- **THEN** `gift_purchase_failed` is captured with a normalized error code
+- **AND** the raw error message and submitted form values are not captured
+
+#### Scenario: A purchase is undone
+
+- **WHEN** `undoRecentPurchase` returns success to the browser
+- **THEN** `gift_purchase_undone` is captured with the internal wishlist and gift identifiers
+
+#### Scenario: An RSVP response succeeds
+
+- **WHEN** `invite.respond` returns success to the browser
+- **THEN** `rsvp_submitted` is captured with response status and party size
+- **AND** no guest identifier or guest name is captured
+
+### Requirement: Public-wishlist analytics property allowlist
+
+Public-wishlist analytics SHALL use explicit capture rather than automatic pageviews or autocapture. The final outbound payload MAY contain stable internal `wishlist_id` and `gift_id`, event type, layout id, theme id, `route_variant`, gift count, referrer hostname, allowlisted campaign parameters, normalized error code, RSVP status, and party size as applicable. It MUST NOT contain wishlist or guest slugs, wishlist titles, gift names, guest identifiers or names, contact details, form values, raw referrers, pathnames, or full or partial public-wishlist URLs.
+
+#### Scenario: Automatic public capture is disabled
+
+- **WHEN** the public-wishlist analytics client initializes
+- **THEN** automatic pageview capture and autocapture are disabled
+- **AND** only the registered public-wishlist events can be emitted by the public instrumentation
+
+#### Scenario: Automatic client properties are sanitized
+
+- **WHEN** a public-wishlist event reaches the analytics transport boundary
+- **THEN** the complete outbound properties, including properties automatically added by the client, match the public allowlist
+- **AND** `$current_url`, `$pathname`, raw referrer fields, or equivalent properties do not reveal a wishlist slug or `guestSlug`
+
+#### Scenario: Public attribution is minimized
+
+- **WHEN** a public-wishlist view has a referrer or campaign parameters
+- **THEN** the event may contain only the referrer hostname and explicitly allowlisted campaign parameters
+- **AND** no raw referrer or unrecognized query parameter is captured
 
 ### Requirement: First-party analytics ingestion
 
@@ -121,6 +210,28 @@ Analytics MUST NOT push the anonymous marketing route past its established JavaS
 - **THEN** its verification records the production marketing audit result
 - **AND** the record distinguishes the analytics delta from budget failures that predate the change
 
+### Requirement: Public-wishlist analytics payload budget
+
+Analytics MUST NOT push `/w/*` past the established public-wishlist JavaScript budget. Total compressed route JavaScript MUST remain at or below the configured 225,280-byte `javascriptBytes` ceiling for both light and heavy audit fixtures. This change MUST NOT raise that ceiling or defer or conditionally load analytics merely to move its bytes outside the audit measurement window.
+
+#### Scenario: The public-wishlist route remains within budget
+
+- **WHEN** the production public-wishlist audit runs after analytics is added
+- **THEN** both light and heavy fixtures remain at or below 225,280 compressed JavaScript bytes
+- **AND** the analytics delta is recorded against a baseline captured before implementation
+
+#### Scenario: The minimal runtime does not fit
+
+- **WHEN** the minimal client and public instrumentation exceed the configured public-wishlist JavaScript ceiling
+- **THEN** implementation pauses and the analytics design is revisited
+- **AND** the budget is not raised or evaded as part of this change
+
+#### Scenario: The public performance audit is verification evidence
+
+- **WHEN** this change is reviewed
+- **THEN** its verification records the before-and-after production public-wishlist audit results
+- **AND** any failures that predate analytics are distinguished from the analytics delta
+
 ### Requirement: Environment isolation for analytics capture
 
 Analytics configuration SHALL be validated through the project's environment schema, and capture SHALL be suppressed outside production so development and test activity cannot enter reporting.
@@ -149,11 +260,11 @@ The system SHALL declare all analytics event names and their property shapes in 
 #### Scenario: Instrumented flows are tested
 
 - **WHEN** the test suite runs
-- **THEN** tests assert that each instrumented marketing flow captures its expected event and properties against a mocked client
+- **THEN** tests assert that each instrumented marketing and public-wishlist flow captures its expected event and properties against a mocked client
 
 ### Requirement: Analytics data minimization
 
-Analytics MUST NOT capture session recordings, page content, form input values, or guest contact data. Collected data MUST remain within what the published privacy policy discloses.
+Analytics MUST NOT capture session recordings, page content, form input values, guest contact data, human-readable wishlist or gift content, or personalized public URLs. Collected data MUST remain within what the published privacy policy discloses.
 
 #### Scenario: No recording or content capture
 
@@ -165,6 +276,12 @@ Analytics MUST NOT capture session recordings, page content, form input values, 
 
 - **WHEN** a guest interacts with any wishlist or finder flow
 - **THEN** no name, email address, phone number, or message text is included in any event
+
+#### Scenario: Public route identity is never captured as content
+
+- **WHEN** a guest interacts with `/w/<slug>` or `/w/<slug>/<guestSlug>`
+- **THEN** no wishlist slug, guest slug, wishlist title, gift name, guest identifier, pathname, or public-wishlist URL is included in any event
+- **AND** stable internal wishlist and gift identifiers MAY be included
 
 #### Scenario: Collection matches disclosure
 

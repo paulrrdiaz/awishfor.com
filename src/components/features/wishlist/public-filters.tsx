@@ -10,6 +10,7 @@ import {
 	useState,
 } from "react";
 import type { GuestGiftDrawerView } from "@/components/features/wishlist/guest-gift-drawer";
+import { usePublicWishlistAnalytics } from "@/components/layouts/public-wishlist/public-wishlist-analytics";
 import { EmptyState } from "@/components/shared/empty-state";
 import { GiftGrid } from "@/components/shared/gift-grid";
 import {
@@ -141,6 +142,7 @@ export function PublicGiftFilters({
 		null,
 	);
 	const actionTriggerRef = useRef<HTMLElement | null>(null);
+	const analytics = usePublicWishlistAnalytics();
 
 	const counts = useMemo(() => countByStatusFilter(gifts), [gifts]);
 	const categoryFilters = useMemo(
@@ -179,6 +181,8 @@ export function PublicGiftFilters({
 	}
 
 	function openGift(gift: PublicGiftViewModel, view: GuestGiftDrawerView) {
+		if (view === "purchase")
+			analytics?.captureGiftEvent("gift_purchase_started", gift.id);
 		actionTriggerRef.current = document.activeElement as HTMLElement | null;
 		setSelectedGift(gift);
 		setDrawerView(view);

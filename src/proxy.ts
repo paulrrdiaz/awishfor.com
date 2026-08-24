@@ -43,7 +43,7 @@ export const config = {
 	matcher: [
 		// Keep Clerk's request state available to the root ClerkProvider on every
 		// application page while skipping Next.js internals and static assets.
-		"/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+		"/((?!_next|ingest|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
 		// Always run for API routes.
 		"/(api|trpc)(.*)",
 		// Always run for Clerk's Frontend API and handshake routes.

@@ -8,6 +8,12 @@ import { RsvpSection } from "./rsvp-section";
 
 const mutateMock = vi.hoisted(() => vi.fn());
 const refreshMock = vi.hoisted(() => vi.fn());
+const analytics = vi.hoisted(() => ({ captureRsvp: vi.fn() }));
+const respondCallbacks = vi.hoisted(() => ({
+	onSuccess: undefined as
+		| ((data: { status: "confirmed" | "declined" }) => void)
+		| undefined,
+}));
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ refresh: refreshMock }),
@@ -17,10 +23,12 @@ vi.mock("@/trpc/react", () => ({
 	api: {
 		invite: {
 			respond: {
-				useMutation: () => ({
-					mutate: mutateMock,
-					isPending: false,
-				}),
+				useMutation: (options: {
+					onSuccess?: typeof respondCallbacks.onSuccess;
+				}) => {
+					respondCallbacks.onSuccess = options.onSuccess;
+					return { isPending: false, mutate: mutateMock };
+				},
 			},
 		},
 	},
@@ -31,6 +39,11 @@ vi.mock("@/components/providers/public-wishlist-providers", () => ({
 		<div data-testid="public-wishlist-trpc-provider">{children}</div>
 	),
 }));
+
+vi.mock(
+	"@/components/layouts/public-wishlist/public-wishlist-analytics",
+	() => ({ usePublicWishlistAnalytics: () => analytics }),
+);
 
 function makeGuest(
 	overrides: Partial<PublicGuestViewModel> = {},
@@ -55,6 +68,8 @@ const defaultProps = {
 beforeEach(() => {
 	mutateMock.mockClear();
 	refreshMock.mockClear();
+	analytics.captureRsvp.mockClear();
+	respondCallbacks.onSuccess = undefined;
 });
 
 afterEach(() => {
@@ -156,5 +171,25 @@ describe("RsvpSection", () => {
 	it("omits the extra-guest area when the invite has no extra guests", () => {
 		render(<RsvpSection {...defaultProps} guest={makeGuest()} />);
 		expect(screen.queryByText(/Tu acompañante/)).toBeNull();
+	});
+
+	it("captures RSVP only after success with status and party size", async () => {
+		const user = userEvent.setup();
+		render(
+			<RsvpSection
+				{...defaultProps}
+				guest={makeGuest({
+					extraGuests: [{ id: "g1", name: "Ana", status: "pending" }],
+				})}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Sí, ahí estaré" }));
+		await user.click(
+			screen.getByRole("button", { name: "Enviar confirmación" }),
+		);
+		expect(analytics.captureRsvp).not.toHaveBeenCalled();
+		respondCallbacks.onSuccess?.({ status: "confirmed" });
+		expect(analytics.captureRsvp).toHaveBeenCalledWith("confirmed", 2);
 	});
 });

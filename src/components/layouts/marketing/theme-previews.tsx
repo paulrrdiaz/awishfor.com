@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { DEFAULT_THEME_ID, getAllThemes } from "@/config/public-themes";
+import { captureMarketingEvent } from "@/lib/analytics";
 
 import { MarketingContainer } from "./marketing-container";
 
@@ -47,7 +48,13 @@ export function ThemePreviews() {
 								aria-pressed={isSelected}
 								className="rounded-full border px-[18px] py-[9px] font-semibold text-[12px] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2 motion-reduce:transition-none sm:text-[13px]"
 								key={theme.id}
-								onClick={() => setSelectedThemeId(theme.id)}
+								onClick={() => {
+									setSelectedThemeId(theme.id);
+									captureMarketingEvent("theme_preview_opened", {
+										theme: theme.id,
+										visitor_intent: "creator",
+									});
+								}}
 								style={
 									isSelected
 										? {

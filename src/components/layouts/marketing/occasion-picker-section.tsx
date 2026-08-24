@@ -1,4 +1,5 @@
 import { MarketingContainer } from "./marketing-container";
+import { MarketingCtaLink } from "./marketing-cta-link";
 import { OccasionMediaController } from "./occasion-media-controller";
 
 const OCCASIONS = [
@@ -40,6 +41,7 @@ export function OccasionPickerSection() {
 	return (
 		<section
 			className="border-[var(--mline)] border-t bg-white px-[22px] py-11 lg:px-11 lg:py-[76px]"
+			data-analytics-section="occasions"
 			id="ocasiones"
 		>
 			<MarketingContainer>
@@ -57,10 +59,12 @@ export function OccasionPickerSection() {
 					className="flex flex-col gap-3 lg:grid lg:h-[392px] lg:grid-cols-[1.3fr_1fr_1fr] lg:grid-rows-2 lg:gap-4"
 					data-occasion-grid
 				>
-					<a
+					<MarketingCtaLink
 						aria-label={`Crear una lista para ${lead.label}`}
 						className="card-lift group relative block h-[172px] cursor-pointer overflow-clip rounded-2xl shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:row-span-2 lg:h-auto lg:rounded-[20px] lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)]"
 						href={`/create?type=${lead.eventType}`}
+						occasion={lead.eventType}
+						placement="occasion"
 					>
 						{/* biome-ignore lint/performance/noImgElement: src is assigned only after intersection; next/image requires an eager src. */}
 						<img
@@ -95,15 +99,17 @@ export function OccasionPickerSection() {
 								Crear mi lista →
 							</span>
 						</div>
-					</a>
+					</MarketingCtaLink>
 
 					<div className="grid grid-cols-2 gap-3 lg:contents">
 						{smallOccasions.map((o) => (
-							<a
+							<MarketingCtaLink
 								aria-label={`Crear una lista para ${o.label}`}
 								className={`card-lift group relative block h-[130px] cursor-pointer overflow-hidden rounded-2xl shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:h-auto lg:rounded-[18px] lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)] ${SMALL_TILE_LAYOUTS[o.eventType]}`}
 								href={`/create?type=${o.eventType}`}
 								key={o.eventType}
+								occasion={o.eventType}
+								placement="occasion"
 							>
 								{/* biome-ignore lint/performance/noImgElement: src is assigned only after intersection; next/image requires an eager src. */}
 								<img
@@ -135,12 +141,14 @@ export function OccasionPickerSection() {
 										{o.subtitle}
 									</div>
 								</div>
-							</a>
+							</MarketingCtaLink>
 						))}
-						<a
+						<MarketingCtaLink
 							aria-label="Crear una wishlist general"
 							className="card-lift flex h-[130px] flex-col items-center justify-center rounded-2xl bg-[#173E29] p-2 text-center text-white shadow-[0_8px_22px_rgba(20,60,20,0.1)] lg:col-start-3 lg:row-start-2 lg:h-auto lg:rounded-[18px] lg:p-3.5 lg:shadow-[0_10px_30px_rgba(20,60,20,0.1)]"
 							href="/create?type=general"
+							occasion="general"
+							placement="occasion"
 						>
 							<span
 								aria-hidden="true"
@@ -154,7 +162,7 @@ export function OccasionPickerSection() {
 							<span className="mt-[3px] hidden text-[10.5px] text-white/65 lg:block">
 								Para cualquier momento →
 							</span>
-						</a>
+						</MarketingCtaLink>
 					</div>
 				</div>
 			</MarketingContainer>

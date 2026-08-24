@@ -40,28 +40,52 @@ export default function MarketingLandingPage() {
 		<>
 			<MarketingFirstFold />
 			<OccasionPickerSection />
-			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]"
+				data-analytics-section="benefits"
+			>
 				<BenefitsSection />
 			</div>
-			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]"
+				data-analytics-section="how_it_works"
+			>
 				<HowItWorksSection />
 			</div>
-			<div className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]"
+				data-analytics-section="partners"
+			>
 				<PartnersMarquee />
 			</div>
-			<div className="[contain-intrinsic-size:auto_900px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_900px] [content-visibility:auto]"
+				data-analytics-section="example"
+			>
 				<ExamplePreview />
 			</div>
-			<div className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_700px] [content-visibility:auto]"
+				data-analytics-section="themes"
+			>
 				<ThemePreviews />
 			</div>
-			<div className="[contain-intrinsic-size:auto_400px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_400px] [content-visibility:auto]"
+				data-analytics-section="guest_finder"
+			>
 				<GuestFinder />
 			</div>
-			<div className="[contain-intrinsic-size:auto_600px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_600px] [content-visibility:auto]"
+				data-analytics-section="faq"
+			>
 				<FaqSection />
 			</div>
-			<div className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]">
+			<div
+				className="[contain-intrinsic-size:auto_500px] [content-visibility:auto]"
+				data-analytics-section="final_cta"
+			>
 				<FinalCta />
 			</div>
 			<div className="[contain-intrinsic-size:auto_400px] [content-visibility:auto]">

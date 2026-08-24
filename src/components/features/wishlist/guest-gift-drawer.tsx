@@ -15,6 +15,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { usePublicWishlistAnalytics } from "@/components/layouts/public-wishlist/public-wishlist-analytics";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DeliveryItems } from "@/components/shared/delivery-items";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,7 @@ export function GuestGiftDrawer({
 	const renderedExpiresAt = debugState?.undoExpiresAt ?? undoExpiresAt;
 	const showQuantitySelector = gift.quantityNeeded > 1;
 	const hasDelivery = Boolean(delivery?.address);
+	const analytics = usePublicWishlistAnalytics();
 
 	useSuccessCheckMotion(successCheckRef, renderedView === "success");
 
@@ -177,10 +179,12 @@ export function GuestGiftDrawer({
 
 	const purchaseMutation = api.purchase.markGiftPurchased.useMutation({
 		onError: (error) => {
+			analytics?.capturePurchaseFailure(gift.id, error);
 			setPurchaseError(error.message);
 			setErrors((current) => ({ ...current, submit: error.message }));
 		},
 		onSuccess: (data) => {
+			analytics?.captureGiftEvent("gift_marked_purchased", gift.id);
 			setPurchaseId(data.purchase.id);
 			setUndoToken(data.undoToken);
 			setUndoExpiresAt(data.undoExpiresAt);
@@ -195,6 +199,7 @@ export function GuestGiftDrawer({
 	const undoMutation = api.purchase.undoRecentPurchase.useMutation({
 		onError: (error) => setUndoError(error.message),
 		onSuccess: () => {
+			analytics?.captureGiftEvent("gift_purchase_undone", gift.id);
 			router.refresh();
 			reset();
 			onOpenChange(false);
@@ -285,6 +290,7 @@ export function GuestGiftDrawer({
 								className="public-btn inline-flex h-10 items-center justify-center gap-2 bg-primary px-4 text-primary-foreground text-sm hover:bg-primary/90"
 								href={gift.productUrl ?? undefined}
 								onClick={() => {
+									analytics?.captureGiftEvent("gift_store_opened", gift.id);
 									if (productFromPurchase) onViewChange("purchase");
 								}}
 								rel="noopener noreferrer"

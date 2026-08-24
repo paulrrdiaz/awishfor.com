@@ -1,5 +1,6 @@
 /* biome-ignore-all lint/performance/noImgElement: local SVG mark does not need the next/image client runtime. */
 import { SUPPORT_EMAIL } from "@/config/contact";
+import { MarketingCtaLink } from "./marketing-cta-link";
 import { SiteHeaderNavLinks } from "./site-header-nav-links";
 
 export function SiteHeader() {
@@ -45,12 +46,13 @@ export function SiteHeader() {
 					>
 						Iniciar sesión
 					</a>
-					<a
+					<MarketingCtaLink
 						className="whitespace-nowrap rounded-full bg-[var(--mlime)] px-5 py-[10px] font-semibold text-[#1B3A12] text-[13.5px] shadow-[0_8px_22px_rgba(140,200,60,0.4)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4"
 						href="/create"
+						placement="desktop_nav"
 					>
 						Crea un wishlist
-					</a>
+					</MarketingCtaLink>
 				</div>
 			</div>
 		</header>

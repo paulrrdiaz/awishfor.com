@@ -3,6 +3,8 @@
 import { Menu, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { captureMarketingEvent } from "@/lib/analytics";
+
 export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const triggerRef = useRef<HTMLButtonElement>(null);
@@ -18,6 +20,13 @@ export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
 	}, [open]);
 
 	const closeDrawer = () => setOpen(false);
+	const trackCreate = () => {
+		captureMarketingEvent("cta_clicked", {
+			placement: "mobile_nav",
+			visitor_intent: "creator",
+		});
+		closeDrawer();
+	};
 
 	const handleClose = () => {
 		setOpen(false);
@@ -102,7 +111,7 @@ export function MobileNavDrawer({ isSignedIn }: { isSignedIn: boolean }) {
 						<a
 							className="!w-full m-btn m-btn-lime mt-4 justify-center focus-visible:outline-2 focus-visible:outline-[var(--mink)] focus-visible:outline-offset-2"
 							href="/create"
-							onClick={closeDrawer}
+							onClick={trackCreate}
 						>
 							Crear mi wishlist
 						</a>

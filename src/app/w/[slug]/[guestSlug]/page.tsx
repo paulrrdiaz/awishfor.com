@@ -58,6 +58,7 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 
 	return (
 		<PublicWishlistPage
+			analyticsRouteVariant="personalized"
 			mode="full"
 			rsvpSection={
 				<RsvpSection

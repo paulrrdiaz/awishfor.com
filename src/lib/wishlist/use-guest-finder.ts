@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
 
+import { captureMarketingEvent } from "@/lib/analytics";
 import { extractWishlistSlug } from "@/lib/wishlist/slug-extract";
 
 /** Native-form client behavior shared by the small list-finder surfaces. */
@@ -26,6 +27,7 @@ export function useGuestFinder() {
 			return;
 		}
 		setError(null);
+		captureMarketingEvent("guest_finder_used", { visitor_intent: "guest" });
 		router.push(`/w/${slug}`);
 	};
 

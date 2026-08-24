@@ -419,20 +419,20 @@ export function GiftsStep() {
 				<PublicThemeProvider
 					bodyFont={resolveBodyFont(draft.bodyFont)}
 					buttonStyle={resolveButtonStyle(draft.buttonStyle)}
-					className="min-h-0 flex-1 overflow-hidden bg-transparent"
+					className="min-h-0 flex-1 overflow-y-auto bg-transparent pr-2"
 					headingFont={resolveHeadingFont(draft.headingFont)}
 					theme={resolveTheme(draft.themeId)}
 				>
-					<div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-						{previewGifts.slice(0, 3).map((gift, index) => (
-							<div
-								className={index === 2 ? "hidden 2xl:block" : undefined}
-								key={gift.id}
-							>
+					<section
+						aria-label="Vista previa de regalos"
+						className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3"
+					>
+						{previewGifts.map((gift) => (
+							<div key={gift.id}>
 								<GiftCard cardStyle="card" gift={gift} />
 							</div>
 						))}
-					</div>
+					</section>
 				</PublicThemeProvider>
 			</div>
 		</div>

@@ -9,6 +9,10 @@ import { GuestGiftDrawer } from "./guest-gift-drawer";
 const mutateMock = vi.hoisted(() => vi.fn());
 const undoMutateMock = vi.hoisted(() => vi.fn());
 const refreshMock = vi.hoisted(() => vi.fn());
+const analytics = vi.hoisted(() => ({
+	captureGiftEvent: vi.fn(),
+	capturePurchaseFailure: vi.fn(),
+}));
 const callbacks = vi.hoisted(() => ({
 	purchaseError: undefined as
 		| ((error: { message: string }) => void)
@@ -27,6 +31,10 @@ const callbacks = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ refresh: refreshMock }),
 }));
+vi.mock(
+	"@/components/layouts/public-wishlist/public-wishlist-analytics",
+	() => ({ usePublicWishlistAnalytics: () => analytics }),
+);
 vi.mock("@/trpc/react", () => ({
 	api: {
 		purchase: {
@@ -228,6 +236,9 @@ describe("GuestGiftDrawer", () => {
 		await user.type(screen.getByLabelText(/tu nombre/i), "Ana García");
 		await user.click(screen.getByRole("button", { name: /confirmar regalo/i }));
 		act(() => callbacks.purchaseError?.({ message: "No pudimos confirmar" }));
+		expect(analytics.capturePurchaseFailure).toHaveBeenCalledWith("gift-1", {
+			message: "No pudimos confirmar",
+		});
 		expect(screen.getByText("No pudimos confirmar")).toBeInTheDocument();
 		await user.click(screen.getByRole("button", { name: /confirmar regalo/i }));
 		expect(mutateMock).toHaveBeenCalledTimes(2);
@@ -235,12 +246,17 @@ describe("GuestGiftDrawer", () => {
 	it("shows compact success, refreshes, then allows plain undo before server expiry", () => {
 		const onViewChange = vi.fn();
 		renderDrawer("purchase", { onViewChange });
+		expect(analytics.captureGiftEvent).not.toHaveBeenCalled();
 		act(() =>
 			callbacks.purchaseSuccess?.({
 				purchase: { id: "purchase-1" },
 				undoExpiresAt: "2099-01-01T00:00:00.000Z",
 				undoToken: "raw",
 			}),
+		);
+		expect(analytics.captureGiftEvent).toHaveBeenCalledWith(
+			"gift_marked_purchased",
+			"gift-1",
 		);
 		expect(onViewChange).toHaveBeenCalledWith("success");
 		expect(refreshMock).toHaveBeenCalledOnce();
@@ -283,6 +299,10 @@ describe("GuestGiftDrawer", () => {
 		act(() => callbacks.undoError?.({ message: "Undo token has expired" }));
 		expect(screen.getByText("Undo token has expired")).toBeInTheDocument();
 		act(() => callbacks.undoSuccess?.());
+		expect(analytics.captureGiftEvent).toHaveBeenCalledWith(
+			"gift_purchase_undone",
+			"gift-1",
+		);
 		expect(refreshMock).toHaveBeenCalledTimes(2);
 	});
 	it("hides undo at expiry and keeps success dismissible", () => {

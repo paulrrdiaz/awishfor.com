@@ -19,6 +19,7 @@ import { MagazineEditorialLayout } from "./magazine-editorial-layout";
 import { OverlapDuoLayout } from "./overlap-duo-layout";
 import { PortraitFrameSplitLayout } from "./portrait-frame-split-layout";
 import { PublicThemeProvider } from "./public-theme-provider";
+import { PublicWishlistAnalyticsProvider } from "./public-wishlist-analytics";
 import { ScrapbookPolaroidsLayout } from "./scrapbook-polaroids-layout";
 import { SELF_CONTAINED_LAYOUT_IDS } from "./self-contained-layouts";
 import { SplitImageRightLayout } from "./split-image-right-layout";
@@ -31,6 +32,7 @@ type Props = {
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
 	rsvpSection?: ReactNode;
+	analyticsRouteVariant?: "public" | "personalized";
 };
 
 type LayoutComponentType = (props: {
@@ -58,6 +60,7 @@ export function PublicWishlistPage({
 	mode,
 	surface = "embedded",
 	rsvpSection,
+	analyticsRouteVariant = "public",
 }: Props) {
 	const theme = resolveTheme(wishlist.themeId);
 	const layout = resolveLayout(wishlist.layoutId);
@@ -73,53 +76,63 @@ export function PublicWishlistPage({
 	const isSelfContainedLayout = SELF_CONTAINED_LAYOUT_IDS.has(layout.id);
 
 	return (
-		<PublicThemeProvider
-			bodyFont={bodyFont}
-			buttonStyle={buttonStyle}
-			// Embedded previews must not stretch to the full viewport height.
-			// Standalone owner previews still use mode="preview", so render surface
-			// determines page sizing independently of interaction mode.
-			className={
-				isSelfContainedLayout
-					? surface === "embedded"
-						? "min-h-0 bg-background"
-						: "bg-background"
-					: surface === "embedded"
-						? "min-h-0"
-						: undefined
-			}
-			headingFont={headingFont}
-			motif={motif}
-			motifPalette={motifPalette}
-			motifTreatment={motifTreatment}
-			theme={theme}
+		<PublicWishlistAnalyticsProvider
+			enabled={mode === "full" && surface === "standalone"}
+			eventType={wishlist.eventType}
+			giftCount={wishlist.gifts.length}
+			layoutId={layout.id}
+			routeVariant={analyticsRouteVariant}
+			themeId={theme.id}
+			wishlistId={wishlist.id}
 		>
-			{motif && (
-				<MotifBand
-					motif={motif}
-					palette={motifPalette}
-					position="header"
-					treatment={motifTreatment}
+			<PublicThemeProvider
+				bodyFont={bodyFont}
+				buttonStyle={buttonStyle}
+				// Embedded previews must not stretch to the full viewport height.
+				// Standalone owner previews still use mode="preview", so render surface
+				// determines page sizing independently of interaction mode.
+				className={
+					isSelfContainedLayout
+						? surface === "embedded"
+							? "min-h-0 bg-background"
+							: "bg-background"
+						: surface === "embedded"
+							? "min-h-0"
+							: undefined
+				}
+				headingFont={headingFont}
+				motif={motif}
+				motifPalette={motifPalette}
+				motifTreatment={motifTreatment}
+				theme={theme}
+			>
+				{motif && (
+					<MotifBand
+						motif={motif}
+						palette={motifPalette}
+						position="header"
+						treatment={motifTreatment}
+					/>
+				)}
+				{mode === "preview" && (
+					<div className="sticky top-0 z-50 border-amber-200 border-b bg-amber-50 px-6 py-3 text-center font-medium text-amber-900 text-sm">
+						Vista previa — esta lista aún no es pública
+					</div>
+				)}
+				<LayoutComponent
+					layout={layout}
+					mode={mode}
+					rsvpSection={rsvpSection}
+					surface={surface}
+					wishlist={wishlist}
 				/>
-			)}
-			{mode === "preview" && (
-				<div className="sticky top-0 z-50 border-amber-200 border-b bg-amber-50 px-6 py-3 text-center font-medium text-amber-900 text-sm">
-					Vista previa — esta lista aún no es pública
-				</div>
-			)}
-			<LayoutComponent
-				layout={layout}
-				mode={mode}
-				rsvpSection={rsvpSection}
-				surface={surface}
-				wishlist={wishlist}
-			/>
-			{mode !== "compact" && (
-				<WishlistFooter
-					variant={surface === "standalone" ? "expanded" : "compact"}
-					wishlistSlug={wishlist.slug}
-				/>
-			)}
-		</PublicThemeProvider>
+				{mode !== "compact" && (
+					<WishlistFooter
+						variant={surface === "standalone" ? "expanded" : "compact"}
+						wishlistSlug={wishlist.slug}
+					/>
+				)}
+			</PublicThemeProvider>
+		</PublicWishlistAnalyticsProvider>
 	);
 }

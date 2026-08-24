@@ -26,6 +26,10 @@ type GiftDelegate = {
 	findFirst(args: Prisma.GiftFindFirstArgs): Promise<Gift | null>;
 };
 
+type WishlistTouchDelegate = {
+	update(args: Prisma.WishlistUpdateArgs): Promise<Wishlist>;
+};
+
 export type PurchaseDatabase = {
 	purchase: PurchaseDelegate;
 	gift: GiftDelegate;
@@ -36,7 +40,8 @@ type OwnerPurchaseClient = {
 		findMany(args: Prisma.PurchaseFindManyArgs): Promise<Purchase[]>;
 	};
 	gift: GiftDelegate;
-} & WishlistAccessDatabase;
+	wishlist: WishlistAccessDatabase["wishlist"] & WishlistTouchDelegate;
+};
 
 export type OwnerPurchaseDatabase = OwnerPurchaseClient & {
 	$transaction<T>(
@@ -56,8 +61,32 @@ export type WishlistRecentPurchaseDatabase = {
 	};
 };
 
+type PurchaseMutationClient = PurchaseDatabase & {
+	wishlist: WishlistTouchDelegate;
+};
+
+export type PurchaseMutationDatabase = PurchaseMutationClient & {
+	$transaction<T>(
+		callback: (tx: PurchaseMutationClient) => Promise<T>,
+	): Promise<T>;
+};
+
 const hashToken = (raw: string) =>
 	createHash("sha256").update(raw).digest("hex");
+
+/**
+ * The published wishlist snapshot is versioned by Wishlist.updatedAt. Purchases
+ * are child records, so advance the parent version in the same transaction as
+ * every purchase-state change instead of relying only on cache invalidation.
+ */
+const touchPublicWishlist = (
+	db: Pick<PurchaseMutationClient, "wishlist">,
+	wishlistId: string,
+) =>
+	db.wishlist.update({
+		where: { id: wishlistId },
+		data: { updatedAt: new Date() },
+	});
 
 export const getPurchasedQuantity = async (
 	db: PurchaseDatabase,
@@ -175,7 +204,7 @@ export const createOwnerManualPurchase = async (
 			});
 		}
 
-		return tx.purchase.create({
+		const purchase = await tx.purchase.create({
 			data: {
 				gift: { connect: { id: giftId } },
 				guestName: guestName ?? OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
@@ -185,6 +214,8 @@ export const createOwnerManualPurchase = async (
 				quantity,
 			},
 		});
+		await touchPublicWishlist(tx, gift.wishlistId);
+		return purchase;
 	});
 };
 
@@ -212,7 +243,11 @@ export const deleteOwnerPurchase = async (
 		});
 
 		try {
-			return await tx.purchase.delete({ where: { id: purchaseId } });
+			const deletedPurchase = await tx.purchase.delete({
+				where: { id: purchaseId },
+			});
+			await touchPublicWishlist(tx, gift.wishlistId);
+			return deletedPurchase;
 		} catch (err) {
 			if (
 				err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -237,7 +272,7 @@ type PublicGiftDelegate = {
 type PublicPurchaseClient = {
 	purchase: PurchaseDelegate;
 	gift: PublicGiftDelegate;
-};
+} & Pick<PurchaseMutationClient, "wishlist">;
 
 export type PublicPurchaseDatabase = PublicPurchaseClient & {
 	$transaction<T>(
@@ -295,7 +330,7 @@ export const markGiftPurchasedPublic = async (
 			});
 		}
 
-		return tx.purchase.create({
+		const purchase = await tx.purchase.create({
 			data: {
 				gift: { connect: { id: input.giftId } },
 				guestName: input.guestName,
@@ -307,43 +342,56 @@ export const markGiftPurchasedPublic = async (
 				undoExpiresAt: expiresAt,
 			},
 		});
+		await touchPublicWishlist(tx, gift.wishlistId);
+		return purchase;
 	});
 
 	return { purchase, undoToken: rawToken };
 };
 
 export const undoPurchase = async (
-	db: PurchaseDatabase,
+	db: PurchaseMutationDatabase,
 	{ purchaseId, undoToken }: { purchaseId: string; undoToken: string },
 ): Promise<Purchase> => {
-	const purchase = await db.purchase.findFirst({
-		where: { id: purchaseId },
+	return db.$transaction(async (tx) => {
+		const purchase = await tx.purchase.findFirst({
+			where: { id: purchaseId },
+		});
+
+		if (!purchase) {
+			throw new TRPCError({ code: "NOT_FOUND", message: "Purchase not found" });
+		}
+
+		if (!purchase.undoTokenHash || !purchase.undoExpiresAt) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "This purchase does not support undo",
+			});
+		}
+
+		if (purchase.undoExpiresAt < new Date()) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "Undo token has expired",
+			});
+		}
+
+		if (hashToken(undoToken) !== purchase.undoTokenHash) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "Invalid undo token",
+			});
+		}
+
+		const gift = await tx.gift.findFirst({ where: { id: purchase.giftId } });
+		if (!gift) {
+			throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+		}
+
+		const deletedPurchase = await tx.purchase.delete({
+			where: { id: purchaseId },
+		});
+		await touchPublicWishlist(tx, gift.wishlistId);
+		return deletedPurchase;
 	});
-
-	if (!purchase) {
-		throw new TRPCError({ code: "NOT_FOUND", message: "Purchase not found" });
-	}
-
-	if (!purchase.undoTokenHash || !purchase.undoExpiresAt) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "This purchase does not support undo",
-		});
-	}
-
-	if (purchase.undoExpiresAt < new Date()) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "Undo token has expired",
-		});
-	}
-
-	if (hashToken(undoToken) !== purchase.undoTokenHash) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "Invalid undo token",
-		});
-	}
-
-	return db.purchase.delete({ where: { id: purchaseId } });
 };

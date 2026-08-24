@@ -1,4 +1,6 @@
 /* biome-ignore-all lint/performance/noImgElement: the band photograph is a local, optimized, lazily loaded asset. */
+import { MarketingCtaLink } from "./marketing-cta-link";
+
 export function FinalCta() {
 	return (
 		<section className="relative min-h-[220px] overflow-hidden text-center lg:min-h-[280px]">
@@ -25,12 +27,13 @@ export function FinalCta() {
 				<p className="mb-[26px] text-[14px] text-white/80 leading-[1.6] lg:mb-[34px] lg:text-[17px]">
 					Crea tu wishlist en minutos. Es gratis y se siente bonito. 🌿
 				</p>
-				<a
+				<MarketingCtaLink
 					className="!px-10 !py-[15px] !text-[15px] lg:!py-[17px] lg:!text-[16px] m-btn m-btn-glow m-btn-lime w-full lg:w-auto"
 					href="/create"
+					placement="final"
 				>
 					Crear mi wishlist →
-				</a>
+				</MarketingCtaLink>
 			</div>
 		</section>
 	);

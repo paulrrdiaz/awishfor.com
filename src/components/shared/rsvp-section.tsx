@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { usePublicWishlistAnalytics } from "@/components/layouts/public-wishlist/public-wishlist-analytics";
 import { PublicWishlistProviders } from "@/components/providers/public-wishlist-providers";
 import { Locale } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
@@ -123,12 +124,24 @@ function RsvpForm({
 	const [extraStatuses, setExtraStatuses] = useState<
 		Record<string, ExtraStatus>
 	>(() => initialExtraStatuses(guest));
+	const analytics = usePublicWishlistAnalytics();
 
 	const respondMutation = api.invite.respond.useMutation({
 		onError: () => {
 			toast.error("No pudimos guardar tu respuesta. Intenta de nuevo.");
 		},
 		onSuccess: (data) => {
+			const partySize =
+				primaryChoice === "confirmed"
+					? 1 +
+						guest.extraGuests.filter(
+							(extra) => extraStatuses[extra.id] === "confirmed",
+						).length
+					: 0;
+			analytics?.captureRsvp(
+				data.status === "confirmed" ? "confirmed" : "declined",
+				partySize,
+			);
 			setMode("auto");
 			router.refresh();
 			toast.success(
