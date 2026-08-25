@@ -96,9 +96,9 @@ const config: NextConfig = {
 		],
 	},
 	// Turbopack externalizes sharp. Trace its Linux native binding and libvips
-	// explicitly so Vercel includes them with the server function at runtime.
+	// only for the Open Graph function that imports it.
 	outputFileTracingIncludes: {
-		"/*": [
+		"/w/[slug]/opengraph-image": [
 			"node_modules/sharp/**/*",
 			"node_modules/@img/sharp-linux-x64/**/*",
 			"node_modules/@img/sharp-libvips-linux-x64/**/*",
