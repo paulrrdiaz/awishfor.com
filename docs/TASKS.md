@@ -1932,6 +1932,34 @@ Notes/out-of-scope:
 
 - No hard delete.
 
+### 7.6 Add guest invitation management filters
+
+Priority: P1
+
+Details:
+
+Owners can find invitations and follow up on RSVP responses without changing the global dashboard totals.
+
+Tasks:
+
+- [x] Add URL-backed search across primary guests, named companions, email, and phone.
+- [x] Add invitation-level RSVP status filters with global invitation counts.
+- [x] Preserve active filters through invite create, update, and delete revalidation.
+- [x] Add a filtered-results empty state that clears both controls.
+
+Acceptance criteria:
+
+- Search is case- and accent-insensitive, and phone searches tolerate formatting.
+- Search and status filters compose while preserving the invitation order.
+- Copied URLs and browser navigation preserve the selected filters.
+- A zero-invitation wishlist remains distinct from zero matching results.
+
+Affected areas:
+
+- `src/app/(protected)/dashboard/wishlists/[id]/guests/*`
+- `src/components/features/dashboard/guests/*`
+- `src/lib/dashboard/guest-filters.ts`
+
 ### Cut line
 
 If scope gets tight, defer:
