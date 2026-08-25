@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
+import type { ReactElement } from "react";
 import { resolveTheme, type ThemePreset } from "@/config/public-themes";
+import { encodeSocialImage } from "@/lib/wishlist/social-image-jpeg";
 import { db } from "@/server/db";
 import {
 	getPublishedWishlistMetadata,
@@ -8,7 +10,7 @@ import {
 } from "@/server/services/public-wishlist-metadata.service";
 
 export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const contentType = "image/jpeg";
 
 const publicMetadataDb = db as unknown as PublicWishlistMetadataDatabase;
 const COVER_EXISTENCE_TIMEOUT_MS = 800;
@@ -198,25 +200,35 @@ function fallbackComposition(
 	);
 }
 
-/** Renders the hero composition fully (bounded) so failures can fall back before headers are sent. */
+async function renderJpegComposition(
+	composition: ReactElement,
+	timeoutMs?: number,
+): Promise<Response> {
+	const response = new ImageResponse(composition, size);
+	const png = timeoutMs
+		? await withTimeout(response.arrayBuffer(), timeoutMs)
+		: await response.arrayBuffer();
+	const jpeg = await encodeSocialImage(png);
+	const headers = new Headers(response.headers);
+	headers.set("content-length", String(jpeg.byteLength));
+	headers.set("content-type", contentType);
+	return new Response(Uint8Array.from(jpeg), {
+		headers,
+		status: response.status,
+	});
+}
+
+/** Renders the hero fully (bounded) so failures can fall back before headers are sent. */
 async function renderHeroComposition(
 	coverUrl: string,
 	wishlist: PublishedWishlistMetadataProjection,
 	theme: ThemePreset,
 ): Promise<Response | null> {
 	try {
-		const response = new ImageResponse(
+		return await renderJpegComposition(
 			heroComposition(coverUrl, wishlist, theme),
-			size,
-		);
-		const buffer = await withTimeout(
-			response.arrayBuffer(),
 			HERO_RENDER_TIMEOUT_MS,
 		);
-		return new Response(buffer, {
-			headers: response.headers,
-			status: response.status,
-		});
 	} catch {
 		return null;
 	}
@@ -241,5 +253,5 @@ export default async function OpenGraphImage({
 		if (hero) return hero;
 	}
 
-	return new ImageResponse(fallbackComposition(wishlist, theme), size);
+	return renderJpegComposition(fallbackComposition(wishlist, theme));
 }

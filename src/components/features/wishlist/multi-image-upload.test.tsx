@@ -7,12 +7,17 @@ import { MultiImageUpload } from "@/components/features/wishlist/multi-image-upl
 import type { DraftCoverImage } from "@/stores/wishlist-wizard.store";
 
 const startUploadMock = vi.hoisted(() => vi.fn());
+const selectCoverUploadCandidateMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/uploadthing/client", () => ({
 	useUploadThing: () => ({
 		startUpload: startUploadMock,
 		isUploading: false,
 	}),
+}));
+
+vi.mock("@/lib/wishlist/cover-image-optimizer", () => ({
+	selectCoverUploadCandidate: selectCoverUploadCandidateMock,
 }));
 
 vi.mock("next/image", () => ({
@@ -38,6 +43,7 @@ const DIMENSIONS: Record<string, { width: number; height: number }> = {
 	"landscape-4.jpg": { width: 1600, height: 900 },
 	"portrait-1.jpg": { width: 900, height: 1600 },
 	"bad.jpg": { width: 1600, height: 900 },
+	"optimized-landscape-1.jpg": { width: 1280, height: 720 },
 };
 
 class FakeImage {
@@ -78,6 +84,9 @@ function makeImage(overrides: Partial<DraftCoverImage> = {}): DraftCoverImage {
 describe("MultiImageUpload", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		selectCoverUploadCandidateMock.mockImplementation(
+			async (file: File) => file,
+		);
 		// @ts-expect-error test stub for image dimension measurement
 		window.Image = FakeImage;
 		URL.createObjectURL = vi.fn((file: File) => `blob:${file.name}`);
@@ -187,6 +196,35 @@ describe("MultiImageUpload", () => {
 		expect(
 			await screen.findByText(/bad\.jpg: tipo de archivo no permitido/i),
 		).toBeTruthy();
+	});
+
+	it("uploads and persists dimensions from the selected optimized candidate", async () => {
+		const onChange = vi.fn();
+		const user = userEvent.setup();
+		selectCoverUploadCandidateMock.mockImplementation(async (file: File) =>
+			file.name === "landscape-1.jpg"
+				? new File(["optimized"], "optimized-landscape-1.jpg", {
+						type: file.type,
+					})
+				: file,
+		);
+		const { container } = render(
+			<MultiImageUpload endpoint="coverImage" onChange={onChange} value={[]} />,
+		);
+
+		await user.upload(getFileInput(container), makeFile("landscape-1.jpg"));
+
+		expect(startUploadMock).toHaveBeenCalledWith([
+			expect.objectContaining({ name: "optimized-landscape-1.jpg" }),
+		]);
+		expect(onChange.mock.calls[0]?.[0]).toEqual([
+			expect.objectContaining({
+				url: "https://cdn.test/optimized-landscape-1.jpg",
+				width: 1280,
+				height: 720,
+				orientation: "landscape",
+			}),
+		]);
 	});
 
 	it("groups the uploaded set by orientation with a count per group", () => {

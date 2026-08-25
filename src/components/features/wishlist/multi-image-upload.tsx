@@ -25,6 +25,7 @@ import type {
 } from "@/config/public-layouts";
 import { useUploadThing } from "@/lib/uploadthing/client";
 import { cn } from "@/lib/utils";
+import { selectCoverUploadCandidate } from "@/lib/wishlist/cover-image-optimizer";
 import {
 	getImageMismatchMessage,
 	getImageOrientation,
@@ -243,8 +244,8 @@ export function MultiImageUpload({
 
 		const uploadedImages: DraftCoverImage[] = [];
 		for (const file of filesToUpload) {
-			const dimensions = await measureImageDimensions(file);
-			if (!dimensions) {
+			const sourceDimensions = await measureImageDimensions(file);
+			if (!sourceDimensions) {
 				setErrors((prev) => [
 					...prev,
 					`${file.name}: no pudimos leer esta imagen. Inténtalo de nuevo.`,
@@ -253,7 +254,23 @@ export function MultiImageUpload({
 			}
 
 			try {
-				const res = await startUpload([file]);
+				const candidate = await selectCoverUploadCandidate(
+					file,
+					sourceDimensions,
+				);
+				const dimensions =
+					candidate === file
+						? sourceDimensions
+						: await measureImageDimensions(candidate);
+				if (!dimensions) {
+					setErrors((prev) => [
+						...prev,
+						`${file.name}: no pudimos leer esta imagen. Inténtalo de nuevo.`,
+					]);
+					continue;
+				}
+
+				const res = await startUpload([candidate]);
 				const url = res?.[0]?.ufsUrl ?? res?.[0]?.url;
 				if (url) {
 					uploadedImages.push({

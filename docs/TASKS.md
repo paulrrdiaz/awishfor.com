@@ -728,6 +728,7 @@ Tasks:
 - [x] Emit bounded published-only canonical, Open Graph, Twitter Card, and `noindex, nofollow` metadata from a server-safe projection.
 - [x] Add a branded 1200×630 social image with validated cover-image loading and a deterministic private-safe fallback.
 - [x] Keep personalized guest, owner, delivery, hidden-gift, and purchase data out of metadata and social images.
+- [x] Localize date-aware social titles (with branded undated fallbacks), word-bound descriptions, and encode 1200×630 social cards as bounded JPEGs.
 
 Acceptance criteria:
 
@@ -1355,6 +1356,7 @@ Tasks:
 - [x] Add gift image remove.
 - [x] Validate file types JPG/PNG/WEBP.
 - [x] Validate cover max 4MB.
+- [x] Preprocess only oversized cover uploads in a same-origin Worker; retain the accepted original when optimization cannot make it smaller.
 - [x] Validate gift max 4MB.
 
 Acceptance criteria:
@@ -2238,6 +2240,7 @@ Tasks:
 - [x] Add deterministic light and heavy public audit fixtures plus a versioned Lighthouse budget runner.
 - [x] Pass three cold mobile runs per fixture and a heavy desktop run within the public score, LCP, CLS, TBT, JavaScript, CSS, font, transfer, and image-priority budgets.
 - [x] Verify production published/personalized HTML and the social-image response for metadata, privacy, dimensions, and content type.
+- [x] Record social-image JPEG MIME, dimensions, bytes, response timing, and 500 KiB preferred/1 MiB hard-budget evidence in the production audit.
 
 Affected areas:
 

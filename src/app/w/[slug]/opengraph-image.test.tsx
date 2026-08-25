@@ -3,6 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const findUnique = vi.hoisted(() => vi.fn());
 const imageResponse = vi.hoisted(() => vi.fn());
+const encodeSocialImage = vi.hoisted(() =>
+	vi.fn(async () => Buffer.from([0xff, 0xd8, 0xff, 0xd9])),
+);
 const arrayBufferMock = vi.hoisted(() =>
 	vi.fn(async () => new Uint8Array([1, 2, 3]).buffer),
 );
@@ -27,6 +30,7 @@ const ImageResponseMock = vi.hoisted(
 
 vi.mock("@/server/db", () => ({ db: { wishlist: { findUnique } } }));
 vi.mock("next/og", () => ({ ImageResponse: ImageResponseMock }));
+vi.mock("@/lib/wishlist/social-image-jpeg", () => ({ encodeSocialImage }));
 
 import OpenGraphImage, { contentType, size } from "./opengraph-image";
 
@@ -37,6 +41,8 @@ const publishedRow = {
 	title: "Lista pública",
 	welcomeMessage: "Bienvenidos",
 	eventType: "wedding",
+	eventDate: new Date("2027-06-26T00:00:00.000Z"),
+	language: "es",
 	themeId: "crema-elegante",
 	images: [
 		{ url: "https://cdn.example/first-cover.png", width: 1200, height: 630 },
@@ -61,6 +67,7 @@ function renderedMarkup(callIndex: number) {
 afterEach(() => {
 	imageResponse.mockClear();
 	arrayBufferMock.mockClear();
+	encodeSocialImage.mockClear();
 	findUnique.mockReset();
 	vi.unstubAllGlobals();
 	vi.useRealTimers();
@@ -78,7 +85,10 @@ describe("public Open Graph image", () => {
 		expect(response).toBeInstanceOf(Response);
 		expect(imageResponse).toHaveBeenCalledWith(expect.anything(), size);
 		expect(renderedMarkup(0)).toContain("first-cover.png");
-		expect(contentType).toBe("image/png");
+		expect(contentType).toBe("image/jpeg");
+		expect(response.headers.get("content-type")).toBe("image/jpeg");
+		expect(response.headers.get("content-length")).toBe("4");
+		expect(encodeSocialImage).toHaveBeenCalledTimes(1);
 	});
 
 	it("uses the branded fallback when the wishlist has no cover image", async () => {
@@ -120,6 +130,17 @@ describe("public Open Graph image", () => {
 		expect(imageResponse).toHaveBeenCalledTimes(2);
 		expect(renderedMarkup(1)).not.toContain("first-cover.png");
 		expect(renderedMarkup(1)).toContain("A Wish For");
+	});
+
+	it("surfaces JPEG encoding failures for the fallback composition", async () => {
+		findUnique.mockResolvedValueOnce({ ...publishedRow, images: [] });
+		encodeSocialImage.mockRejectedValueOnce(new Error("encoder failed"));
+
+		await expect(
+			OpenGraphImage({
+				params: Promise.resolve({ slug: "lista-publica" }),
+			}),
+		).rejects.toThrow("encoder failed");
 	});
 
 	it("uses the branded fallback when the hero render hangs past the timeout", async () => {

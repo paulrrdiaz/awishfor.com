@@ -18,6 +18,8 @@ const publicMetadataRow = {
 	title: "Lista pública",
 	welcomeMessage: "Bienvenidos a nuestra celebración",
 	eventType: "wedding",
+	eventDate: new Date("2027-06-26T00:00:00.000Z"),
+	language: "es",
 	themeId: "crema-elegante",
 	images: [{ url: "https://cdn.example/cover.png", width: 1200, height: 630 }],
 };
@@ -33,7 +35,7 @@ describe("public wishlist route metadata", () => {
 			"http://localhost:4000/w/lista-publica",
 		);
 		expect(metadata.openGraph).toMatchObject({
-			title: "Lista pública",
+			title: "Lista pública — Sábado, 26 de junio de 2027 | A Wish For",
 			url: "http://localhost:4000/w/lista-publica",
 		});
 		expect(metadata.twitter).toMatchObject({ card: "summary_large_image" });

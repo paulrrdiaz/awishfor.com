@@ -21,6 +21,8 @@ function database(status: WishlistStatus): PublicWishlistMetadataDatabase {
 						title: "Mi lista",
 						welcomeMessage: "Bienvenidos",
 						eventType: "wedding",
+						eventDate: new Date("2027-06-26T00:00:00.000Z"),
+						language: "es",
 						themeId: null,
 						images: [],
 					}) as never,
@@ -39,6 +41,10 @@ describe("getPublishedWishlistMetadata", () => {
 		});
 		expect(publicWishlistMetadataSelect).not.toHaveProperty("owner");
 		expect(publicWishlistMetadataSelect).not.toHaveProperty("gifts");
+		expect(publicWishlistMetadataSelect).toMatchObject({
+			eventDate: true,
+			language: true,
+		});
 	});
 
 	it("does not return draft presentation data", async () => {

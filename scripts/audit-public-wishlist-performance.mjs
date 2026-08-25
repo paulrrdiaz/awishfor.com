@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { launch } from "chrome-launcher";
 import lighthouse from "lighthouse";
+import sharp from "sharp";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const config = await import(
@@ -20,6 +21,10 @@ const artifactDirectory = resolve(
 );
 const revision =
 	process.env.GITHUB_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
+const socialImageBudgets = {
+	preferredBytes: 500 * 1024,
+	hardLimitBytes: 1024 * 1024,
+};
 
 const bytes = (value) => `${(value / 1024).toFixed(1)} KiB`;
 const median = (values) => {
@@ -205,6 +210,28 @@ function diagnosticRequests(run) {
 		.join("\n");
 }
 
+async function socialImageEvidence(slug) {
+	const url = `${config.baseUrl}/w/${slug}/opengraph-image`;
+	const startedAt = performance.now();
+	const response = await fetch(url);
+	const image = Buffer.from(await response.arrayBuffer());
+	const elapsedMs = performance.now() - startedAt;
+	const metadata = response.ok ? await sharp(image).metadata() : null;
+	return {
+		url,
+		status: response.status,
+		contentType: response.headers.get("content-type"),
+		width: metadata?.width ?? null,
+		height: metadata?.height ?? null,
+		encodedBytes: image.byteLength,
+		responseTimeMs: Math.round(elapsedMs),
+		preferredBudgetBytes: socialImageBudgets.preferredBytes,
+		hardLimitBytes: socialImageBudgets.hardLimitBytes,
+		meetsPreferredBudget: image.byteLength <= socialImageBudgets.preferredBytes,
+		meetsHardLimit: image.byteLength < socialImageBudgets.hardLimitBytes,
+	};
+}
+
 async function assertClientBoundaryAndFonts(fixture, html, firstRun) {
 	const failures = [];
 	const clerkUiRequestUrls = firstRun.requests
@@ -348,9 +375,31 @@ try {
 			html,
 			mobileRuns[0],
 		);
+		const socialImage = await socialImageEvidence(fixture.slug);
 		failures.push(
 			...validation.failures.map((failure) => `${fixture.id}: ${failure}`),
 			...boundary.failures.map((failure) => `${fixture.id}: ${failure}`),
+			...(socialImage.status !== 200
+				? [`${fixture.id}: social image returned ${socialImage.status}`]
+				: []),
+			...(socialImage.contentType !== "image/jpeg"
+				? [
+						`${fixture.id}: social image MIME ${socialImage.contentType} is not image/jpeg`,
+					]
+				: []),
+			...(socialImage.width !== 1200 || socialImage.height !== 630
+				? [`${fixture.id}: social image dimensions are not 1200×630`]
+				: []),
+			...(!socialImage.meetsHardLimit
+				? [
+						`${fixture.id}: social image ${bytes(socialImage.encodedBytes)} exceeds 1 MiB hard limit`,
+					]
+				: []),
+			...(!socialImage.meetsPreferredBudget
+				? [
+						`${fixture.id}: social image ${bytes(socialImage.encodedBytes)} exceeds 500 KiB preferred budget`,
+					]
+				: []),
 		);
 		fixtureEvidence.push({
 			id: fixture.id,
@@ -364,9 +413,10 @@ try {
 			mobileRuns,
 			mobileMedian: validation.report,
 			desktopRun,
+			socialImage,
 		});
 		console.log(
-			`${fixture.id}: mobile ${mobileRuns.map((run) => (run.performance * 100).toFixed(0)).join(", ")} median ${(validation.report.performance * 100).toFixed(0)} | LCP ${validation.report.lcp.toFixed(0)}ms | TBT ${validation.report.tbt.toFixed(0)}ms | JS ${bytes(validation.report.javascriptBytes)} | CSS ${bytes(validation.report.cssBytes)} | fonts ${bytes(validation.report.fontBytes)} | transfer ${bytes(validation.report.totalTransferBytes)}`,
+			`${fixture.id}: mobile ${mobileRuns.map((run) => (run.performance * 100).toFixed(0)).join(", ")} median ${(validation.report.performance * 100).toFixed(0)} | LCP ${validation.report.lcp.toFixed(0)}ms | TBT ${validation.report.tbt.toFixed(0)}ms | JS ${bytes(validation.report.javascriptBytes)} | CSS ${bytes(validation.report.cssBytes)} | fonts ${bytes(validation.report.fontBytes)} | transfer ${bytes(validation.report.totalTransferBytes)} | social JPEG ${bytes(socialImage.encodedBytes)} in ${socialImage.responseTimeMs}ms`,
 		);
 	}
 
@@ -376,6 +426,7 @@ try {
 		mobileProfile: config.mobile,
 		desktopProfile: config.desktop,
 		budgets: config.budgets,
+		socialImageBudgets,
 		fixtures: fixtureEvidence,
 		generatedAt: new Date().toISOString(),
 	};

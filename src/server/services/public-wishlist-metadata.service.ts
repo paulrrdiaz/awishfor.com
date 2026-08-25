@@ -12,6 +12,8 @@ export const publicWishlistMetadataSelect = {
 	title: true,
 	welcomeMessage: true,
 	eventType: true,
+	eventDate: true,
+	language: true,
 	themeId: true,
 	images: {
 		select: { url: true, width: true, height: true },
@@ -50,6 +52,10 @@ export async function getPublishedWishlistMetadata(
 					title: auditFixture.title,
 					welcomeMessage: auditFixture.welcomeMessage,
 					eventType: auditFixture.eventType,
+					eventDate: auditFixture.eventDate
+						? new Date(auditFixture.eventDate)
+						: null,
+					language: auditFixture.language,
 					themeId: auditFixture.themeId,
 					images: auditFixture.images.slice(0, 1).map((image) => ({
 						url: image.url,
