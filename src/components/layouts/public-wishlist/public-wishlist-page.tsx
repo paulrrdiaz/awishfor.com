@@ -84,6 +84,7 @@ export function PublicWishlistPage({
 			routeVariant={analyticsRouteVariant}
 			themeId={theme.id}
 			wishlistId={wishlist.id}
+			wishlistSlug={wishlist.slug}
 		>
 			<PublicThemeProvider
 				bodyFont={bodyFont}

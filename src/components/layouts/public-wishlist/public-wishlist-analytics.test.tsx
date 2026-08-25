@@ -93,6 +93,7 @@ const props = {
 	routeVariant: "public" as const,
 	themeId: "sage-garden",
 	wishlistId: "wishlist_1",
+	wishlistSlug: "lista-de-boda",
 };
 
 describe("Public wishlist analytics", () => {
@@ -125,6 +126,7 @@ describe("Public wishlist analytics", () => {
 				event_type: "wedding",
 				route_variant: "public",
 				wishlist_id: "wishlist_1",
+				wishlist_slug: "lista-de-boda",
 			}),
 		);
 		expect(capturePublicWishlistEvent).toHaveBeenCalledWith(

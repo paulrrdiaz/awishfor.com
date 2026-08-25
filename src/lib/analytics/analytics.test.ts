@@ -133,6 +133,7 @@ describe("public payload sanitization", () => {
 			route_variant: "personalized",
 			theme_id: "theme_1",
 			wishlist_id: "wishlist_1",
+			wishlist_slug: "private-slug",
 		});
 	});
 
@@ -153,6 +154,7 @@ describe("public payload sanitization", () => {
 				guest_name: "Marina",
 				route_variant: "personalized",
 				wishlist_id: "wishlist_1",
+				wishlist_slug: "private-slug",
 			},
 			{
 				anonymousId: "anonymous_1",
@@ -174,6 +176,7 @@ describe("public payload sanitization", () => {
 						gift_count: 3,
 						route_variant: "personalized",
 						wishlist_id: "wishlist_1",
+						wishlist_slug: "private-slug",
 					},
 				},
 			],

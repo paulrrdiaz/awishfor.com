@@ -17,6 +17,7 @@ const eventProperties: Record<PublicWishlistEventName, ReadonlySet<string>> = {
 		"referrer_hostname",
 		"route_variant",
 		"theme_id",
+		"wishlist_slug",
 	]),
 	gift_store_opened: new Set(["gift_id"]),
 	gift_purchase_started: new Set(["gift_id"]),

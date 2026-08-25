@@ -42,6 +42,7 @@ type Props = {
 	routeVariant: "public" | "personalized";
 	themeId: string;
 	wishlistId: string;
+	wishlistSlug: string;
 };
 
 function normalizePurchaseFailure(error: unknown) {
@@ -67,6 +68,7 @@ export function PublicWishlistAnalyticsProvider({
 	routeVariant,
 	themeId,
 	wishlistId,
+	wishlistSlug,
 }: Props) {
 	const capturedView = useRef(false);
 
@@ -82,6 +84,7 @@ export function PublicWishlistAnalyticsProvider({
 			route_variant: routeVariant,
 			theme_id: themeId,
 			wishlist_id: wishlistId,
+			wishlist_slug: wishlistSlug,
 			...getCampaignProperties(new URLSearchParams(window.location.search)),
 		});
 	}, [
@@ -92,6 +95,7 @@ export function PublicWishlistAnalyticsProvider({
 		routeVariant,
 		themeId,
 		wishlistId,
+		wishlistSlug,
 	]);
 
 	const value = useMemo<PublicAnalyticsContextValue>(

@@ -74,6 +74,7 @@ export type AnalyticsEventProperties = {
 		referrer_hostname?: string;
 		route_variant: "public" | "personalized";
 		theme_id: string;
+		wishlist_slug: string;
 	};
 	gift_store_opened: PublicWishlistProperties & { gift_id: string };
 	gift_purchase_started: PublicWishlistProperties & { gift_id: string };
