@@ -72,9 +72,9 @@ Alternative considered: replace custom welcome copy with generated event copy. R
 
 ### 4. Encode the completed social composition as JPEG
 
-Keep `ImageResponse` for layout and rasterization, then pass its fully buffered PNG output through a direct production dependency on `sharp`. Return a new response with `content-type: image/jpeg`, the encoded byte length, and the relevant cache headers. Export `contentType = "image/jpeg"`; keep `size = { width: 1200, height: 630 }`.
+Keep `ImageResponse` for layout and rasterization, then decode its fully buffered PNG output with `pngjs` and encode it with `jpeg-js`. Both libraries are portable JavaScript dependencies, avoiding native image-library binaries in the Vercel server function. Return a new response with `content-type: image/jpeg`, the encoded byte length, and the relevant cache headers. Export `contentType = "image/jpeg"`; keep `size = { width: 1200, height: 630 }`.
 
-Start with progressive mozjpeg encoding at quality 85 and 4:4:4 chroma subsampling to protect text and high-contrast brand edges. If an encoded response exceeds 1 MiB, retry through a bounded descending quality ladder and permit 4:2:0 subsampling on the final fallback. The first result below the hard limit wins. Deterministic representative photo and text-only fixtures must remain at or below the preferred 500 KiB budget. The composition is fully opaque, so JPEG does not introduce an alpha-background decision.
+Start JPEG encoding at quality 85. If an encoded response exceeds 1 MiB, retry through a bounded descending quality ladder. The first result below the hard limit wins. Deterministic representative photo and text-only fixtures must remain at or below the preferred 500 KiB budget. The composition is fully opaque, so JPEG does not introduce an alpha-background decision.
 
 Both the cover-photo and text-only paths go through the same encoder. Existing HEAD and hero-render timeouts remain in front of encoding; a slow or unreachable cover still selects the text-only composition before encoding. Encoding errors are treated as route failures rather than returning bytes whose MIME type contradicts advertised metadata. Build and focused response tests validate that the native encoder is available in the deployment runtime.
 

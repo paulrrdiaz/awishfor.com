@@ -1,6 +1,6 @@
 ## 1. Image Processing Foundations
 
-- [x] 1.1 Add `sharp` and `browser-image-compression` as direct production dependencies and verify their server and browser entry points build under Next.js 16.
+- [x] 1.1 Add portable `pngjs`/`jpeg-js` server dependencies and `browser-image-compression` as a browser dependency, then verify their entry points build under Next.js 16.
 - [x] 1.2 Add deterministic local cover-photo and text-only image fixtures suitable for JPEG byte-budget tests without relying on remote hosts.
 
 ## 2. Localized Social Metadata
@@ -12,7 +12,7 @@
 
 ## 3. Compressed Open Graph Responses
 
-- [x] 3.1 Add a server-only JPEG encoder around `sharp` with progressive mozjpeg defaults, a bounded quality ladder, preserved 1200×630 dimensions, and focused encoder tests.
+- [x] 3.1 Add a server-only portable PNG-to-JPEG encoder with a bounded quality ladder, preserved 1200×630 dimensions, and focused encoder tests.
 - [x] 3.2 Route both cover-photo and text-only `ImageResponse` buffers through the JPEG encoder and update exported/HTTP content types and response headers.
 - [x] 3.3 Update social-image route tests for cover fallback behavior, timeouts, JPEG MIME consistency, encoder failures, dimensions, and the 1 MiB hard limit.
 - [x] 3.4 Verify deterministic cover-photo and fallback compositions meet the preferred 500 KiB response budget.
