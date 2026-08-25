@@ -93,6 +93,29 @@ describe("RsvpSection", () => {
 		expect(screen.getByTestId("public-wishlist-trpc-provider")).toBeVisible();
 	});
 
+	it("keeps the RSVP deadline's stored calendar day for viewers west of UTC", () => {
+		const previousTimezone = process.env.TZ;
+		process.env.TZ = "America/Lima";
+
+		try {
+			render(
+				<RsvpSection
+					{...defaultProps}
+					guest={makeGuest()}
+					rsvpDeadline="2026-09-13T00:00:00.000Z"
+				/>,
+			);
+
+			expect(screen.getByText("Domingo, 13 de setiembre")).toBeVisible();
+		} finally {
+			if (previousTimezone === undefined) {
+				delete process.env.TZ;
+			} else {
+				process.env.TZ = previousTimezone;
+			}
+		}
+	});
+
 	it("keeps the submit control disabled until the primary guest chooses", async () => {
 		const user = userEvent.setup();
 		render(<RsvpSection {...defaultProps} guest={makeGuest()} />);

@@ -40,10 +40,16 @@ const EYEBROW =
 	"font-mono text-[8.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground";
 
 function formatShortDate(iso: string): string {
-	return new Intl.DateTimeFormat("es-PE", {
+	const formattedDate = new Intl.DateTimeFormat("es-PE", {
+		weekday: "long",
 		day: "numeric",
 		month: "long",
+		// RSVP deadlines, like event dates, represent calendar days stored at
+		// UTC midnight. Keep that calendar day when the viewer is west of UTC.
+		timeZone: "UTC",
 	}).format(new Date(iso));
+
+	return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 }
 
 function joinNames(names: string[]): string {
