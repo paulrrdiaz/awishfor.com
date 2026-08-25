@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { RsvpSection } from "@/components/shared/rsvp-section";
+import { env } from "@/env";
 import {
 	buildPublicWishlistMetadata,
 	genericPublicWishlistMetadata,
@@ -55,6 +56,9 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 	if (inviteResult.kind === "notFound") {
 		notFound();
 	}
+	const eventTitle = result.wishlist.hostName
+		? `${result.wishlist.title} - ${result.wishlist.hostName}`
+		: result.wishlist.title;
 
 	return (
 		<PublicWishlistPage
@@ -64,9 +68,15 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 				<RsvpSection
 					endTime={result.wishlist.endTime}
 					eventDate={result.wishlist.eventDate}
+					eventDescription={result.wishlist.welcomeMessage}
 					eventLocation={result.wishlist.eventLocation}
 					eventTime={result.wishlist.eventTime}
+					eventTitle={eventTitle}
 					guest={inviteResult.guest}
+					inviteUrl={new URL(
+						`/w/${result.wishlist.slug}/${guestSlug}`,
+						env.NEXT_PUBLIC_APP_URL,
+					).toString()}
 					rsvpDeadline={result.wishlist.rsvpDeadline}
 					wishlistSlug={result.wishlist.slug}
 				/>

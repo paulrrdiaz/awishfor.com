@@ -36,7 +36,7 @@ type WishlistPublicRow = Wishlist & {
 	categories: CategoryRow[];
 	gifts: GiftRow[];
 	images: WishlistImage[];
-	owner: { clerkId: string };
+	owner: { clerkId: string; name: string | null };
 };
 
 type PublicWishlistDelegate = {
@@ -70,7 +70,7 @@ async function resolveLifecycle(
 			slug: true,
 			title: true,
 			updatedAt: true,
-			owner: { select: { clerkId: true } },
+			owner: { select: { clerkId: true, name: true } },
 		},
 	})) as LifecycleRow | null;
 }

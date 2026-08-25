@@ -54,7 +54,7 @@ type MockRow = Wishlist & {
 	categories: MockCategory[];
 	gifts: MockGift[];
 	images: WishlistImage[];
-	owner: { clerkId: string };
+	owner: { clerkId: string; name: string | null };
 };
 
 const makeGift = (overrides: Partial<MockGift> = {}): MockGift => ({
@@ -123,7 +123,7 @@ const makeWishlist = (overrides: Partial<MockRow> = {}): MockRow => ({
 	categories: [],
 	gifts: [],
 	images: [],
-	owner: { clerkId: "clerk_owner" },
+	owner: { clerkId: "clerk_owner", name: "Paul Diaz" },
 	...overrides,
 	subtitle: overrides.subtitle === undefined ? null : overrides.subtitle,
 });

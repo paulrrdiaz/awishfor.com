@@ -113,6 +113,17 @@ function makeCategory(overrides: Partial<Category> = {}): Category {
 }
 
 describe("mapPublicWishlist", () => {
+	it("includes the host name when loaded for a personalized calendar title", () => {
+		const result = mapPublicWishlist({
+			...makeWishlist(),
+			owner: { name: "Paul Diaz" },
+			categories: [],
+			gifts: [],
+		});
+
+		expect(result.hostName).toBe("Paul Diaz");
+	});
+
 	it("preserves present and absent subtitles", () => {
 		expect(
 			mapPublicWishlist({

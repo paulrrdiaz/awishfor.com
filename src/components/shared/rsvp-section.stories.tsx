@@ -17,6 +17,9 @@ const meta = {
 	],
 	args: {
 		wishlistSlug: "lista-de-boda",
+		eventTitle: sampleWishlist.title,
+		eventDescription: "Una tarde para celebrar juntos.",
+		inviteUrl: "https://awishfor.com/w/lista-de-boda/lady-castillo",
 		rsvpDeadline: "2026-08-08",
 		eventDate: sampleWishlist.eventDate,
 		eventTime: sampleWishlist.eventTime,

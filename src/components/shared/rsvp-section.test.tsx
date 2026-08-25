@@ -59,6 +59,9 @@ function makeGuest(
 
 const defaultProps = {
 	wishlistSlug: "lista-de-boda",
+	eventTitle: "Boda de Lady",
+	eventDescription: "Una tarde para celebrar juntos.",
+	inviteUrl: "https://awishfor.com/w/lista-de-boda/lady-castillo",
 	rsvpDeadline: null,
 	eventDate: null,
 	eventTime: null,
@@ -191,5 +194,54 @@ describe("RsvpSection", () => {
 		expect(analytics.captureRsvp).not.toHaveBeenCalled();
 		respondCallbacks.onSuccess?.({ status: "confirmed" });
 		expect(analytics.captureRsvp).toHaveBeenCalledWith("confirmed", 2);
+	});
+
+	it("shows the calendar save action only for confirmed guests with an event date", () => {
+		const { rerender } = render(
+			<RsvpSection
+				{...defaultProps}
+				eventDate="2026-10-17"
+				guest={makeGuest({ status: "confirmed" })}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: "Guardar en mi calendario" }),
+		).toBeVisible();
+
+		rerender(
+			<RsvpSection
+				{...defaultProps}
+				eventDate="2026-10-17"
+				guest={makeGuest({ status: "declined" })}
+			/>,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Guardar en mi calendario" }),
+		).toBeNull();
+	});
+
+	it("does not show the calendar action for pending guests or date-less events", () => {
+		const { rerender } = render(
+			<RsvpSection
+				{...defaultProps}
+				eventDate="2026-10-17"
+				guest={makeGuest()}
+			/>,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Guardar en mi calendario" }),
+		).toBeNull();
+
+		rerender(
+			<RsvpSection
+				{...defaultProps}
+				eventDate={null}
+				guest={makeGuest({ status: "confirmed" })}
+			/>,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Guardar en mi calendario" }),
+		).toBeNull();
 	});
 });

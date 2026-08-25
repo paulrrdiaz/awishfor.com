@@ -82,7 +82,7 @@ const publishedWishlist = {
 	categories: [],
 	gifts: [],
 	images: [],
-	owner: { clerkId: "clerk_owner" },
+	owner: { clerkId: "clerk_owner", name: "Paul Diaz" },
 };
 
 function invite(guestSlug: string) {
@@ -148,5 +148,43 @@ describe("personalized public wishlist route", () => {
 			where: { id: "invite_ana" },
 			data: { openedAt: expect.any(Date) },
 		});
+	});
+
+	it("supplies the confirmed RSVP with calendar event details and its personalized URL", async () => {
+		wishlistFindUnique.mockResolvedValue({
+			...publishedWishlist,
+			title: "Boda de Ana y Luis",
+			eventDate: new Date("2026-10-17T00:00:00.000Z"),
+			eventTime: "14:30",
+			endTime: "18:00",
+			eventLocation: "Barranco, Lima",
+			welcomeMessage: "Una tarde para celebrar juntos.",
+		});
+		inviteFindFirst.mockResolvedValue({
+			...invite("ana"),
+			status: "confirmed",
+		});
+
+		const page = (await PersonalizedWishlistPage({
+			params: Promise.resolve({ slug: "lista-publica", guestSlug: "ana" }),
+		})) as ReactElement<{ rsvpSection: ReactElement }>;
+
+		const rsvp = page.props.rsvpSection as ReactElement<{
+			eventTitle: string;
+			eventDate: string;
+			eventTime: string;
+			endTime: string;
+			eventLocation: string;
+			inviteUrl: string;
+		}>;
+		expect(rsvp.props).toMatchObject({
+			eventTitle: "Boda de Ana y Luis - Paul Diaz",
+			eventDescription: "Una tarde para celebrar juntos.",
+			eventDate: "2026-10-17T00:00:00.000Z",
+			eventTime: "14:30",
+			endTime: "18:00",
+			eventLocation: "Barranco, Lima",
+		});
+		expect(new URL(rsvp.props.inviteUrl).pathname).toBe("/w/lista-publica/ana");
 	});
 });

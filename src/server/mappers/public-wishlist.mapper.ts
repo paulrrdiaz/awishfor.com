@@ -68,6 +68,7 @@ type WishlistWithRelations = Wishlist & {
 	categories: CategoryWithGifts[];
 	gifts: GiftWithPurchases[];
 	images: WishlistImage[];
+	owner?: { name: string | null };
 };
 
 function mapImages(images: WishlistImage[]): WishlistImageViewModel[] {
@@ -142,6 +143,7 @@ export function mapPublicWishlist(
 		id: wishlist.id,
 		slug: wishlist.slug,
 		title: wishlist.title,
+		hostName: wishlist.owner?.name ?? null,
 		subtitle: wishlist.subtitle,
 		eventType: wishlist.eventType,
 		language: wishlist.language,

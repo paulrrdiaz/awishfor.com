@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { usePublicWishlistAnalytics } from "@/components/layouts/public-wishlist/public-wishlist-analytics";
 import { PublicWishlistProviders } from "@/components/providers/public-wishlist-providers";
+import { CalendarSaveControl } from "@/components/shared/calendar-save-control";
 import { Locale } from "@/generated/prisma/enums";
 import { formatEventDate } from "@/lib/format/dates";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,9 @@ import { api } from "@/trpc/react";
 export type RsvpSectionProps = {
 	guest: PublicGuestViewModel | undefined;
 	wishlistSlug: string;
+	eventTitle: string;
+	eventDescription: string;
+	inviteUrl: string;
 	rsvpDeadline: string | null;
 	eventDate: string | null;
 	eventTime: string | null;
@@ -107,6 +111,9 @@ export function RsvpSection(props: RsvpSectionProps) {
 function RsvpForm({
 	guest,
 	wishlistSlug,
+	eventTitle,
+	eventDescription,
+	inviteUrl,
 	rsvpDeadline,
 	eventDate,
 	eventTime,
@@ -360,6 +367,17 @@ function RsvpForm({
 					)}
 				</div>
 			</div>
+			{guest.status === "confirmed" && eventDate && (
+				<CalendarSaveControl
+					description={eventDescription}
+					endTime={endTime}
+					eventDate={eventDate}
+					eventTime={eventTime}
+					inviteUrl={inviteUrl}
+					location={eventLocation}
+					title={eventTitle}
+				/>
+			)}
 		</section>
 	);
 }

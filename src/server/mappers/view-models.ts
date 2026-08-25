@@ -66,6 +66,7 @@ export type PublicWishlistViewModel = {
 	id: string;
 	slug: string;
 	title: string;
+	hostName?: string | null;
 	subtitle: string | null;
 	eventType: string;
 	language: string;
