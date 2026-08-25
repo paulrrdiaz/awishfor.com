@@ -95,6 +95,15 @@ const config: NextConfig = {
 			},
 		],
 	},
+	// Turbopack externalizes sharp. Trace its Linux native binding and libvips
+	// explicitly so Vercel includes them with the server function at runtime.
+	outputFileTracingIncludes: {
+		"/*": [
+			"node_modules/sharp/**/*",
+			"node_modules/@img/sharp-linux-x64/**/*",
+			"node_modules/@img/sharp-libvips-linux-x64/**/*",
+		],
+	},
 	async headers() {
 		return [
 			{

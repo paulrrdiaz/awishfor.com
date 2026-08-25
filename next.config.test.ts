@@ -23,4 +23,14 @@ describe("PostHog first-party ingestion rewrites", () => {
 			],
 		});
 	});
+
+	it("traces Sharp's Linux runtime for Vercel server functions", () => {
+		expect(config.outputFileTracingIncludes).toEqual({
+			"/*": [
+				"node_modules/sharp/**/*",
+				"node_modules/@img/sharp-linux-x64/**/*",
+				"node_modules/@img/sharp-libvips-linux-x64/**/*",
+			],
+		});
+	});
 });
