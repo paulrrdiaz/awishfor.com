@@ -24,6 +24,7 @@ const eventProperties: Record<PublicWishlistEventName, ReadonlySet<string>> = {
 	gift_purchase_failed: new Set(["error_code", "gift_id"]),
 	gift_purchase_undone: new Set(["gift_id"]),
 	rsvp_submitted: new Set(["party_size", "response_status"]),
+	calendar_save_action_selected: new Set(["calendar_provider"]),
 };
 
 export function sanitizePublicEventPayload(

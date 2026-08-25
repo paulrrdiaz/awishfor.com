@@ -2,6 +2,18 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+const { captureCalendarSave } = vi.hoisted(() => ({
+	captureCalendarSave: vi.fn(),
+}));
+
+vi.mock(
+	"@/components/layouts/public-wishlist/public-wishlist-analytics",
+	() => ({
+		usePublicWishlistAnalytics: () => ({ captureCalendarSave }),
+	}),
+);
+
 import { CalendarSaveControl } from "./calendar-save-control";
 
 const PROPS = {
@@ -15,6 +27,7 @@ const PROPS = {
 };
 
 afterEach(() => {
+	captureCalendarSave.mockClear();
 	vi.restoreAllMocks();
 });
 
@@ -57,8 +70,21 @@ describe("CalendarSaveControl", () => {
 		);
 
 		expect(createObjectUrl).toHaveBeenCalledWith(expect.any(Blob));
+		expect(captureCalendarSave).toHaveBeenCalledWith("icalendar");
 		expect(anchorClick).toHaveBeenCalledOnce();
 		expect(revokeObjectUrl).toHaveBeenCalledWith("blob:calendar");
+	});
+
+	it("captures the Google Calendar action", () => {
+		render(<CalendarSaveControl {...PROPS} />);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Guardar en mi calendario" }),
+		);
+		fireEvent.click(
+			screen.getByRole("menuitem", { name: "Abrir en Google Calendar" }),
+		);
+
+		expect(captureCalendarSave).toHaveBeenCalledWith("google");
 	});
 
 	it("closes the action menu when the guest clicks outside it", () => {

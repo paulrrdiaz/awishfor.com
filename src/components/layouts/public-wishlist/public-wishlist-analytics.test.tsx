@@ -75,6 +75,12 @@ function AnalyticsTriggers() {
 			>
 				RSVP
 			</button>
+			<button
+				onClick={() => analytics.captureCalendarSave("google")}
+				type="button"
+			>
+				Calendar
+			</button>
 		</>
 	);
 }
@@ -109,6 +115,7 @@ describe("Public wishlist analytics", () => {
 			"Failure",
 			"Undo",
 			"RSVP",
+			"Calendar",
 		])
 			fireEvent.click(screen.getByRole("button", { name }));
 
@@ -152,6 +159,13 @@ describe("Public wishlist analytics", () => {
 			response_status: "confirmed",
 			wishlist_id: "wishlist_1",
 		});
+		expect(capturePublicWishlistEvent).toHaveBeenCalledWith(
+			"calendar_save_action_selected",
+			{
+				calendar_provider: "google",
+				wishlist_id: "wishlist_1",
+			},
+		);
 		for (const [, eventProps] of capturePublicWishlistEvent.mock.calls)
 			expect(eventProps).not.toEqual(
 				expect.objectContaining({ guest_name: expect.anything() }),

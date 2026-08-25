@@ -24,7 +24,7 @@ describe("analytics contract", () => {
 			"guest_finder_used",
 			"cta_clicked",
 		]);
-		expect(publicWishlistEventNames).toHaveLength(7);
+		expect(publicWishlistEventNames).toHaveLength(8);
 	});
 });
 

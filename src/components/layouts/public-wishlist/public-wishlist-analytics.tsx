@@ -27,6 +27,7 @@ type PublicAnalyticsContextValue = {
 	) => void;
 	capturePurchaseFailure: (giftId: string, error: unknown) => void;
 	captureRsvp: (status: "confirmed" | "declined", partySize: number) => void;
+	captureCalendarSave: (provider: "google" | "icalendar") => void;
 };
 
 const PublicAnalyticsContext =
@@ -115,6 +116,13 @@ export function PublicWishlistAnalyticsProvider({
 				capturePublicWishlistEvent("rsvp_submitted", {
 					party_size: partySize,
 					response_status: status,
+					wishlist_id: wishlistId,
+				});
+			},
+			captureCalendarSave: (provider) => {
+				if (!enabled) return;
+				capturePublicWishlistEvent("calendar_save_action_selected", {
+					calendar_provider: provider,
 					wishlist_id: wishlistId,
 				});
 			},

@@ -2,6 +2,7 @@
 
 import { CalendarPlusIcon, DownloadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { usePublicWishlistAnalytics } from "@/components/layouts/public-wishlist/public-wishlist-analytics";
 import {
 	type CalendarEventInput,
 	createCalendarEvent,
@@ -13,6 +14,7 @@ export function CalendarSaveControl(props: CalendarSaveControlProps) {
 	const [open, setOpen] = useState(false);
 	const controlRef = useRef<HTMLDivElement>(null);
 	const calendarEvent = createCalendarEvent(props);
+	const analytics = usePublicWishlistAnalytics();
 
 	useEffect(() => {
 		function closeOnOutsidePointerDown(event: PointerEvent) {
@@ -31,6 +33,7 @@ export function CalendarSaveControl(props: CalendarSaveControlProps) {
 	}, []);
 
 	function downloadIcalendar() {
+		analytics?.captureCalendarSave("icalendar");
 		const blob = new Blob([calendarEvent.icalendar], {
 			type: "text/calendar;charset=utf-8",
 		});
@@ -40,6 +43,11 @@ export function CalendarSaveControl(props: CalendarSaveControlProps) {
 		anchor.download = calendarEvent.filename;
 		anchor.click();
 		URL.revokeObjectURL(href);
+		setOpen(false);
+	}
+
+	function openGoogleCalendar() {
+		analytics?.captureCalendarSave("google");
 		setOpen(false);
 	}
 
@@ -55,6 +63,7 @@ export function CalendarSaveControl(props: CalendarSaveControlProps) {
 						<a
 							className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover"
 							href={calendarEvent.googleCalendarUrl}
+							onClick={openGoogleCalendar}
 							rel="noreferrer"
 							role="menuitem"
 							target="_blank"

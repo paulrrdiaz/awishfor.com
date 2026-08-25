@@ -16,6 +16,7 @@ export const publicWishlistEventNames = [
 	"gift_purchase_failed",
 	"gift_purchase_undone",
 	"rsvp_submitted",
+	"calendar_save_action_selected",
 ] as const;
 
 export type VisitorIntent = "creator" | "guest";
@@ -69,6 +70,9 @@ export type AnalyticsEventProperties = {
 	rsvp_submitted: PublicWishlistProperties & {
 		party_size: number;
 		response_status: "confirmed" | "declined";
+	};
+	calendar_save_action_selected: PublicWishlistProperties & {
+		calendar_provider: "google" | "icalendar";
 	};
 };
 
