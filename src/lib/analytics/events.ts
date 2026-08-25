@@ -19,7 +19,23 @@ export const publicWishlistEventNames = [
 	"calendar_save_action_selected",
 ] as const;
 
+export const wizardEventNames = [
+	"wizard_started",
+	"wizard_step_completed",
+	"wishlist_published",
+] as const;
+
+export const wizardCompletionSteps = [
+	"event-type",
+	"details",
+	"layout",
+	"theme",
+	"images",
+	"gifts",
+] as const;
+
 export type VisitorIntent = "creator" | "guest";
+export type WizardCompletionStep = (typeof wizardCompletionSteps)[number];
 
 export type CampaignProperties = Partial<{
 	utm_source: string;
@@ -74,11 +90,15 @@ export type AnalyticsEventProperties = {
 	calendar_save_action_selected: PublicWishlistProperties & {
 		calendar_provider: "google" | "icalendar";
 	};
+	wizard_started: Record<never, never>;
+	wizard_step_completed: { step: WizardCompletionStep };
+	wishlist_published: Record<never, never>;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventProperties;
 export type MarketingEventName = (typeof marketingEventNames)[number];
 export type PublicWishlistEventName = (typeof publicWishlistEventNames)[number];
+export type WizardEventName = (typeof wizardEventNames)[number];
 
 export const isPublicWishlistEvent = (
 	event: AnalyticsEventName,

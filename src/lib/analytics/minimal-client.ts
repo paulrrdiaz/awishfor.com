@@ -1,6 +1,7 @@
 import type {
 	AnalyticsEventName,
 	AnalyticsEventProperties,
+	MarketingEventName,
 	PublicWishlistEventName,
 } from "./events";
 import { isPublicWishlistEvent } from "./events";
@@ -111,9 +112,10 @@ function capture<E extends AnalyticsEventName>(
 	);
 }
 
-export function captureMarketingEvent<
-	E extends Exclude<AnalyticsEventName, PublicWishlistEventName>,
->(event: E, properties: AnalyticsEventProperties[E]) {
+export function captureMarketingEvent<E extends MarketingEventName>(
+	event: E,
+	properties: AnalyticsEventProperties[E],
+) {
 	capture(event, properties);
 }
 

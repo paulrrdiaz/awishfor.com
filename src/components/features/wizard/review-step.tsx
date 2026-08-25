@@ -20,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EVENT_TYPE_PRESETS } from "@/config/event-type-presets";
 import { resolveLayout } from "@/config/public-layouts";
 import { resolveTheme } from "@/config/public-themes";
+import { captureApplicationEvent } from "@/lib/analytics/application-client";
 import { isValidSlug } from "@/lib/slug";
 import { cn } from "@/lib/utils";
 import { draftToPreview } from "@/lib/wishlist/draft-to-preview";
@@ -406,6 +407,7 @@ export function ReviewStep() {
 				return;
 			}
 
+			void captureApplicationEvent("wishlist_published", {});
 			completePublish({
 				wishlistId: result.wishlistId,
 				slug: result.slug,

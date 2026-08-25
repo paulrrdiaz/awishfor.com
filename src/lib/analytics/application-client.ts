@@ -1,3 +1,4 @@
+import type { AnalyticsEventProperties, WizardEventName } from "./events";
 import { getAnonymousAnalyticsId } from "./identity";
 import { isAnalyticsCaptureEnabled } from "./minimal-client";
 
@@ -62,6 +63,18 @@ export async function identifyApplicationUser(
 	if (!userId) return;
 	const posthog = await initializeApplicationAnalytics();
 	posthog?.identify(userId);
+}
+
+export async function captureApplicationEvent<E extends WizardEventName>(
+	event: E,
+	properties: AnalyticsEventProperties[E],
+) {
+	try {
+		const posthog = await initializeApplicationAnalytics();
+		posthog?.capture(event, properties);
+	} catch {
+		// Analytics must never disrupt application behavior.
+	}
 }
 
 export function getApplicationAnalyticsDistinctId() {

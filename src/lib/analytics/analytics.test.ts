@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-
+import { captureApplicationEvent } from "./application-client";
 import {
 	captureMarketingEvent,
 	capturePublicWishlistEvent,
@@ -11,10 +11,12 @@ import {
 	marketingEventNames,
 	publicWishlistEventNames,
 	sanitizePublicEventPayload,
+	wizardCompletionSteps,
+	wizardEventNames,
 } from "./index";
 
 describe("analytics contract", () => {
-	it("registers the marketing and public-wishlist event vocabulary", () => {
+	it("registers the marketing, public-wishlist, and wizard event vocabulary", () => {
 		expect(marketingEventNames).toEqual([
 			"$pageview",
 			"occasion_selected",
@@ -25,6 +27,19 @@ describe("analytics contract", () => {
 			"cta_clicked",
 		]);
 		expect(publicWishlistEventNames).toHaveLength(8);
+		expect(wizardEventNames).toEqual([
+			"wizard_started",
+			"wizard_step_completed",
+			"wishlist_published",
+		]);
+		expect(wizardCompletionSteps).toEqual([
+			"event-type",
+			"details",
+			"layout",
+			"theme",
+			"images",
+			"gifts",
+		]);
 	});
 });
 
@@ -67,6 +82,14 @@ describe("analytics environment isolation", () => {
 			}),
 		).not.toThrow();
 		expect(getMinimalAnalyticsDistinctId()).toBeUndefined();
+	});
+
+	it("makes application capture a no-op when analytics is disabled", async () => {
+		await expect(
+			captureApplicationEvent("wizard_step_completed", {
+				step: "details",
+			}),
+		).resolves.toBeUndefined();
 	});
 });
 

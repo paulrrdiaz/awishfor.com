@@ -1,10 +1,15 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { WizardLayout } from "@/components/shared/wizard-layout";
 import { WizardNav } from "@/components/shared/wizard-nav";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
+import { captureApplicationEvent } from "@/lib/analytics/application-client";
+import {
+	type WizardCompletionStep,
+	wizardCompletionSteps,
+} from "@/lib/analytics/events";
 import { DetailsStep } from "./details-step";
 import { EventTypeStep } from "./event-type-step";
 import { GiftsStep } from "./gifts-step";
@@ -44,6 +49,12 @@ function StepContent({
 	return null;
 }
 
+function isWizardCompletionStep(
+	step: WizardStep,
+): step is WizardCompletionStep {
+	return (wizardCompletionSteps as readonly string[]).includes(step);
+}
+
 export function WizardShell() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
@@ -53,6 +64,7 @@ export function WizardShell() {
 	const publishSuccess = useWizardStore((s) => s.publishSuccess);
 	const welcomeMessage = useWizardStore((s) => s.draft.welcomeMessage);
 	const [detailsValidationAttempt, setDetailsValidationAttempt] = useState(0);
+	const hasCapturedWizardStart = useRef(false);
 
 	const currentIndex = WIZARD_STEPS.indexOf(step);
 	const isFirst = currentIndex === 0;
@@ -84,9 +96,25 @@ export function WizardShell() {
 		}
 		const nextStep = getNextWizardStep(step);
 		if (nextStep) {
+			if (isWizardCompletionStep(step)) {
+				void captureApplicationEvent("wizard_step_completed", { step });
+			}
 			navigate(nextStep);
 		}
 	}
+
+	useEffect(() => {
+		if (
+			hasCapturedWizardStart.current ||
+			!hasHydrated ||
+			step !== "event-type"
+		) {
+			return;
+		}
+
+		hasCapturedWizardStart.current = true;
+		void captureApplicationEvent("wizard_started", {});
+	}, [hasHydrated, step]);
 
 	useEffect(() => {
 		if (!hasHydrated || !isPublished || publishSuccess) return;

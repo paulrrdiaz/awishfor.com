@@ -14,6 +14,7 @@ const mutateAsyncMock = vi.hoisted(() => vi.fn());
 const checkSlugAvailabilityMock = vi.hoisted(() => vi.fn());
 const toastSuccessMock = vi.hoisted(() => vi.fn());
 const pushMock = vi.hoisted(() => vi.fn());
+const captureApplicationEventMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@clerk/nextjs", () => ({
 	useUser: useUserMock,
@@ -22,6 +23,10 @@ vi.mock("@clerk/nextjs", () => ({
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: pushMock }),
 	useSearchParams: () => new URLSearchParams("step=review"),
+}));
+
+vi.mock("@/lib/analytics/application-client", () => ({
+	captureApplicationEvent: captureApplicationEventMock,
 }));
 
 vi.mock("next/link", () => ({
@@ -196,6 +201,7 @@ describe("ReviewStep", () => {
 	beforeEach(() => {
 		cleanup();
 		vi.clearAllMocks();
+		captureApplicationEventMock.mockResolvedValue(undefined);
 		checkSlugAvailabilityMock.mockResolvedValue({ available: true });
 		vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {});
 	});
@@ -267,6 +273,7 @@ describe("ReviewStep", () => {
 		);
 
 		expect(mutateAsyncMock).not.toHaveBeenCalled();
+		expect(captureApplicationEventMock).not.toHaveBeenCalled();
 		expect(
 			screen
 				.getByRole("link", { name: /iniciar sesión/i })
@@ -311,9 +318,42 @@ describe("ReviewStep", () => {
 			publicUrlPath: "/w/lista-de-boda",
 			dashboardUrlPath: "/dashboard",
 		});
+		expect(captureApplicationEventMock).toHaveBeenCalledWith(
+			"wishlist_published",
+			{},
+		);
+		expect(
+			captureApplicationEventMock.mock.invocationCallOrder[0],
+		).toBeLessThan(
+			pushMock.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
+		);
 		expect(Storage.prototype.removeItem).toHaveBeenCalledWith(
 			"wishlist-wizard-draft",
 		);
 		expect(toastSuccessMock).toHaveBeenCalledWith("Wishlist publicada");
+	});
+
+	it("does not capture publish when the mutation fails", async () => {
+		mutateAsyncMock.mockRejectedValue(new Error("No disponible"));
+		const user = userEvent.setup();
+		renderStep();
+
+		await waitFor(() => {
+			expect(
+				screen
+					.getByRole("button", { name: /publicar wishlist/i })
+					.getAttribute("disabled"),
+			).toBeNull();
+		});
+		await user.click(
+			screen.getByRole("button", { name: /publicar wishlist/i }),
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText("No disponible")).toBeTruthy();
+		});
+
+		expect(captureApplicationEventMock).not.toHaveBeenCalled();
+		expect(pushMock).not.toHaveBeenCalled();
 	});
 });
