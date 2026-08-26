@@ -43,6 +43,10 @@ import {
 	saveWishlistDraft,
 } from "@/server/services/wishlist.service";
 import {
+	getWishlistViewAnalytics,
+	type WishlistViewAnalyticsDatabase,
+} from "@/server/services/wishlist-view-analytics.service";
+import {
 	checkSlugAvailabilitySchema,
 	publishWishlistSchema,
 	updateWishlistDesignSchema,
@@ -91,6 +95,11 @@ const asWishlistRecentPurchaseDb = (
 	ctx: WishlistRouterContext,
 ): WishlistRecentPurchaseDatabase =>
 	ctx.db as unknown as WishlistRecentPurchaseDatabase;
+
+const asWishlistViewAnalyticsDb = (
+	ctx: WishlistRouterContext,
+): Pick<WishlistViewAnalyticsDatabase, "wishlistView"> =>
+	ctx.db as unknown as Pick<WishlistViewAnalyticsDatabase, "wishlistView">;
 
 export const wishlistRouter = createTRPCRouter({
 	list: protectedProcedure.query(async ({ ctx }) => {
@@ -285,12 +294,17 @@ export const wishlistRouter = createTRPCRouter({
 			});
 			const publicUrlPath = `/w/${wishlist.slug}`;
 			const publicUrl = toCanonicalWishlistUrl(publicUrlPath);
-			const recentPurchases = await listWishlistRecentPurchases(
-				asWishlistRecentPurchaseDb(ctx),
-				{
+			const [recentPurchases, analytics] = await Promise.all([
+				listWishlistRecentPurchases(asWishlistRecentPurchaseDb(ctx), {
 					wishlistId: input.wishlistId,
-				},
-			);
+				}),
+				isOwner
+					? getWishlistViewAnalytics(
+							asWishlistViewAnalyticsDb(ctx),
+							input.wishlistId,
+						)
+					: Promise.resolve(undefined),
+			]);
 
 			return mapDashboardWishlistOverview(wishlist, {
 				isOwner,
@@ -299,6 +313,7 @@ export const wishlistRouter = createTRPCRouter({
 				whatsAppUrl: toWhatsAppShareUrl(publicUrl, wishlist.eventType),
 				readiness,
 				recentPurchases,
+				analytics,
 			});
 		}),
 

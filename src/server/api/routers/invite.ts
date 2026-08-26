@@ -47,14 +47,16 @@ export const inviteRouter = createTRPCRouter({
 		.input(listInvitesSchema)
 		.query(async ({ ctx, input }) => {
 			const localUserId = await getLocalUserId(ctx);
-			await assertWishlistAccess(asInviteDb(ctx), {
+			const { isOwner } = await assertWishlistAccess(asInviteDb(ctx), {
 				localUserId,
 				wishlistId: input.wishlistId,
 			});
 			const invites = await listInvites(asInviteDb(ctx), {
 				wishlistId: input.wishlistId,
 			});
-			return invites.map(mapDashboardInvite);
+			return invites.map((invite) =>
+				mapDashboardInvite(invite, { includeAnalytics: isOwner }),
+			);
 		}),
 
 	create: protectedProcedure

@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, Users } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import { CopyInviteUrlButton } from "@/components/features/dashboard/guests/copy-invite-url-button";
 import { DeleteGuestDialog } from "@/components/features/dashboard/guests/delete-guest-dialog";
@@ -29,9 +29,18 @@ function confirmedCount(invite: DashboardInviteViewModel): number {
 	return primaryConfirmed + extrasConfirmed;
 }
 
+function formatLastViewedAt(value: string | null): string {
+	if (!value) return "Sin vistas aún";
+	return new Intl.DateTimeFormat("es-PE", {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}).format(new Date(value));
+}
+
 export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const hasResponded = invite.status !== "pending";
+	const hasViewAnalytics = invite.viewCount !== undefined;
 
 	return (
 		<div className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-3.5">
@@ -75,6 +84,17 @@ export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
+
+			{hasViewAnalytics && (
+				<div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+					<Eye className="size-3.5" />
+					<span>
+						{invite.viewCount} {invite.viewCount === 1 ? "vista" : "vistas"}
+					</span>
+					<span aria-hidden="true">·</span>
+					<span>{formatLastViewedAt(invite.lastViewedAt ?? null)}</span>
+				</div>
+			)}
 
 			<div className="mt-auto flex items-center justify-between gap-2 border-border border-t pt-3">
 				<CopyInviteUrlButton url={inviteUrl} />

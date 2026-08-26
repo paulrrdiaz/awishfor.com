@@ -33,6 +33,7 @@ type Props = {
 	surface?: PublicWishlistSurface;
 	rsvpSection?: ReactNode;
 	analyticsRouteVariant?: "public" | "personalized";
+	viewAuthorization?: string;
 };
 
 type LayoutComponentType = (props: {
@@ -61,6 +62,7 @@ export function PublicWishlistPage({
 	surface = "embedded",
 	rsvpSection,
 	analyticsRouteVariant = "public",
+	viewAuthorization,
 }: Props) {
 	const theme = resolveTheme(wishlist.themeId);
 	const layout = resolveLayout(wishlist.layoutId);
@@ -83,6 +85,7 @@ export function PublicWishlistPage({
 			layoutId={layout.id}
 			routeVariant={analyticsRouteVariant}
 			themeId={theme.id}
+			viewAuthorization={viewAuthorization}
 			wishlistId={wishlist.id}
 			wishlistSlug={wishlist.slug}
 		>

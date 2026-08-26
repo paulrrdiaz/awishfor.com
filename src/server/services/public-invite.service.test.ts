@@ -116,7 +116,7 @@ describe("resolvePersonalizedInvite", () => {
 		expect(result).toEqual({ kind: "notFound" });
 	});
 
-	it("sets openedAt on first open", async () => {
+	it("does not record a view while resolving a server-rendered page", async () => {
 		const update = vi.fn().mockResolvedValue({});
 		const db = makeDb({
 			findFirst: vi.fn().mockResolvedValue(makeInvite({ openedAt: null })),
@@ -128,15 +128,10 @@ describe("resolvePersonalizedInvite", () => {
 			guestSlug: "pedro-castillo",
 		});
 
-		expect(update).toHaveBeenCalledWith(
-			expect.objectContaining({
-				where: { id: "invite_1" },
-				data: { openedAt: expect.any(Date) },
-			}),
-		);
+		expect(update).not.toHaveBeenCalled();
 	});
 
-	it("does not overwrite an existing openedAt on later opens", async () => {
+	it("does not write existing invite metrics during route resolution", async () => {
 		const update = vi.fn();
 		const db = makeDb({
 			findFirst: vi
@@ -188,6 +183,7 @@ describe("resolvePersonalizedInvite", () => {
 
 		expect(result).toEqual({
 			kind: "found",
+			inviteId: "invite_1",
 			guest: {
 				slug: "pedro-castillo",
 				primaryName: "Pedro Castillo",

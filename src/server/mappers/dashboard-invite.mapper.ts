@@ -3,6 +3,7 @@ import type { InviteWithExtras } from "@/server/services/invite.service";
 
 export function mapDashboardInvite(
 	invite: InviteWithExtras,
+	{ includeAnalytics = false }: { includeAnalytics?: boolean } = {},
 ): DashboardInviteViewModel {
 	return {
 		id: invite.id,
@@ -19,6 +20,12 @@ export function mapDashboardInvite(
 			status: guest.status,
 		})),
 		openedAt: invite.openedAt?.toISOString() ?? null,
+		...(includeAnalytics
+			? {
+					lastViewedAt: invite.lastViewedAt?.toISOString() ?? null,
+					viewCount: invite.viewCount,
+				}
+			: {}),
 		respondedAt: invite.respondedAt?.toISOString() ?? null,
 		createdAt: invite.createdAt.toISOString(),
 		updatedAt: invite.updatedAt.toISOString(),

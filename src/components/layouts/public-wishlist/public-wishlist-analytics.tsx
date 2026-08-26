@@ -15,6 +15,7 @@ import {
 	getReferrerHostname,
 	initializeMinimalAnalytics,
 } from "@/lib/analytics";
+import { getAnonymousAnalyticsId } from "@/lib/analytics/identity";
 
 type PublicAnalyticsContextValue = {
 	captureGiftEvent: (
@@ -43,7 +44,23 @@ type Props = {
 	themeId: string;
 	wishlistId: string;
 	wishlistSlug: string;
+	viewAuthorization?: string;
 };
+
+function recordFirstPartyView(authorization: string) {
+	const anonymousId = getAnonymousAnalyticsId();
+	if (!anonymousId || typeof window === "undefined") return;
+	const body = JSON.stringify({ anonymousId, authorization });
+	const beaconBody = new Blob([body], { type: "application/json" });
+	if (navigator.sendBeacon?.("/api/analytics/wishlist-view", beaconBody))
+		return;
+	void fetch("/api/analytics/wishlist-view", {
+		body,
+		headers: { "content-type": "application/json" },
+		keepalive: true,
+		method: "POST",
+	}).catch(() => undefined);
+}
 
 function normalizePurchaseFailure(error: unknown) {
 	const message =
@@ -69,6 +86,7 @@ export function PublicWishlistAnalyticsProvider({
 	themeId,
 	wishlistId,
 	wishlistSlug,
+	viewAuthorization,
 }: Props) {
 	const capturedView = useRef(false);
 
@@ -87,6 +105,7 @@ export function PublicWishlistAnalyticsProvider({
 			wishlist_slug: wishlistSlug,
 			...getCampaignProperties(new URLSearchParams(window.location.search)),
 		});
+		if (viewAuthorization) recordFirstPartyView(viewAuthorization);
 	}, [
 		enabled,
 		eventType,
@@ -96,6 +115,7 @@ export function PublicWishlistAnalyticsProvider({
 		themeId,
 		wishlistId,
 		wishlistSlug,
+		viewAuthorization,
 	]);
 
 	const value = useMemo<PublicAnalyticsContextValue>(

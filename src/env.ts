@@ -13,6 +13,7 @@ export const env = createEnv({
 		DATABASE_URL: z.string().url(),
 		CLERK_WEBHOOK_SIGNING_SECRET: z.string(),
 		UPLOADTHING_TOKEN: z.string(),
+		VIEW_ANALYTICS_HMAC_SECRET: z.string().min(32).optional(),
 	},
 
 	client: {
@@ -33,6 +34,7 @@ export const env = createEnv({
 		DATABASE_URL: process.env.DATABASE_URL,
 		CLERK_WEBHOOK_SIGNING_SECRET: process.env.CLERK_WEBHOOK_SIGNING_SECRET,
 		UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+		VIEW_ANALYTICS_HMAC_SECRET: process.env.VIEW_ANALYTICS_HMAC_SECRET,
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
 			process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
 		NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

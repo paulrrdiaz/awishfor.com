@@ -100,6 +100,10 @@ describe("Public wishlist analytics", () => {
 	beforeEach(() => {
 		capturePublicWishlistEvent.mockClear();
 		initializeMinimalAnalytics.mockClear();
+		Object.defineProperty(navigator, "sendBeacon", {
+			configurable: true,
+			value: vi.fn(() => true),
+		});
 	});
 
 	it("captures every allowed public event with minimized properties", () => {
@@ -211,5 +215,43 @@ describe("Public wishlist analytics", () => {
 				([event]) => event === "public_wishlist_viewed",
 			),
 		).toHaveLength(2);
+	});
+
+	it("sends one first-party signal only for enabled published pages", () => {
+		const { rerender } = render(
+			<PublicWishlistAnalyticsProvider
+				{...props}
+				viewAuthorization="signed-view-authorization"
+			>
+				<div />
+			</PublicWishlistAnalyticsProvider>,
+		);
+		expect(navigator.sendBeacon).toHaveBeenCalledTimes(1);
+		expect(navigator.sendBeacon).toHaveBeenCalledWith(
+			"/api/analytics/wishlist-view",
+			expect.any(Blob),
+		);
+
+		rerender(
+			<PublicWishlistAnalyticsProvider
+				{...props}
+				routeVariant="personalized"
+				viewAuthorization="another-authorization"
+			>
+				<div />
+			</PublicWishlistAnalyticsProvider>,
+		);
+		expect(navigator.sendBeacon).toHaveBeenCalledTimes(1);
+
+		render(
+			<PublicWishlistAnalyticsProvider
+				{...props}
+				enabled={false}
+				viewAuthorization="preview-authorization"
+			>
+				<div />
+			</PublicWishlistAnalyticsProvider>,
+		);
+		expect(navigator.sendBeacon).toHaveBeenCalledTimes(1);
 	});
 });

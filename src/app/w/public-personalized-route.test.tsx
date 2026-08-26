@@ -125,11 +125,11 @@ describe("personalized public wishlist route", () => {
 		expect(second.props.wishlist.guest.primaryName).toBe("Luis");
 		expect(wishlistFindUnique).toHaveBeenCalledTimes(3);
 		expect(inviteFindFirst).toHaveBeenCalledTimes(2);
-		expect(inviteUpdate).toHaveBeenCalledTimes(2);
+		expect(inviteUpdate).not.toHaveBeenCalled();
 		expect(unstableCacheMock).toHaveBeenCalledTimes(2);
 	});
 
-	it("keeps metadata side-effect free and records openedAt on page render", async () => {
+	it("keeps metadata and page rendering side-effect free", async () => {
 		await generateMetadata({
 			params: Promise.resolve({
 				slug: "lista-publica",
@@ -144,10 +144,7 @@ describe("personalized public wishlist route", () => {
 			params: Promise.resolve({ slug: "lista-publica", guestSlug: "ana" }),
 		});
 
-		expect(inviteUpdate).toHaveBeenCalledWith({
-			where: { id: "invite_ana" },
-			data: { openedAt: expect.any(Date) },
-		});
+		expect(inviteUpdate).not.toHaveBeenCalled();
 	});
 
 	it("supplies the confirmed RSVP with calendar event details and its personalized URL", async () => {

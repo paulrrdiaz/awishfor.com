@@ -315,4 +315,33 @@ describe("mapDashboardWishlistOverview", () => {
 			},
 		]);
 	});
+
+	it("includes serialized analytics only for the owner", () => {
+		const wishlist = { ...makeWishlist(), gifts: [] };
+		const options = {
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			analytics: {
+				totalViews: 4,
+				uniqueVisitors: 2,
+				latestViewAt: new Date("2026-08-25T14:00:00.000Z"),
+			},
+		};
+
+		expect(
+			mapDashboardWishlistOverview(wishlist, { ...options, isOwner: true })
+				.metrics,
+		).toMatchObject({
+			latestViewAt: "2026-08-25T14:00:00.000Z",
+			totalViews: 4,
+			uniqueVisitors: 2,
+		});
+		expect(
+			mapDashboardWishlistOverview(wishlist, { ...options, isOwner: false })
+				.metrics,
+		).not.toHaveProperty("totalViews");
+	});
 });

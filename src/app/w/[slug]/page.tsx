@@ -15,6 +15,7 @@ import {
 	getPublishedWishlistMetadata,
 	type PublicWishlistMetadataDatabase,
 } from "@/server/services/public-wishlist-metadata.service";
+import { createWishlistViewAuthorization } from "@/server/services/wishlist-view-analytics.service";
 
 // db.wishlist.findUnique is generic; the port type encodes the include shape
 // used at runtime. The cast is safe: the service always calls findUnique with
@@ -77,8 +78,17 @@ export default async function WishlistSlugPage({ params }: Props) {
 
 	const { wishlist } = result;
 	const mode = result.kind === "preview" ? "preview" : "full";
+	const viewAuthorization =
+		result.kind === "published"
+			? createWishlistViewAuthorization({ wishlistId: wishlist.id })
+			: undefined;
 
 	return (
-		<PublicWishlistPage mode={mode} surface="standalone" wishlist={wishlist} />
+		<PublicWishlistPage
+			mode={mode}
+			surface="standalone"
+			viewAuthorization={viewAuthorization}
+			wishlist={wishlist}
+		/>
 	);
 }

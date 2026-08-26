@@ -13,6 +13,7 @@ import type {
 	RecentPurchaseViewModel,
 	WishlistImageViewModel,
 } from "@/server/mappers/view-models";
+import type { WishlistViewAnalytics } from "@/server/services/wishlist-view-analytics.service";
 
 type GiftWithPurchases = Gift & { purchases: Purchase[] };
 type WishlistWithGifts = Wishlist & {
@@ -37,6 +38,7 @@ type DashboardWishlistOverviewOptions = {
 	whatsAppUrl: string;
 	readiness: PublishReadinessResult;
 	recentPurchases: PurchaseWithGiftName[];
+	analytics?: WishlistViewAnalytics;
 };
 
 function isVisibleAndNotDeleted(gift: Gift): boolean {
@@ -164,6 +166,7 @@ export function mapDashboardWishlistOverview(
 		whatsAppUrl,
 		readiness,
 		recentPurchases,
+		analytics,
 	}: DashboardWishlistOverviewOptions,
 ): DashboardWishlistOverviewViewModel {
 	const aggregates = getVisibleGiftAggregates(wishlist.gifts);
@@ -186,6 +189,13 @@ export function mapDashboardWishlistOverview(
 			purchasedGifts: aggregates.purchasedGifts,
 			totalUnits: aggregates.totalUnits,
 			purchasedUnits: aggregates.purchasedUnits,
+			...(isOwner && analytics
+				? {
+						latestViewAt: analytics.latestViewAt?.toISOString() ?? null,
+						totalViews: analytics.totalViews,
+						uniqueVisitors: analytics.uniqueVisitors,
+					}
+				: {}),
 		},
 		readiness,
 		recentPurchases: recentPurchases.map(mapRecentPurchase),

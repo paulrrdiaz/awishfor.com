@@ -187,6 +187,9 @@ export type DashboardWishlistOverviewViewModel = {
 		purchasedGifts: number;
 		totalUnits: number;
 		purchasedUnits: number;
+		totalViews?: number;
+		uniqueVisitors?: number;
+		latestViewAt?: string | null;
 	};
 	readiness: {
 		ready: boolean;
@@ -212,6 +215,8 @@ export type DashboardInviteViewModel = {
 	partySize: number;
 	extraGuests: InviteExtraGuestViewModel[];
 	openedAt: string | null;
+	viewCount?: number;
+	lastViewedAt?: string | null;
 	respondedAt: string | null;
 	createdAt: string;
 	updatedAt: string;

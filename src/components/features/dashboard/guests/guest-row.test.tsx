@@ -85,4 +85,31 @@ describe("GuestRow", () => {
 
 		expect(screen.getByText("0 de 3 confirmados")).toBeVisible();
 	});
+
+	it("shows owner-only link views with an explicit zero-data state", () => {
+		render(
+			<GuestRow
+				invite={makeInvite({ lastViewedAt: null, viewCount: 0 })}
+				inviteUrl="https://example.com/w/lista/lady-castillo"
+				onEdit={vi.fn()}
+				wishlistId="wishlist_1"
+			/>,
+		);
+
+		expect(screen.getByText("0 vistas")).toBeVisible();
+		expect(screen.getByText("Sin vistas aún")).toBeVisible();
+	});
+
+	it("does not render analytics omitted for a collaborator", () => {
+		render(
+			<GuestRow
+				invite={makeInvite()}
+				inviteUrl="https://example.com/w/lista/lady-castillo"
+				onEdit={vi.fn()}
+				wishlistId="wishlist_1"
+			/>,
+		);
+
+		expect(screen.queryByText(/vistas/)).toBeNull();
+	});
 });

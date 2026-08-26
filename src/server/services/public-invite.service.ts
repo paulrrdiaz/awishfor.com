@@ -38,7 +38,7 @@ export type PublicInviteDatabase = PublicInviteClient & {
 };
 
 export type PersonalizedInviteResult =
-	| { kind: "found"; guest: PublicGuestViewModel }
+	| { kind: "found"; guest: PublicGuestViewModel; inviteId?: string }
 	| { kind: "notFound" };
 
 export async function resolvePersonalizedInvite(
@@ -60,19 +60,9 @@ export async function resolvePersonalizedInvite(
 		return { kind: "notFound" };
 	}
 
-	if (invite.openedAt === null) {
-		try {
-			await db.invite.update({
-				where: { id: invite.id },
-				data: { openedAt: new Date() },
-			});
-		} catch {
-			// Best-effort tracking write; never block rendering the guest's page.
-		}
-	}
-
 	return {
 		kind: "found",
+		inviteId: invite.id,
 		guest: {
 			slug: invite.slug,
 			primaryName: invite.primaryName,

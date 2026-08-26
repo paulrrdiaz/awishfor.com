@@ -80,6 +80,7 @@ model Wishlist {
   categories      Category[]
   gifts           Gift[]
   invites         Invite[]
+  views           WishlistView[]
   images          WishlistImage[]
   members            WishlistMember[]
   memberInvitations  WishlistMemberInvitation[]
@@ -218,18 +219,35 @@ model Invite {
   wishlistId    String
   wishlist      Wishlist           @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
   extraGuests   InviteExtraGuest[]
+  views         WishlistView[]
   primaryName   String
   primaryEmail  String?
   primaryPhone  String?
   slug          String
   status        RsvpStatus         @default(pending)
   openedAt      DateTime?
+  viewCount     Int                @default(0)
+  lastViewedAt  DateTime?
   respondedAt   DateTime?
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
   @@unique([wishlistId, slug])
   @@index([wishlistId])
+}
+
+model WishlistView {
+  id          String   @id @default(cuid())
+  wishlistId  String
+  wishlist    Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  inviteId    String?
+  invite      Invite?  @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  visitorHash String
+  createdAt   DateTime @default(now())
+
+  @@index([wishlistId, createdAt])
+  @@index([inviteId, createdAt])
+  @@index([wishlistId, visitorHash])
 }
 
 model InviteExtraGuest {

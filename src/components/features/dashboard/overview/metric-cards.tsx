@@ -7,8 +7,19 @@ type Props = {
 		purchasedGifts: number;
 		totalUnits: number;
 		purchasedUnits: number;
+		totalViews?: number;
+		uniqueVisitors?: number;
+		latestViewAt?: string | null;
 	};
 };
+
+function formatLatestView(value: string | null | undefined): string {
+	if (!value) return "Aún no hay vistas";
+	return new Intl.DateTimeFormat("es-PE", {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}).format(new Date(value));
+}
 
 export function MetricCards({ metrics }: Props) {
 	const progress =
@@ -36,6 +47,20 @@ export function MetricCards({ metrics }: Props) {
 					{metrics.purchasedUnits}/{metrics.totalUnits} unidades compradas
 				</p>
 			</div>
+			{metrics.totalViews !== undefined && (
+				<>
+					<MetricCard label="Vistas totales" value={metrics.totalViews} />
+					<MetricCard
+						label="Visitantes aprox."
+						value={metrics.uniqueVisitors ?? 0}
+					/>
+					<MetricCard
+						className="sm:col-span-2 xl:col-span-2"
+						label="Última vista"
+						value={formatLatestView(metrics.latestViewAt)}
+					/>
+				</>
+			)}
 		</div>
 	);
 }

@@ -42,6 +42,13 @@ export default function PrivacyPage() {
 							personal. Estos datos se comparten con el dueño de la lista para
 							que pueda coordinar la entrega.
 						</li>
+						<li>
+							<strong>Medición de vistas:</strong> cuando visitas una lista
+							pública, podemos registrar una vista con un identificador anónimo
+							transformado de forma no reversible y limitado a esa lista. No
+							guardamos tu dirección IP, URL de referencia completa, huella del
+							navegador ni identidad mediante este registro.
+						</li>
 					</ul>
 				</div>
 
@@ -86,6 +93,11 @@ export default function PrivacyPage() {
 							de contacto.
 						</li>
 						<li>Detectar y corregir errores técnicos.</li>
+						<li>
+							Mostrar al dueño de una lista sus vistas totales, visitantes
+							aproximados y la última vista; en enlaces personalizados, el dueño
+							también puede ver las vistas de esa invitación.
+						</li>
 					</ul>
 				</div>
 

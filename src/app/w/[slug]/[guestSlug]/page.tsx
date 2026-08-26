@@ -20,6 +20,7 @@ import {
 	getPublishedWishlistMetadata,
 	type PublicWishlistMetadataDatabase,
 } from "@/server/services/public-wishlist-metadata.service";
+import { createWishlistViewAuthorization } from "@/server/services/wishlist-view-analytics.service";
 
 const publicDb = db as unknown as PublicWishlistDatabase;
 const publicInviteDb = db as unknown as PublicInviteDatabase;
@@ -59,6 +60,12 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 	const eventTitle = result.wishlist.hostName
 		? `${result.wishlist.title} - ${result.wishlist.hostName}`
 		: result.wishlist.title;
+	const viewAuthorization = inviteResult.inviteId
+		? createWishlistViewAuthorization({
+				inviteId: inviteResult.inviteId,
+				wishlistId: result.wishlist.id,
+			})
+		: undefined;
 
 	return (
 		<PublicWishlistPage
@@ -82,6 +89,7 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 				/>
 			}
 			surface="standalone"
+			viewAuthorization={viewAuthorization}
 			wishlist={{ ...result.wishlist, guest: inviteResult.guest }}
 		/>
 	);
