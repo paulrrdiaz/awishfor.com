@@ -610,7 +610,7 @@ export const createWishlistWizardStore = () =>
 					if (isStale(state.updatedAt) && state.updatedAt !== null) {
 						state.needsRecovery = true;
 					}
-					state._hasHydrated = true;
+					state.setHasHydrated();
 				},
 				skipHydration: true,
 			},

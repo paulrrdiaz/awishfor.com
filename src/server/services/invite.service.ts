@@ -301,3 +301,46 @@ export const listInvites = (
 		include: { extraGuests: extraGuestsOrder },
 		orderBy: { createdAt: "asc" },
 	});
+
+export type InviteEngagementSummary = {
+	confirmedGuests: number;
+	declinedGuests: number;
+	pendingGuests: number;
+	openedInvitations: number;
+	unopenedInvitations: number;
+};
+
+/**
+ * RSVP and invitation-open counts across primary and extra guests. Ungated —
+ * this mirrors what collaborators already see on the guest list.
+ */
+export function summarizeInviteEngagement(
+	invites: InviteWithExtras[],
+): InviteEngagementSummary {
+	let confirmedGuests = 0;
+	let declinedGuests = 0;
+	let pendingGuests = 0;
+	let openedInvitations = 0;
+
+	const tally = (status: "confirmed" | "declined" | "pending") => {
+		if (status === "confirmed") confirmedGuests += 1;
+		else if (status === "declined") declinedGuests += 1;
+		else pendingGuests += 1;
+	};
+
+	for (const invite of invites) {
+		tally(invite.status);
+		if (invite.openedAt !== null) openedInvitations += 1;
+		for (const guest of invite.extraGuests) {
+			tally(guest.status);
+		}
+	}
+
+	return {
+		confirmedGuests,
+		declinedGuests,
+		pendingGuests,
+		openedInvitations,
+		unopenedInvitations: invites.length - openedInvitations,
+	};
+}

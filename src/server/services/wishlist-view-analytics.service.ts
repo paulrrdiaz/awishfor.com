@@ -54,6 +54,11 @@ function getSecret(): string | undefined {
 	return env.VIEW_ANALYTICS_HMAC_SECRET;
 }
 
+/** Whether first-party view tracking is configured at all, independent of any wishlist's data. */
+export function isViewAnalyticsEnabled(): boolean {
+	return getSecret() !== undefined;
+}
+
 function encode(payload: ViewAuthorizationPayload): string {
 	return Buffer.from(JSON.stringify(payload)).toString("base64url");
 }
@@ -216,4 +221,57 @@ export async function getWishlistViewAnalytics(
 		uniqueVisitors: uniqueVisitorRows.length,
 		latestViewAt: latestView?.createdAt ?? null,
 	};
+}
+
+export type WishlistViewSeriesPoint = {
+	date: string;
+	views: number;
+};
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function toDateKey(date: Date): string {
+	return date.toISOString().slice(0, 10);
+}
+
+function startOfUtcDay(date: Date): Date {
+	return new Date(
+		Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+	);
+}
+
+/**
+ * One bucket per day across the window, oldest first, including days with
+ * zero views so a chart never has gaps. Buckets are UTC calendar days.
+ */
+export async function getWishlistViewSeries(
+	db: Pick<WishlistViewAnalyticsDatabase, "wishlistView">,
+	wishlistId: string,
+	{ days, now = new Date() }: { days: number; now?: Date },
+): Promise<WishlistViewSeriesPoint[]> {
+	const windowStart = new Date(
+		startOfUtcDay(now).getTime() - (days - 1) * MS_PER_DAY,
+	);
+
+	const rows = (await db.wishlistView.findMany({
+		where: { wishlistId, createdAt: { gte: windowStart } },
+		select: { createdAt: true },
+	})) as { createdAt: Date }[];
+
+	const counts = new Map<string, number>();
+	for (let i = 0; i < days; i++) {
+		counts.set(toDateKey(new Date(windowStart.getTime() + i * MS_PER_DAY)), 0);
+	}
+	for (const row of rows) {
+		const key = toDateKey(row.createdAt);
+		const current = counts.get(key);
+		if (current !== undefined) {
+			counts.set(key, current + 1);
+		}
+	}
+
+	return Array.from(counts.entries()).map(([date, views]) => ({
+		date,
+		views,
+	}));
 }

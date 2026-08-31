@@ -27,6 +27,10 @@ import {
 } from "@/server/mappers/dashboard-wishlist.mapper";
 import { assertWishlistAccess } from "@/server/services/collaboration.service";
 import { persistDraftGiftImages } from "@/server/services/imported-image.service";
+import {
+	type InviteDatabase,
+	listInvites,
+} from "@/server/services/invite.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import { invalidatePublicWishlist } from "@/server/services/public-wishlist-cache";
 import {
@@ -44,6 +48,8 @@ import {
 } from "@/server/services/wishlist.service";
 import {
 	getWishlistViewAnalytics,
+	getWishlistViewSeries,
+	isViewAnalyticsEnabled,
 	type WishlistViewAnalyticsDatabase,
 } from "@/server/services/wishlist-view-analytics.service";
 import {
@@ -100,6 +106,13 @@ const asWishlistViewAnalyticsDb = (
 	ctx: WishlistRouterContext,
 ): Pick<WishlistViewAnalyticsDatabase, "wishlistView"> =>
 	ctx.db as unknown as Pick<WishlistViewAnalyticsDatabase, "wishlistView">;
+
+const asInviteDb = (ctx: WishlistRouterContext): InviteDatabase =>
+	ctx.db as unknown as InviteDatabase;
+
+const viewWindowDaysSchema = z
+	.union([z.literal(7), z.literal(30), z.literal(90)])
+	.optional();
 
 export const wishlistRouter = createTRPCRouter({
 	list: protectedProcedure.query(async ({ ctx }) => {
@@ -260,7 +273,12 @@ export const wishlistRouter = createTRPCRouter({
 	}),
 
 	overview: protectedProcedure
-		.input(z.object({ wishlistId: wishlistIdSchema }))
+		.input(
+			z.object({
+				wishlistId: wishlistIdSchema,
+				viewWindowDays: viewWindowDaysSchema,
+			}),
+		)
 		.query(async ({ ctx, input }) => {
 			const localUserId = await getLocalUserId(ctx);
 			const { isOwner } = await assertWishlistAccess(ctx.db, {
@@ -299,10 +317,13 @@ export const wishlistRouter = createTRPCRouter({
 				pendingInvitations,
 				totalInvitations,
 				extraGuestCount,
+				invites,
 				analytics,
+				viewSeries,
 			] = await Promise.all([
 				listWishlistRecentPurchases(asWishlistRecentPurchaseDb(ctx), {
 					wishlistId: input.wishlistId,
+					take: 10,
 				}),
 				ctx.db.invite.count({
 					where: { wishlistId: input.wishlistId, status: "pending" },
@@ -313,10 +334,22 @@ export const wishlistRouter = createTRPCRouter({
 				ctx.db.inviteExtraGuest.count({
 					where: { invite: { wishlistId: input.wishlistId } },
 				}),
+				listInvites(asInviteDb(ctx), { wishlistId: input.wishlistId }),
 				isOwner
 					? getWishlistViewAnalytics(
 							asWishlistViewAnalyticsDb(ctx),
 							input.wishlistId,
+						)
+					: Promise.resolve(undefined),
+				isOwner &&
+				input.viewWindowDays !== undefined &&
+				isViewAnalyticsEnabled()
+					? getWishlistViewSeries(
+							asWishlistViewAnalyticsDb(ctx),
+							input.wishlistId,
+							{
+								days: input.viewWindowDays,
+							},
 						)
 					: Promise.resolve(undefined),
 			]);
@@ -328,10 +361,12 @@ export const wishlistRouter = createTRPCRouter({
 				whatsAppUrl: toWhatsAppShareUrl(publicUrl, wishlist.eventType),
 				readiness,
 				recentPurchases,
+				invites,
 				pendingInvitations,
 				totalInvitations,
 				totalGuests: totalInvitations + extraGuestCount,
 				analytics,
+				viewSeries,
 			});
 		}),
 

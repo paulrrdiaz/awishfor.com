@@ -9,7 +9,9 @@ vi.mock("@/env", () => ({
 import {
 	createWishlistViewAuthorization,
 	getWishlistViewAnalytics,
+	getWishlistViewSeries,
 	hashWishlistVisitor,
+	isViewAnalyticsEnabled,
 	recordWishlistView,
 	verifyWishlistViewAuthorization,
 	type WishlistViewAnalyticsDatabase,
@@ -183,5 +185,91 @@ describe("wishlist view analytics", () => {
 		expect(tx.wishlistView.count).toHaveBeenCalledWith({
 			where: { wishlistId: "wishlist_1" },
 		});
+	});
+
+	it("reports view analytics as enabled when the secret is configured", () => {
+		expect(isViewAnalyticsEnabled()).toBe(true);
+	});
+
+	describe("getWishlistViewSeries", () => {
+		const now = new Date("2026-08-27T10:00:00.000Z");
+
+		it("fills a zero-value bucket for every day, oldest first, with gaps between recorded days", async () => {
+			const wishlistView = {
+				findMany: vi
+					.fn()
+					.mockResolvedValue([
+						{ createdAt: new Date("2026-08-23T09:00:00.000Z") },
+						{ createdAt: new Date("2026-08-23T20:00:00.000Z") },
+						{ createdAt: new Date("2026-08-27T01:00:00.000Z") },
+					]),
+			};
+
+			const series = await getWishlistViewSeries(
+				{ wishlistView } as unknown as Pick<
+					WishlistViewAnalyticsDatabase,
+					"wishlistView"
+				>,
+				"wishlist_1",
+				{ days: 5, now },
+			);
+
+			expect(series).toEqual([
+				{ date: "2026-08-23", views: 2 },
+				{ date: "2026-08-24", views: 0 },
+				{ date: "2026-08-25", views: 0 },
+				{ date: "2026-08-26", views: 0 },
+				{ date: "2026-08-27", views: 1 },
+			]);
+		});
+
+		it("returns an all-zero window when the wishlist has no recorded views", async () => {
+			const wishlistView = { findMany: vi.fn().mockResolvedValue([]) };
+
+			const series = await getWishlistViewSeries(
+				{ wishlistView } as unknown as Pick<
+					WishlistViewAnalyticsDatabase,
+					"wishlistView"
+				>,
+				"wishlist_1",
+				{ days: 7, now },
+			);
+
+			expect(series).toHaveLength(7);
+			expect(series.every((point) => point.views === 0)).toBe(true);
+		});
+
+		it("returns an all-zero window when analytics is disabled, since no rows are ever recorded", async () => {
+			const wishlistView = { findMany: vi.fn().mockResolvedValue([]) };
+
+			const series = await getWishlistViewSeries(
+				{ wishlistView } as unknown as Pick<
+					WishlistViewAnalyticsDatabase,
+					"wishlistView"
+				>,
+				"wishlist_1",
+				{ days: 30, now },
+			);
+
+			expect(series).toHaveLength(30);
+			expect(series.every((point) => point.views === 0)).toBe(true);
+		});
+	});
+});
+
+describe("wishlist view analytics when disabled", () => {
+	it("reports view analytics as disabled when the secret is unset", async () => {
+		vi.resetModules();
+		vi.doMock("@/env", () => ({
+			env: { VIEW_ANALYTICS_HMAC_SECRET: undefined },
+		}));
+
+		const { isViewAnalyticsEnabled: isViewAnalyticsEnabledDisabled } =
+			await import("./wishlist-view-analytics.service");
+
+		expect(isViewAnalyticsEnabledDisabled()).toBe(false);
+
+		vi.doUnmock("@/env");
+		vi.resetModules();
 	});
 });

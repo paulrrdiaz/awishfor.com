@@ -170,3 +170,27 @@ evidence. Task 9.8 remains open: the connected project currently has no
 `guest_finder_used`, store/purchase, or RSVP events, and the audit fixture has
 no mutable published wishlist or invite data with which to generate the
 required client-confirmed outcome.
+
+## 2026-08-31 follow-up — live PostHog MCP verification
+
+A fresh production build was exercised through the real first-party ingest
+path. The creator session preserved anonymous identifier
+`b1888542-e8de-4a3a-8085-b165a62ec0f0` from `/` through `/create`; the public
+fixture session used `8c931062-8651-46bc-a5b0-ec52cc427468`. PostHog MCP
+confirmed the latter's `public_wishlist_viewed` event with route variant
+`public`, the fixture's stable internal wishlist id, the explicit
+`awishfor-beacon` library, and its anonymous person state.
+
+The verification also exposed and corrected a production-only wizard-state
+issue: the Zustand persistence callback mutated `_hasHydrated` directly, which
+does not notify React subscribers. It now calls `setHasHydrated()` so the
+wizard-start effect can observe rehydration. The focused wizard test suite and
+typecheck pass, and a subsequent production build still prerenders `/`.
+
+Tasks 9.7 and 9.8 remain open. PostHog did not yet show the fresh
+`wizard_started` event in the connected project, so marking the creator funnel
+as delivered would overstate the evidence. The audit fixture is intentionally
+database-free and can safely verify a public view and purchase-form activation,
+but it cannot generate a client-confirmed purchase success/undo or RSVP
+outcome. A mutable published wishlist and personalized invite are required to
+complete task 9.8 without manufacturing production analytics data.

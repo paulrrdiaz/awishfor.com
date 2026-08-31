@@ -143,14 +143,16 @@ export type OwnerPurchaseRecordViewModel = {
 	updatedAt: string;
 };
 
-export type RecentPurchaseViewModel = {
+export type WishlistViewSeriesPointViewModel = {
+	date: string;
+	views: number;
+};
+
+export type DashboardActivityEntryViewModel = {
 	id: string;
-	guestName: string;
-	giftId: string;
-	giftName: string;
-	quantity: number;
-	status: "confirmed" | "pending";
-	createdAt: string;
+	kind: "rsvp" | "purchase" | "invite_opened";
+	label: string;
+	occurredAt: string;
 };
 
 export type DashboardWishlistSummaryViewModel = {
@@ -192,15 +194,24 @@ export type DashboardWishlistOverviewViewModel = {
 		pendingInvitations: number;
 		totalInvitations: number;
 		totalGuests: number;
+		confirmedGuests: number;
+		declinedGuests: number;
+		pendingGuests: number;
+		openedInvitations: number;
+		unopenedInvitations: number;
 		totalViews?: number;
 		uniqueVisitors?: number;
 		latestViewAt?: string | null;
+		/** Distinct purchasers over unique visitors. Owner-only; absent with no visitors or when analytics is disabled. */
+		conversionRate?: number;
 	};
 	readiness: {
 		ready: boolean;
 		checks: PublishReadinessChecks;
 	};
-	recentPurchases: RecentPurchaseViewModel[];
+	activity: DashboardActivityEntryViewModel[];
+	/** Daily view counts for the requested window. Owner-only; absent when view analytics is disabled. */
+	viewSeries?: WishlistViewSeriesPointViewModel[];
 };
 
 export type InviteExtraGuestViewModel = {

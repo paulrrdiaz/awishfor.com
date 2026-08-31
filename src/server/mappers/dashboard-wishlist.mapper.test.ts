@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { Gift, Purchase, Wishlist } from "@/generated/prisma/client";
+import type {
+	Gift,
+	InviteExtraGuest,
+	Purchase,
+	Wishlist,
+} from "@/generated/prisma/client";
 import {
 	mapDashboardWishlist,
 	mapDashboardWishlistOverview,
 	mapDashboardWishlistSummary,
 } from "@/server/mappers/dashboard-wishlist.mapper";
+import type { InviteWithExtras } from "@/server/services/invite.service";
+import { OWNER_MANUAL_PURCHASE_DEFAULT_NAME } from "@/server/services/purchase.service";
 
 const now = new Date("2026-06-26T12:00:00Z");
 
@@ -91,6 +98,43 @@ function makePurchase(overrides: Partial<Purchase> = {}): Purchase {
 		undoExpiresAt: null,
 		createdAt: now,
 		updatedAt: now,
+		...overrides,
+	};
+}
+
+function makeInvite(
+	overrides: Partial<InviteWithExtras> = {},
+): InviteWithExtras {
+	return {
+		id: "invite-1",
+		wishlistId: "wl-1",
+		primaryName: "Guest",
+		primaryEmail: null,
+		primaryPhone: null,
+		slug: "guest",
+		status: "pending",
+		openedAt: null,
+		viewCount: 0,
+		lastViewedAt: null,
+		respondedAt: null,
+		responseSource: null,
+		responseLockedAt: null,
+		createdAt: now,
+		updatedAt: now,
+		extraGuests: [],
+		...overrides,
+	};
+}
+
+function makeExtraGuest(
+	overrides: Partial<InviteExtraGuest> = {},
+): InviteExtraGuest {
+	return {
+		id: "extra-1",
+		inviteId: "invite-1",
+		name: null,
+		status: "pending",
+		sortOrder: 0,
 		...overrides,
 	};
 }
@@ -260,18 +304,7 @@ describe("mapDashboardWishlistOverview", () => {
 		},
 	};
 
-	it("maps overview metrics and recent purchases", () => {
-		const purchase = {
-			...makePurchase({
-				id: "purchase-1",
-				giftId: "g1",
-				quantity: 2,
-				undoTokenHash: null,
-				undoExpiresAt: null,
-			}),
-			gift: { id: "g1", name: "Cafetera" },
-		};
-
+	it("maps overview metrics", () => {
 		const result = mapDashboardWishlistOverview(
 			{
 				...makeWishlist({ status: "published" }),
@@ -292,7 +325,8 @@ describe("mapDashboardWishlistOverview", () => {
 				publicUrl: "https://awishfor.com/w/my-wishlist",
 				whatsAppUrl: "https://wa.me/?text=hello",
 				readiness,
-				recentPurchases: [purchase],
+				recentPurchases: [],
+				invites: [],
 				pendingInvitations: 0,
 				totalInvitations: 3,
 				totalGuests: 5,
@@ -308,28 +342,31 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 0,
 			totalInvitations: 3,
 			totalGuests: 5,
+			confirmedGuests: 0,
+			declinedGuests: 0,
+			pendingGuests: 0,
+			openedInvitations: 0,
+			unopenedInvitations: 0,
 		});
-		expect(result.recentPurchases).toEqual([
-			{
-				id: "purchase-1",
-				guestName: "Guest",
-				giftId: "g1",
-				giftName: "Cafetera",
-				quantity: 2,
-				status: "confirmed",
-				createdAt: "2026-06-26T12:00:00.000Z",
-			},
-		]);
 	});
 
-	it("includes serialized analytics only for the owner", () => {
-		const wishlist = { ...makeWishlist(), gifts: [] };
+	it("includes serialized analytics and conversion rate only for the owner", () => {
+		const wishlist = {
+			...makeWishlist(),
+			gifts: [
+				{
+					...makeGift({ id: "g1" }),
+					purchases: [makePurchase({ id: "p1", guestEmail: "a@example.com" })],
+				},
+			],
+		};
 		const options = {
 			publicUrlPath: "/w/my-wishlist",
 			publicUrl: "https://awishfor.com/w/my-wishlist",
 			whatsAppUrl: "https://wa.me/?text=hello",
 			readiness,
 			recentPurchases: [],
+			invites: [],
 			pendingInvitations: 0,
 			totalInvitations: 0,
 			totalGuests: 0,
@@ -347,10 +384,268 @@ describe("mapDashboardWishlistOverview", () => {
 			latestViewAt: "2026-08-25T14:00:00.000Z",
 			totalViews: 4,
 			uniqueVisitors: 2,
+			conversionRate: 0.5,
 		});
 		expect(
 			mapDashboardWishlistOverview(wishlist, { ...options, isOwner: false })
 				.metrics,
 		).not.toHaveProperty("totalViews");
+	});
+
+	it("omits the conversion rate when there are no unique visitors", () => {
+		const wishlist = { ...makeWishlist(), gifts: [] };
+
+		const result = mapDashboardWishlistOverview(wishlist, {
+			isOwner: true,
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			invites: [],
+			pendingInvitations: 0,
+			totalInvitations: 0,
+			totalGuests: 0,
+			analytics: { totalViews: 0, uniqueVisitors: 0, latestViewAt: null },
+		});
+
+		expect(result.metrics).not.toHaveProperty("conversionRate");
+	});
+
+	it("excludes owner-recorded manual purchases from the conversion numerator", () => {
+		const wishlist = {
+			...makeWishlist(),
+			gifts: [
+				{
+					...makeGift({ id: "g1" }),
+					purchases: [
+						makePurchase({
+							id: "p1",
+							guestName: OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
+							guestEmail: null,
+						}),
+					],
+				},
+			],
+		};
+
+		const result = mapDashboardWishlistOverview(wishlist, {
+			isOwner: true,
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			invites: [],
+			pendingInvitations: 0,
+			totalInvitations: 0,
+			totalGuests: 0,
+			analytics: { totalViews: 4, uniqueVisitors: 2, latestViewAt: null },
+		});
+
+		expect(result.metrics.conversionRate).toBe(0);
+	});
+
+	it("clamps the conversion rate at one hundred percent", () => {
+		const wishlist = {
+			...makeWishlist(),
+			gifts: [
+				{
+					...makeGift({ id: "g1" }),
+					purchases: [
+						makePurchase({ id: "p1", guestEmail: "a@example.com" }),
+						makePurchase({ id: "p2", guestEmail: "b@example.com" }),
+						makePurchase({ id: "p3", guestEmail: "c@example.com" }),
+					],
+				},
+			],
+		};
+
+		const result = mapDashboardWishlistOverview(wishlist, {
+			isOwner: true,
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			invites: [],
+			pendingInvitations: 0,
+			totalInvitations: 0,
+			totalGuests: 0,
+			analytics: { totalViews: 1, uniqueVisitors: 1, latestViewAt: null },
+		});
+
+		expect(result.metrics.conversionRate).toBe(1);
+	});
+
+	it("reports the confirmed attendee count across primary and extra guests", () => {
+		const wishlist = { ...makeWishlist(), gifts: [] };
+
+		const result = mapDashboardWishlistOverview(wishlist, {
+			isOwner: true,
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			invites: [
+				makeInvite({
+					id: "i1",
+					status: "confirmed",
+					extraGuests: [makeExtraGuest({ status: "declined" })],
+				}),
+			],
+			pendingInvitations: 0,
+			totalInvitations: 1,
+			totalGuests: 2,
+		});
+
+		expect(result.metrics.confirmedGuests).toBe(1);
+		expect(result.metrics.declinedGuests).toBe(1);
+	});
+
+	it("reports opened and unopened invitation counts", () => {
+		const wishlist = { ...makeWishlist(), gifts: [] };
+
+		const result = mapDashboardWishlistOverview(wishlist, {
+			isOwner: true,
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			invites: [
+				makeInvite({ id: "i1", openedAt: now }),
+				makeInvite({ id: "i2", openedAt: null }),
+				makeInvite({ id: "i3", openedAt: null }),
+				makeInvite({ id: "i4", openedAt: null }),
+			],
+			pendingInvitations: 4,
+			totalInvitations: 4,
+			totalGuests: 4,
+		});
+
+		expect(result.metrics.openedInvitations).toBe(1);
+		expect(result.metrics.unopenedInvitations).toBe(3);
+	});
+
+	describe("activity feed", () => {
+		const baseOptions = {
+			isOwner: true,
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			pendingInvitations: 0,
+			totalInvitations: 1,
+			totalGuests: 1,
+		};
+
+		it("merges RSVP responses, purchases, and invitation opens ordered by recency", () => {
+			const wishlist = {
+				...makeWishlist(),
+				gifts: [
+					{
+						...makeGift({ id: "g1", name: "Cafetera" }),
+						purchases: [
+							makePurchase({
+								id: "p1",
+								guestName: "Ana",
+								createdAt: new Date("2026-08-20T00:00:00Z"),
+							}),
+						],
+					},
+				],
+			};
+
+			const result = mapDashboardWishlistOverview(wishlist, {
+				...baseOptions,
+				recentPurchases: [
+					{
+						...makePurchase({
+							id: "p1",
+							guestName: "Ana",
+							createdAt: new Date("2026-08-20T00:00:00Z"),
+						}),
+						gift: { id: "g1", name: "Cafetera" },
+					},
+				],
+				invites: [
+					makeInvite({
+						id: "i1",
+						primaryName: "Luis",
+						status: "confirmed",
+						respondedAt: new Date("2026-08-26T00:00:00Z"),
+					}),
+					makeInvite({
+						id: "i2",
+						primaryName: "Renee",
+						openedAt: new Date("2026-08-15T00:00:00Z"),
+					}),
+				],
+			});
+
+			expect(result.activity.map((entry) => entry.kind)).toEqual([
+				"rsvp",
+				"purchase",
+				"invite_opened",
+			]);
+			expect(result.activity[0]).toMatchObject({
+				kind: "rsvp",
+				label: "Luis confirmó su asistencia",
+			});
+		});
+
+		it("attributes an owner-recorded purchase with no guest name to Alguien", () => {
+			const wishlist = { ...makeWishlist(), gifts: [] };
+
+			const result = mapDashboardWishlistOverview(wishlist, {
+				...baseOptions,
+				recentPurchases: [
+					{
+						...makePurchase({
+							id: "p1",
+							guestName: OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
+						}),
+						gift: { id: "g1", name: "Silla Gamer GX2000" },
+					},
+				],
+				invites: [],
+			});
+
+			expect(result.activity[0]?.label).toBe(
+				"Alguien marcó «Silla Gamer GX2000» como comprado",
+			);
+		});
+
+		it("caps the feed at the ten most recent entries", () => {
+			const wishlist = { ...makeWishlist(), gifts: [] };
+			const invites = Array.from({ length: 12 }, (_, i) =>
+				makeInvite({
+					id: `i${i}`,
+					openedAt: new Date(now.getTime() - i * 1000),
+				}),
+			);
+
+			const result = mapDashboardWishlistOverview(wishlist, {
+				...baseOptions,
+				recentPurchases: [],
+				invites,
+			});
+
+			expect(result.activity).toHaveLength(10);
+		});
+
+		it("renders no entries when nothing has happened", () => {
+			const wishlist = { ...makeWishlist(), gifts: [] };
+
+			const result = mapDashboardWishlistOverview(wishlist, {
+				...baseOptions,
+				recentPurchases: [],
+				invites: [],
+			});
+
+			expect(result.activity).toEqual([]);
+		});
 	});
 });

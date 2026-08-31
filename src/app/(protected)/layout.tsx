@@ -13,7 +13,7 @@ export default function ProtectedLayout({
 			<div className="h-svh p-0 md:p-4">
 				<SidebarProvider className="h-svh min-h-0 overflow-hidden rounded-none md:h-[calc(100svh-2rem)] md:rounded-xl">
 					<AppSidebar />
-					<SidebarInset className="min-h-0">
+					<SidebarInset className="min-h-0 overflow-clip">
 						{children}
 						<MobileTabBar />
 					</SidebarInset>

@@ -3,61 +3,46 @@ import { MetricCard } from "@/components/shared/metric-card";
 type Props = {
 	metrics: {
 		totalGifts: number;
-		availableGifts: number;
 		purchasedGifts: number;
-		totalUnits: number;
-		purchasedUnits: number;
+		confirmedGuests: number;
+		totalGuests: number;
 		totalViews?: number;
 		uniqueVisitors?: number;
-		latestViewAt?: string | null;
+		conversionRate?: number;
 	};
 };
 
-function formatLatestView(value: string | null | undefined): string {
-	if (!value) return "Aún no hay vistas";
-	return new Intl.DateTimeFormat("es-PE", {
-		dateStyle: "medium",
-		timeStyle: "short",
-	}).format(new Date(value));
+function formatConversionRate(rate: number | undefined): string {
+	if (rate === undefined) return "—";
+	return `${(rate * 100).toFixed(1)}%`;
 }
 
 export function MetricCards({ metrics }: Props) {
-	const progress =
-		metrics.totalUnits > 0
-			? Math.round((metrics.purchasedUnits / metrics.totalUnits) * 100)
-			: 0;
+	const hasViewMetrics = metrics.totalViews !== undefined;
 
 	return (
-		<div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
-			<MetricCard label="Regalos totales" value={metrics.totalGifts} />
-			<MetricCard label="Disponibles" value={metrics.availableGifts} />
+		<div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+			<MetricCard label="Regalos" value={metrics.totalGifts} />
 			<MetricCard label="Comprados" value={metrics.purchasedGifts} />
 			<div className="rounded-lg border border-border bg-card p-[18px] text-card-foreground shadow-sm">
-				<p className="text-muted-foreground text-xs">Progreso de compras</p>
+				<p className="text-muted-foreground text-xs">Confirmados</p>
 				<p className="mt-1 font-heading text-[30px] leading-none">
-					{progress}%
-				</p>
-				<div className="mt-4 h-1.5 overflow-hidden rounded-full bg-border">
-					<div
-						className="h-full rounded-full bg-primary transition-[width]"
-						style={{ width: `${progress}%` }}
-					/>
-				</div>
-				<p className="mt-3 text-muted-foreground text-xs">
-					{metrics.purchasedUnits}/{metrics.totalUnits} unidades compradas
+					{metrics.confirmedGuests}
+					<span className="ml-1.5 text-base text-muted-foreground">
+						/ {metrics.totalGuests}
+					</span>
 				</p>
 			</div>
-			{metrics.totalViews !== undefined && (
+			{hasViewMetrics && (
 				<>
-					<MetricCard label="Vistas totales" value={metrics.totalViews} />
+					<MetricCard label="Visitas" value={metrics.totalViews ?? 0} />
 					<MetricCard
-						label="Visitantes aprox."
+						label="Visitantes únicos"
 						value={metrics.uniqueVisitors ?? 0}
 					/>
 					<MetricCard
-						className="sm:col-span-2 xl:col-span-2"
-						label="Última vista"
-						value={formatLatestView(metrics.latestViewAt)}
+						label="Tasa de compra"
+						value={formatConversionRate(metrics.conversionRate)}
 					/>
 				</>
 			)}

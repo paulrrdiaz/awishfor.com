@@ -7,12 +7,18 @@ import type {
 import type { PublishReadinessResult } from "@/lib/wishlist/publish-readiness";
 import { mapDashboardGift } from "@/server/mappers/dashboard-gift.mapper";
 import type {
+	DashboardActivityEntryViewModel,
 	DashboardWishlistCardViewModel,
 	DashboardWishlistOverviewViewModel,
 	DashboardWishlistSummaryViewModel,
-	RecentPurchaseViewModel,
 	WishlistImageViewModel,
+	WishlistViewSeriesPointViewModel,
 } from "@/server/mappers/view-models";
+import {
+	type InviteWithExtras,
+	summarizeInviteEngagement,
+} from "@/server/services/invite.service";
+import { OWNER_MANUAL_PURCHASE_DEFAULT_NAME } from "@/server/services/purchase.service";
 import type { WishlistViewAnalytics } from "@/server/services/wishlist-view-analytics.service";
 
 type GiftWithPurchases = Gift & { purchases: Purchase[] };
@@ -38,10 +44,12 @@ type DashboardWishlistOverviewOptions = {
 	whatsAppUrl: string;
 	readiness: PublishReadinessResult;
 	recentPurchases: PurchaseWithGiftName[];
+	invites: InviteWithExtras[];
 	pendingInvitations: number;
 	totalInvitations: number;
 	totalGuests: number;
 	analytics?: WishlistViewAnalytics;
+	viewSeries?: WishlistViewSeriesPointViewModel[];
 };
 
 function isVisibleAndNotDeleted(gift: Gift): boolean {
@@ -77,24 +85,97 @@ function getVisibleGiftAggregates(gifts: GiftWithPurchases[]) {
 	};
 }
 
-function mapRecentPurchase(
-	purchase: PurchaseWithGiftName,
-): RecentPurchaseViewModel {
-	const now = new Date();
-	const canUndo =
-		purchase.undoTokenHash !== null &&
-		purchase.undoExpiresAt !== null &&
-		purchase.undoExpiresAt > now;
+function purchaserIdentity(
+	purchase: Pick<Purchase, "guestName" | "guestEmail" | "guestPhone">,
+): string {
+	return (purchase.guestEmail || purchase.guestPhone || purchase.guestName)
+		.trim()
+		.toLowerCase();
+}
 
-	return {
-		id: purchase.id,
-		guestName: purchase.guestName,
-		giftId: purchase.gift.id,
-		giftName: purchase.gift.name,
-		quantity: purchase.quantity,
-		status: canUndo ? "pending" : "confirmed",
-		createdAt: purchase.createdAt.toISOString(),
-	};
+function countDistinctPurchasers(purchases: Purchase[]): number {
+	return new Set(purchases.map(purchaserIdentity)).size;
+}
+
+/**
+ * Purchases eligible for the conversion rate's numerator: visitor-driven
+ * purchases only. Owner-recorded manual purchases aren't a visitor
+ * converting, so they're excluded rather than counted as distinct
+ * "purchasers" against a small unique-visitor denominator.
+ */
+function collectPurchasesForConversion(gifts: GiftWithPurchases[]): Purchase[] {
+	return gifts
+		.filter((gift) => gift.deletedAt === null)
+		.flatMap((gift) => gift.purchases)
+		.filter(
+			(purchase) => purchase.guestName !== OWNER_MANUAL_PURCHASE_DEFAULT_NAME,
+		);
+}
+
+const ACTIVITY_FEED_LIMIT = 10;
+
+type ActivityEvent = {
+	id: string;
+	kind: DashboardActivityEntryViewModel["kind"];
+	label: string;
+	occurredAt: Date;
+};
+
+function purchaserLabel(purchase: PurchaseWithGiftName): string {
+	return purchase.guestName === OWNER_MANUAL_PURCHASE_DEFAULT_NAME
+		? "Alguien"
+		: purchase.guestName;
+}
+
+function buildActivityFeed({
+	invites,
+	purchases,
+}: {
+	invites: InviteWithExtras[];
+	purchases: PurchaseWithGiftName[];
+}): DashboardActivityEntryViewModel[] {
+	const events: ActivityEvent[] = [];
+
+	for (const invite of invites) {
+		if (invite.respondedAt) {
+			events.push({
+				id: `rsvp-${invite.id}`,
+				kind: "rsvp",
+				label:
+					invite.status === "confirmed"
+						? `${invite.primaryName} confirmó su asistencia`
+						: `${invite.primaryName} no podrá asistir`,
+				occurredAt: invite.respondedAt,
+			});
+		}
+		if (invite.openedAt) {
+			events.push({
+				id: `opened-${invite.id}`,
+				kind: "invite_opened",
+				label: `${invite.primaryName} abrió su invitación`,
+				occurredAt: invite.openedAt,
+			});
+		}
+	}
+
+	for (const purchase of purchases) {
+		events.push({
+			id: `purchase-${purchase.id}`,
+			kind: "purchase",
+			label: `${purchaserLabel(purchase)} marcó «${purchase.gift.name}» como comprado`,
+			occurredAt: purchase.createdAt,
+		});
+	}
+
+	return events
+		.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
+		.slice(0, ACTIVITY_FEED_LIMIT)
+		.map(({ id, kind, label, occurredAt }) => ({
+			id,
+			kind,
+			label,
+			occurredAt: occurredAt.toISOString(),
+		}));
 }
 
 export function mapDashboardWishlist(
@@ -169,13 +250,25 @@ export function mapDashboardWishlistOverview(
 		whatsAppUrl,
 		readiness,
 		recentPurchases,
+		invites,
 		pendingInvitations,
 		totalInvitations,
 		totalGuests,
 		analytics,
+		viewSeries,
 	}: DashboardWishlistOverviewOptions,
 ): DashboardWishlistOverviewViewModel {
 	const aggregates = getVisibleGiftAggregates(wishlist.gifts);
+	const engagement = summarizeInviteEngagement(invites);
+	const conversionRate =
+		isOwner && analytics && analytics.uniqueVisitors > 0
+			? Math.min(
+					1,
+					countDistinctPurchasers(
+						collectPurchasesForConversion(wishlist.gifts),
+					) / analytics.uniqueVisitors,
+				)
+			: undefined;
 
 	return {
 		id: wishlist.id,
@@ -198,15 +291,22 @@ export function mapDashboardWishlistOverview(
 			pendingInvitations,
 			totalInvitations,
 			totalGuests,
+			confirmedGuests: engagement.confirmedGuests,
+			declinedGuests: engagement.declinedGuests,
+			pendingGuests: engagement.pendingGuests,
+			openedInvitations: engagement.openedInvitations,
+			unopenedInvitations: engagement.unopenedInvitations,
 			...(isOwner && analytics
 				? {
 						latestViewAt: analytics.latestViewAt?.toISOString() ?? null,
 						totalViews: analytics.totalViews,
 						uniqueVisitors: analytics.uniqueVisitors,
+						...(conversionRate !== undefined ? { conversionRate } : {}),
 					}
 				: {}),
 		},
 		readiness,
-		recentPurchases: recentPurchases.map(mapRecentPurchase),
+		activity: buildActivityFeed({ invites, purchases: recentPurchases }),
+		...(isOwner && viewSeries ? { viewSeries } : {}),
 	};
 }
