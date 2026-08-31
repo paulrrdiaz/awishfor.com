@@ -1,8 +1,25 @@
-# dashboard-detail-chrome Specification
+## REMOVED Requirements
 
-## Purpose
-TBD - created by archiving change redesign-wishlist-detail-chrome. Update Purpose after archive.
-## Requirements
+### Requirement: Vertical section rail replaces tab navigation
+
+**Reason**: The icon-only rail hid every section name behind a hover tooltip, which is unreachable by touch and slow by pointer. Replaced by named horizontal tabs.
+
+**Migration**: Route segments are unchanged, so no links break. `WishlistSectionRail` is deleted and replaced by `WishlistSectionTabs`.
+
+### Requirement: Labeled rail strip below the md breakpoint
+
+**Reason**: The tabs are label-first and horizontally scrollable at every width, so a separate narrow-viewport idiom is no longer needed.
+
+**Migration**: Behavior below `md` is subsumed by the tabs requirement; the dedicated mobile shell is specified separately in `dashboard-mobile-shell`.
+
+### Requirement: Shared title block
+
+**Reason**: The block carried the wishlist title, the public URL, and a copy affordance on one row. The URL and copy affordance now belong to the published status strip, where they are reachable from every section rather than only where the title renders.
+
+**Migration**: Replaced by `Wishlist title heading`, which keeps the single-`h1` guarantee. The `Copying the public URL` and `Copy failure is surfaced` scenarios move to `Persistent wishlist status strip`.
+
+## MODIFIED Requirements
+
 ### Requirement: Fixed wishlist topbar
 
 The wishlist detail route SHALL render a fixed 55px topbar as the first element of the detail layout, containing on the left a breadcrumb whose first level is the wishlist switcher and whose second level is the active section name, and on the right the `Ver pública`, `⋯`, and `+ Crear wishlist` actions. The topbar SHALL NOT render the wishlist status badge, which belongs to the status strip. The topbar SHALL sit on the card surface with a bottom border, SHALL NOT scroll with the content pane, and SHALL be the only place these actions appear.
@@ -27,24 +44,10 @@ The wishlist detail route SHALL render a fixed 55px topbar as the first element 
 - **WHEN** the owner is on the Resumen section
 - **THEN** the breadcrumb renders the switcher alone
 
-### Requirement: Wishlist title heading
-
-The wishlist detail layout SHALL render the wishlist title as the route's only `h1`, immediately above the section tabs. The status badge, the public URL, the copy affordance, and the wishlist-level action buttons SHALL NOT appear in this row. Section pages SHALL render their own heading below it at a lower level.
-
-#### Scenario: Title renders once per section
-
-- **WHEN** the owner opens any wishlist section
-- **THEN** the wishlist title renders once, above the tabs and above the section's own content
-
-#### Scenario: Single h1 per route
+#### Scenario: Status is not duplicated in the topbar
 
 - **WHEN** any wishlist section renders
-- **THEN** the document contains exactly one `h1`, holding the wishlist title
-
-#### Scenario: Title row carries no actions
-
-- **WHEN** any wishlist section renders
-- **THEN** the title row contains no status badge, no public URL, and no copy affordance
+- **THEN** the wishlist status appears in the status strip and not in the topbar
 
 ### Requirement: App-shell scroll model
 
@@ -95,8 +98,29 @@ The active section tab SHALL be derived from the current pathname. Routes nested
 
 #### Scenario: Unknown nested segment falls back to Resumen
 
-- **WHEN** the owner opens a nested route under the wishlist that maps to no rail item and has no alias
+- **WHEN** the owner opens a nested route under the wishlist that maps to no tab and has no alias
 - **THEN** the Resumen tab is shown as active
+
+## ADDED Requirements
+
+### Requirement: Wishlist title heading
+
+The wishlist detail layout SHALL render the wishlist title as the route's only `h1`, immediately above the section tabs. The status badge, the public URL, the copy affordance, and the wishlist-level action buttons SHALL NOT appear in this row. Section pages SHALL render their own heading below it at a lower level.
+
+#### Scenario: Title renders once per section
+
+- **WHEN** the owner opens any wishlist section
+- **THEN** the wishlist title renders once, above the tabs and above the section's own content
+
+#### Scenario: Single h1 per route
+
+- **WHEN** any wishlist section renders
+- **THEN** the document contains exactly one `h1`, holding the wishlist title
+
+#### Scenario: Title row carries no actions
+
+- **WHEN** any wishlist section renders
+- **THEN** the title row contains no status badge, no public URL, and no copy affordance
 
 ### Requirement: Horizontal section tabs
 

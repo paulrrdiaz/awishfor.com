@@ -18,7 +18,7 @@ export default async function DashboardWishlistCategoriesPage({
 	}
 
 	return (
-		<div className="w-full px-7 py-5">
+		<div className="w-full p-7">
 			<div className="mb-6">
 				<h2 className="mb-1 font-semibold text-base text-foreground">
 					Categorías

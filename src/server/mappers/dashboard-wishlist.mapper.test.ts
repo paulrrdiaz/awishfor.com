@@ -293,6 +293,7 @@ describe("mapDashboardWishlistOverview", () => {
 				whatsAppUrl: "https://wa.me/?text=hello",
 				readiness,
 				recentPurchases: [purchase],
+				pendingInvitations: 0,
 			},
 		);
 
@@ -302,6 +303,7 @@ describe("mapDashboardWishlistOverview", () => {
 			purchasedGifts: 1,
 			totalUnits: 6,
 			purchasedUnits: 3,
+			pendingInvitations: 0,
 		});
 		expect(result.recentPurchases).toEqual([
 			{
@@ -324,6 +326,7 @@ describe("mapDashboardWishlistOverview", () => {
 			whatsAppUrl: "https://wa.me/?text=hello",
 			readiness,
 			recentPurchases: [],
+			pendingInvitations: 0,
 			analytics: {
 				totalViews: 4,
 				uniqueVisitors: 2,

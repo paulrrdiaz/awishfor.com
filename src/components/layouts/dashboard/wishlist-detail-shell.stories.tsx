@@ -2,19 +2,48 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DEMO_WISHLIST } from "@/config/demo-wishlist";
 import { TRPCReactProvider } from "@/trpc/react";
-import { WishlistSectionRail } from "./wishlist-section-rail";
+import { WishlistSectionTabs } from "./wishlist-section-tabs";
+import { WishlistStatusStrip } from "./wishlist-status-strip";
 import { WishlistTitleBlock } from "./wishlist-title-block";
 import { WishlistTopbar } from "./wishlist-topbar";
 
 const WISHLIST_ID = "demo-wishlist";
 const PUBLIC_URL_PATH = `/w/${DEMO_WISHLIST.slug}`;
 
+const READY_READINESS = {
+	ready: true,
+	checks: {
+		title: true,
+		eventType: true,
+		slug: true,
+		language: true,
+		currency: true,
+		visibleGift: true,
+		images: true,
+	},
+};
+
+const PARTIAL_READINESS = {
+	ready: false,
+	checks: {
+		...READY_READINESS.checks,
+		visibleGift: false,
+		images: false,
+	},
+};
+
 function pathnameFor(segment: string) {
 	const base = `/dashboard/wishlists/${WISHLIST_ID}`;
 	return segment ? `${base}/${segment}` : base;
 }
 
-function DashboardWishlistShell({ status }: { status: string }) {
+function DashboardWishlistShell({
+	status,
+	readiness,
+}: {
+	status: string;
+	readiness: typeof READY_READINESS;
+}) {
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<WishlistTopbar
@@ -24,18 +53,26 @@ function DashboardWishlistShell({ status }: { status: string }) {
 				title={DEMO_WISHLIST.title}
 				wishlistId={WISHLIST_ID}
 			/>
-			<div className="flex min-h-0 flex-1 flex-col md:flex-row">
-				<WishlistSectionRail isOwner wishlistId={WISHLIST_ID} />
-				<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
-					<WishlistTitleBlock
-						publicUrlPath={PUBLIC_URL_PATH}
-						slug={DEMO_WISHLIST.slug}
-						title={DEMO_WISHLIST.title}
-					/>
-					<div className="px-7 pb-7 text-muted-foreground text-sm">
-						(contenido de la sección)
-					</div>
-				</div>
+			<WishlistStatusStrip
+				eventType={DEMO_WISHLIST.eventType}
+				isOwner
+				publicUrlPath={PUBLIC_URL_PATH}
+				readiness={readiness}
+				status={status}
+				totalViews={128}
+				wishlistId={WISHLIST_ID}
+			/>
+			<WishlistTitleBlock title={DEMO_WISHLIST.title} />
+			<WishlistSectionTabs
+				badges={{
+					gifts: { count: 4 },
+					guests: { count: 3, variant: "warning" },
+				}}
+				isOwner
+				wishlistId={WISHLIST_ID}
+			/>
+			<div className="min-h-0 flex-1 overflow-y-auto p-7 text-muted-foreground text-sm">
+				(contenido de la sección)
 			</div>
 		</div>
 	);
@@ -64,19 +101,25 @@ export default meta;
 type Story = StoryObj;
 
 export const Published: Story = {
-	render: () => <DashboardWishlistShell status="published" />,
+	render: () => (
+		<DashboardWishlistShell readiness={READY_READINESS} status="published" />
+	),
 };
 
 export const Draft: Story = {
 	parameters: {
 		nextjs: { navigation: { pathname: pathnameFor("gifts") } },
 	},
-	render: () => <DashboardWishlistShell status="draft" />,
+	render: () => (
+		<DashboardWishlistShell readiness={PARTIAL_READINESS} status="draft" />
+	),
 };
 
 export const Archived: Story = {
 	parameters: {
 		nextjs: { navigation: { pathname: pathnameFor("design") } },
 	},
-	render: () => <DashboardWishlistShell status="archived" />,
+	render: () => (
+		<DashboardWishlistShell readiness={READY_READINESS} status="archived" />
+	),
 };

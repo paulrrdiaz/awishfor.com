@@ -11,7 +11,7 @@ export const NAV_ITEMS = [
 	{ label: "Resumen", segment: "", icon: LayoutGridIcon, ownerOnly: false },
 	{ label: "Regalos", segment: "gifts", icon: GiftIcon, ownerOnly: false },
 	{ label: "Invitados", segment: "guests", icon: UsersIcon, ownerOnly: false },
-	{ label: "Diseño", segment: "design", icon: PaletteIcon, ownerOnly: false },
+	{ label: "Tema", segment: "design", icon: PaletteIcon, ownerOnly: false },
 	{
 		label: "Colaboradores",
 		segment: "collaborators",
@@ -19,7 +19,7 @@ export const NAV_ITEMS = [
 		ownerOnly: true,
 	},
 	{
-		label: "Configuración",
+		label: "Ajustes",
 		segment: "settings",
 		icon: SettingsIcon,
 		ownerOnly: false,
@@ -31,6 +31,15 @@ export type WishlistSection = (typeof NAV_ITEMS)[number]["segment"];
 export function navItemsFor(isOwner: boolean) {
 	return NAV_ITEMS.filter((item) => isOwner || !item.ownerOnly);
 }
+
+export type SectionBadgeVariant = "default" | "warning";
+
+export type SectionBadge = {
+	count: number;
+	variant?: SectionBadgeVariant;
+};
+
+export type SectionBadges = Partial<Record<WishlistSection, SectionBadge>>;
 
 const SEGMENT_ALIASES: Record<string, WishlistSection> = {
 	categories: "gifts",

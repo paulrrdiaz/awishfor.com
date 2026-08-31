@@ -8,9 +8,24 @@ vi.mock("next/navigation", () => ({
 	usePathname: () => pathnameRef.current,
 }));
 
+const openUserProfileMock = vi.fn();
 vi.mock("@clerk/nextjs", () => ({
 	useUser: () => ({ user: null }),
+	useClerk: () => ({ openUserProfile: openUserProfileMock }),
 	UserButton: () => null,
+}));
+
+const listQueryRef = {
+	current: { owned: [] as { id: string }[], shared: [] as { id: string }[] },
+};
+vi.mock("@/trpc/react", () => ({
+	api: {
+		wishlist: {
+			list: {
+				useQuery: () => ({ data: listQueryRef.current }),
+			},
+		},
+	},
 }));
 
 import { AppSidebar } from "@/components/features/dashboard/app-sidebar";
@@ -19,45 +34,62 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 afterEach(() => {
 	cleanup();
+	listQueryRef.current = { owned: [], shared: [] };
+	pathnameRef.current = "/dashboard";
+	openUserProfileMock.mockClear();
 });
 
-const OWNED = [
-	{ id: "wl_1", title: "Boda de Ana", status: "draft", eventType: "wedding" },
-];
-
-const SHARED = [
-	{
-		id: "wl_2",
-		title: "Baby shower de Sofía",
-		status: "published",
-		eventType: "baby_shower",
-		ownerName: "Marco Pérez",
-	},
-];
-
-function renderSidebar(owned: typeof OWNED, shared: typeof SHARED) {
+function renderSidebar() {
 	return render(
 		<TooltipProvider>
 			<SidebarProvider>
-				<AppSidebar owned={owned} shared={shared} />
+				<AppSidebar />
 			</SidebarProvider>
 		</TooltipProvider>,
 	);
 }
 
 describe("AppSidebar", () => {
-	it("does not render the shared group for a solo user with no shared wishlists", () => {
-		renderSidebar(OWNED, []);
+	it("renders exactly the four fixed destinations and no wishlist tree", () => {
+		listQueryRef.current = {
+			owned: [{ id: "wl_1" }, { id: "wl_2" }],
+			shared: [{ id: "wl_3" }],
+		};
+		renderSidebar();
 
+		expect(screen.getByText("Inicio")).toBeInTheDocument();
+		expect(screen.getByText("Mis wishlists")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Mi cuenta" }),
+		).toBeInTheDocument();
+		expect(screen.getByText("Ayuda y soporte")).toBeInTheDocument();
 		expect(screen.queryByText("Compartidas conmigo")).not.toBeInTheDocument();
-		expect(screen.getByText("Boda de Ana")).toBeInTheDocument();
+		expect(screen.queryByText("Nueva wishlist")).not.toBeInTheDocument();
+		expect(screen.queryByText("Analíticas")).not.toBeInTheDocument();
 	});
 
-	it("renders the shared group with owner labels when wishlists are shared", () => {
-		renderSidebar(OWNED, SHARED);
+	it("badges Mis wishlists with the owned non-archived count", () => {
+		listQueryRef.current = {
+			owned: [{ id: "wl_1" }, { id: "wl_2" }, { id: "wl_3" }],
+			shared: [],
+		};
+		renderSidebar();
 
-		expect(screen.getByText("Compartidas conmigo")).toBeInTheDocument();
-		expect(screen.getByText("Baby shower de Sofía")).toBeInTheDocument();
-		expect(screen.getByText("de Marco Pérez")).toBeInTheDocument();
+		expect(screen.getByText("3")).toBeInTheDocument();
+	});
+
+	it("marks Mis wishlists active on a nested wishlist route", () => {
+		pathnameRef.current = "/dashboard/wishlists/wl_1/gifts";
+		renderSidebar();
+
+		const link = screen.getByText("Mis wishlists").closest("a");
+		expect(link).toHaveAttribute("data-active", "true");
+	});
+
+	it("opens the account profile when Mi cuenta is activated", () => {
+		renderSidebar();
+
+		screen.getByRole("button", { name: "Mi cuenta" }).click();
+		expect(openUserProfileMock).toHaveBeenCalled();
 	});
 });

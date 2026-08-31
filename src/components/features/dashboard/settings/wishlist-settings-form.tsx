@@ -329,7 +329,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-3xl px-4 py-8">
+		<div className="mx-auto w-full max-w-3xl p-7">
 			<div className="mb-8">
 				<div className="mb-2 flex flex-wrap items-center gap-2">
 					<p className="text-muted-foreground text-sm">

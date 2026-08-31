@@ -38,6 +38,7 @@ type DashboardWishlistOverviewOptions = {
 	whatsAppUrl: string;
 	readiness: PublishReadinessResult;
 	recentPurchases: PurchaseWithGiftName[];
+	pendingInvitations: number;
 	analytics?: WishlistViewAnalytics;
 };
 
@@ -166,6 +167,7 @@ export function mapDashboardWishlistOverview(
 		whatsAppUrl,
 		readiness,
 		recentPurchases,
+		pendingInvitations,
 		analytics,
 	}: DashboardWishlistOverviewOptions,
 ): DashboardWishlistOverviewViewModel {
@@ -189,6 +191,7 @@ export function mapDashboardWishlistOverview(
 			purchasedGifts: aggregates.purchasedGifts,
 			totalUnits: aggregates.totalUnits,
 			purchasedUnits: aggregates.purchasedUnits,
+			pendingInvitations,
 			...(isOwner && analytics
 				? {
 						latestViewAt: analytics.latestViewAt?.toISOString() ?? null,

@@ -95,7 +95,7 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 	};
 
 	return (
-		<div className="w-full px-4 py-8">
+		<div className="w-full p-7">
 			<div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 				<div>
 					<div className="mb-2 flex flex-wrap items-center gap-2">

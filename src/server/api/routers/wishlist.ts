@@ -294,17 +294,21 @@ export const wishlistRouter = createTRPCRouter({
 			});
 			const publicUrlPath = `/w/${wishlist.slug}`;
 			const publicUrl = toCanonicalWishlistUrl(publicUrlPath);
-			const [recentPurchases, analytics] = await Promise.all([
-				listWishlistRecentPurchases(asWishlistRecentPurchaseDb(ctx), {
-					wishlistId: input.wishlistId,
-				}),
-				isOwner
-					? getWishlistViewAnalytics(
-							asWishlistViewAnalyticsDb(ctx),
-							input.wishlistId,
-						)
-					: Promise.resolve(undefined),
-			]);
+			const [recentPurchases, pendingInvitations, analytics] =
+				await Promise.all([
+					listWishlistRecentPurchases(asWishlistRecentPurchaseDb(ctx), {
+						wishlistId: input.wishlistId,
+					}),
+					ctx.db.invite.count({
+						where: { wishlistId: input.wishlistId, status: "pending" },
+					}),
+					isOwner
+						? getWishlistViewAnalytics(
+								asWishlistViewAnalyticsDb(ctx),
+								input.wishlistId,
+							)
+						: Promise.resolve(undefined),
+				]);
 
 			return mapDashboardWishlistOverview(wishlist, {
 				isOwner,
@@ -313,6 +317,7 @@ export const wishlistRouter = createTRPCRouter({
 				whatsAppUrl: toWhatsAppShareUrl(publicUrl, wishlist.eventType),
 				readiness,
 				recentPurchases,
+				pendingInvitations,
 				analytics,
 			});
 		}),
