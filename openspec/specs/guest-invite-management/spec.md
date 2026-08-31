@@ -51,7 +51,7 @@ An invite's slug SHALL be editable by the owner and SHALL be unique within its w
 
 ### Requirement: Invitados management UI
 
-The wishlist detail SHALL provide an Invitados view at `/dashboard/wishlists/[id]/guests` that lists invites and supports adding, editing, and deleting an invite. The add/edit form SHALL capture the primary guest name (required), optional email and phone, up to 4 optional extra-guest names, and an editable slug. The list SHALL display each invite's party size and RSVP status and SHALL provide a control to copy that invite's personalized URL. For an invite that has responded, the row SHALL also display how many of the party are attending out of the party's total size. When at least one invitation exists, the view SHALL provide search across the primary guest name, named extra guests, primary email, and primary phone, plus invitation-level RSVP filters for all, pending, confirmed, and declined invitations. Search and status SHALL compose as an intersection, SHALL be represented in the page URL, and SHALL NOT replace the unfiltered person and invitation totals shown in the page header. Status-filter counts SHALL represent invitations in the complete unfiltered list. The view SHALL distinguish a wishlist with no invitations from an existing list with no matching filtered results.
+The wishlist detail SHALL provide an Invitados view at `/dashboard/wishlists/[id]/guests` that lists invites and supports adding, editing, and deleting an invite. The add/edit form SHALL capture the primary guest name (required), optional email and phone, up to 4 optional extra-guest names, and an editable slug. The list SHALL display each invite's party size and RSVP status and SHALL provide a control to copy that invite's personalized URL. For an invite that has responded, the row SHALL also display how many of the party are attending out of the party's total size. When the authenticated user is the wishlist owner, each row SHALL additionally display that personalized link's total recorded views and latest recorded view time, using an explicit empty state when it has never been viewed. When at least one invitation exists, the view SHALL provide search across the primary guest name, named extra guests, primary email, and primary phone, plus invitation-level RSVP filters for all, pending, confirmed, and declined invitations. Search and status SHALL compose as an intersection, SHALL be represented in the page URL, and SHALL NOT replace the unfiltered person and invitation totals shown in the page header. Status-filter counts SHALL represent invitations in the complete unfiltered list. The view SHALL distinguish a wishlist with no invitations from an existing list with no matching filtered results.
 
 #### Scenario: Owner adds an invite with extra guests
 - **WHEN** the owner submits the add form with a primary name and two extra-guest names
@@ -68,6 +68,14 @@ The wishlist detail SHALL provide an Invitados view at `/dashboard/wishlists/[id
 #### Scenario: Party confirmation count is visible to the owner
 - **WHEN** an invite with a party size of 3 has responded with the primary guest and one extra guest attending
 - **THEN** the list row shows that 2 of 3 are confirmed
+
+#### Scenario: Owner sees invitation-view metrics
+- **WHEN** an owner opens the guest list and an invite has recorded three personalized-link views, the latest at a known time
+- **THEN** that invite's row displays three views and that latest view time
+
+#### Scenario: Unviewed invitation is explicit
+- **WHEN** an owner opens the guest list and an invite has no recorded personalized-link views
+- **THEN** its row displays zero views and an explicit no-views-yet state instead of a misleading date
 
 #### Scenario: Pending invite shows no party count
 - **WHEN** an invite has status `pending`
