@@ -33,7 +33,7 @@ export function GiftsHeaderToolbar({
 					</p>
 				)}
 			</div>
-			<div className="flex gap-2">
+			<div className="hidden gap-2 md:flex">
 				<Button
 					onClick={() => setAddOpen(true)}
 					type="button"

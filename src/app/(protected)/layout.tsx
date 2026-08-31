@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/features/dashboard/app-sidebar";
+import { MobileTabBar } from "@/components/layouts/dashboard/mobile/mobile-tab-bar";
 import { ClerkApplicationLayout } from "@/components/providers/clerk-application-layout";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
@@ -9,10 +10,13 @@ export default function ProtectedLayout({
 }) {
 	return (
 		<ClerkApplicationLayout>
-			<div className="h-svh p-2 md:p-4">
-				<SidebarProvider className="h-[calc(100svh-1rem)] min-h-0 overflow-hidden rounded-xl md:h-[calc(100svh-2rem)]">
+			<div className="h-svh p-0 md:p-4">
+				<SidebarProvider className="h-svh min-h-0 overflow-hidden rounded-none md:h-[calc(100svh-2rem)] md:rounded-xl">
 					<AppSidebar />
-					<SidebarInset className="min-h-0">{children}</SidebarInset>
+					<SidebarInset className="min-h-0">
+						{children}
+						<MobileTabBar />
+					</SidebarInset>
 				</SidebarProvider>
 			</div>
 		</ClerkApplicationLayout>

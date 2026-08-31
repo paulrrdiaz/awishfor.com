@@ -72,3 +72,17 @@ export function activeSegmentFromPathname(
 export function sectionLabel(segment: WishlistSection) {
 	return NAV_ITEMS.find((item) => item.segment === segment)?.label ?? "";
 }
+
+const MOBILE_CHIP_SEGMENTS: WishlistSection[] = [
+	"gifts",
+	"guests",
+	"",
+	"design",
+];
+
+export function mobileChipItemsFor(isOwner: boolean) {
+	const items = navItemsFor(isOwner);
+	return MOBILE_CHIP_SEGMENTS.map((segment) =>
+		items.find((item) => item.segment === segment),
+	).filter((item): item is (typeof items)[number] => item !== undefined);
+}

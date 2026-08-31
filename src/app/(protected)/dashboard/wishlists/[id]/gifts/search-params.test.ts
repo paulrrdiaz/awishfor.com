@@ -23,13 +23,13 @@ describe("gifts search parameters", () => {
 			filter: "todos",
 			sort: "manual",
 		});
-		expect(loadGiftsSearchParams({ filter: "unknown", sort: "latest" })).toEqual(
-			{
-				q: "",
-				filter: "todos",
-				sort: "manual",
-			},
-		);
+		expect(
+			loadGiftsSearchParams({ filter: "unknown", sort: "latest" }),
+		).toEqual({
+			q: "",
+			filter: "todos",
+			sort: "manual",
+		});
 	});
 
 	it("refreshes the server page when query parameters change", () => {

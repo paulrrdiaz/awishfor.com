@@ -7,6 +7,14 @@ import { WishlistSettingsForm } from "@/components/features/dashboard/settings/w
 
 const updateSettingsMock = vi.hoisted(() => vi.fn());
 
+function getSaveButton() {
+	const [button] = screen.getAllByRole("button", { name: "Guardar cambios" });
+	if (!button) {
+		throw new Error("Guardar cambios button not found");
+	}
+	return button;
+}
+
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ refresh: vi.fn() }),
 }));
@@ -102,7 +110,7 @@ describe("WishlistSettingsForm subtitle", () => {
 		expect(input).toHaveValue("Celebramos juntos");
 		await user.clear(input);
 		await user.type(input, "Una fecha para recordar");
-		await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		await user.click(getSaveButton());
 
 		expect(updateSettingsMock).toHaveBeenCalledWith(
 			expect.objectContaining({ subtitle: "Una fecha para recordar" }),
@@ -113,7 +121,7 @@ describe("WishlistSettingsForm subtitle", () => {
 		const user = userEvent.setup();
 		render(<WishlistSettingsForm wishlist={wishlist as never} />);
 		await user.clear(screen.getByLabelText(/Subtítulo/));
-		await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		await user.click(getSaveButton());
 
 		expect(updateSettingsMock).toHaveBeenCalledWith(
 			expect.objectContaining({ subtitle: null }),
@@ -129,9 +137,7 @@ describe("WishlistSettingsForm subtitle", () => {
 		expect(
 			screen.getByText("El subtítulo debe tener como máximo 160 caracteres."),
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: "Guardar cambios" }),
-		).toBeDisabled();
+		expect(getSaveButton()).toBeDisabled();
 	});
 });
 
@@ -146,7 +152,7 @@ describe("WishlistSettingsForm event times", () => {
 			target: { value: "20:00" },
 		});
 
-		await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		await user.click(getSaveButton());
 
 		expect(updateSettingsMock).toHaveBeenCalledWith(
 			expect.objectContaining({ eventTime: "16:00", endTime: "20:00" }),

@@ -190,6 +190,8 @@ export type DashboardWishlistOverviewViewModel = {
 		totalUnits: number;
 		purchasedUnits: number;
 		pendingInvitations: number;
+		totalInvitations: number;
+		totalGuests: number;
 		totalViews?: number;
 		uniqueVisitors?: number;
 		latestViewAt?: string | null;

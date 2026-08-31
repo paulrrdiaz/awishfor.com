@@ -27,7 +27,11 @@ export function GuestsHeaderToolbar({
 					{totalInvites} {totalInvites === 1 ? "invitación" : "invitaciones"}
 				</span>
 			</div>
-			<Button onClick={() => setAddOpen(true)} type="button">
+			<Button
+				className="hidden md:inline-flex"
+				onClick={() => setAddOpen(true)}
+				type="button"
+			>
 				<Plus /> Agregar invitado
 			</Button>
 			<GuestSheet

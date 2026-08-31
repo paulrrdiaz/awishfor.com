@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { setGiftVisibilityAction } from "@/app/(protected)/dashboard/wishlists/[id]/gifts/actions";
+import { GiftActionSheet } from "@/components/layouts/dashboard/mobile/gift-action-sheet";
 import { Button } from "@/components/ui/button";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import { PurchaseDrawer } from "../purchases/purchase-drawer";
@@ -31,7 +32,7 @@ export function GiftRowActions({ gift, wishlistId, onEdit }: Props) {
 
 	return (
 		<>
-			<div className="flex shrink-0 items-center gap-1">
+			<div className="hidden shrink-0 items-center gap-1 md:flex">
 				{isHidden ? (
 					<Button
 						className="text-secondary"
@@ -49,6 +50,14 @@ export function GiftRowActions({ gift, wishlistId, onEdit }: Props) {
 					</Button>
 				)}
 				<GiftRowMenu
+					gift={gift}
+					onEdit={onEdit}
+					onOpenPurchases={() => setPurchaseDrawerOpen(true)}
+					wishlistId={wishlistId}
+				/>
+			</div>
+			<div className="shrink-0 md:hidden">
+				<GiftActionSheet
 					gift={gift}
 					onEdit={onEdit}
 					onOpenPurchases={() => setPurchaseDrawerOpen(true)}

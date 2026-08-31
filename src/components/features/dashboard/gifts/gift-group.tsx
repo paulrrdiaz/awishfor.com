@@ -13,9 +13,12 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { ArrowUpDownIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { reorderGiftsAction } from "@/app/(protected)/dashboard/wishlists/[id]/gifts/actions";
+import { GiftReorderMode } from "@/components/layouts/dashboard/mobile/gift-reorder-mode";
+import { Button } from "@/components/ui/button";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import { GiftSheet } from "./gift-sheet";
 import { SortableGiftRow } from "./sortable-gift-row";
@@ -37,6 +40,7 @@ export function GiftGroup({
 	const prevItemsRef = useRef(items);
 	const [editingGift, setEditingGift] =
 		useState<DashboardGiftRowViewModel | null>(null);
+	const [reorderMode, setReorderMode] = useState(false);
 
 	useEffect(() => {
 		setItems(gifts);
@@ -68,6 +72,31 @@ export function GiftGroup({
 
 	return (
 		<>
+			{items.length > 0 && (
+				<div className="flex items-center justify-between gap-2 md:hidden">
+					<p className="text-muted-foreground text-xs">
+						Desliza un regalo para editarlo.
+					</p>
+					{sortable && items.length > 1 && (
+						<Button
+							className="shrink-0"
+							onClick={() => setReorderMode(true)}
+							size="sm"
+							type="button"
+							variant="outline"
+						>
+							<ArrowUpDownIcon /> Reordenar
+						</Button>
+					)}
+				</div>
+			)}
+			{reorderMode && (
+				<GiftReorderMode
+					gifts={items}
+					onClose={() => setReorderMode(false)}
+					wishlistId={wishlistId}
+				/>
+			)}
 			<DndContext
 				collisionDetection={closestCenter}
 				id={`gifts-${wishlistId}`}

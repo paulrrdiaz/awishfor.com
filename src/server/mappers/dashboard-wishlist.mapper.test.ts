@@ -294,6 +294,8 @@ describe("mapDashboardWishlistOverview", () => {
 				readiness,
 				recentPurchases: [purchase],
 				pendingInvitations: 0,
+				totalInvitations: 3,
+				totalGuests: 5,
 			},
 		);
 
@@ -304,6 +306,8 @@ describe("mapDashboardWishlistOverview", () => {
 			totalUnits: 6,
 			purchasedUnits: 3,
 			pendingInvitations: 0,
+			totalInvitations: 3,
+			totalGuests: 5,
 		});
 		expect(result.recentPurchases).toEqual([
 			{
@@ -327,6 +331,8 @@ describe("mapDashboardWishlistOverview", () => {
 			readiness,
 			recentPurchases: [],
 			pendingInvitations: 0,
+			totalInvitations: 0,
+			totalGuests: 0,
 			analytics: {
 				totalViews: 4,
 				uniqueVisitors: 2,

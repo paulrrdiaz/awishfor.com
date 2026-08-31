@@ -294,21 +294,32 @@ export const wishlistRouter = createTRPCRouter({
 			});
 			const publicUrlPath = `/w/${wishlist.slug}`;
 			const publicUrl = toCanonicalWishlistUrl(publicUrlPath);
-			const [recentPurchases, pendingInvitations, analytics] =
-				await Promise.all([
-					listWishlistRecentPurchases(asWishlistRecentPurchaseDb(ctx), {
-						wishlistId: input.wishlistId,
-					}),
-					ctx.db.invite.count({
-						where: { wishlistId: input.wishlistId, status: "pending" },
-					}),
-					isOwner
-						? getWishlistViewAnalytics(
-								asWishlistViewAnalyticsDb(ctx),
-								input.wishlistId,
-							)
-						: Promise.resolve(undefined),
-				]);
+			const [
+				recentPurchases,
+				pendingInvitations,
+				totalInvitations,
+				extraGuestCount,
+				analytics,
+			] = await Promise.all([
+				listWishlistRecentPurchases(asWishlistRecentPurchaseDb(ctx), {
+					wishlistId: input.wishlistId,
+				}),
+				ctx.db.invite.count({
+					where: { wishlistId: input.wishlistId, status: "pending" },
+				}),
+				ctx.db.invite.count({
+					where: { wishlistId: input.wishlistId },
+				}),
+				ctx.db.inviteExtraGuest.count({
+					where: { invite: { wishlistId: input.wishlistId } },
+				}),
+				isOwner
+					? getWishlistViewAnalytics(
+							asWishlistViewAnalyticsDb(ctx),
+							input.wishlistId,
+						)
+					: Promise.resolve(undefined),
+			]);
 
 			return mapDashboardWishlistOverview(wishlist, {
 				isOwner,
@@ -318,6 +329,8 @@ export const wishlistRouter = createTRPCRouter({
 				readiness,
 				recentPurchases,
 				pendingInvitations,
+				totalInvitations,
+				totalGuests: totalInvitations + extraGuestCount,
 				analytics,
 			});
 		}),

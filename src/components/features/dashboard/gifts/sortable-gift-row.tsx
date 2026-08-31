@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
+import { SwipeableGiftRow } from "@/components/layouts/dashboard/mobile/swipeable-gift-row";
 import { cn } from "@/lib/utils";
 import type { DashboardGiftRowViewModel } from "@/server/mappers/view-models";
 import { GiftRow } from "./gift-row";
@@ -65,12 +66,14 @@ export function SortableGiftRow({
 					<GripVertical className="size-4" />
 				</button>
 				<div className="min-w-0 flex-1">
-					<GiftRow
-						categoryName={categoryName}
-						gift={gift}
-						onEdit={onEdit}
-						wishlistId={wishlistId}
-					/>
+					<SwipeableGiftRow onEdit={onEdit}>
+						<GiftRow
+							categoryName={categoryName}
+							gift={gift}
+							onEdit={onEdit}
+							wishlistId={wishlistId}
+						/>
+					</SwipeableGiftRow>
 				</div>
 			</div>
 		</li>

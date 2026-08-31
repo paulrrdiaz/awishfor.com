@@ -94,7 +94,7 @@ export async function updateGiftAction(
 export async function duplicateGiftAction(
 	wishlistId: string,
 	giftId: string,
-): Promise<void> {
+): Promise<{ id: string }> {
 	const localUserId = await getLocalUserId();
 	const existing = await getOwnedGift(db as unknown as DashboardGiftDatabase, {
 		localUserId,
@@ -107,6 +107,7 @@ export async function duplicateGiftAction(
 	});
 	await invalidateWishlist(gift.wishlistId);
 	revalidateGiftsRoute(gift.wishlistId);
+	return { id: gift.id };
 }
 
 export async function setGiftVisibilityAction(

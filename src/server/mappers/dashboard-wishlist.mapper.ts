@@ -39,6 +39,8 @@ type DashboardWishlistOverviewOptions = {
 	readiness: PublishReadinessResult;
 	recentPurchases: PurchaseWithGiftName[];
 	pendingInvitations: number;
+	totalInvitations: number;
+	totalGuests: number;
 	analytics?: WishlistViewAnalytics;
 };
 
@@ -168,6 +170,8 @@ export function mapDashboardWishlistOverview(
 		readiness,
 		recentPurchases,
 		pendingInvitations,
+		totalInvitations,
+		totalGuests,
 		analytics,
 	}: DashboardWishlistOverviewOptions,
 ): DashboardWishlistOverviewViewModel {
@@ -192,6 +196,8 @@ export function mapDashboardWishlistOverview(
 			totalUnits: aggregates.totalUnits,
 			purchasedUnits: aggregates.purchasedUnits,
 			pendingInvitations,
+			totalInvitations,
+			totalGuests,
 			...(isOwner && analytics
 				? {
 						latestViewAt: analytics.latestViewAt?.toISOString() ?? null,

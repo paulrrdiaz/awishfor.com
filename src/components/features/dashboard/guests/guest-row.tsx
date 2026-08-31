@@ -6,6 +6,7 @@ import { CopyInviteUrlButton } from "@/components/features/dashboard/guests/copy
 import { DeleteGuestDialog } from "@/components/features/dashboard/guests/delete-guest-dialog";
 import { OwnerRsvpControls } from "@/components/features/dashboard/guests/owner-rsvp-controls";
 import { RsvpStatusBadge } from "@/components/features/dashboard/guests/rsvp-status-badge";
+import { MobileGuestRsvpCard } from "@/components/layouts/dashboard/mobile/mobile-guest-rsvp-card";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -104,7 +105,14 @@ export function GuestRow({
 				</div>
 			)}
 
-			{isOwner && <OwnerRsvpControls invite={invite} wishlistId={wishlistId} />}
+			{isOwner && (
+				<div className="hidden md:block">
+					<OwnerRsvpControls invite={invite} wishlistId={wishlistId} />
+				</div>
+			)}
+			{isOwner && (
+				<MobileGuestRsvpCard invite={invite} wishlistId={wishlistId} />
+			)}
 
 			<div className="mt-auto flex items-center justify-between gap-2 border-border border-t pt-3">
 				<CopyInviteUrlButton url={inviteUrl} />

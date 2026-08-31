@@ -124,7 +124,7 @@ function DraftStrip({
 					Publicar
 				</Button>
 			</div>
-			<ul className="flex flex-wrap gap-x-4 gap-y-1">
+			<ul className="hidden flex-wrap gap-x-4 gap-y-1 md:flex">
 				{checks.map(([key, passed]) => (
 					<li className="flex items-center gap-1.5 text-xs" key={key}>
 						{passed ? (

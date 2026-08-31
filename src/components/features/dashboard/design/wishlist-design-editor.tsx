@@ -7,6 +7,7 @@ import { FontSelect } from "@/components/features/wishlist/font-select";
 import { LayoutPicker } from "@/components/features/wishlist/layout-picker";
 import { MultiImageUpload } from "@/components/features/wishlist/multi-image-upload";
 import { ThemeSwatchPicker } from "@/components/features/wishlist/theme-swatch-picker";
+import { EditorCommitBar } from "@/components/layouts/dashboard/mobile/editor-commit-bar";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -94,6 +95,33 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 		}));
 	};
 
+	const handleSave = () => {
+		updateDesign.mutate({
+			id: wishlist.id,
+			themeId: design.themeId,
+			layoutId: design.layoutId,
+			headingFont: design.headingFont,
+			bodyFont: design.bodyFont,
+			buttonStyle: design.buttonStyle,
+			coverImages: design.images.map(({ url, width, height }) => ({
+				url,
+				width,
+				height,
+			})),
+		});
+	};
+
+	const handleDiscard = () => {
+		setDesign({
+			themeId: wishlist.themeId,
+			layoutId: wishlist.layoutId,
+			headingFont: wishlist.headingFont,
+			bodyFont: wishlist.bodyFont,
+			buttonStyle: wishlist.buttonStyle,
+			images: wishlist.images,
+		});
+	};
+
 	return (
 		<div className="w-full p-7">
 			<div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -112,22 +140,9 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 				</div>
 				<div className="flex flex-col items-start gap-2 md:items-end">
 					<Button
+						className="hidden md:inline-flex"
 						disabled={!hasChanges || updateDesign.isPending}
-						onClick={() => {
-							updateDesign.mutate({
-								id: wishlist.id,
-								themeId: design.themeId,
-								layoutId: design.layoutId,
-								headingFont: design.headingFont,
-								bodyFont: design.bodyFont,
-								buttonStyle: design.buttonStyle,
-								coverImages: design.images.map(({ url, width, height }) => ({
-									url,
-									width,
-									height,
-								})),
-							});
-						}}
+						onClick={handleSave}
 						type="button"
 					>
 						{updateDesign.isPending ? "Guardando..." : "Guardar diseño"}
@@ -223,6 +238,14 @@ export function WishlistDesignEditor({ wishlist }: Props) {
 					</div>
 				</section>
 			</div>
+
+			<EditorCommitBar
+				discardDisabled={!hasChanges || updateDesign.isPending}
+				onDiscard={handleDiscard}
+				onSave={handleSave}
+				saveDisabled={!hasChanges || updateDesign.isPending}
+				saveLabel={updateDesign.isPending ? "Guardando..." : "Guardar diseño"}
+			/>
 		</div>
 	);
 }

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { MessageVariantPicker } from "@/components/features/wishlist/message-variant-picker";
 import { MotifPicker } from "@/components/features/wishlist/motif-picker";
+import { EditorCommitBar } from "@/components/layouts/dashboard/mobile/editor-commit-bar";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -294,8 +295,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		setRsvpDeadlineError(Boolean(next && eventDate && next > eventDate));
 	}
 
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
+	function saveSettings() {
 		if (!canSave) return;
 		updateSettings.mutate({
 			id: wishlist.id,
@@ -326,6 +326,50 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			currency: currency as Currency,
 			showHowItWorks,
 		});
+	}
+
+	function handleSubmit(e: React.FormEvent) {
+		e.preventDefault();
+		saveSettings();
+	}
+
+	function resetToSaved() {
+		setTitle(wishlist.title);
+		setSubtitle(wishlist.subtitle ?? "");
+		setSlug(wishlist.slug);
+		setSavedSlug(wishlist.slug);
+		setEventDate(wishlist.eventDate ? wishlist.eventDate.split("T")[0] : "");
+		setEventTime(wishlist.eventTime ?? "");
+		setEndTime(wishlist.endTime ?? "");
+		setRsvpDeadline(
+			wishlist.rsvpDeadline ? wishlist.rsvpDeadline.split("T")[0] : "",
+		);
+		setRsvpDeadlineError(false);
+		setEventLocation(wishlist.eventLocation ?? "");
+		setDressCode(wishlist.dressCode ?? "");
+		setWelcomeMessage(wishlist.welcomeMessage ?? "");
+		setWelcomeMessageAttribution(wishlist.welcomeMessageAttribution ?? "");
+		setDeliveryRecipientName(wishlist.deliveryRecipientName ?? "");
+		setDeliveryDocumentId(wishlist.deliveryDocumentId ?? "");
+		setDeliveryAddress(wishlist.deliveryAddress ?? "");
+		setDeliveryPhone(wishlist.deliveryPhone ?? "");
+		setThankYouMessage(wishlist.thankYouMessage ?? "");
+		setGiftListMessage(wishlist.giftListMessage ?? "");
+		setCountdownVariant(resolveCountdownVariant(wishlist.countdownVariant).id);
+		setWelcomeMessageVariant(
+			resolveWelcomeVariant(wishlist.welcomeMessageVariant).id,
+		);
+		setThankYouMessageVariant(
+			resolveThankYouVariant(wishlist.thankYouMessageVariant).id,
+		);
+		setMotifId(wishlist.motifId);
+		setMotifTreatment(wishlist.motifTreatment);
+		setMotifPalette(wishlist.motifPalette);
+		setLanguage(wishlist.language);
+		setCurrency(wishlist.currency);
+		setShowHowItWorks(wishlist.showHowItWorks);
+		setSlugStatus("idle");
+		setSlugWarningAck(false);
 	}
 
 	return (
@@ -745,7 +789,7 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					</div>
 				</section>
 
-				<div className="flex justify-end">
+				<div className="hidden justify-end md:flex">
 					<Button disabled={!canSave || updateSettings.isPending} type="submit">
 						{updateSettings.isPending ? "Guardando…" : "Guardar cambios"}
 					</Button>
@@ -839,6 +883,14 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					)}
 				</div>
 			)}
+
+			<EditorCommitBar
+				discardDisabled={updateSettings.isPending}
+				onDiscard={resetToSaved}
+				onSave={saveSettings}
+				saveDisabled={!canSave || updateSettings.isPending}
+				saveLabel={updateSettings.isPending ? "Guardando…" : "Guardar cambios"}
+			/>
 		</div>
 	);
 }

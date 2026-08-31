@@ -61,3 +61,78 @@ export const toEmailShareUrl = (
 	const body = whatsAppMessageForEvent(eventType, publicUrl);
 	return `mailto:?subject=${encodeURIComponent(subject as string)}&body=${encodeURIComponent(body)}`;
 };
+
+export type SharePurpose = "invitation" | "reminder" | "thanks";
+
+export const SHARE_PURPOSE_LABELS: Record<SharePurpose, string> = {
+	invitation: "Invitación",
+	reminder: "Recordatorio",
+	thanks: "Gracias",
+};
+
+type GuestTemplate = (name: string, url: string) => string;
+
+const GUEST_TEMPLATES: Record<SharePurpose, Record<string, GuestTemplate>> = {
+	invitation: {
+		baby_shower: (name, url) =>
+			`¡Hola ${name}! 🍼 Mi baby shower se acerca y quiero invitarte a ver mi lista de deseos y confirmar tu asistencia aquí: ${url}`,
+		birthday: (name, url) =>
+			`¡Hola ${name}! 🎂 Es mi cumpleaños y me encantaría que vieras mi wishlist y confirmes si nos acompañas: ${url}`,
+		wedding: (name, url) =>
+			`¡Hola ${name}! 💍 Nos casamos y queremos invitarte a celebrar con nosotros. Aquí puedes ver nuestra lista y confirmar tu asistencia: ${url}`,
+		housewarming: (name, url) =>
+			`¡Hola ${name}! 🏡 Nos mudamos a nuestro nuevo hogar y queremos invitarte a celebrar con nosotros. Aquí puedes ver nuestra lista y confirmar tu asistencia: ${url}`,
+		general: (name, url) =>
+			`¡Hola ${name}! Te invito a ver mi wishlist y confirmar tu asistencia aquí: ${url}`,
+	},
+	reminder: {
+		baby_shower: (name, url) =>
+			`¡Hola ${name}! 🍼 Un recordatorio de mi baby shower — aún no he recibido tu confirmación. Puedes ver la lista y responder aquí: ${url}`,
+		birthday: (name, url) =>
+			`¡Hola ${name}! 🎂 Te recuerdo mi cumpleaños — aún no he recibido tu confirmación. Puedes ver la lista y responder aquí: ${url}`,
+		wedding: (name, url) =>
+			`¡Hola ${name}! 💍 Un recordatorio de nuestra boda — aún no hemos recibido tu confirmación. Puedes ver la lista y responder aquí: ${url}`,
+		housewarming: (name, url) =>
+			`¡Hola ${name}! 🏡 Te recuerdo la inauguración de nuestro nuevo hogar — aún no he recibido tu confirmación. Puedes ver la lista y responder aquí: ${url}`,
+		general: (name, url) =>
+			`¡Hola ${name}! Un recordatorio — aún no he recibido tu confirmación. Puedes ver la lista y responder aquí: ${url}`,
+	},
+	thanks: {
+		baby_shower: (name, url) =>
+			`¡Hola ${name}! 🍼 Muchas gracias por acompañarme en mi baby shower y por tu regalo, significó mucho para mí. Aquí puedes ver la lista si quieres revisarla de nuevo: ${url}`,
+		birthday: (name, url) =>
+			`¡Hola ${name}! 🎂 Muchas gracias por acompañarme en mi cumpleaños y por tu regalo, significó mucho para mí. Aquí puedes ver la lista si quieres revisarla de nuevo: ${url}`,
+		wedding: (name, url) =>
+			`¡Hola ${name}! 💍 Muchas gracias por celebrar con nosotros nuestra boda y por tu regalo, significó mucho para nosotros. Aquí puedes ver la lista si quieres revisarla de nuevo: ${url}`,
+		housewarming: (name, url) =>
+			`¡Hola ${name}! 🏡 Muchas gracias por acompañarnos en la inauguración de nuestro hogar y por tu regalo, significó mucho para nosotros. Aquí puedes ver la lista si quieres revisarla de nuevo: ${url}`,
+		general: (name, url) =>
+			`¡Hola ${name}! Muchas gracias por tu regalo, significó mucho. Aquí puedes ver la lista si quieres revisarla de nuevo: ${url}`,
+	},
+};
+
+export function guestWhatsAppMessage({
+	purpose,
+	eventType,
+	guestName,
+	inviteUrl,
+}: {
+	purpose: SharePurpose;
+	eventType: string | null | undefined;
+	guestName: string;
+	inviteUrl: string;
+}): string {
+	const table = GUEST_TEMPLATES[purpose];
+	const template =
+		eventType && eventType in table ? table[eventType] : table.general;
+	return (template as GuestTemplate)(guestName, inviteUrl);
+}
+
+export function toGuestWhatsAppShareUrl(input: {
+	purpose: SharePurpose;
+	eventType: string | null | undefined;
+	guestName: string;
+	inviteUrl: string;
+}): string {
+	return `https://wa.me/?text=${encodeURIComponent(guestWhatsAppMessage(input))}`;
+}
