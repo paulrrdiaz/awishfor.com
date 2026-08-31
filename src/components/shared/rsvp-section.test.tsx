@@ -93,6 +93,25 @@ describe("RsvpSection", () => {
 		expect(screen.getByTestId("public-wishlist-trpc-provider")).toBeVisible();
 	});
 
+	it("renders owner-locked responses read-only", () => {
+		render(
+			<RsvpSection
+				{...defaultProps}
+				eventDate="2026-10-17"
+				guest={makeGuest({
+					status: "confirmed",
+					responseSource: "owner",
+					responseLockedAt: "2026-06-28T10:00:00.000Z",
+				})}
+			/>,
+		);
+
+		expect(
+			screen.getByText("Respuesta registrada por el anfitrión"),
+		).toBeVisible();
+		expect(screen.queryByRole("button", { name: "Cambiar" })).toBeNull();
+	});
+
 	it("keeps the RSVP deadline's stored calendar day for viewers west of UTC", () => {
 		const previousTimezone = process.env.TZ;
 		process.env.TZ = "America/Lima";

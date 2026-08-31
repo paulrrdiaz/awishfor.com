@@ -9,13 +9,20 @@ import {
 	createInvite,
 	deleteInvite,
 	getOwnedInvite,
+	getOwnerInvite,
 	type InviteDatabase,
+	type OwnerRsvpDatabase,
+	recordOwnerRsvp,
+	reopenOwnerRsvp,
 	updateInvite,
 } from "@/server/services/invite.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
 import {
 	type CreateInviteInput,
 	createInviteSchema,
+	type RecordOwnerRsvpInput,
+	recordOwnerRsvpSchema,
+	reopenOwnerRsvpSchema,
 	type UpdateInviteInput,
 	updateInviteSchema,
 } from "@/server/validators/invite.schema";
@@ -72,5 +79,37 @@ export async function deleteInviteAction(
 		inviteId,
 	});
 	await deleteInvite(db as unknown as InviteDatabase, { inviteId });
+	revalidateGuestsRoute(wishlistId);
+}
+
+export async function recordOwnerRsvpAction(
+	wishlistId: string,
+	input: RecordOwnerRsvpInput,
+): Promise<void> {
+	const parsed = recordOwnerRsvpSchema.parse(input);
+	const localUserId = await getLocalUserId();
+	const invite = await getOwnerInvite(db as unknown as InviteDatabase, {
+		localUserId,
+		inviteId: parsed.inviteId,
+	});
+	await recordOwnerRsvp(db as unknown as OwnerRsvpDatabase, {
+		invite,
+		status: parsed.status,
+		extraGuests: parsed.extraGuests,
+	});
+	revalidateGuestsRoute(wishlistId);
+}
+
+export async function reopenOwnerRsvpAction(
+	wishlistId: string,
+	inviteId: string,
+): Promise<void> {
+	const parsed = reopenOwnerRsvpSchema.parse({ inviteId });
+	const localUserId = await getLocalUserId();
+	await getOwnerInvite(db as unknown as InviteDatabase, {
+		localUserId,
+		inviteId: parsed.inviteId,
+	});
+	await reopenOwnerRsvp(db as unknown as OwnerRsvpDatabase, parsed);
 	revalidateGuestsRoute(wishlistId);
 }

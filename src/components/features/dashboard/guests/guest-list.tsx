@@ -8,9 +8,10 @@ import type { DashboardInviteViewModel } from "@/server/mappers/view-models";
 type Props = {
 	wishlistId: string;
 	invites: (DashboardInviteViewModel & { inviteUrl: string })[];
+	isOwner?: boolean;
 };
 
-export function GuestList({ wishlistId, invites }: Props) {
+export function GuestList({ wishlistId, invites, isOwner = false }: Props) {
 	const [editingInvite, setEditingInvite] =
 		useState<DashboardInviteViewModel | null>(null);
 
@@ -22,6 +23,7 @@ export function GuestList({ wishlistId, invites }: Props) {
 						<GuestRow
 							invite={invite}
 							inviteUrl={invite.inviteUrl}
+							isOwner={isOwner}
 							onEdit={() => setEditingInvite(invite)}
 							wishlistId={wishlistId}
 						/>

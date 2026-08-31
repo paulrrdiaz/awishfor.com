@@ -27,6 +27,8 @@ export function mapDashboardInvite(
 				}
 			: {}),
 		respondedAt: invite.respondedAt?.toISOString() ?? null,
+		responseSource: invite.responseSource,
+		responseLockedAt: invite.responseLockedAt?.toISOString() ?? null,
 		createdAt: invite.createdAt.toISOString(),
 		updatedAt: invite.updatedAt.toISOString(),
 	};

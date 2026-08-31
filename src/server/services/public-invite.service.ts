@@ -72,6 +72,8 @@ export async function resolvePersonalizedInvite(
 				status: guest.status,
 			})),
 			status: invite.status,
+			responseSource: invite.responseSource,
+			responseLockedAt: invite.responseLockedAt?.toISOString() ?? null,
 		},
 	};
 }
@@ -95,7 +97,7 @@ function sameIdSet(a: string[], b: string[]): boolean {
 		return false;
 	}
 	const bSet = new Set(b);
-	return a.every((id) => bSet.has(id));
+	return bSet.size === b.length && a.every((id) => bSet.has(id));
 }
 
 export async function respondToInvite(
@@ -116,6 +118,12 @@ export async function respondToInvite(
 	});
 	if (!invite) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+	}
+	if (invite.responseLockedAt) {
+		throw new TRPCError({
+			code: "CONFLICT",
+			message: "La respuesta fue registrada por el anfitrión",
+		});
 	}
 
 	if (
@@ -149,7 +157,7 @@ export async function respondToInvite(
 	const updated = await db.$transaction(async (tx) => {
 		const updatedInvite = await tx.invite.update({
 			where: { id: invite.id },
-			data: { status, respondedAt: new Date() },
+			data: { status, respondedAt: new Date(), responseSource: "guest" },
 		});
 
 		for (const guest of invite.extraGuests) {

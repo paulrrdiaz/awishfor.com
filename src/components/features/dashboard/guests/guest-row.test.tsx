@@ -5,6 +5,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DashboardInviteViewModel } from "@/server/mappers/view-models";
 import { GuestRow } from "./guest-row";
 
+vi.mock("@/app/(protected)/dashboard/wishlists/[id]/guests/actions", () => ({
+	recordOwnerRsvpAction: vi.fn(),
+	reopenOwnerRsvpAction: vi.fn(),
+}));
+
 function makeInvite(
 	overrides: Partial<DashboardInviteViewModel> = {},
 ): DashboardInviteViewModel {
@@ -111,5 +116,33 @@ describe("GuestRow", () => {
 		);
 
 		expect(screen.queryByText(/vistas/)).toBeNull();
+	});
+
+	it("shows RSVP controls only to the wishlist owner", () => {
+		const { rerender } = render(
+			<GuestRow
+				invite={makeInvite()}
+				inviteUrl="https://example.com/w/lista/lady-castillo"
+				isOwner
+				onEdit={vi.fn()}
+				wishlistId="wishlist_1"
+			/>,
+		);
+		expect(
+			screen.getByRole("button", { name: "Registrar respuesta" }),
+		).toBeVisible();
+
+		rerender(
+			<GuestRow
+				invite={makeInvite()}
+				inviteUrl="https://example.com/w/lista/lady-castillo"
+				isOwner={false}
+				onEdit={vi.fn()}
+				wishlistId="wishlist_1"
+			/>,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Registrar respuesta" }),
+		).toBeNull();
 	});
 });

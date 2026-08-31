@@ -53,6 +53,11 @@ enum RsvpStatus {
   declined
 }
 
+enum RsvpResponseSource {
+  guest
+  owner
+}
+
 enum ImageOrientation {
   landscape
   portrait
@@ -229,6 +234,8 @@ model Invite {
   viewCount     Int                @default(0)
   lastViewedAt  DateTime?
   respondedAt   DateTime?
+  responseSource RsvpResponseSource?
+  responseLockedAt DateTime?
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 

@@ -26,6 +26,8 @@ function makeInviteRow(overrides: Record<string, unknown> = {}) {
 		status: "pending",
 		openedAt: null,
 		respondedAt: null,
+		responseSource: null,
+		responseLockedAt: null,
 		createdAt: now,
 		updatedAt: now,
 		extraGuests: [],
@@ -328,5 +330,118 @@ describe("inviteRouter.respond", () => {
 			}),
 		).rejects.toMatchObject({ code: "BAD_REQUEST" });
 		expect(db.invite.update).not.toHaveBeenCalled();
+	});
+});
+
+describe("inviteRouter owner RSVP", () => {
+	it("records a whole-party owner response and locks the invite", async () => {
+		const inviteUpdate = vi.fn().mockResolvedValue(makeInviteRow());
+		const db = makeDb({
+			inviteFindFirst: vi
+				.fn()
+				.mockResolvedValue(
+					makeInviteRow({ extraGuests: [{ id: "g1", status: "pending" }] }),
+				),
+			inviteUpdate,
+		});
+
+		await makeCaller(db).recordOwnerRsvp({
+			inviteId: "invite_1",
+			status: "confirmed",
+			extraGuests: [{ id: "g1", status: "declined" }],
+		});
+
+		expect(inviteUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					responseSource: "owner",
+					responseLockedAt: expect.any(Date),
+				}),
+			}),
+		);
+	});
+
+	it("rejects collaborator attempts to manage RSVP locks", async () => {
+		const db = makeDb({
+			inviteFindFirst: vi.fn().mockResolvedValue(makeInviteRow()),
+			wishlistFindFirst: vi.fn().mockResolvedValue(null),
+		});
+
+		await expect(
+			makeCaller(db).reopenOwnerRsvp({ inviteId: "invite_1" }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+		expect(db.invite.update).not.toHaveBeenCalled();
+	});
+
+	it("corrects a locked response, forces declined companions, and bypasses guest deadlines", async () => {
+		const inviteUpdate = vi.fn().mockResolvedValue(makeInviteRow());
+		const inviteExtraGuestUpdate = vi.fn().mockResolvedValue({});
+		const db = makeDb({
+			inviteFindFirst: vi.fn().mockResolvedValue(
+				makeInviteRow({
+					responseLockedAt: new Date("2026-06-01"),
+					extraGuests: [{ id: "g1", status: "confirmed" }],
+				}),
+			),
+			inviteUpdate,
+			inviteExtraGuestUpdate,
+			wishlistFindFirst: vi.fn().mockResolvedValue({ id: "wishlist_1" }),
+		});
+
+		await makeCaller(db).recordOwnerRsvp({
+			inviteId: "invite_1",
+			status: "declined",
+			extraGuests: [{ id: "g1", status: "confirmed" }],
+		});
+
+		expect(inviteExtraGuestUpdate).toHaveBeenCalledWith({
+			where: { id: "g1" },
+			data: { status: "declined" },
+		});
+		expect(inviteUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({ status: "declined" }),
+			}),
+		);
+	});
+
+	it("rejects owner responses with an incomplete companion set", async () => {
+		const inviteUpdate = vi.fn();
+		const db = makeDb({
+			inviteFindFirst: vi
+				.fn()
+				.mockResolvedValue(
+					makeInviteRow({ extraGuests: [{ id: "g1", status: "pending" }] }),
+				),
+			inviteUpdate,
+		});
+
+		await expect(
+			makeCaller(db).recordOwnerRsvp({
+				inviteId: "invite_1",
+				status: "confirmed",
+				extraGuests: [],
+			}),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		expect(inviteUpdate).not.toHaveBeenCalled();
+	});
+
+	it("reopens a locked response without changing attendance statuses", async () => {
+		const inviteUpdate = vi.fn().mockResolvedValue(makeInviteRow());
+		const db = makeDb({
+			inviteFindFirst: vi
+				.fn()
+				.mockResolvedValue(
+					makeInviteRow({ status: "confirmed", responseLockedAt: new Date() }),
+				),
+			inviteUpdate,
+		});
+
+		await makeCaller(db).reopenOwnerRsvp({ inviteId: "invite_1" });
+
+		expect(inviteUpdate).toHaveBeenCalledWith({
+			where: { id: "invite_1" },
+			data: { responseSource: null, responseLockedAt: null },
+		});
 	});
 });

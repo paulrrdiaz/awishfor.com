@@ -142,7 +142,14 @@ function RsvpForm({
 	const analytics = usePublicWishlistAnalytics();
 
 	const respondMutation = api.invite.respond.useMutation({
-		onError: () => {
+		onError: (error) => {
+			if (error.message === "La respuesta fue registrada por el anfitrión") {
+				toast.error(
+					"El anfitrión registró esta respuesta. Ya no se puede editar.",
+				);
+				router.refresh();
+				return;
+			}
 			toast.error("No pudimos guardar tu respuesta. Intenta de nuevo.");
 		},
 		onSuccess: (data) => {
@@ -168,7 +175,9 @@ function RsvpForm({
 	});
 
 	const closed = isRsvpClosed(eventDate, rsvpDeadline);
-	const showForm = !closed && (mode === "form" || guest.status === "pending");
+	const ownerLocked = Boolean(guest.responseLockedAt);
+	const showForm =
+		!ownerLocked && !closed && (mode === "form" || guest.status === "pending");
 	const isDeclined = guest.status === "declined";
 
 	function openForm() {
@@ -352,6 +361,11 @@ function RsvpForm({
 										? "No podrás asistir"
 										: `Confirmado — ${attendingPartyNames}`}
 								</div>
+								{ownerLocked && (
+									<div className="mt-0.5 text-[12px] text-muted-foreground">
+										Respuesta registrada por el anfitrión
+									</div>
+								)}
 								{!isDeclined && eventDate && (
 									<div className="mt-0.5 text-[12px] text-muted-foreground">
 										Te esperamos el{" "}
@@ -360,7 +374,7 @@ function RsvpForm({
 									</div>
 								)}
 							</div>
-							{!closed && (
+							{!closed && !ownerLocked && (
 								<button
 									className="whitespace-nowrap text-[11.5px] text-accent-foreground underline"
 									onClick={openForm}

@@ -55,6 +55,8 @@ export type PublicGuestViewModel = {
 	primaryName: string;
 	extraGuests: PublicGuestExtraGuestViewModel[];
 	status: string;
+	responseSource?: string | null;
+	responseLockedAt?: string | null;
 };
 
 export type PublicContributorsViewModel = {
@@ -219,6 +221,8 @@ export type DashboardInviteViewModel = {
 	viewCount?: number;
 	lastViewedAt?: string | null;
 	respondedAt: string | null;
+	responseSource?: string | null;
+	responseLockedAt?: string | null;
 	createdAt: string;
 	updatedAt: string;
 };

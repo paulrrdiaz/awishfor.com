@@ -98,8 +98,25 @@ export const respondInviteSchema = z.object({
 	extraGuests: z.array(respondInviteExtraGuestSchema).default([]),
 });
 
+export const ownerRsvpExtraGuestSchema = z.object({
+	id: z.string().min(1),
+	status: z.enum(["confirmed", "declined"]),
+});
+
+export const recordOwnerRsvpSchema = z.object({
+	inviteId: inviteIdSchema,
+	status: z.enum(["confirmed", "declined"]),
+	extraGuests: z.array(ownerRsvpExtraGuestSchema).default([]),
+});
+
+export const reopenOwnerRsvpSchema = z.object({
+	inviteId: inviteIdSchema,
+});
+
 export type CreateInviteInput = z.infer<typeof createInviteSchema>;
 export type UpdateInviteInput = z.infer<typeof updateInviteSchema>;
 export type DeleteInviteInput = z.infer<typeof deleteInviteSchema>;
 export type ListInvitesInput = z.infer<typeof listInvitesSchema>;
 export type RespondInviteInput = z.infer<typeof respondInviteSchema>;
+export type RecordOwnerRsvpInput = z.infer<typeof recordOwnerRsvpSchema>;
+export type ReopenOwnerRsvpInput = z.infer<typeof reopenOwnerRsvpSchema>;

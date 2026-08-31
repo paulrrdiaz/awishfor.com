@@ -37,7 +37,7 @@ Each qualifying browser view of a personalized invite page SHALL increment that 
 
 ### Requirement: Public RSVP response
 
-The `invite` router SHALL expose a public procedure that lets a guest, from their personalized page, submit one response covering the whole party: an RSVP status of `confirmed` or `declined` for the primary guest, and a status of `confirmed` or `declined` for each of the invite's extra guests. On a successful response the system SHALL persist the primary status, persist each extra guest's status, and set `respondedAt` to the current time. The procedure SHALL identify the invite by wishlist slug and guest slug, SHALL reject any status value other than `confirmed` or `declined`, and SHALL reject a response whose extra-guest identifiers do not exactly match the invite's extra guests.
+The `invite` router SHALL expose a public procedure that lets a guest, from their personalized page, submit one response covering the whole party: an RSVP status of `confirmed` or `declined` for the primary guest, and a status of `confirmed` or `declined` for each of the invite's extra guests. On a successful response the system SHALL persist the primary status, persist each extra guest's status, set `respondedAt` to the current time, and leave the RSVP response unlocked. The procedure SHALL identify the invite by wishlist slug and guest slug, SHALL reject any status value other than `confirmed` or `declined`, SHALL reject a response whose extra-guest identifiers do not exactly match the invite's extra guests, and SHALL reject a response when the invitation has an owner-created RSVP lock.
 
 #### Scenario: Guest confirms attendance
 
@@ -66,8 +66,13 @@ The `invite` router SHALL expose a public procedure that lets a guest, from thei
 
 #### Scenario: Response replaces an earlier response
 
-- **WHEN** a guest who already responded submits a different response before the event date
+- **WHEN** a guest who already responded submits a different response before the event date and the invite is not owner-locked
 - **THEN** the new primary and extra-guest statuses replace the previous ones and `respondedAt` is updated
+
+#### Scenario: Owner-locked response rejects a guest submission
+
+- **WHEN** a guest attempts to submit or change an RSVP through an owner-locked personalized link
+- **THEN** the procedure rejects the submission and preserves the locked response
 
 ### Requirement: RSVP section in every layout
 
@@ -138,16 +143,21 @@ The `PublicWishlistViewModel` SHALL carry the wishlist's optional RSVP deadline.
 
 ### Requirement: RSVP section responded state
 
-Once an invite has been responded to, the RSVP section SHALL render a confirmation summary in place of the form, stating the outcome and naming the attending party. While the wishlist's event date has not passed, the summary SHALL offer a control that returns the guest to the form with their previous answers pre-selected. Once the event date has passed, or when the wishlist has no event date and the RSVP deadline has passed, the summary SHALL be read-only and SHALL NOT offer that control.
+Once an invite has been responded to, the RSVP section SHALL render a confirmation summary in place of the form, stating the outcome and naming the attending party. When the response is owner-locked, the summary SHALL state that the host registered the response and SHALL be read-only regardless of the event date or RSVP deadline. When the response is not owner-locked and the wishlist's event date has not passed, the summary SHALL offer a control that returns the guest to the form with their previous answers pre-selected. Once the event date has passed, or when the wishlist has no event date and the RSVP deadline has passed, an unlocked response summary SHALL be read-only and SHALL NOT offer that control.
 
 #### Scenario: Responded invite shows the summary
 
 - **WHEN** a guest opens a personalized page for an invite whose status is `confirmed`
 - **THEN** the RSVP section shows a confirmation summary naming the attending party instead of the form
 
+#### Scenario: Owner-locked response is read-only before the event
+
+- **WHEN** a guest opens an owner-locked personalized link before the event date
+- **THEN** the RSVP section identifies the host-recorded result and does not show an edit control
+
 #### Scenario: Guest can change their answer before the event
 
-- **WHEN** the event date has not passed and the guest activates the change control
+- **WHEN** the event date has not passed, the response is not owner-locked, and the guest activates the change control
 - **THEN** the form reopens with the guest's previous primary and extra-guest choices pre-selected
 
 #### Scenario: Summary is read-only after the event
@@ -197,4 +207,3 @@ When a personalized invite has a `confirmed` primary RSVP status and its wishlis
 
 - **WHEN** a guest declines attendance
 - **THEN** the personalized page shows the declined RSVP summary without calendar-save access
-

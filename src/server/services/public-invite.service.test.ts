@@ -24,6 +24,8 @@ function makeInvite(overrides: Record<string, unknown> = {}) {
 		status: "pending",
 		openedAt: null,
 		respondedAt: null,
+		responseSource: null,
+		responseLockedAt: null,
 		createdAt: now,
 		updatedAt: now,
 		extraGuests: [],
@@ -192,6 +194,8 @@ describe("resolvePersonalizedInvite", () => {
 					{ id: "g2", name: null, status: "pending" },
 				],
 				status: "confirmed",
+				responseSource: null,
+				responseLockedAt: null,
 			},
 		});
 	});
@@ -221,7 +225,11 @@ describe("respondToInvite", () => {
 		expect(inviteUpdate).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { id: "invite_1" },
-				data: { status: "confirmed", respondedAt: expect.any(Date) },
+				data: expect.objectContaining({
+					status: "confirmed",
+					respondedAt: expect.any(Date),
+					responseSource: "guest",
+				}),
 			}),
 		);
 		expect(extraGuestUpdate).toHaveBeenCalledWith({
@@ -364,7 +372,11 @@ describe("respondToInvite", () => {
 		expect(result).toEqual({ status: "declined" });
 		expect(inviteUpdate).toHaveBeenCalledWith(
 			expect.objectContaining({
-				data: { status: "declined", respondedAt: expect.any(Date) },
+				data: expect.objectContaining({
+					status: "declined",
+					respondedAt: expect.any(Date),
+					responseSource: "guest",
+				}),
 			}),
 		);
 	});
@@ -380,5 +392,21 @@ describe("respondToInvite", () => {
 				extraGuests: [],
 			}),
 		).rejects.toThrow(TRPCError);
+	});
+
+	it("rejects an owner-locked response before any writes", async () => {
+		const { db, inviteUpdate } = makeRespondDb({
+			invite: makeInvite({ responseLockedAt: new Date("2026-06-01") }),
+		});
+
+		await expect(
+			respondToInvite(db, {
+				wishlistSlug: "boda-lu",
+				guestSlug: "pedro-castillo",
+				status: "confirmed",
+				extraGuests: [],
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		expect(inviteUpdate).not.toHaveBeenCalled();
 	});
 });

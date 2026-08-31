@@ -4,6 +4,7 @@ import { Eye, MoreHorizontal, Pencil, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import { CopyInviteUrlButton } from "@/components/features/dashboard/guests/copy-invite-url-button";
 import { DeleteGuestDialog } from "@/components/features/dashboard/guests/delete-guest-dialog";
+import { OwnerRsvpControls } from "@/components/features/dashboard/guests/owner-rsvp-controls";
 import { RsvpStatusBadge } from "@/components/features/dashboard/guests/rsvp-status-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ type Props = {
 	wishlistId: string;
 	inviteUrl: string;
 	onEdit: () => void;
+	isOwner?: boolean;
 };
 
 function confirmedCount(invite: DashboardInviteViewModel): number {
@@ -37,7 +39,13 @@ function formatLastViewedAt(value: string | null): string {
 	}).format(new Date(value));
 }
 
-export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
+export function GuestRow({
+	invite,
+	wishlistId,
+	inviteUrl,
+	onEdit,
+	isOwner = false,
+}: Props) {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const hasResponded = invite.status !== "pending";
 	const hasViewAnalytics = invite.viewCount !== undefined;
@@ -95,6 +103,8 @@ export function GuestRow({ invite, wishlistId, inviteUrl, onEdit }: Props) {
 					<span>{formatLastViewedAt(invite.lastViewedAt ?? null)}</span>
 				</div>
 			)}
+
+			{isOwner && <OwnerRsvpControls invite={invite} wishlistId={wishlistId} />}
 
 			<div className="mt-auto flex items-center justify-between gap-2 border-border border-t pt-3">
 				<CopyInviteUrlButton url={inviteUrl} />

@@ -62,7 +62,11 @@ export default async function DashboardWishlistGuestsPage({
 			) : filteredInvites.length === 0 ? (
 				<GuestsFilteredEmptyState />
 			) : (
-				<GuestList invites={filteredInvites} wishlistId={id} />
+				<GuestList
+					invites={filteredInvites}
+					isOwner={wishlist.isOwner}
+					wishlistId={id}
+				/>
 			)}
 		</div>
 	);

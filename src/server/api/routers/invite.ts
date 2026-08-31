@@ -10,8 +10,12 @@ import {
 	createInvite,
 	deleteInvite,
 	getOwnedInvite,
+	getOwnerInvite,
 	type InviteDatabase,
 	listInvites,
+	type OwnerRsvpDatabase,
+	recordOwnerRsvp,
+	reopenOwnerRsvp,
 	updateInvite,
 } from "@/server/services/invite.service";
 import { getOrCreateLocalUserId } from "@/server/services/local-user.service";
@@ -23,6 +27,8 @@ import {
 	createInviteSchema,
 	deleteInviteSchema,
 	listInvitesSchema,
+	recordOwnerRsvpSchema,
+	reopenOwnerRsvpSchema,
 	respondInviteSchema,
 	updateInviteSchema,
 } from "@/server/validators/invite.schema";
@@ -95,6 +101,32 @@ export const inviteRouter = createTRPCRouter({
 				inviteId: input.inviteId,
 			});
 			await deleteInvite(asInviteDb(ctx), { inviteId: input.inviteId });
+		}),
+
+	recordOwnerRsvp: protectedProcedure
+		.input(recordOwnerRsvpSchema)
+		.mutation(async ({ ctx, input }) => {
+			const localUserId = await getLocalUserId(ctx);
+			const invite = await getOwnerInvite(asInviteDb(ctx), {
+				localUserId,
+				inviteId: input.inviteId,
+			});
+			await recordOwnerRsvp(asInviteDb(ctx) as OwnerRsvpDatabase, {
+				invite,
+				status: input.status,
+				extraGuests: input.extraGuests,
+			});
+		}),
+
+	reopenOwnerRsvp: protectedProcedure
+		.input(reopenOwnerRsvpSchema)
+		.mutation(async ({ ctx, input }) => {
+			const localUserId = await getLocalUserId(ctx);
+			await getOwnerInvite(asInviteDb(ctx), {
+				localUserId,
+				inviteId: input.inviteId,
+			});
+			await reopenOwnerRsvp(asInviteDb(ctx) as OwnerRsvpDatabase, input);
 		}),
 
 	respond: publicProcedure

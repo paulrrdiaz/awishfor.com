@@ -30,9 +30,27 @@ type InviteDelegate = {
 	findMany(args: Prisma.InviteFindManyArgs): Promise<InviteWithExtras[]>;
 };
 
+type OwnerRsvpClient = {
+	invite: {
+		update(args: Prisma.InviteUpdateArgs): Promise<Invite>;
+	};
+	inviteExtraGuest: {
+		update(args: Prisma.InviteExtraGuestUpdateArgs): Promise<InviteExtraGuest>;
+	};
+};
+
 export type InviteDatabase = {
 	invite: InviteDelegate;
 } & WishlistAccessDatabase;
+
+export type OwnerRsvpDatabase = InviteDatabase & {
+	$transaction<T>(callback: (tx: OwnerRsvpClient) => Promise<T>): Promise<T>;
+};
+
+export type OwnerRsvpExtraGuestInput = {
+	id: string;
+	status: "confirmed" | "declined";
+};
 
 export const getOwnedInvite = async (
 	db: InviteDatabase,
@@ -51,6 +69,92 @@ export const getOwnedInvite = async (
 	});
 	return invite;
 };
+
+export const getOwnerInvite = async (
+	db: InviteDatabase,
+	{ localUserId, inviteId }: { localUserId: number; inviteId: string },
+): Promise<InviteWithExtras> => {
+	const invite = await db.invite.findFirst({
+		where: { id: inviteId },
+		include: { extraGuests: extraGuestsOrder },
+	});
+	if (!invite) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+	}
+	await assertWishlistAccess(db, {
+		localUserId,
+		wishlistId: invite.wishlistId,
+		requireOwner: true,
+	});
+	return invite;
+};
+
+function hasExactExtraGuestSet(
+	expected: InviteExtraGuest[],
+	submitted: OwnerRsvpExtraGuestInput[],
+): boolean {
+	if (expected.length !== submitted.length) return false;
+	const submittedIds = new Set(submitted.map((guest) => guest.id));
+	return (
+		submittedIds.size === submitted.length &&
+		expected.every((guest) => submittedIds.has(guest.id))
+	);
+}
+
+export async function recordOwnerRsvp(
+	db: OwnerRsvpDatabase,
+	{
+		invite,
+		status,
+		extraGuests,
+	}: {
+		invite: InviteWithExtras;
+		status: "confirmed" | "declined";
+		extraGuests: OwnerRsvpExtraGuestInput[];
+	},
+): Promise<void> {
+	if (!hasExactExtraGuestSet(invite.extraGuests, extraGuests)) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Los acompañantes no coinciden con la invitación",
+		});
+	}
+	const statuses = new Map(
+		extraGuests.map((guest) => [guest.id, guest.status]),
+	);
+	const now = new Date();
+	await db.$transaction(async (tx) => {
+		await tx.invite.update({
+			where: { id: invite.id },
+			data: {
+				status,
+				respondedAt: now,
+				responseSource: "owner",
+				responseLockedAt: now,
+			},
+		});
+		for (const guest of invite.extraGuests) {
+			await tx.inviteExtraGuest.update({
+				where: { id: guest.id },
+				data: {
+					status:
+						status === "declined"
+							? "declined"
+							: (statuses.get(guest.id) ?? "declined"),
+				},
+			});
+		}
+	});
+}
+
+export const reopenOwnerRsvp = (
+	db: OwnerRsvpDatabase,
+	{ inviteId }: { inviteId: string },
+): Promise<Invite> =>
+	db.invite.update({
+		where: { id: inviteId },
+		data: { responseSource: null, responseLockedAt: null },
+	});
 
 const resolveSlug = async (
 	db: InviteDatabase,
