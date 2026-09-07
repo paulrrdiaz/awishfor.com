@@ -100,6 +100,74 @@ describe("auth password error handling", () => {
 		).toBeInTheDocument();
 	});
 
+	it.each([
+		["Google", "oauth_google"],
+		["Outlook", "oauth_microsoft"],
+	] as const)("resets a rejected password attempt before switching to %s", async (provider, strategy) => {
+		const password = vi.fn().mockResolvedValue({
+			error: rejectedPasswordAttempt,
+		});
+		const sso = vi.fn().mockResolvedValue({ error: null });
+		const staleSso = vi.fn().mockResolvedValue({ error: null });
+		let currentSignIn: {
+			password: typeof password;
+			reset: ReturnType<typeof vi.fn>;
+			sso: typeof sso;
+			status: string | null;
+		};
+		const reset = vi.fn().mockImplementation(async () => {
+			currentSignIn = freshSignIn;
+			return { error: null };
+		});
+		const freshSignIn = {
+			password,
+			reset,
+			sso,
+			status: "needs_first_factor",
+		};
+		currentSignIn = {
+			password,
+			reset,
+			sso: staleSso,
+			status: "needs_first_factor",
+		};
+		useSignInMock.mockImplementation(() => ({
+			signIn: currentSignIn,
+			fetchStatus: "idle",
+		}));
+		const user = userEvent.setup();
+
+		render(<SignInForm />);
+		await user.type(
+			screen.getByLabelText("Correo electrónico"),
+			"ana@example.com",
+		);
+		await user.type(screen.getByLabelText("Contraseña"), "secreto");
+		await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+		await screen.findByText(
+			"No encontramos una cuenta con ese correo electrónico.",
+		);
+
+		await user.click(screen.getByRole("button", { name: provider }));
+
+		await waitFor(() => expect(sso).toHaveBeenCalledTimes(1));
+		expect(reset).toHaveBeenCalledTimes(1);
+		expect(reset.mock.invocationCallOrder[0]).toBeLessThan(
+			sso.mock.invocationCallOrder[0] ?? 0,
+		);
+		expect(staleSso).not.toHaveBeenCalled();
+		expect(sso).toHaveBeenCalledWith({
+			strategy,
+			redirectUrl: "/dashboard",
+			redirectCallbackUrl: "/sso-callback?redirect_url=%2Fdashboard",
+		});
+		expect(
+			screen.queryByText(
+				"No encontramos una cuenta con ese correo electrónico.",
+			),
+		).not.toBeInTheDocument();
+	});
+
 	it("renders Clerk field and general errors after a rejected sign-up", async () => {
 		const password = vi.fn().mockResolvedValue({
 			error: rejectedPasswordAttempt,

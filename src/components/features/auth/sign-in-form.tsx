@@ -4,7 +4,7 @@ import { useSignIn } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,13 @@ import { GoogleButton } from "./google-button";
 import { OutlookButton } from "./outlook-button";
 import { type SignInValues, signInSchema } from "./schemas";
 
+type SocialStrategy = "oauth_google" | "oauth_microsoft";
+
+type SocialSignInState = {
+	strategy: SocialStrategy;
+	phase: "resetting" | "ready" | "starting";
+};
+
 export function SignInForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -27,8 +34,11 @@ export function SignInForm() {
 		: "/forgot-password";
 	const { signIn, fetchStatus } = useSignIn();
 	const [clerkError, setClerkError] = useState<string | null>(null);
-	const [isPending, startTransition] = useTransition();
-	const [isOutlookPending, startOutlookTransition] = useTransition();
+	const [socialSignIn, setSocialSignIn] = useState<SocialSignInState | null>(
+		null,
+	);
+	const isStartingSocialSignIn = useRef(false);
+	const signInBeforeReset = useRef(signIn);
 	// Visual only — there's no remember-me/session-length param wired to the
 	// Clerk sign-in call today.
 	const [rememberMe, setRememberMe] = useState(true);
@@ -87,12 +97,46 @@ export function SignInForm() {
 		}
 	}
 
-	async function handleGoogleSignIn() {
+	async function prepareSocialSignIn(strategy: SocialStrategy) {
+		if (socialSignIn) return;
 		setClerkError(null);
-		startTransition(async () => {
+		clearErrors(["email", "password"]);
+		isStartingSocialSignIn.current = false;
+		signInBeforeReset.current = signIn;
+		setSocialSignIn({ strategy, phase: "resetting" });
+		try {
+			const { error } = await signIn.reset();
+			if (error) {
+				setClerkError(
+					error.longMessage ?? "Algo salió mal. Inténtalo de nuevo.",
+				);
+				setSocialSignIn(null);
+				return;
+			}
+			setSocialSignIn({ strategy, phase: "ready" });
+		} catch {
+			setClerkError("Algo salió mal. Inténtalo de nuevo.");
+			setSocialSignIn(null);
+		}
+	}
+
+	useEffect(() => {
+		if (
+			socialSignIn?.phase !== "ready" ||
+			signIn === signInBeforeReset.current ||
+			isStartingSocialSignIn.current
+		) {
+			return;
+		}
+
+		const { strategy } = socialSignIn;
+		isStartingSocialSignIn.current = true;
+		setSocialSignIn({ strategy, phase: "starting" });
+
+		void (async () => {
 			try {
 				const { error } = await signIn.sso({
-					strategy: "oauth_google",
+					strategy,
 					redirectUrl: redirectPath,
 					redirectCallbackUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectPath)}`,
 				});
@@ -104,35 +148,23 @@ export function SignInForm() {
 					setClerkError(
 						error.longMessage ?? "Algo salió mal. Inténtalo de nuevo.",
 					);
+					setSocialSignIn(null);
+					isStartingSocialSignIn.current = false;
 				}
 			} catch {
 				setClerkError("Algo salió mal. Inténtalo de nuevo.");
+				setSocialSignIn(null);
+				isStartingSocialSignIn.current = false;
 			}
-		});
+		})();
+	}, [redirectPath, router, signIn, socialSignIn]);
+
+	async function handleGoogleSignIn() {
+		await prepareSocialSignIn("oauth_google");
 	}
 
 	async function handleOutlookSignIn() {
-		setClerkError(null);
-		startOutlookTransition(async () => {
-			try {
-				const { error } = await signIn.sso({
-					strategy: "oauth_microsoft",
-					redirectUrl: redirectPath,
-					redirectCallbackUrl: `/sso-callback?redirect_url=${encodeURIComponent(redirectPath)}`,
-				});
-				if (error) {
-					if (error.code === "session_exists") {
-						router.replace(redirectPath);
-						return;
-					}
-					setClerkError(
-						error.longMessage ?? "Algo salió mal. Inténtalo de nuevo.",
-					);
-				}
-			} catch {
-				setClerkError("Algo salió mal. Inténtalo de nuevo.");
-			}
-		});
+		await prepareSocialSignIn("oauth_microsoft");
 	}
 
 	const isBusy = fetchStatus === "fetching" || isSubmitting;
@@ -208,12 +240,12 @@ export function SignInForm() {
 
 			<div className="grid grid-cols-2 gap-3">
 				<GoogleButton
-					isLoading={isPending}
+					isLoading={socialSignIn?.strategy === "oauth_google"}
 					label="Google"
 					onClick={handleGoogleSignIn}
 				/>
 				<OutlookButton
-					isLoading={isOutlookPending}
+					isLoading={socialSignIn?.strategy === "oauth_microsoft"}
 					label="Outlook"
 					onClick={handleOutlookSignIn}
 				/>
