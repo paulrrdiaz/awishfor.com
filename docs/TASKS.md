@@ -1946,6 +1946,7 @@ Tasks:
 - [x] Add invitation-level RSVP status filters with global invitation counts.
 - [x] Preserve active filters through invite create, update, and delete revalidation.
 - [x] Add a filtered-results empty state that clears both controls.
+- [x] Add person-level attendance metrics, a complete confirmed-roster copy action, and a dedicated declined RSVP treatment.
 
 Acceptance criteria:
 

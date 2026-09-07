@@ -5,6 +5,7 @@ import { GuestsEmptyState } from "@/components/features/dashboard/guests/guests-
 import { GuestsFilterToolbar } from "@/components/features/dashboard/guests/guests-filter-toolbar";
 import { GuestsFilteredEmptyState } from "@/components/features/dashboard/guests/guests-filtered-empty-state";
 import { GuestsHeaderToolbar } from "@/components/features/dashboard/guests/guests-header-toolbar";
+import { getConfirmedGuestsRoster } from "@/lib/dashboard/confirmed-guests-roster";
 import {
 	countDashboardInvitesByStatus,
 	filterDashboardInvites,
@@ -45,13 +46,17 @@ export default async function DashboardWishlistGuestsPage({
 		0,
 	);
 	const inviteCounts = countDashboardInvitesByStatus(invites);
+	const { confirmedGuests, text: confirmedGuestsRoster } =
+		getConfirmedGuestsRoster(invites, wishlist.title);
 	const filteredInvites = filterDashboardInvites(invitesWithUrl, { q, status });
 
 	return (
 		<div className="w-full space-y-5 p-7">
 			<GuestsHeaderToolbar
+				confirmedGuests={confirmedGuests}
+				confirmedGuestsRoster={confirmedGuestsRoster}
+				pendingInvitations={inviteCounts.pending}
 				totalGuests={totalGuests}
-				totalInvites={invites.length}
 				wishlistId={id}
 			/>
 

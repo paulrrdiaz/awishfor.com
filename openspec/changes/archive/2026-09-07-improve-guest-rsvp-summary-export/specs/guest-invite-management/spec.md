@@ -1,81 +1,4 @@
-# guest-invite-management Specification
-
-## Purpose
-Defines the owner-facing invite list for a wishlist: the `Invite`/extra-guest data model, the owner-scoped `invite` tRPC router (list, create, update, delete), the editable unique guest slug, and the Invitados dashboard tab (`/dashboard/wishlists/[id]/guests`) for adding, editing, and deleting invites and copying each guest's personalized URL.
-## Requirements
-### Requirement: Invite data model
-
-Each wishlist SHALL own zero or more invites. An invite SHALL have a required primary guest name, an optional primary email, an optional primary phone, a URL slug unique within its wishlist, an RSVP status of `pending`, `confirmed`, or `declined` (default `pending`), an optional `openedAt` timestamp, an optional `respondedAt` timestamp, an optional RSVP response source of `guest` or `owner`, an optional response-lock timestamp, and between 0 and 4 extra guests. A new invitation SHALL have neither response source nor response-lock timestamp. A guest-submitted response SHALL set its source to `guest` and remain unlocked; an owner-recorded response SHALL set its source to `owner` and create a lock. Each extra guest SHALL have an optional name, a stable identifier, and its own RSVP status of `pending`, `confirmed`, or `declined` (default `pending`), and no other required data. Deleting a wishlist SHALL delete its invites and their extra guests.
-
-#### Scenario: Invite belongs to one wishlist with one primary guest
-- **WHEN** an invite is created for a wishlist
-- **THEN** it stores exactly one primary guest name and is associated with that wishlist only
-
-#### Scenario: Extra guests are limited to four and may be unnamed
-- **WHEN** an invite is created or updated with more than 4 extra guests
-- **THEN** the operation is rejected with a validation error
-- **AND WHEN** an extra guest is provided without a name
-- **THEN** it is stored as an unnamed extra guest that still counts toward the party size
-
-#### Scenario: Extra guests start pending
-- **WHEN** an invite is created with two extra guests
-- **THEN** each extra guest is stored with RSVP status `pending`
-
-#### Scenario: Owner-recorded response is marked and locked
-- **WHEN** the owner records an RSVP for an invite
-- **THEN** the invite stores `owner` as its response source and a response-lock timestamp
-
-### Requirement: Owner-managed RSVP responses
-
-The actual wishlist owner SHALL be able to record an attendance response for an invitation from the Invitados dashboard, including the primary guest and every extra guest. The owner SHALL be able to correct a locked response without unlocking it and SHALL be able to deliberately reopen it. Collaborators SHALL NOT be allowed to record, correct, or reopen RSVP responses. Recording or correcting a response SHALL set the RSVP status of the primary guest and every extra guest, set `respondedAt` to the current time, retain or set the response source to `owner`, and lock the personalized invite. Reopening SHALL clear the response lock and source while preserving the most recently recorded attendance statuses and response timestamp.
-
-#### Scenario: Owner records an offline response
-- **WHEN** the wishlist owner receives an RSVP by phone or WhatsApp and records the primary guest as attending with one companion not attending
-- **THEN** the dashboard shows the resulting party count and the personalized link is locked
-
-#### Scenario: Owner records a response after the guest deadline
-- **WHEN** the wishlist owner records an RSVP after the self-service RSVP deadline
-- **THEN** the response is accepted and the personalized link is locked
-
-#### Scenario: Collaborator cannot manage RSVP locks
-- **WHEN** a collaborator attempts to record, correct, or reopen an RSVP response
-- **THEN** the operation is rejected and the invitation is unchanged
-
-#### Scenario: Owner corrects a locked response
-- **WHEN** the wishlist owner changes an already locked RSVP response
-- **THEN** the corrected statuses and a new `respondedAt` timestamp are saved and the personalized link remains locked
-
-#### Scenario: Owner reopens a response
-- **WHEN** the wishlist owner deliberately reopens a locked RSVP response
-- **THEN** the personalized link is eligible for guest self-service RSVP again
-
-### Requirement: Owner-only invite management
-
-The `invite` tRPC router SHALL expose list, create, update, and delete procedures as `protectedProcedure`s scoped to the authenticated owner, and SHALL reject any operation on a wishlist the caller does not own.
-
-#### Scenario: Non-owner cannot read or mutate invites
-- **WHEN** a signed-in user requests or mutates invites for a wishlist they do not own
-- **THEN** the procedure throws an authorization error and no data is returned or changed
-
-#### Scenario: Owner lists invites for their wishlist
-- **WHEN** the owner calls the list procedure for their wishlist
-- **THEN** it returns that wishlist's invites with primary guest, party size, slug, and RSVP status
-
-### Requirement: Editable unique guest slug
-
-An invite's slug SHALL be editable by the owner and SHALL be unique within its wishlist. When the owner does not supply a slug, the system SHALL derive one from the primary guest name (lowercase, hyphenated). The system SHALL reject a slug that collides with another invite in the same wishlist or with a reserved route segment.
-
-#### Scenario: Slug derived from name on create
-- **WHEN** an invite is created with primary name "Pedro Castillo" and no explicit slug
-- **THEN** the invite receives the slug `pedro-castillo`
-
-#### Scenario: Duplicate slug within a wishlist is rejected
-- **WHEN** the owner sets an invite slug that already belongs to another invite in the same wishlist
-- **THEN** the operation is rejected with a validation error and the slug is unchanged
-
-#### Scenario: Reserved segment rejected
-- **WHEN** the owner sets an invite slug equal to a reserved public route segment
-- **THEN** the operation is rejected with a validation error
+## MODIFIED Requirements
 
 ### Requirement: Invitados management UI
 
@@ -149,6 +72,8 @@ The wishlist detail SHALL provide an Invitados view at `/dashboard/wishlists/[id
 - **WHEN** the owner activates the clear-filters action
 - **THEN** the search becomes empty, the RSVP filter returns to all invitations, and every invitation is shown in its original order
 
+## ADDED Requirements
+
 ### Requirement: Copy complete confirmed-person roster
 
 The Invitados view SHALL provide users with wishlist access a responsive `Copiar confirmados` control. The control SHALL copy a plain-text roster derived from the complete unfiltered invitation list and SHALL include only primary and extra guests whose individual RSVP status is `confirmed`. The roster SHALL include the wishlist title, the confirmed-person total, and one compact entry per invitation, grouped by primary name in alphabetical order. A primary guest name SHALL appear no more than once in its entry; named confirmed companions SHALL be joined inline, and unnamed confirmed companions SHALL be represented as `+ N` when the primary is confirmed. The roster SHALL omit email addresses, phone numbers, personalized URLs, and pending or declined people. The interface SHALL expose success and failure feedback after a clipboard attempt, and SHALL keep the control visible but unavailable when no people are confirmed.
@@ -186,19 +111,3 @@ The Invitados view SHALL provide users with wishlist access a responsive `Copiar
 - **WHEN** the confirmed-person count is zero
 - **THEN** `Copiar confirmados` remains visible but unavailable
 - **AND** its accessible description explains that no people are confirmed yet
-
-### Requirement: RSVP management controls in the guest dashboard
-
-The Invitados dashboard SHALL provide the actual wishlist owner a control to record or correct an invitation's RSVP and a separate, deliberate control to reopen a locked invitation. The response control SHALL let the owner choose attending or not attending for the primary guest and, when the primary guest is attending, for every extra guest. A locked invitation SHALL clearly indicate that its response was registered by the owner. Collaborators may continue to view invitation RSVP status but SHALL NOT be shown controls that record, correct, or reopen RSVP responses.
-
-#### Scenario: Owner sees response actions for a pending invitation
-- **WHEN** the owner views a pending invitation
-- **THEN** they can open a response control and record attendance for the party
-
-#### Scenario: Owner sees a locked response state
-- **WHEN** the owner views an invitation whose response is locked
-- **THEN** the row identifies it as owner-registered and offers controls to correct or reopen it
-
-#### Scenario: Companion choices are omitted for a declining primary guest
-- **WHEN** the owner chooses not attending for the primary guest
-- **THEN** companion choices are not required and all companions are recorded as not attending

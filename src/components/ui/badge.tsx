@@ -22,6 +22,7 @@ const badgeVariants = cva(
 				published: "bg-status-published text-status-published-foreground",
 				draft: "bg-status-draft text-status-draft-foreground",
 				archived: "bg-status-archived text-status-archived-foreground",
+				declined: "bg-status-declined text-status-declined-foreground",
 			},
 		},
 		defaultVariants: {

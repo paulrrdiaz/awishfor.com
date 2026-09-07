@@ -2,10 +2,10 @@ import { Badge } from "@/components/ui/badge";
 
 const RSVP_STATUS_META: Record<
 	string,
-	{ label: string; variant: "published" | "archived" | "draft" }
+	{ label: string; variant: "published" | "archived" | "declined" | "draft" }
 > = {
 	confirmed: { label: "Confirmado", variant: "published" },
-	declined: { label: "No asistirá", variant: "archived" },
+	declined: { label: "No asistirá", variant: "declined" },
 	pending: { label: "Pendiente", variant: "draft" },
 };
 
