@@ -6,6 +6,7 @@ import {
 	type Prisma,
 	WishlistStatus,
 } from "@/generated/prisma/client";
+import { deriveHomeActions } from "@/lib/dashboard/home-actions";
 import { buildCoverImageRecords } from "@/lib/wishlist/cover-images";
 import {
 	evaluatePublishReadiness,
@@ -22,6 +23,7 @@ import {
 	publicProcedure,
 } from "@/server/api/trpc";
 import {
+	mapDashboardHomeWishlist,
 	mapDashboardWishlistOverview,
 	mapDashboardWishlistSummary,
 } from "@/server/mappers/dashboard-wishlist.mapper";
@@ -76,6 +78,24 @@ const wishlistWithGiftsInclude = {
 		},
 	},
 } as const;
+
+const wishlistHomeInclude = {
+	gifts: {
+		include: {
+			purchases: true,
+		},
+	},
+	invites: {
+		select: {
+			status: true,
+		},
+	},
+	_count: {
+		select: {
+			images: true,
+		},
+	},
+} satisfies Prisma.WishlistInclude;
 
 const wishlistDetailInclude = {
 	categories: {
@@ -149,6 +169,95 @@ export const wishlistRouter = createTRPCRouter({
 				...wishlist,
 				ownerName: owner.name ?? owner.email,
 			})),
+		};
+	}),
+
+	home: protectedProcedure.query(async ({ ctx }) => {
+		const localUserId = await getLocalUserId(ctx);
+
+		const [owned, shared] = await Promise.all([
+			ctx.db.wishlist.findMany({
+				where: {
+					ownerId: localUserId,
+					status: { not: WishlistStatus.archived },
+				},
+				include: wishlistHomeInclude,
+				orderBy: { createdAt: "desc" },
+			}),
+			ctx.db.wishlist.findMany({
+				where: {
+					status: { not: WishlistStatus.archived },
+					members: { some: { userId: localUserId } },
+				},
+				include: {
+					...wishlistHomeInclude,
+					owner: { select: { name: true, email: true } },
+				},
+				orderBy: { createdAt: "desc" },
+			}),
+		]);
+
+		const homeInputs = [
+			...owned.map((wishlist) =>
+				mapDashboardHomeWishlist(wishlist, { isOwner: true, ownerName: null }),
+			),
+			...shared.map((wishlist) =>
+				mapDashboardHomeWishlist(wishlist, {
+					isOwner: false,
+					ownerName: wishlist.owner.name ?? wishlist.owner.email,
+				}),
+			),
+		];
+
+		const { actions, nextStep, subsequentActions } = deriveHomeActions({
+			wishlists: homeInputs,
+		});
+
+		const allWishlists = [...owned, ...shared];
+		const summaries = allWishlists.map(mapDashboardWishlistSummary);
+
+		const now = Date.now();
+		const upcomingEventWishlist = allWishlists
+			.filter(
+				(wishlist) =>
+					wishlist.eventDate !== null && wishlist.eventDate.getTime() >= now,
+			)
+			.sort(
+				(a, b) => (a.eventDate?.getTime() ?? 0) - (b.eventDate?.getTime() ?? 0),
+			)[0];
+		const upcomingEventSummary = upcomingEventWishlist
+			? mapDashboardWishlistSummary(upcomingEventWishlist)
+			: null;
+
+		return {
+			actions,
+			nextStep,
+			subsequentActions,
+			upcomingEvent: upcomingEventSummary
+				? {
+						id: upcomingEventSummary.id,
+						slug: upcomingEventSummary.slug,
+						title: upcomingEventSummary.title,
+						status: upcomingEventSummary.status,
+						eventType: upcomingEventSummary.eventType,
+						eventDate: upcomingEventSummary.eventDate,
+						publicUrlPath: `/w/${upcomingEventSummary.slug}`,
+						totalUnits: upcomingEventSummary.totalUnits,
+						purchasedUnits: upcomingEventSummary.purchasedUnits,
+					}
+				: null,
+			summary: {
+				activeWishlists: summaries.length,
+				totalUnits: summaries.reduce((sum, s) => sum + s.totalUnits, 0),
+				purchasedUnits: summaries.reduce((sum, s) => sum + s.purchasedUnits, 0),
+				pendingRsvps: allWishlists.reduce(
+					(sum, wishlist) =>
+						sum +
+						wishlist.invites.filter((invite) => invite.status === "pending")
+							.length,
+					0,
+				),
+			},
 		};
 	}),
 

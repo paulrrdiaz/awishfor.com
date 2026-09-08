@@ -1,10 +1,13 @@
 import type {
 	Gift,
+	Invite,
 	Purchase,
 	Wishlist,
 	WishlistImage,
 } from "@/generated/prisma/client";
+import type { HomeActionWishlistInput } from "@/lib/dashboard/home-actions";
 import type { PublishReadinessResult } from "@/lib/wishlist/publish-readiness";
+import { evaluatePublishReadiness } from "@/lib/wishlist/publish-readiness";
 import { mapDashboardGift } from "@/server/mappers/dashboard-gift.mapper";
 import type {
 	DashboardActivityEntryViewModel,
@@ -238,6 +241,45 @@ export function mapDashboardWishlistSummary(
 		availableGiftCount: aggregates.availableGiftCount,
 		totalGiftCount: aggregates.totalGiftCount,
 		createdAt: wishlist.createdAt.toISOString(),
+	};
+}
+
+type WishlistWithHomeData = WishlistWithGifts & {
+	invites: Pick<Invite, "status">[];
+	_count: { images: number };
+};
+
+export function mapDashboardHomeWishlist(
+	wishlist: WishlistWithHomeData,
+	{ isOwner, ownerName }: { isOwner: boolean; ownerName: string | null },
+): HomeActionWishlistInput {
+	const visibleGiftCount = wishlist.gifts.filter(isVisibleAndNotDeleted).length;
+	const readiness = evaluatePublishReadiness({
+		title: wishlist.title,
+		eventType: wishlist.eventType,
+		slug: wishlist.slug,
+		language: wishlist.language,
+		currency: wishlist.currency,
+		visibleGiftCount,
+		layoutId: wishlist.layoutId,
+		imageCount: wishlist._count.images,
+	});
+	const pendingInvites = wishlist.invites.filter(
+		(invite) => invite.status === "pending",
+	).length;
+
+	return {
+		id: wishlist.id,
+		title: wishlist.title,
+		status: wishlist.status,
+		isOwner,
+		ownerName: isOwner ? null : ownerName,
+		eventDate: wishlist.eventDate?.toISOString() ?? null,
+		rsvpDeadline: wishlist.rsvpDeadline?.toISOString() ?? null,
+		createdAt: wishlist.createdAt.toISOString(),
+		pendingInvites,
+		totalInvites: wishlist.invites.length,
+		readiness,
 	};
 }
 

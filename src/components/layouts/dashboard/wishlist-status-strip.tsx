@@ -12,21 +12,12 @@ import { RestoreWishlistDialogContent } from "@/components/features/dashboard/se
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { PublishReadinessChecks } from "@/lib/wishlist/publish-readiness";
+import { CHECK_LABELS } from "@/lib/wishlist/publish-readiness-labels";
 import {
 	toCanonicalWishlistUrl,
 	toWhatsAppShareUrl,
 } from "@/lib/wishlist/share";
 import { api } from "@/trpc/react";
-
-const CHECK_LABELS: Record<keyof PublishReadinessChecks, string> = {
-	title: "Tiene título",
-	eventType: "Tiene tipo de evento",
-	slug: "Tiene enlace público válido",
-	language: "Tiene idioma",
-	currency: "Tiene moneda",
-	visibleGift: "Tiene al menos un regalo visible",
-	images: "Tiene suficientes fotos de portada para su disposición",
-};
 
 type CopyState = "idle" | "success" | "error";
 

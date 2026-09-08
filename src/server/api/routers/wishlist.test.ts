@@ -1118,3 +1118,154 @@ describe("wishlistRouter.publishWizard", () => {
 		expect(publishWishlistFromWizardMock).not.toHaveBeenCalled();
 	});
 });
+
+describe("wishlistRouter.home", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		authMock.mockResolvedValue({ userId: "clerk_123" });
+	});
+
+	function makeHomeDb(wishlistFindMany: ReturnType<typeof vi.fn>) {
+		return {
+			user: { findUnique: vi.fn().mockResolvedValue({ id: 42 }) },
+			wishlist: { findMany: wishlistFindMany },
+		};
+	}
+
+	it("ranks actions across a mixed owned/shared fixture and aggregates the summary", async () => {
+		const ownedDraft = {
+			id: "wl_owned_draft",
+			ownerId: 42,
+			title: "",
+			slug: "borrador-sin-titulo",
+			eventType: "birthday",
+			language: "es",
+			currency: "PEN",
+			layoutId: null,
+			status: "draft",
+			eventDate: null,
+			rsvpDeadline: null,
+			createdAt: new Date("2026-06-01T00:00:00.000Z"),
+			gifts: [],
+			invites: [],
+			_count: { images: 0 },
+		};
+		const sharedPublished = {
+			id: "wl_shared_published",
+			ownerId: 7,
+			title: "Cumpleaños de Paula",
+			slug: "cumple-de-paula",
+			eventType: "birthday",
+			language: "es",
+			currency: "PEN",
+			layoutId: null,
+			status: "published",
+			eventDate: null,
+			rsvpDeadline: new Date("2026-09-11T00:00:00.000Z"),
+			createdAt: new Date("2026-05-01T00:00:00.000Z"),
+			gifts: [],
+			invites: [{ status: "pending" }, { status: "pending" }],
+			_count: { images: 2 },
+			owner: { name: "Lucía", email: "lucia@example.com" },
+		};
+
+		const wishlistFindMany = vi
+			.fn()
+			.mockResolvedValueOnce([ownedDraft])
+			.mockResolvedValueOnce([sharedPublished]);
+		const caller = createCaller({
+			db: makeHomeDb(wishlistFindMany),
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.home();
+
+		expect(result.nextStep).toMatchObject({
+			kind: "complete_draft",
+			wishlistId: "wl_owned_draft",
+		});
+		expect(result.subsequentActions).toHaveLength(1);
+		expect(result.subsequentActions[0]).toMatchObject({
+			kind: "review_rsvps",
+			wishlistId: "wl_shared_published",
+			isOwner: false,
+			ownerName: "Lucía",
+			pendingCount: 2,
+		});
+		expect(result.summary).toEqual({
+			activeWishlists: 2,
+			totalUnits: 0,
+			purchasedUnits: 0,
+			pendingRsvps: 2,
+		});
+	});
+
+	it("returns no actions, no next step, and a zeroed summary for a user with no wishlists", async () => {
+		const wishlistFindMany = vi
+			.fn()
+			.mockResolvedValueOnce([])
+			.mockResolvedValueOnce([]);
+		const caller = createCaller({
+			db: makeHomeDb(wishlistFindMany),
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.home();
+
+		expect(result.actions).toEqual([]);
+		expect(result.nextStep).toBeNull();
+		expect(result.subsequentActions).toEqual([]);
+		expect(result.upcomingEvent).toBeNull();
+		expect(result.summary).toEqual({
+			activeWishlists: 0,
+			totalUnits: 0,
+			purchasedUnits: 0,
+			pendingRsvps: 0,
+		});
+	});
+
+	it("derives no actions when the user's wishlists have nothing pending", async () => {
+		const allClearWishlist = {
+			id: "wl_all_clear",
+			ownerId: 42,
+			title: "Baby shower de Emilia",
+			slug: "baby-shower-de-emilia",
+			eventType: "baby_shower",
+			language: "es",
+			currency: "PEN",
+			layoutId: null,
+			status: "published",
+			eventDate: new Date("2026-12-01T00:00:00.000Z"),
+			rsvpDeadline: null,
+			createdAt: new Date("2026-06-01T00:00:00.000Z"),
+			gifts: [
+				{
+					deletedAt: null,
+					visibilityStatus: "available",
+					quantityNeeded: 1,
+					purchases: [],
+				},
+			],
+			invites: [{ status: "confirmed" }],
+			_count: { images: 2 },
+		};
+
+		const wishlistFindMany = vi
+			.fn()
+			.mockResolvedValueOnce([allClearWishlist])
+			.mockResolvedValueOnce([]);
+		const caller = createCaller({
+			db: makeHomeDb(wishlistFindMany),
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.home();
+
+		expect(result.actions).toEqual([]);
+		expect(result.nextStep).toBeNull();
+		expect(result.upcomingEvent).toMatchObject({
+			id: "wl_all_clear",
+			slug: "baby-shower-de-emilia",
+		});
+	});
+});
