@@ -199,6 +199,10 @@ export type DashboardWishlistOverviewViewModel = {
 		pendingGuests: number;
 		openedInvitations: number;
 		unopenedInvitations: number;
+		/** Tables on this wishlist's floor plan. Feeds the Mesas badge's suppression rule. */
+		seatingTables: number;
+		/** Eligible people with no table yet. Meaningless until `seatingTables > 0`. */
+		unseatedGuests: number;
 		totalViews?: number;
 		uniqueVisitors?: number;
 		latestViewAt?: string | null;
@@ -274,4 +278,49 @@ export type DashboardWishlistCardViewModel = {
 	archivedAt: string | null;
 	createdAt: string;
 	updatedAt: string;
+};
+
+export type SeatingTableViewModel = {
+	id: string;
+	/** `name` when set, otherwise `Mesa {sortOrder + 1}`. */
+	label: string;
+	name: string | null;
+	shape: string;
+	capacity: number;
+	/** Derived: assignment rows whose person is still eligible. */
+	seated: number;
+	x: number;
+	y: number;
+	sortOrder: number;
+};
+
+export type SeatingPersonViewModel = {
+	personId: string;
+	displayName: string;
+	partyLabel: string;
+	status: string;
+	isUnnamed: boolean;
+	inviteId: string;
+	extraGuestId: string | null;
+	/** The party's public invitation link. Shared per invitation, not per person. */
+	inviteUrl: string;
+	tableId: string | null;
+	/** When their assignment row was written; null when they have no table. Drives "who moves first". */
+	seatedAt: string | null;
+};
+
+export type SeatingBoardTotalsViewModel = {
+	tables: number;
+	capacity: number;
+	eligiblePeople: number;
+	seated: number;
+	unseated: number;
+	declinedExcluded: number;
+};
+
+export type SeatingBoardViewModel = {
+	wishlistId: string;
+	tables: SeatingTableViewModel[];
+	people: SeatingPersonViewModel[];
+	totals: SeatingBoardTotalsViewModel;
 };

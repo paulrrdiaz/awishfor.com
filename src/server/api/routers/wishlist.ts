@@ -427,6 +427,8 @@ export const wishlistRouter = createTRPCRouter({
 				totalInvitations,
 				extraGuestCount,
 				invites,
+				seatingTableCount,
+				seatingAssignments,
 				analytics,
 				viewSeries,
 			] = await Promise.all([
@@ -444,6 +446,13 @@ export const wishlistRouter = createTRPCRouter({
 					where: { invite: { wishlistId: input.wishlistId } },
 				}),
 				listInvites(asInviteDb(ctx), { wishlistId: input.wishlistId }),
+				ctx.db.seatingTable.count({
+					where: { wishlistId: input.wishlistId },
+				}),
+				ctx.db.seatingAssignment.findMany({
+					where: { wishlistId: input.wishlistId },
+					select: { inviteId: true, extraGuestId: true },
+				}),
 				isOwner
 					? getWishlistViewAnalytics(
 							asWishlistViewAnalyticsDb(ctx),
@@ -474,6 +483,10 @@ export const wishlistRouter = createTRPCRouter({
 				pendingInvitations,
 				totalInvitations,
 				totalGuests: totalInvitations + extraGuestCount,
+				seating: {
+					tableCount: seatingTableCount,
+					assignments: seatingAssignments,
+				},
 				analytics,
 				viewSeries,
 			});

@@ -2078,6 +2078,14 @@ Recommended limits:
 - Purchase confirmations: 10/hour/IP, 3 attempts/gift/hour.
 - Slug availability: 30 checks/hour per IP/user.
 
+## 19a. Seating chart ("Mesas") — in exploration
+
+A venue seating-chart tool (spatial table layout + drag-and-drop guest assignment + printable
+guest→table lookup sheet) is in design exploration. See `docs/SEATING_CHART_PRD.md` and
+`docs/CLAUDE_DESIGN_SEATING_PROMPT.md`. Note: §2's "No RSVP" non-goal below is stale — RSVP
+(`Invite`/`InviteExtraGuest`) already exists in `prisma/schema.prisma` and the dashboard; not
+corrected here, flagged for a future cleanup pass.
+
 ## 20. MVP out of scope
 
 - Checkout/payments.

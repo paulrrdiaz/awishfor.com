@@ -22,6 +22,10 @@ import {
 	summarizeInviteEngagement,
 } from "@/server/services/invite.service";
 import { OWNER_MANUAL_PURCHASE_DEFAULT_NAME } from "@/server/services/purchase.service";
+import {
+	personIdFor,
+	toEligiblePeople,
+} from "@/server/services/seating.service";
 import type { WishlistViewAnalytics } from "@/server/services/wishlist-view-analytics.service";
 
 type GiftWithPurchases = Gift & { purchases: Purchase[] };
@@ -40,6 +44,16 @@ function mapImages(images: WishlistImage[] = []): WishlistImageViewModel[] {
 }
 type PurchaseWithGiftName = Purchase & { gift: Pick<Gift, "id" | "name"> };
 
+/**
+ * Just enough of the floor plan to drive the Mesas tab badge: the table count
+ * (the badge stays hidden until the host has started a plan) and the person key
+ * of every assignment row, so eligibility is applied here rather than in SQL.
+ */
+type SeatingOverviewInput = {
+	tableCount: number;
+	assignments: { inviteId: string; extraGuestId: string | null }[];
+};
+
 type DashboardWishlistOverviewOptions = {
 	isOwner: boolean;
 	publicUrlPath: string;
@@ -51,6 +65,7 @@ type DashboardWishlistOverviewOptions = {
 	pendingInvitations: number;
 	totalInvitations: number;
 	totalGuests: number;
+	seating: SeatingOverviewInput;
 	analytics?: WishlistViewAnalytics;
 	viewSeries?: WishlistViewSeriesPointViewModel[];
 };
@@ -296,12 +311,14 @@ export function mapDashboardWishlistOverview(
 		pendingInvitations,
 		totalInvitations,
 		totalGuests,
+		seating,
 		analytics,
 		viewSeries,
 	}: DashboardWishlistOverviewOptions,
 ): DashboardWishlistOverviewViewModel {
 	const aggregates = getVisibleGiftAggregates(wishlist.gifts);
 	const engagement = summarizeInviteEngagement(invites);
+	const unseatedGuests = countUnseatedGuests(invites, seating);
 	const conversionRate =
 		isOwner && analytics && analytics.uniqueVisitors > 0
 			? Math.min(
@@ -338,6 +355,8 @@ export function mapDashboardWishlistOverview(
 			pendingGuests: engagement.pendingGuests,
 			openedInvitations: engagement.openedInvitations,
 			unopenedInvitations: engagement.unopenedInvitations,
+			seatingTables: seating.tableCount,
+			unseatedGuests,
 			...(isOwner && analytics
 				? {
 						latestViewAt: analytics.latestViewAt?.toISOString() ?? null,
@@ -351,4 +370,23 @@ export function mapDashboardWishlistOverview(
 		activity: buildActivityFeed({ invites, purchases: recentPurchases }),
 		...(isOwner && viewSeries ? { viewSeries } : {}),
 	};
+}
+
+/**
+ * Eligible people (an RSVP of `declined` drops the person, and a declined
+ * invitation drops its whole party) who have no assignment row. An assignment
+ * belonging to somebody no longer eligible is ignored, not counted as a seat.
+ */
+function countUnseatedGuests(
+	invites: InviteWithExtras[],
+	seating: SeatingOverviewInput,
+): number {
+	const seated = new Set(
+		seating.assignments.map((assignment) =>
+			personIdFor(assignment.inviteId, assignment.extraGuestId),
+		),
+	);
+	return toEligiblePeople(invites).filter(
+		(person) => !seated.has(person.personId),
+	).length;
 }

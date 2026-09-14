@@ -330,6 +330,7 @@ describe("mapDashboardWishlistOverview", () => {
 				pendingInvitations: 0,
 				totalInvitations: 3,
 				totalGuests: 5,
+				seating: { tableCount: 0, assignments: [] },
 			},
 		);
 
@@ -347,6 +348,8 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingGuests: 0,
 			openedInvitations: 0,
 			unopenedInvitations: 0,
+			seatingTables: 0,
+			unseatedGuests: 0,
 		});
 	});
 
@@ -370,6 +373,7 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 0,
 			totalInvitations: 0,
 			totalGuests: 0,
+			seating: { tableCount: 0, assignments: [] },
 			analytics: {
 				totalViews: 4,
 				uniqueVisitors: 2,
@@ -406,6 +410,7 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 0,
 			totalInvitations: 0,
 			totalGuests: 0,
+			seating: { tableCount: 0, assignments: [] },
 			analytics: { totalViews: 0, uniqueVisitors: 0, latestViewAt: null },
 		});
 
@@ -440,6 +445,7 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 0,
 			totalInvitations: 0,
 			totalGuests: 0,
+			seating: { tableCount: 0, assignments: [] },
 			analytics: { totalViews: 4, uniqueVisitors: 2, latestViewAt: null },
 		});
 
@@ -472,6 +478,7 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 0,
 			totalInvitations: 0,
 			totalGuests: 0,
+			seating: { tableCount: 0, assignments: [] },
 			analytics: { totalViews: 1, uniqueVisitors: 1, latestViewAt: null },
 		});
 
@@ -498,10 +505,59 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 0,
 			totalInvitations: 1,
 			totalGuests: 2,
+			seating: { tableCount: 0, assignments: [] },
 		});
 
 		expect(result.metrics.confirmedGuests).toBe(1);
 		expect(result.metrics.declinedGuests).toBe(1);
+	});
+
+	it("counts unseated eligible people and reports the table count", () => {
+		const wishlist = { ...makeWishlist(), gifts: [] };
+		const base = {
+			isOwner: true,
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			invites: [
+				makeInvite({
+					id: "i1",
+					status: "confirmed",
+					extraGuests: [
+						makeExtraGuest({ id: "e1", status: "confirmed" }),
+						// Declined people leave the pool, so they are never "unseated".
+						makeExtraGuest({ id: "e2", status: "declined" }),
+					],
+				}),
+				makeInvite({ id: "i2", status: "declined" }),
+			],
+			pendingInvitations: 0,
+			totalInvitations: 2,
+			totalGuests: 4,
+		};
+
+		const none = mapDashboardWishlistOverview(wishlist, {
+			...base,
+			seating: { tableCount: 0, assignments: [] },
+		});
+		expect(none.metrics.seatingTables).toBe(0);
+		expect(none.metrics.unseatedGuests).toBe(2);
+
+		const partly = mapDashboardWishlistOverview(wishlist, {
+			...base,
+			seating: {
+				tableCount: 2,
+				assignments: [
+					{ inviteId: "i1", extraGuestId: null },
+					// A row for somebody who has since declined does not seat anyone.
+					{ inviteId: "i2", extraGuestId: null },
+				],
+			},
+		});
+		expect(partly.metrics.seatingTables).toBe(2);
+		expect(partly.metrics.unseatedGuests).toBe(1);
 	});
 
 	it("reports opened and unopened invitation counts", () => {
@@ -523,6 +579,7 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 4,
 			totalInvitations: 4,
 			totalGuests: 4,
+			seating: { tableCount: 0, assignments: [] },
 		});
 
 		expect(result.metrics.openedInvitations).toBe(1);
@@ -539,6 +596,7 @@ describe("mapDashboardWishlistOverview", () => {
 			pendingInvitations: 0,
 			totalInvitations: 1,
 			totalGuests: 1,
+			seating: { tableCount: 0, assignments: [] },
 		};
 
 		it("merges RSVP responses, purchases, and invitation opens ordered by recency", () => {

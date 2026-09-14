@@ -42,4 +42,64 @@ describe("WishlistSectionTabs", () => {
 
 		expect(screen.queryByText("Colaboradores")).not.toBeInTheDocument();
 	});
+
+	it("renders the sections in order with Mesas between Invitados and Tema", () => {
+		render(<WishlistSectionTabs isOwner wishlistId="wl_1" />);
+
+		const labels = screen
+			.getAllByRole("link")
+			.map((link) => link.textContent?.trim());
+		expect(labels).toEqual([
+			"Resumen",
+			"Regalos",
+			"Invitados",
+			"Mesas",
+			"Tema",
+			"Colaboradores",
+			"Ajustes",
+		]);
+	});
+
+	it("keeps Mesas visible for a collaborator, since seating is not owner-only", () => {
+		render(<WishlistSectionTabs isOwner={false} wishlistId="wl_1" />);
+
+		expect(screen.getByText("Mesas").closest("a")).toHaveAttribute(
+			"href",
+			"/dashboard/wishlists/wl_1/seating",
+		);
+	});
+
+	it("keeps the Mesas tab active on the nested print route", () => {
+		pathnameRef.current = "/dashboard/wishlists/wl_1/seating/print";
+		render(<WishlistSectionTabs isOwner wishlistId="wl_1" />);
+
+		expect(screen.getByText("Mesas").closest("a")).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+	});
+
+	it("renders the unseated-guest warning badge on Mesas", () => {
+		render(
+			<WishlistSectionTabs
+				badges={{ seating: { count: 7, variant: "warning" } }}
+				isOwner
+				wishlistId="wl_1"
+			/>,
+		);
+
+		expect(screen.getByText("Mesas").closest("a")?.textContent).toBe("Mesas7");
+	});
+
+	it("omits the Mesas badge when nobody is unseated", () => {
+		render(
+			<WishlistSectionTabs
+				badges={{ seating: { count: 0, variant: "warning" } }}
+				isOwner
+				wishlistId="wl_1"
+			/>,
+		);
+
+		expect(screen.getByText("Mesas").closest("a")?.textContent).toBe("Mesas");
+	});
 });

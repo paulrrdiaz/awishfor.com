@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mobileChipItemsFor, navItemsFor } from "./wishlist-sections";
+import {
+	activeSegmentFromPathname,
+	mobileChipItemsFor,
+	navItemsFor,
+} from "./wishlist-sections";
 
 describe("mobileChipItemsFor", () => {
 	it("leads with Regalos, Invitados, Resumen, Tema for an owner", () => {
@@ -30,5 +34,36 @@ describe("mobileChipItemsFor", () => {
 			);
 			expect(desktopTab?.label).toBe(chip.label);
 		}
+	});
+});
+
+describe("activeSegmentFromPathname", () => {
+	it("resolves the seating print route to the seating section", () => {
+		expect(
+			activeSegmentFromPathname(
+				"/dashboard/wishlists/wl_1/seating/print",
+				"wl_1",
+			),
+		).toBe("seating");
+	});
+
+	it("resolves the seating route itself", () => {
+		expect(
+			activeSegmentFromPathname("/dashboard/wishlists/wl_1/seating", "wl_1"),
+		).toBe("seating");
+	});
+});
+
+describe("navItemsFor", () => {
+	it("places Mesas after Invitados for both owner and collaborator", () => {
+		for (const isOwner of [true, false]) {
+			const segments = navItemsFor(isOwner).map((item) => item.segment);
+			expect(segments.indexOf("seating")).toBe(segments.indexOf("guests") + 1);
+		}
+	});
+
+	it("leaves the mobile chip row untouched", () => {
+		const segments = mobileChipItemsFor(true).map((item) => item.segment);
+		expect(segments).not.toContain("seating");
 	});
 });

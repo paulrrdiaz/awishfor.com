@@ -1,4 +1,5 @@
 import {
+	CircleDotIcon,
 	GiftIcon,
 	LayoutGridIcon,
 	PaletteIcon,
@@ -11,6 +12,7 @@ export const NAV_ITEMS = [
 	{ label: "Resumen", segment: "", icon: LayoutGridIcon, ownerOnly: false },
 	{ label: "Regalos", segment: "gifts", icon: GiftIcon, ownerOnly: false },
 	{ label: "Invitados", segment: "guests", icon: UsersIcon, ownerOnly: false },
+	{ label: "Mesas", segment: "seating", icon: CircleDotIcon, ownerOnly: false },
 	{ label: "Tema", segment: "design", icon: PaletteIcon, ownerOnly: false },
 	{
 		label: "Colaboradores",

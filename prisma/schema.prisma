@@ -58,6 +58,11 @@ enum RsvpResponseSource {
   owner
 }
 
+enum SeatingTableShape {
+  round
+  rectangular
+}
+
 enum ImageOrientation {
   landscape
   portrait
@@ -89,6 +94,8 @@ model Wishlist {
   images          WishlistImage[]
   members            WishlistMember[]
   memberInvitations  WishlistMemberInvitation[]
+  seatingTables      SeatingTable[]
+  seatingAssignments SeatingAssignment[]
   title           String
   subtitle        String?
   slug            String         @unique
@@ -225,6 +232,7 @@ model Invite {
   wishlist      Wishlist           @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
   extraGuests   InviteExtraGuest[]
   views         WishlistView[]
+  seatingAssignments SeatingAssignment[]
   primaryName   String
   primaryEmail  String?
   primaryPhone  String?
@@ -264,8 +272,47 @@ model InviteExtraGuest {
   name      String?
   status    RsvpStatus @default(pending)
   sortOrder Int        @default(0)
+  seatingAssignments SeatingAssignment[]
 
   @@index([inviteId])
+}
+
+model SeatingTable {
+  id          String              @id @default(cuid())
+  wishlistId  String
+  wishlist    Wishlist            @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  assignments SeatingAssignment[]
+  name        String?
+  shape       SeatingTableShape
+  capacity    Int
+  x           Int
+  y           Int
+  sortOrder   Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([wishlistId])
+}
+
+model SeatingAssignment {
+  id           String            @id @default(cuid())
+  wishlistId   String
+  wishlist     Wishlist          @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  tableId      String
+  table        SeatingTable      @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  inviteId     String
+  invite       Invite            @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  extraGuestId String?
+  extraGuest   InviteExtraGuest? @relation(fields: [extraGuestId], references: [id], onDelete: Cascade)
+  createdAt    DateTime          @default(now())
+
+  // Prisma 7.8 has no `nulls: "not distinct"` on @@unique, and a plain
+  // @@unique([inviteId, extraGuestId]) does not hold on Postgres because NULLs
+  // compare as distinct. The one-person-one-table invariant is enforced by two
+  // partial unique indexes created in the migration SQL instead.
+  @@index([inviteId, extraGuestId])
+  @@index([wishlistId])
+  @@index([tableId])
 }
 
 model Purchase {

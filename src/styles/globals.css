@@ -13,6 +13,12 @@
 		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 	--font-serif:
 		var(--font-lora, Lora), Georgia, Cambria, "Times New Roman", serif;
+
+	/* Seating floor plan. Three table states and nothing more; amber is reserved
+	   for pending *people* so a table's state never competes with a person's. */
+	--color-seat-open: #4e9b6f;
+	--color-seat-full: #2e7d4f;
+	--color-seat-invalid: #c9503c;
 }
 
 @theme inline {
@@ -369,5 +375,22 @@
 	}
 	html {
 		@apply font-sans;
+	}
+}
+
+/*
+ * Printing a dashboard page should put the page on paper, not the app around
+ * it. The chrome itself is marked `print:hidden` in the layouts; these rules
+ * undo the shell's viewport-height clipping, which would otherwise crop a
+ * multi-page sheet (the seating guest → table lookup sheet) to one page.
+ */
+@media print {
+	html,
+	body {
+		/* biome-ignore-start lint/complexity/noImportantStyles: these override Tailwind utilities (h-svh / overflow-hidden) that would otherwise crop a multi-page sheet to one page. */
+		height: auto !important;
+		overflow: visible !important;
+		background: #fff !important;
+		/* biome-ignore-end lint/complexity/noImportantStyles: see above */
 	}
 }

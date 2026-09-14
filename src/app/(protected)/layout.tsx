@@ -10,12 +10,16 @@ export default function ProtectedLayout({
 }) {
 	return (
 		<ClerkApplicationLayout>
-			<div className="h-svh p-0 md:p-4">
-				<SidebarProvider className="h-svh min-h-0 overflow-hidden rounded-none md:h-[calc(100svh-2rem)] md:rounded-xl">
-					<AppSidebar />
-					<SidebarInset className="min-h-0 overflow-clip">
+			<div className="h-svh p-0 md:p-4 print:h-auto print:p-0">
+				<SidebarProvider className="h-svh min-h-0 overflow-hidden rounded-none md:h-[calc(100svh-2rem)] md:rounded-xl print:block print:h-auto print:overflow-visible print:rounded-none">
+					<div className="contents print:hidden">
+						<AppSidebar />
+					</div>
+					<SidebarInset className="min-h-0 overflow-clip print:h-auto print:overflow-visible">
 						{children}
-						<MobileTabBar />
+						<div className="contents print:hidden">
+							<MobileTabBar />
+						</div>
 					</SidebarInset>
 				</SidebarProvider>
 			</div>
