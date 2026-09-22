@@ -1,7 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { InviteExtraGuest } from "@/generated/prisma/client";
 import {
 	type InviteWithExtras,
+	type OwnerFollowUpDatabase,
+	recordFollowUpCopy,
 	summarizeInviteEngagement,
 } from "./invite.service";
 
@@ -34,6 +36,8 @@ function makeInvite(
 		openedAt: null,
 		viewCount: 0,
 		lastViewedAt: null,
+		lastFollowUpKind: null,
+		lastFollowUpCopiedAt: null,
 		respondedAt: null,
 		responseSource: null,
 		responseLockedAt: null,
@@ -80,5 +84,51 @@ describe("summarizeInviteEngagement", () => {
 
 		expect(result.openedInvitations).toBe(1);
 		expect(result.unopenedInvitations).toBe(3);
+	});
+});
+
+describe("recordFollowUpCopy", () => {
+	it("updates only the latest follow-up kind and copy time for the owner", async () => {
+		const update = vi.fn().mockResolvedValue(makeInvite());
+		const db = {
+			invite: { findFirst: vi.fn().mockResolvedValue(makeInvite()), update },
+			wishlist: {
+				findFirst: vi.fn().mockResolvedValue({ id: "wl-1", ownerId: 1 }),
+			},
+		} as unknown as OwnerFollowUpDatabase;
+		const copiedAt = new Date("2026-09-22T12:00:00.000Z");
+
+		await recordFollowUpCopy(db, {
+			localUserId: 1,
+			wishlistId: "wl-1",
+			inviteId: "invite-1",
+			kind: "event_7_day",
+			now: copiedAt,
+		});
+
+		expect(update).toHaveBeenCalledWith({
+			where: { id: "invite-1" },
+			data: { lastFollowUpKind: "event_7_day", lastFollowUpCopiedAt: copiedAt },
+		});
+	});
+
+	it("rejects a copied follow-up scoped to another wishlist", async () => {
+		const update = vi.fn();
+		const db = {
+			invite: { findFirst: vi.fn().mockResolvedValue(makeInvite()), update },
+			wishlist: {
+				findFirst: vi.fn().mockResolvedValue({ id: "wl-1", ownerId: 1 }),
+			},
+		} as unknown as OwnerFollowUpDatabase;
+
+		await expect(
+			recordFollowUpCopy(db, {
+				localUserId: 1,
+				wishlistId: "another-wishlist",
+				inviteId: "invite-1",
+				kind: "invitation",
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+		expect(update).not.toHaveBeenCalled();
 	});
 });

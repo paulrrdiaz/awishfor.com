@@ -39,6 +39,7 @@ const invites: DashboardInviteViewModel[] = [
 
 const inviteListMock = vi.hoisted(() => vi.fn());
 const wishlistOverviewMock = vi.hoisted(() => vi.fn());
+const guestListMock = vi.hoisted(() => vi.fn());
 
 vi.mock("./search-params", () => ({
 	loadGuestsSearchParams: vi
@@ -81,13 +82,16 @@ vi.mock("@/components/features/dashboard/guests/guest-list", () => ({
 		invites: visibleInvites,
 	}: {
 		invites: DashboardInviteViewModel[];
-	}) => (
-		<ul>
-			{visibleInvites.map((invite) => (
-				<li key={invite.id}>{invite.primaryName}</li>
-			))}
-		</ul>
-	),
+	}) => {
+		guestListMock(visibleInvites);
+		return (
+			<ul>
+				{visibleInvites.map((invite) => (
+					<li key={invite.id}>{invite.primaryName}</li>
+				))}
+			</ul>
+		);
+	},
 }));
 
 vi.mock("@/components/features/dashboard/guests/guests-filter-toolbar", () => ({
@@ -109,6 +113,7 @@ import DashboardWishlistGuestsPage from "./page";
 
 describe("DashboardWishlistGuestsPage", () => {
 	beforeEach(() => {
+		guestListMock.mockReset();
 		inviteListMock.mockResolvedValue(invites);
 		wishlistOverviewMock.mockResolvedValue({
 			isOwner: true,
@@ -139,5 +144,40 @@ describe("DashboardWishlistGuestsPage", () => {
 		);
 		expect(screen.getByText("Beto Pendiente")).toBeVisible();
 		expect(screen.queryByText("Ana Confirmada")).toBeNull();
+	});
+
+	it("derives the same owner-only follow-up passed to the guest card", async () => {
+		render(
+			await DashboardWishlistGuestsPage({
+				params: Promise.resolve({ id: "wishlist_1" }),
+				searchParams: Promise.resolve({}),
+			}),
+		);
+
+		const [visibleInvites] = guestListMock.mock.calls.at(-1) ?? [];
+		expect(visibleInvites[0]?.followUp).toMatchObject({
+			kind: "invitation",
+			label: "Copiar invitación",
+		});
+		expect(visibleInvites[0]?.followUp.message).toContain(
+			"https://example.com/w/celebracion/beto-pendiente",
+		);
+	});
+
+	it("does not derive follow-ups for a collaborator", async () => {
+		wishlistOverviewMock.mockResolvedValue({
+			isOwner: false,
+			slug: "celebracion",
+			title: "Celebración",
+		});
+		render(
+			await DashboardWishlistGuestsPage({
+				params: Promise.resolve({ id: "wishlist_1" }),
+				searchParams: Promise.resolve({}),
+			}),
+		);
+
+		const [visibleInvites] = guestListMock.mock.calls.at(-1) ?? [];
+		expect(visibleInvites[0]?.followUp).toBeUndefined();
 	});
 });

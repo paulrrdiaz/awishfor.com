@@ -2,8 +2,7 @@
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { es } from "date-fns/locale";
-import { BellIcon, CheckIcon, XIcon } from "lucide-react";
-import Link from "next/link";
+import { CheckIcon, XIcon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
@@ -134,19 +133,6 @@ export function MobileGuestRsvpCard({ invite, wishlistId }: Props) {
 					<XIcon /> No podrá
 				</Button>
 			</div>
-			<Button
-				asChild
-				className="w-full"
-				size="sm"
-				type="button"
-				variant="ghost"
-			>
-				<Link
-					href={`/dashboard/wishlists/${wishlistId}/share?guest=${invite.id}&purpose=reminder`}
-				>
-					<BellIcon /> Recordar
-				</Link>
-			</Button>
 		</div>
 	);
 }

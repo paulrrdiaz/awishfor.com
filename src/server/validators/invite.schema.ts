@@ -113,6 +113,20 @@ export const reopenOwnerRsvpSchema = z.object({
 	inviteId: inviteIdSchema,
 });
 
+export const inviteFollowUpKindSchema = z.enum([
+	"invitation",
+	"rsvp_reminder",
+	"event_14_day",
+	"event_7_day",
+	"event_1_day",
+]);
+
+export const recordFollowUpCopySchema = z.object({
+	wishlistId: wishlistIdSchema,
+	inviteId: inviteIdSchema,
+	kind: inviteFollowUpKindSchema,
+});
+
 export type CreateInviteInput = z.infer<typeof createInviteSchema>;
 export type UpdateInviteInput = z.infer<typeof updateInviteSchema>;
 export type DeleteInviteInput = z.infer<typeof deleteInviteSchema>;
@@ -120,3 +134,4 @@ export type ListInvitesInput = z.infer<typeof listInvitesSchema>;
 export type RespondInviteInput = z.infer<typeof respondInviteSchema>;
 export type RecordOwnerRsvpInput = z.infer<typeof recordOwnerRsvpSchema>;
 export type ReopenOwnerRsvpInput = z.infer<typeof reopenOwnerRsvpSchema>;
+export type RecordFollowUpCopyInput = z.infer<typeof recordFollowUpCopySchema>;

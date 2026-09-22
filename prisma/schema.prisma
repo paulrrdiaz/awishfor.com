@@ -54,8 +54,16 @@ enum RsvpStatus {
 }
 
 enum RsvpResponseSource {
-  guest
-  owner
+	guest
+	owner
+}
+
+enum InviteFollowUpKind {
+	invitation
+	rsvp_reminder
+	event_14_day
+	event_7_day
+	event_1_day
 }
 
 enum SeatingTableShape {
@@ -241,6 +249,8 @@ model Invite {
   openedAt      DateTime?
   viewCount     Int                @default(0)
   lastViewedAt  DateTime?
+	lastFollowUpKind InviteFollowUpKind?
+	lastFollowUpCopiedAt DateTime?
   respondedAt   DateTime?
   responseSource RsvpResponseSource?
   responseLockedAt DateTime?

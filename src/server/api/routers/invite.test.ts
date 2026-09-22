@@ -445,3 +445,67 @@ describe("inviteRouter owner RSVP", () => {
 		});
 	});
 });
+
+describe("inviteRouter.recordFollowUpCopy", () => {
+	it("records a copied follow-up for the wishlist owner", async () => {
+		const inviteUpdate = vi.fn().mockResolvedValue(makeInviteRow());
+		const db = makeDb({
+			inviteFindFirst: vi.fn().mockResolvedValue(makeInviteRow()),
+			inviteUpdate,
+		});
+
+		await makeCaller(db).recordFollowUpCopy({
+			wishlistId: "wishlist_1",
+			inviteId: "invite_1",
+			kind: "rsvp_reminder",
+		});
+
+		expect(inviteUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					lastFollowUpKind: "rsvp_reminder",
+					lastFollowUpCopiedAt: expect.any(Date),
+				}),
+			}),
+		);
+	});
+
+	it("rejects collaborator and cross-wishlist copy attempts", async () => {
+		const collaboratorDb = makeDb({
+			inviteFindFirst: vi.fn().mockResolvedValue(makeInviteRow()),
+			wishlistFindFirst: vi.fn().mockResolvedValue(null),
+		});
+		await expect(
+			makeCaller(collaboratorDb).recordFollowUpCopy({
+				wishlistId: "wishlist_1",
+				inviteId: "invite_1",
+				kind: "invitation",
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+		expect(collaboratorDb.invite.update).not.toHaveBeenCalled();
+
+		const crossWishlistDb = makeDb({
+			inviteFindFirst: vi.fn().mockResolvedValue(makeInviteRow()),
+		});
+		await expect(
+			makeCaller(crossWishlistDb).recordFollowUpCopy({
+				wishlistId: "another_wishlist",
+				inviteId: "invite_1",
+				kind: "invitation",
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+		expect(crossWishlistDb.invite.update).not.toHaveBeenCalled();
+	});
+
+	it("rejects an invalid follow-up kind before updating", async () => {
+		const db = makeDb();
+		await expect(
+			makeCaller(db).recordFollowUpCopy({
+				wishlistId: "wishlist_1",
+				inviteId: "invite_1",
+				kind: "sent" as never,
+			}),
+		).rejects.toThrow();
+		expect(db.invite.update).not.toHaveBeenCalled();
+	});
+});

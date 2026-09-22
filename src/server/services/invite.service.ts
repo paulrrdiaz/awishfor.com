@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import type {
 	Invite,
 	InviteExtraGuest,
+	InviteFollowUpKind,
 	Prisma,
 } from "@/generated/prisma/client";
 import { isValidSlug } from "@/lib/slug";
@@ -46,6 +47,8 @@ export type InviteDatabase = {
 export type OwnerRsvpDatabase = InviteDatabase & {
 	$transaction<T>(callback: (tx: OwnerRsvpClient) => Promise<T>): Promise<T>;
 };
+
+export type OwnerFollowUpDatabase = InviteDatabase;
 
 export type OwnerRsvpExtraGuestInput = {
 	id: string;
@@ -155,6 +158,32 @@ export const reopenOwnerRsvp = (
 		where: { id: inviteId },
 		data: { responseSource: null, responseLockedAt: null },
 	});
+
+export async function recordFollowUpCopy(
+	db: OwnerFollowUpDatabase,
+	{
+		localUserId,
+		wishlistId,
+		inviteId,
+		kind,
+		now = new Date(),
+	}: {
+		localUserId: number;
+		wishlistId: string;
+		inviteId: string;
+		kind: InviteFollowUpKind;
+		now?: Date;
+	},
+): Promise<void> {
+	const invite = await getOwnerInvite(db, { localUserId, inviteId });
+	if (invite.wishlistId !== wishlistId) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+	}
+	await db.invite.update({
+		where: { id: invite.id },
+		data: { lastFollowUpKind: kind, lastFollowUpCopiedAt: now },
+	});
+}
 
 const resolveSlug = async (
 	db: InviteDatabase,

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
+import { EventProximityIndicator } from "@/components/features/dashboard/guests/event-proximity-indicator";
 import { GuestList } from "@/components/features/dashboard/guests/guest-list";
 import { GuestsEmptyState } from "@/components/features/dashboard/guests/guests-empty-state";
 import { GuestsFilterToolbar } from "@/components/features/dashboard/guests/guests-filter-toolbar";
@@ -10,6 +11,12 @@ import {
 	countDashboardInvitesByStatus,
 	filterDashboardInvites,
 } from "@/lib/dashboard/guest-filters";
+import {
+	buildInviteFollowUpMessage,
+	deriveInviteFollowUp,
+	getEventProximity,
+	inviteFollowUpLabel,
+} from "@/lib/dashboard/invite-follow-up";
 import { toCanonicalWishlistUrl } from "@/lib/wishlist/share";
 import { api } from "@/trpc/server";
 import { loadGuestsSearchParams } from "./search-params";
@@ -37,10 +44,46 @@ export default async function DashboardWishlistGuestsPage({
 		notFound();
 	}
 
-	const invitesWithUrl = invites.map((invite) => ({
-		...invite,
-		inviteUrl: toCanonicalWishlistUrl(`/w/${wishlist.slug}/${invite.slug}`),
-	}));
+	const now = new Date();
+	const eventProximity = getEventProximity(wishlist.eventDate, now);
+	const invitesWithUrl = invites.map((invite) => {
+		const inviteUrl = toCanonicalWishlistUrl(
+			`/w/${wishlist.slug}/${invite.slug}`,
+		);
+		const followUp = wishlist.isOwner
+			? deriveInviteFollowUp({
+					status: invite.status,
+					lastViewedAt: invite.lastViewedAt,
+					lastFollowUpKind: invite.lastFollowUpKind,
+					eventDate: wishlist.eventDate,
+					rsvpDeadline: wishlist.rsvpDeadline,
+					now,
+				})
+			: null;
+		return {
+			...invite,
+			inviteUrl,
+			...(followUp
+				? {
+						followUp: {
+							...followUp,
+							label: inviteFollowUpLabel(followUp.kind),
+							message: buildInviteFollowUpMessage({
+								...followUp,
+								guestName: invite.primaryName,
+								inviteUrl,
+								eventType: wishlist.eventType,
+								eventDate: wishlist.eventDate,
+								eventTime: wishlist.eventTime,
+								eventLocation: wishlist.eventLocation,
+								rsvpDeadline: wishlist.rsvpDeadline,
+								now,
+							}),
+						},
+					}
+				: {}),
+		};
+	});
 	const totalGuests = invites.reduce(
 		(total, invite) => total + invite.partySize,
 		0,
@@ -59,6 +102,7 @@ export default async function DashboardWishlistGuestsPage({
 				totalGuests={totalGuests}
 				wishlistId={id}
 			/>
+			{eventProximity && <EventProximityIndicator proximity={eventProximity} />}
 
 			{invites.length > 0 && <GuestsFilterToolbar counts={inviteCounts} />}
 

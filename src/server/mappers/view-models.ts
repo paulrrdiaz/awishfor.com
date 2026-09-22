@@ -182,6 +182,10 @@ export type DashboardWishlistOverviewViewModel = {
 	eventType: string;
 	language: string;
 	status: string;
+	eventDate: string | null;
+	eventTime: string | null;
+	eventLocation: string | null;
+	rsvpDeadline: string | null;
 	publicUrlPath: string;
 	publicUrl: string;
 	whatsAppUrl: string;
@@ -237,6 +241,8 @@ export type DashboardInviteViewModel = {
 	openedAt: string | null;
 	viewCount?: number;
 	lastViewedAt?: string | null;
+	lastFollowUpKind?: InviteFollowUpKind | null;
+	lastFollowUpCopiedAt?: string | null;
 	respondedAt: string | null;
 	responseSource?: string | null;
 	responseLockedAt?: string | null;
@@ -324,3 +330,5 @@ export type SeatingBoardViewModel = {
 	people: SeatingPersonViewModel[];
 	totals: SeatingBoardTotalsViewModel;
 };
+
+import type { InviteFollowUpKind } from "@/lib/dashboard/invite-follow-up";

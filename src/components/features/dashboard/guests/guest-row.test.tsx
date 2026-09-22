@@ -10,6 +10,12 @@ vi.mock("@/app/(protected)/dashboard/wishlists/[id]/guests/actions", () => ({
 	reopenOwnerRsvpAction: vi.fn(),
 }));
 
+vi.mock("./contextual-follow-up-copy-control", () => ({
+	ContextualFollowUpCopyControl: ({ label }: { label: string }) => (
+		<button type="button">{label}</button>
+	),
+}));
+
 function makeInvite(
 	overrides: Partial<DashboardInviteViewModel> = {},
 ): DashboardInviteViewModel {
@@ -144,5 +150,46 @@ describe("GuestRow", () => {
 		expect(
 			screen.queryByRole("button", { name: "Registrar respuesta" }),
 		).toBeNull();
+	});
+
+	it("renders the shared contextual action only for an eligible owner", () => {
+		const { rerender } = render(
+			<GuestRow
+				followUp={{
+					kind: "invitation",
+					label: "Copiar invitación",
+					message: "Mensaje",
+					indicator: "No se registró ninguna vista",
+					emphasis: "recommended",
+				}}
+				invite={makeInvite()}
+				inviteUrl="https://example.com/w/lista/lady-castillo"
+				isOwner
+				onEdit={vi.fn()}
+				wishlistId="wishlist_1"
+			/>,
+		);
+		expect(screen.getByText("No se registró ninguna vista")).toBeVisible();
+		expect(
+			screen.getByRole("button", { name: "Copiar invitación" }),
+		).toBeVisible();
+
+		rerender(
+			<GuestRow
+				followUp={{
+					kind: "invitation",
+					label: "Copiar invitación",
+					message: "Mensaje",
+					indicator: "No se registró ninguna vista",
+					emphasis: "recommended",
+				}}
+				invite={makeInvite()}
+				inviteUrl="https://example.com/w/lista/lady-castillo"
+				isOwner={false}
+				onEdit={vi.fn()}
+				wishlistId="wishlist_1"
+			/>,
+		);
+		expect(screen.queryByText("No se registró ninguna vista")).toBeNull();
 	});
 });

@@ -116,6 +116,8 @@ function makeInvite(
 		openedAt: null,
 		viewCount: 0,
 		lastViewedAt: null,
+		lastFollowUpKind: null,
+		lastFollowUpCopiedAt: null,
 		respondedAt: null,
 		responseSource: null,
 		responseLockedAt: null,

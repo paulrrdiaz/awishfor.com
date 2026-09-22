@@ -14,6 +14,7 @@ import {
 	type InviteDatabase,
 	listInvites,
 	type OwnerRsvpDatabase,
+	recordFollowUpCopy,
 	recordOwnerRsvp,
 	reopenOwnerRsvp,
 	updateInvite,
@@ -27,6 +28,7 @@ import {
 	createInviteSchema,
 	deleteInviteSchema,
 	listInvitesSchema,
+	recordFollowUpCopySchema,
 	recordOwnerRsvpSchema,
 	reopenOwnerRsvpSchema,
 	respondInviteSchema,
@@ -127,6 +129,13 @@ export const inviteRouter = createTRPCRouter({
 				inviteId: input.inviteId,
 			});
 			await reopenOwnerRsvp(asInviteDb(ctx) as OwnerRsvpDatabase, input);
+		}),
+
+	recordFollowUpCopy: protectedProcedure
+		.input(recordFollowUpCopySchema)
+		.mutation(async ({ ctx, input }) => {
+			const localUserId = await getLocalUserId(ctx);
+			await recordFollowUpCopy(asInviteDb(ctx), { ...input, localUserId });
 		}),
 
 	respond: publicProcedure

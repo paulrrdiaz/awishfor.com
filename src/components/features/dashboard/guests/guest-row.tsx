@@ -2,6 +2,7 @@
 
 import { Eye, MoreHorizontal, Pencil, Trash2, Users } from "lucide-react";
 import { useState } from "react";
+import { ContextualFollowUpCopyControl } from "@/components/features/dashboard/guests/contextual-follow-up-copy-control";
 import { CopyInviteUrlButton } from "@/components/features/dashboard/guests/copy-invite-url-button";
 import { DeleteGuestDialog } from "@/components/features/dashboard/guests/delete-guest-dialog";
 import { OwnerRsvpControls } from "@/components/features/dashboard/guests/owner-rsvp-controls";
@@ -14,6 +15,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type {
+	FollowUpEmphasis,
+	InviteFollowUpKind,
+} from "@/lib/dashboard/invite-follow-up";
 import type { DashboardInviteViewModel } from "@/server/mappers/view-models";
 
 type Props = {
@@ -22,6 +27,13 @@ type Props = {
 	inviteUrl: string;
 	onEdit: () => void;
 	isOwner?: boolean;
+	followUp?: {
+		kind: InviteFollowUpKind;
+		label: string;
+		message: string;
+		indicator: string;
+		emphasis: FollowUpEmphasis;
+	};
 };
 
 function confirmedCount(invite: DashboardInviteViewModel): number {
@@ -46,6 +58,7 @@ export function GuestRow({
 	inviteUrl,
 	onEdit,
 	isOwner = false,
+	followUp,
 }: Props) {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const hasResponded = invite.status !== "pending";
@@ -102,6 +115,21 @@ export function GuestRow({
 					</span>
 					<span aria-hidden="true">·</span>
 					<span>{formatLastViewedAt(invite.lastViewedAt ?? null)}</span>
+				</div>
+			)}
+			{isOwner && followUp && (
+				<div className="rounded-lg border border-border bg-muted/30 p-2.5">
+					<p className="mb-2 text-muted-foreground text-xs">
+						{followUp.indicator}
+					</p>
+					<ContextualFollowUpCopyControl
+						emphasis={followUp.emphasis}
+						inviteId={invite.id}
+						kind={followUp.kind}
+						label={followUp.label}
+						message={followUp.message}
+						wishlistId={wishlistId}
+					/>
 				</div>
 			)}
 

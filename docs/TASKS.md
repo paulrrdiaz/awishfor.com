@@ -1961,6 +1961,39 @@ Affected areas:
 - `src/components/features/dashboard/guests/*`
 - `src/lib/dashboard/guest-filters.ts`
 
+### 7.7 Add contextual invite follow-up reminders
+
+Priority: P1
+
+Details:
+
+Owners get one contextual, clipboard-ready follow-up per eligible invite (first-touch invitation, RSVP reminder, or staged 14/7/1-day event reminder), derived from RSVP status, personalized-link view recency, RSVP deadline, and event proximity. Declined invites and past events never show a reminder action.
+
+Tasks:
+
+- [x] Add `InviteFollowUpKind`, nullable latest-kind/copy-time fields, and the paired-null constraint to `Invite`.
+- [x] Add pure follow-up state/message derivation helpers with calendar-day and view-recency boundary tests.
+- [x] Add the owner-scoped `invite.recordFollowUpCopy` mutation, gated to owners and validated end to end.
+- [x] Add the event-proximity indicator and per-invite follow-up indicator to the Invitados page and guest cards.
+- [x] Add the reusable clipboard-first follow-up copy control (desktop and mobile) and retire the mobile pending-card reminder navigation in favor of direct copy.
+
+Acceptance criteria:
+
+- Pending guests get an invitation message before their link is ever viewed, and an RSVP reminder after.
+- Confirmed guests get 14-day, 7-day, and 1-day event reminders; declined and past/same-day events get none.
+- Generated messages never mention view tracking, view counts, or copy metadata.
+- A successful clipboard copy updates the card immediately even if the persistence mutation fails, with a distinct warning shown.
+- Collaborators and public invite consumers never receive follow-up metadata.
+
+Affected areas:
+
+- `prisma/schema.prisma`
+- `src/lib/dashboard/invite-follow-up.ts`
+- `src/server/services/invite.service.ts`, `src/server/api/routers/invite.ts`
+- `src/server/mappers/dashboard-invite.mapper.ts`, `src/server/mappers/view-models.ts`
+- `src/app/(protected)/dashboard/wishlists/[id]/guests/*`
+- `src/components/features/dashboard/guests/*`, `src/components/layouts/dashboard/mobile/mobile-guest-rsvp-card.tsx`
+
 ### Cut line
 
 If scope gets tight, defer:

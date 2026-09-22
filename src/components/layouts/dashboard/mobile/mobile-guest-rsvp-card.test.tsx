@@ -53,13 +53,10 @@ describe("MobileGuestRsvpCard", () => {
 		).toBeInTheDocument();
 	});
 
-	it("links the reminder into the personalized share view for this guest", () => {
+	it("leaves contextual reminder copy to the shared guest-card control", () => {
 		render(<MobileGuestRsvpCard invite={makeInvite()} wishlistId="wl_1" />);
 
-		expect(screen.getByRole("link", { name: /Recordar/ })).toHaveAttribute(
-			"href",
-			"/dashboard/wishlists/wl_1/share?guest=invite_1&purpose=reminder",
-		);
+		expect(screen.queryByRole("link", { name: /Recordar/ })).toBeNull();
 	});
 
 	it("records a response on a single tap, with no further confirmation", async () => {

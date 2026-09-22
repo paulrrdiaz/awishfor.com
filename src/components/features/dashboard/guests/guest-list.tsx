@@ -3,11 +3,24 @@
 import { useState } from "react";
 import { GuestRow } from "@/components/features/dashboard/guests/guest-row";
 import { GuestSheet } from "@/components/features/dashboard/guests/guest-sheet";
+import type {
+	FollowUpEmphasis,
+	InviteFollowUpKind,
+} from "@/lib/dashboard/invite-follow-up";
 import type { DashboardInviteViewModel } from "@/server/mappers/view-models";
 
 type Props = {
 	wishlistId: string;
-	invites: (DashboardInviteViewModel & { inviteUrl: string })[];
+	invites: (DashboardInviteViewModel & {
+		inviteUrl: string;
+		followUp?: {
+			kind: InviteFollowUpKind;
+			label: string;
+			message: string;
+			indicator: string;
+			emphasis: FollowUpEmphasis;
+		};
+	})[];
 	isOwner?: boolean;
 };
 
@@ -21,6 +34,7 @@ export function GuestList({ wishlistId, invites, isOwner = false }: Props) {
 				{invites.map((invite) => (
 					<li className="h-full" key={invite.id}>
 						<GuestRow
+							followUp={invite.followUp}
 							invite={invite}
 							inviteUrl={invite.inviteUrl}
 							isOwner={isOwner}

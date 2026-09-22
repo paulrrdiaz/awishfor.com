@@ -24,6 +24,9 @@ export function mapDashboardInvite(
 			? {
 					lastViewedAt: invite.lastViewedAt?.toISOString() ?? null,
 					viewCount: invite.viewCount,
+					lastFollowUpKind: invite.lastFollowUpKind,
+					lastFollowUpCopiedAt:
+						invite.lastFollowUpCopiedAt?.toISOString() ?? null,
 				}
 			: {}),
 		respondedAt: invite.respondedAt?.toISOString() ?? null,
