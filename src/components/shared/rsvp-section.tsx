@@ -7,7 +7,7 @@ import { usePublicWishlistAnalytics } from "@/components/layouts/public-wishlist
 import { PublicWishlistProviders } from "@/components/providers/public-wishlist-providers";
 import { CalendarSaveControl } from "@/components/shared/calendar-save-control";
 import { Locale } from "@/generated/prisma/enums";
-import { formatEventDate } from "@/lib/format/dates";
+import { formatEventDate, formatShortDate } from "@/lib/format/dates";
 import { cn } from "@/lib/utils";
 import { isRsvpClosed } from "@/lib/wishlist/rsvp-window";
 import type {
@@ -38,19 +38,6 @@ type ExtraStatus = "confirmed" | "declined";
 
 const EYEBROW =
 	"font-mono text-[8.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground";
-
-function formatShortDate(iso: string): string {
-	const formattedDate = new Intl.DateTimeFormat("es-PE", {
-		weekday: "long",
-		day: "numeric",
-		month: "long",
-		// RSVP deadlines, like event dates, represent calendar days stored at
-		// UTC midnight. Keep that calendar day when the viewer is west of UTC.
-		timeZone: "UTC",
-	}).format(new Date(iso));
-
-	return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-}
 
 function joinNames(names: string[]): string {
 	if (names.length === 0) return "";
@@ -231,7 +218,7 @@ function RsvpForm({
 										{" "}
 										· confirma antes del{" "}
 										<b className="text-card-foreground">
-											{formatShortDate(rsvpDeadline)}
+											{formatShortDate(rsvpDeadline, Locale.es)}
 										</b>
 									</>
 								)}

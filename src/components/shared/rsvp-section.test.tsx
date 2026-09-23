@@ -115,6 +115,8 @@ describe("RsvpSection", () => {
 	it("keeps the RSVP deadline's stored calendar day for viewers west of UTC", () => {
 		const previousTimezone = process.env.TZ;
 		process.env.TZ = "America/Lima";
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-09-01T00:00:00.000Z"));
 
 		try {
 			render(
@@ -125,8 +127,9 @@ describe("RsvpSection", () => {
 				/>,
 			);
 
-			expect(screen.getByText("Domingo, 13 de setiembre")).toBeVisible();
+			expect(screen.getByText("Domingo, 13 de septiembre")).toBeVisible();
 		} finally {
+			vi.useRealTimers();
 			if (previousTimezone === undefined) {
 				delete process.env.TZ;
 			} else {

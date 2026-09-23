@@ -71,6 +71,21 @@ export function formatEventDate(
 	return timeRange ? `${capitalizedDate} · ${timeRange}` : capitalizedDate;
 }
 
+/** Short weekday + day + month form, e.g. "Domingo, 13 de septiembre". */
+export function formatShortDate(date: Date | string, locale: Locale): string {
+	const d = typeof date === "string" ? new Date(date) : date;
+	const formattedDate = new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+		weekday: "long",
+		day: "numeric",
+		month: "long",
+		// Deadlines are calendar days stored at UTC midnight. Keep that
+		// calendar day when the viewer is west of UTC.
+		timeZone: "UTC",
+	}).format(d);
+	// CLDR returns the weekday lowercase for es-419/en-US — capitalize index 0.
+	return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+}
+
 /** Post meta line form, e.g. "14 ago 2026". */
 export function formatBlogPostDate(date: Date | string): string {
 	const d = typeof date === "string" ? new Date(date) : date;
