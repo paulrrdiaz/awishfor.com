@@ -131,4 +131,49 @@ describe("recordFollowUpCopy", () => {
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
 		expect(update).not.toHaveBeenCalled();
 	});
+
+	it("allows a collaborator to record follow-up copy metadata", async () => {
+		const update = vi.fn().mockResolvedValue(makeInvite());
+		const db = {
+			invite: { findFirst: vi.fn().mockResolvedValue(makeInvite()), update },
+			wishlist: {
+				findFirst: vi.fn().mockResolvedValue({ id: "wl-1", ownerId: 1 }),
+			},
+		} as unknown as OwnerFollowUpDatabase;
+		const copiedAt = new Date("2026-09-22T12:00:00.000Z");
+
+		await recordFollowUpCopy(db, {
+			localUserId: 2,
+			wishlistId: "wl-1",
+			inviteId: "invite-1",
+			kind: "rsvp_reminder",
+			now: copiedAt,
+		});
+
+		expect(update).toHaveBeenCalledWith({
+			where: { id: "invite-1" },
+			data: {
+				lastFollowUpKind: "rsvp_reminder",
+				lastFollowUpCopiedAt: copiedAt,
+			},
+		});
+	});
+
+	it("rejects a caller with no wishlist access", async () => {
+		const update = vi.fn();
+		const db = {
+			invite: { findFirst: vi.fn().mockResolvedValue(makeInvite()), update },
+			wishlist: { findFirst: vi.fn().mockResolvedValue(null) },
+		} as unknown as OwnerFollowUpDatabase;
+
+		await expect(
+			recordFollowUpCopy(db, {
+				localUserId: 3,
+				wishlistId: "wl-1",
+				inviteId: "invite-1",
+				kind: "invitation",
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+		expect(update).not.toHaveBeenCalled();
+	});
 });

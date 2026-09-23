@@ -16,6 +16,8 @@ function makeInvite(
 		partySize: overrides.partySize ?? 1,
 		extraGuests: overrides.extraGuests ?? [],
 		openedAt: null,
+		viewRecency: overrides.viewRecency ?? "never",
+		lastFollowUpKind: overrides.lastFollowUpKind ?? null,
 		respondedAt: null,
 		createdAt: "2026-01-01T00:00:00.000Z",
 		updatedAt: "2026-01-01T00:00:00.000Z",

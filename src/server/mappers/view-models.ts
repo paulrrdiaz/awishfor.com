@@ -241,7 +241,8 @@ export type DashboardInviteViewModel = {
 	openedAt: string | null;
 	viewCount?: number;
 	lastViewedAt?: string | null;
-	lastFollowUpKind?: InviteFollowUpKind | null;
+	viewRecency: ViewRecency;
+	lastFollowUpKind: InviteFollowUpKind | null;
 	lastFollowUpCopiedAt?: string | null;
 	respondedAt: string | null;
 	responseSource?: string | null;
@@ -331,4 +332,7 @@ export type SeatingBoardViewModel = {
 	totals: SeatingBoardTotalsViewModel;
 };
 
-import type { InviteFollowUpKind } from "@/lib/dashboard/invite-follow-up";
+import type {
+	InviteFollowUpKind,
+	ViewRecency,
+} from "@/lib/dashboard/invite-follow-up";

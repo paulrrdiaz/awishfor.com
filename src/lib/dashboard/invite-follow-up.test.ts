@@ -10,7 +10,7 @@ import {
 const now = new Date("2026-09-22T12:00:00.000Z");
 const base = {
 	status: "pending",
-	lastViewedAt: null,
+	viewRecency: "never",
 	lastFollowUpKind: null,
 	eventDate: "2026-10-06T00:00:00.000Z",
 	rsvpDeadline: null,
@@ -57,7 +57,13 @@ describe("invite follow-up calendar and view boundaries", () => {
 describe("invite follow-up projection", () => {
 	it.each([
 		[{ ...base }, "invitation"],
-		[{ ...base, lastViewedAt: "2026-09-20T11:00:00.000Z" }, "rsvp_reminder"],
+		[
+			{
+				...base,
+				viewRecency: classifyViewRecency("2026-09-20T11:00:00.000Z", now),
+			},
+			"rsvp_reminder",
+		],
 		[
 			{ ...base, status: "confirmed", eventDate: "2026-10-06T00:00:00.000Z" },
 			"event_14_day",
@@ -87,7 +93,7 @@ describe("invite follow-up projection", () => {
 		expect(
 			deriveInviteFollowUp({
 				...base,
-				lastViewedAt: "2026-09-21T12:00:00.000Z",
+				viewRecency: classifyViewRecency("2026-09-21T12:00:00.000Z", now),
 			})?.emphasis,
 		).toBe("deemphasized");
 		expect(

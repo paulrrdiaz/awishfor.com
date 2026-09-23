@@ -470,20 +470,42 @@ describe("inviteRouter.recordFollowUpCopy", () => {
 		);
 	});
 
-	it("rejects collaborator and cross-wishlist copy attempts", async () => {
-		const collaboratorDb = makeDb({
+	it("allows a collaborator to record a copy", async () => {
+		const inviteUpdate = vi.fn().mockResolvedValue(makeInviteRow());
+		const db = makeDb({
+			inviteFindFirst: vi.fn().mockResolvedValue(makeInviteRow()),
+			inviteUpdate,
+		});
+
+		await makeCaller(db).recordFollowUpCopy({
+			wishlistId: "wishlist_1",
+			inviteId: "invite_1",
+			kind: "invitation",
+		});
+
+		expect(inviteUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({ lastFollowUpKind: "invitation" }),
+			}),
+		);
+	});
+
+	it("rejects a caller without wishlist access", async () => {
+		const noAccessDb = makeDb({
 			inviteFindFirst: vi.fn().mockResolvedValue(makeInviteRow()),
 			wishlistFindFirst: vi.fn().mockResolvedValue(null),
 		});
 		await expect(
-			makeCaller(collaboratorDb).recordFollowUpCopy({
+			makeCaller(noAccessDb).recordFollowUpCopy({
 				wishlistId: "wishlist_1",
 				inviteId: "invite_1",
 				kind: "invitation",
 			}),
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
-		expect(collaboratorDb.invite.update).not.toHaveBeenCalled();
+		expect(noAccessDb.invite.update).not.toHaveBeenCalled();
+	});
 
+	it("rejects a cross-wishlist copy attempt", async () => {
 		const crossWishlistDb = makeDb({
 			inviteFindFirst: vi.fn().mockResolvedValue(makeInviteRow()),
 		});

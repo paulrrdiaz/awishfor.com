@@ -19,7 +19,7 @@ export type EventProximity = {
 
 export type InviteFollowUpInput = {
 	status: string;
-	lastViewedAt: string | null | undefined;
+	viewRecency: ViewRecency;
 	lastFollowUpKind: InviteFollowUpKind | null | undefined;
 	eventDate: string | null;
 	rsvpDeadline: string | null;
@@ -121,7 +121,7 @@ function followUpKindFor(
 		return null;
 	}
 	if (input.status === "pending") {
-		return input.lastViewedAt ? "rsvp_reminder" : "invitation";
+		return input.viewRecency !== "never" ? "rsvp_reminder" : "invitation";
 	}
 	if (input.status !== "confirmed" || !input.eventDate) return null;
 	const daysAway = calendarDaysUntil(input.eventDate, input.now);
@@ -148,7 +148,7 @@ export function deriveInviteFollowUp(
 ): InviteFollowUp | null {
 	const kind = followUpKindFor(input);
 	if (!kind) return null;
-	const viewRecency = classifyViewRecency(input.lastViewedAt, input.now);
+	const viewRecency = input.viewRecency;
 	const sameStageCopied = input.lastFollowUpKind === kind;
 	const emphasis: FollowUpEmphasis =
 		sameStageCopied || viewRecency === "recent"

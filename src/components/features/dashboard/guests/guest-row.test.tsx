@@ -33,6 +33,8 @@ function makeInvite(
 			{ id: "g2", name: "Ana", status: "pending" },
 		],
 		openedAt: null,
+		viewRecency: "never",
+		lastFollowUpKind: null,
 		respondedAt: null,
 		createdAt: "2026-06-01T00:00:00.000Z",
 		updatedAt: "2026-06-01T00:00:00.000Z",
@@ -152,8 +154,8 @@ describe("GuestRow", () => {
 		).toBeNull();
 	});
 
-	it("renders the shared contextual action only for an eligible owner", () => {
-		const { rerender } = render(
+	it("renders the shared contextual action for an eligible owner", () => {
+		render(
 			<GuestRow
 				followUp={{
 					kind: "invitation",
@@ -173,8 +175,10 @@ describe("GuestRow", () => {
 		expect(
 			screen.getByRole("button", { name: "Copiar invitación" }),
 		).toBeVisible();
+	});
 
-		rerender(
+	it("renders the shared contextual action for a collaborator too", () => {
+		render(
 			<GuestRow
 				followUp={{
 					kind: "invitation",
@@ -190,6 +194,9 @@ describe("GuestRow", () => {
 				wishlistId="wishlist_1"
 			/>,
 		);
-		expect(screen.queryByText("No se registró ninguna vista")).toBeNull();
+		expect(screen.getByText("No se registró ninguna vista")).toBeVisible();
+		expect(
+			screen.getByRole("button", { name: "Copiar invitación" }),
+		).toBeVisible();
 	});
 });

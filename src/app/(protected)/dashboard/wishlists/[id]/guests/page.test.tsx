@@ -16,6 +16,8 @@ const invites: DashboardInviteViewModel[] = [
 		partySize: 2,
 		extraGuests: [{ id: "ana-extra", name: "Luis", status: "confirmed" }],
 		openedAt: null,
+		viewRecency: "never",
+		lastFollowUpKind: null,
 		respondedAt: null,
 		createdAt: "2026-01-01T00:00:00.000Z",
 		updatedAt: "2026-01-01T00:00:00.000Z",
@@ -31,6 +33,8 @@ const invites: DashboardInviteViewModel[] = [
 		partySize: 1,
 		extraGuests: [],
 		openedAt: null,
+		viewRecency: "never",
+		lastFollowUpKind: null,
 		respondedAt: null,
 		createdAt: "2026-01-01T00:00:00.000Z",
 		updatedAt: "2026-01-01T00:00:00.000Z",
@@ -146,7 +150,7 @@ describe("DashboardWishlistGuestsPage", () => {
 		expect(screen.queryByText("Ana Confirmada")).toBeNull();
 	});
 
-	it("derives the same owner-only follow-up passed to the guest card", async () => {
+	it("derives the same follow-up passed to the guest card for the owner", async () => {
 		render(
 			await DashboardWishlistGuestsPage({
 				params: Promise.resolve({ id: "wishlist_1" }),
@@ -164,7 +168,7 @@ describe("DashboardWishlistGuestsPage", () => {
 		);
 	});
 
-	it("does not derive follow-ups for a collaborator", async () => {
+	it("also derives follow-ups for a collaborator", async () => {
 		wishlistOverviewMock.mockResolvedValue({
 			isOwner: false,
 			slug: "celebracion",
@@ -178,6 +182,9 @@ describe("DashboardWishlistGuestsPage", () => {
 		);
 
 		const [visibleInvites] = guestListMock.mock.calls.at(-1) ?? [];
-		expect(visibleInvites[0]?.followUp).toBeUndefined();
+		expect(visibleInvites[0]?.followUp).toMatchObject({
+			kind: "invitation",
+			label: "Copiar invitación",
+		});
 	});
 });

@@ -28,6 +28,8 @@ function makeInvite(
 		partySize: 2,
 		extraGuests: [{ id: "g1", name: "Carlos", status: "pending" }],
 		openedAt: null,
+		viewRecency: "never",
+		lastFollowUpKind: null,
 		respondedAt: null,
 		createdAt: "2026-06-01T00:00:00.000Z",
 		updatedAt: "2026-06-01T00:00:00.000Z",

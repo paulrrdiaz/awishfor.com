@@ -25,16 +25,23 @@ const invite = {
 } satisfies InviteWithExtras;
 
 describe("mapDashboardInvite", () => {
-	it("includes follow-up metadata only in the owner analytics projection", () => {
+	it("keeps viewRecency and lastFollowUpKind present for both owner and collaborator", () => {
 		const owner = mapDashboardInvite(invite, { includeAnalytics: true });
 		expect(owner).toMatchObject({
 			lastFollowUpKind: "rsvp_reminder",
 			lastFollowUpCopiedAt: copiedAt.toISOString(),
 		});
+		expect(["never", "recent", "intermediate", "stale"]).toContain(
+			owner.viewRecency,
+		);
 
 		const collaborator = mapDashboardInvite(invite);
-		expect(collaborator).not.toHaveProperty("lastFollowUpKind");
+		expect(collaborator.lastFollowUpKind).toBe("rsvp_reminder");
+		expect(["never", "recent", "intermediate", "stale"]).toContain(
+			collaborator.viewRecency,
+		);
 		expect(collaborator).not.toHaveProperty("lastFollowUpCopiedAt");
 		expect(collaborator).not.toHaveProperty("lastViewedAt");
+		expect(collaborator).not.toHaveProperty("viewCount");
 	});
 });

@@ -1,3 +1,4 @@
+import { classifyViewRecency } from "@/lib/dashboard/invite-follow-up";
 import type { DashboardInviteViewModel } from "@/server/mappers/view-models";
 import type { InviteWithExtras } from "@/server/services/invite.service";
 
@@ -20,11 +21,15 @@ export function mapDashboardInvite(
 			status: guest.status,
 		})),
 		openedAt: invite.openedAt?.toISOString() ?? null,
+		viewRecency: classifyViewRecency(
+			invite.lastViewedAt?.toISOString() ?? null,
+			new Date(),
+		),
+		lastFollowUpKind: invite.lastFollowUpKind,
 		...(includeAnalytics
 			? {
 					lastViewedAt: invite.lastViewedAt?.toISOString() ?? null,
 					viewCount: invite.viewCount,
-					lastFollowUpKind: invite.lastFollowUpKind,
 					lastFollowUpCopiedAt:
 						invite.lastFollowUpCopiedAt?.toISOString() ?? null,
 				}

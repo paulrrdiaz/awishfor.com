@@ -50,16 +50,14 @@ export default async function DashboardWishlistGuestsPage({
 		const inviteUrl = toCanonicalWishlistUrl(
 			`/w/${wishlist.slug}/${invite.slug}`,
 		);
-		const followUp = wishlist.isOwner
-			? deriveInviteFollowUp({
-					status: invite.status,
-					lastViewedAt: invite.lastViewedAt,
-					lastFollowUpKind: invite.lastFollowUpKind,
-					eventDate: wishlist.eventDate,
-					rsvpDeadline: wishlist.rsvpDeadline,
-					now,
-				})
-			: null;
+		const followUp = deriveInviteFollowUp({
+			status: invite.status,
+			viewRecency: invite.viewRecency,
+			lastFollowUpKind: invite.lastFollowUpKind,
+			eventDate: wishlist.eventDate,
+			rsvpDeadline: wishlist.rsvpDeadline,
+			now,
+		});
 		return {
 			...invite,
 			inviteUrl,

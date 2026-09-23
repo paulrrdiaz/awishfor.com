@@ -1973,8 +1973,8 @@ Tasks:
 
 - [x] Add `InviteFollowUpKind`, nullable latest-kind/copy-time fields, and the paired-null constraint to `Invite`.
 - [x] Add pure follow-up state/message derivation helpers with calendar-day and view-recency boundary tests.
-- [x] Add the owner-scoped `invite.recordFollowUpCopy` mutation, gated to owners and validated end to end.
-- [x] Add the event-proximity indicator and per-invite follow-up indicator to the Invitados page and guest cards.
+- [x] Add the `invite.recordFollowUpCopy` mutation, gated to the wishlist owner and collaborators (opened up from owner-only in `collaborator-follow-up-reminders`) and validated end to end.
+- [x] Add the event-proximity indicator and per-invite follow-up indicator to the Invitados page and guest cards, visible to the owner and collaborators alike.
 - [x] Add the reusable clipboard-first follow-up copy control (desktop and mobile) and retire the mobile pending-card reminder navigation in favor of direct copy.
 
 Acceptance criteria:
@@ -1983,7 +1983,7 @@ Acceptance criteria:
 - Confirmed guests get 14-day, 7-day, and 1-day event reminders; declined and past/same-day events get none.
 - Generated messages never mention view tracking, view counts, or copy metadata.
 - A successful clipboard copy updates the card immediately even if the persistence mutation fails, with a distinct warning shown.
-- Collaborators and public invite consumers never receive follow-up metadata.
+- The wishlist owner and collaborators both see and can act on the follow-up recommendation and indicator text; collaborators still never see the exact view count or exact last-viewed timestamp, and public invite consumers never receive follow-up metadata.
 
 Affected areas:
 

@@ -175,7 +175,7 @@ export async function recordFollowUpCopy(
 		now?: Date;
 	},
 ): Promise<void> {
-	const invite = await getOwnerInvite(db, { localUserId, inviteId });
+	const invite = await getOwnedInvite(db, { localUserId, inviteId });
 	if (invite.wishlistId !== wishlistId) {
 		throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
 	}

@@ -117,7 +117,7 @@ export function GuestRow({
 					<span>{formatLastViewedAt(invite.lastViewedAt ?? null)}</span>
 				</div>
 			)}
-			{isOwner && followUp && (
+			{followUp && (
 				<div className="rounded-lg border border-border bg-muted/30 p-2.5">
 					<p className="mb-2 text-muted-foreground text-xs">
 						{followUp.indicator}
