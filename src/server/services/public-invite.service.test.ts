@@ -42,6 +42,50 @@ function makeDb(overrides: Partial<PublicInviteDatabase["invite"]> = {}) {
 	return { invite } as unknown as PublicInviteDatabase;
 }
 
+const seatRow = (
+	inviteId: string,
+	primaryName: string,
+	extraGuestId: string | null = null,
+) => ({
+	inviteId,
+	extraGuestId,
+	invite: { status: "confirmed", primaryName },
+	extraGuest: null,
+});
+
+function makeSeatingDb(
+	inviteOverrides: Record<string, unknown> = {},
+	tables: unknown[] = [
+		{
+			id: "t4",
+			name: null,
+			sortOrder: 3,
+			capacity: 8,
+			assignments: [
+				seatRow("invite_1", "Pedro Castillo"),
+				seatRow("other", "Ana Ríos"),
+			],
+		},
+	],
+) {
+	const findMany = vi.fn().mockResolvedValue(tables);
+	const db = {
+		invite: {
+			findFirst: vi
+				.fn()
+				.mockResolvedValue(
+					makeInvite({ status: "confirmed", ...inviteOverrides }),
+				),
+		},
+		seatingTable: { findMany },
+	} as unknown as PublicInviteDatabase;
+	return { db, findMany };
+}
+
+// 2026-06-28 is `now`; window opens 5 days out.
+const inWindow = { eventDate: "2026-07-01T00:00:00.000Z", now };
+const outOfWindow = { eventDate: "2026-07-04T00:00:00.000Z", now };
+
 function makeWishlistRow(overrides: Record<string, unknown> = {}) {
 	return {
 		id: "wishlist_1",
@@ -408,5 +452,65 @@ describe("respondToInvite", () => {
 			}),
 		).rejects.toMatchObject({ code: "CONFLICT" });
 		expect(inviteUpdate).not.toHaveBeenCalled();
+	});
+});
+
+describe("resolvePersonalizedInvite seating pass", () => {
+	it("loads the party's tables and returns a pass inside the window", async () => {
+		const { db, findMany } = makeSeatingDb();
+		const result = await resolvePersonalizedInvite(db, {
+			wishlistId: "wishlist_1",
+			guestSlug: "pedro-castillo",
+			...inWindow,
+		});
+		expect(findMany).toHaveBeenCalledTimes(1);
+		expect(result.kind === "found" && result.seatingPass?.headline.label).toBe(
+			"Mesa 4",
+		);
+		expect(
+			result.kind === "found" && result.seatingPass?.tables[0]?.mates,
+		).toEqual(["Ana R."]);
+	});
+
+	it("does not query seating outside the window", async () => {
+		const { db, findMany } = makeSeatingDb();
+		const result = await resolvePersonalizedInvite(db, {
+			wishlistId: "wishlist_1",
+			guestSlug: "pedro-castillo",
+			...outOfWindow,
+		});
+		expect(findMany).not.toHaveBeenCalled();
+		expect(result.kind === "found" && result.seatingPass).toBeFalsy();
+	});
+
+	it("does not query seating for non-confirmed invites or without an event date", async () => {
+		const pending = makeSeatingDb({ status: "pending" });
+		await resolvePersonalizedInvite(pending.db, {
+			wishlistId: "wishlist_1",
+			guestSlug: "pedro-castillo",
+			...inWindow,
+		});
+		expect(pending.findMany).not.toHaveBeenCalled();
+
+		const undated = makeSeatingDb();
+		await resolvePersonalizedInvite(undated.db, {
+			wishlistId: "wishlist_1",
+			guestSlug: "pedro-castillo",
+			eventDate: null,
+			now,
+		});
+		expect(undated.findMany).not.toHaveBeenCalled();
+	});
+
+	it("carries no other-invite names when showMates is false", async () => {
+		const { db } = makeSeatingDb();
+		const result = await resolvePersonalizedInvite(db, {
+			wishlistId: "wishlist_1",
+			guestSlug: "pedro-castillo",
+			showMates: false,
+			...inWindow,
+		});
+		expect(JSON.stringify(result)).not.toContain("Ana");
+		expect(result.kind === "found" && result.seatingPass).toBeTruthy();
 	});
 });

@@ -319,6 +319,9 @@ export const wishlistRouter = createTRPCRouter({
 				motifTreatment: wishlist.motifTreatment,
 				motifPalette: wishlist.motifPalette,
 				showHowItWorks: wishlist.showHowItWorks,
+				seatingPassVariant: wishlist.seatingPassVariant,
+				seatingPassShowMates: wishlist.seatingPassShowMates,
+				seatingPassShowMap: wishlist.seatingPassShowMap,
 				status: wishlist.status,
 				categories: wishlist.categories.map((category) => ({
 					id: category.id,
@@ -708,6 +711,9 @@ export const wishlistRouter = createTRPCRouter({
 						language: input.language,
 						currency: input.currency,
 						showHowItWorks: input.showHowItWorks,
+						seatingPassVariant: input.seatingPassVariant,
+						seatingPassShowMates: input.seatingPassShowMates,
+						seatingPassShowMap: input.seatingPassShowMap,
 					},
 					select: { id: true, slug: true, updatedAt: true },
 				});

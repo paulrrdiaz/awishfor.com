@@ -1,9 +1,11 @@
 import "server-only";
 
+import { buildSeatingPass } from "@/lib/seating/seating-pass";
 import type {
 	PublicGiftViewModel,
 	PublicGuestViewModel,
 	PublicWishlistViewModel,
+	SeatingPassViewModel,
 } from "@/server/mappers/view-models";
 
 export const PUBLIC_WISHLIST_AUDIT_MODE_ENV =
@@ -14,6 +16,11 @@ export const PUBLIC_WISHLIST_AUDIT_SLUGS = {
 } as const;
 export const PUBLIC_WISHLIST_AUDIT_GUEST_SLUG =
 	"__audit-personalized-guest" as const;
+export const PUBLIC_WISHLIST_AUDIT_SEATED_GUEST_SLUG =
+	"__audit-seated-guest" as const;
+// Fixed clock so the seated audit guest is always inside the 5-day window
+// of the fixtures' 2027-06-26 event.
+const AUDIT_SEATED_NOW = new Date("2027-06-22T17:00:00.000Z");
 
 const CREATED_AT = "2026-01-15T00:00:00.000Z";
 const categories = [
@@ -103,6 +110,9 @@ function fixture({
 		motifTreatment: null,
 		motifPalette: null,
 		showHowItWorks: true,
+		seatingPassVariant: "pass",
+		seatingPassShowMates: true,
+		seatingPassShowMap: true,
 		categories,
 		gifts: fixtureGifts,
 		progress: {
@@ -193,9 +203,23 @@ export function getPublicWishlistAuditGuest(
 	const auditWishlist = [...fixtures.values()].find(
 		(wishlist) => wishlist.id === wishlistId,
 	);
-	if (!auditWishlist || guestSlug !== PUBLIC_WISHLIST_AUDIT_GUEST_SLUG)
+	if (
+		!auditWishlist ||
+		(guestSlug !== PUBLIC_WISHLIST_AUDIT_GUEST_SLUG &&
+			guestSlug !== PUBLIC_WISHLIST_AUDIT_SEATED_GUEST_SLUG)
+	)
 		return undefined;
 	if (process.env[PUBLIC_WISHLIST_AUDIT_MODE_ENV] !== "1") return null;
+	if (guestSlug === PUBLIC_WISHLIST_AUDIT_SEATED_GUEST_SLUG) {
+		return {
+			slug: PUBLIC_WISHLIST_AUDIT_SEATED_GUEST_SLUG,
+			primaryName: "Lady Díaz",
+			status: "confirmed",
+			extraGuests: [
+				{ id: "audit-seated-extra-1", name: "Marco", status: "confirmed" },
+			],
+		};
+	}
 	return {
 		slug: PUBLIC_WISHLIST_AUDIT_GUEST_SLUG,
 		primaryName: "Invitada de auditoría",
@@ -204,4 +228,55 @@ export function getPublicWishlistAuditGuest(
 			{ id: "audit-extra-guest-1", name: "Acompañante", status: "pending" },
 		],
 	};
+}
+
+/** Seating pass for the seated audit guest, built on a fixed clock. */
+export function getPublicWishlistAuditSeatingPass(
+	guestSlug: string,
+): SeatingPassViewModel | null {
+	if (guestSlug !== PUBLIC_WISHLIST_AUDIT_SEATED_GUEST_SLUG) return null;
+	const fixtureWishlist = fixtures.get(PUBLIC_WISHLIST_AUDIT_SLUGS.light);
+	if (!fixtureWishlist) return null;
+	const seat = (extraGuestId: string | null) => ({
+		inviteId: "audit-seated-invite",
+		extraGuestId,
+		invite: { status: "confirmed", primaryName: "Lady Díaz" },
+		extraGuest: extraGuestId ? { status: "confirmed", name: "Marco" } : null,
+	});
+	return buildSeatingPass(
+		{
+			eventDate: fixtureWishlist.eventDate,
+			eventTime: fixtureWishlist.eventTime,
+			eventLocation: fixtureWishlist.eventLocation,
+			showMates: true,
+			showMap: true,
+			invite: {
+				id: "audit-seated-invite",
+				status: "confirmed",
+				primaryName: "Lady Díaz",
+				extraGuests: [
+					{ id: "audit-seated-extra-1", name: "Marco", status: "confirmed" },
+				],
+			},
+			tables: [
+				{
+					id: "audit-table-4",
+					name: null,
+					sortOrder: 3,
+					capacity: 8,
+					assignments: [
+						seat(null),
+						seat("audit-seated-extra-1"),
+						{
+							inviteId: "audit-other-invite",
+							extraGuestId: null,
+							invite: { status: "confirmed", primaryName: "Ana Ríos" },
+							extraGuest: null,
+						},
+					],
+				},
+			],
+		},
+		AUDIT_SEATED_NOW,
+	);
 }

@@ -64,6 +64,9 @@ export const DEMO_WISHLIST: PublicWishlistViewModel = {
 	motifTreatment: "scene",
 	motifPalette: "fixed",
 	showHowItWorks: true,
+	seatingPassVariant: "pass",
+	seatingPassShowMates: true,
+	seatingPassShowMap: true,
 	categories: [
 		{ id: "cat-alimentacion", name: "Alimentación", sortOrder: 0 },
 		{ id: "cat-movilidad", name: "Movilidad", sortOrder: 1 },

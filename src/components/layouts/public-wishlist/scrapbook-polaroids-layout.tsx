@@ -14,6 +14,7 @@ type Props = {
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 };
 
 function Polaroid({
@@ -56,6 +57,7 @@ export function ScrapbookPolaroidsLayout({
 	layout,
 	mode,
 	rsvpSection,
+	seatingPassSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	const heading = wishlist.title;
@@ -109,6 +111,7 @@ export function ScrapbookPolaroidsLayout({
 				layout={layout}
 				mode={mode}
 				rsvpSection={rsvpSection}
+				seatingPassSection={seatingPassSection}
 				wishlist={wishlist}
 			/>
 		</div>

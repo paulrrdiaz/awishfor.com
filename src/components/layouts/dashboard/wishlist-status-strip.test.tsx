@@ -4,6 +4,11 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WishlistStatusStrip } from "./wishlist-status-strip";
 
+vi.mock("@/components/layouts/public-wishlist/public-theme-provider", () => ({
+	PublicThemeProvider: ({ children }: { children: React.ReactNode }) =>
+		children,
+}));
+
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ refresh: vi.fn() }),
 }));

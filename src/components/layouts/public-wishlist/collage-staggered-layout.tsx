@@ -39,6 +39,7 @@ type Props = {
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 };
 
 export function CollageStaggeredLayout({
@@ -47,6 +48,7 @@ export function CollageStaggeredLayout({
 	mode,
 	surface = "standalone",
 	rsvpSection,
+	seatingPassSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	// An embedded preview (wizard steps, dashboard editor) is bounded by its
@@ -149,6 +151,8 @@ export function CollageStaggeredLayout({
 					</div>
 				</div>
 			</MotifTiltSection>
+
+			{seatingPassSection}
 
 			{!isCompact && (
 				<>

@@ -14,6 +14,7 @@ type Props = {
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 };
 
 export function MagazineEditorialLayout({
@@ -21,6 +22,7 @@ export function MagazineEditorialLayout({
 	layout,
 	mode,
 	rsvpSection,
+	seatingPassSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	const heading = wishlist.title;
@@ -83,6 +85,7 @@ export function MagazineEditorialLayout({
 				layout={layout}
 				mode={mode}
 				rsvpSection={rsvpSection}
+				seatingPassSection={seatingPassSection}
 				wishlist={wishlist}
 			/>
 		</div>

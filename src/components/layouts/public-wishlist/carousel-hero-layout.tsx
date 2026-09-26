@@ -12,6 +12,7 @@ type Props = {
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 };
 
 export function CarouselHeroLayout({
@@ -19,6 +20,7 @@ export function CarouselHeroLayout({
 	layout,
 	mode,
 	rsvpSection,
+	seatingPassSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	const heading = wishlist.title;
@@ -62,6 +64,7 @@ export function CarouselHeroLayout({
 				maxWidth="max-w-5xl"
 				mode={mode}
 				rsvpSection={rsvpSection}
+				seatingPassSection={seatingPassSection}
 				wishlist={wishlist}
 			/>
 		</div>

@@ -1,10 +1,11 @@
-import type { ReactElement } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Children, type ReactElement, type ReactNode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sharedCache = vi.hoisted(() => new Map<string, Promise<unknown>>());
 const wishlistFindUnique = vi.hoisted(() => vi.fn());
 const inviteFindFirst = vi.hoisted(() => vi.fn());
 const inviteUpdate = vi.hoisted(() => vi.fn());
+const seatingTableFindMany = vi.hoisted(() => vi.fn());
 const unstableCacheMock = vi.hoisted(() =>
 	vi.fn(
 		<T extends (...args: never[]) => Promise<unknown>>(
@@ -31,15 +32,31 @@ vi.mock("@/server/db", () => ({
 	db: {
 		invite: { findFirst: inviteFindFirst, update: inviteUpdate },
 		wishlist: { findUnique: wishlistFindUnique },
+		seatingTable: { findMany: seatingTableFindMany },
 	},
 }));
 vi.mock("@/components/layouts/public-wishlist/public-wishlist-page", () => ({
 	PublicWishlistPage: () => null,
 }));
 
+import { RsvpSection } from "@/components/shared/rsvp-section";
+import { SeatingPass } from "@/components/shared/seating-pass/seating-pass";
 import PersonalizedWishlistPage, {
 	generateMetadata,
 } from "./[slug]/[guestSlug]/page";
+
+function findByType(
+	node: ReactNode,
+	type: unknown,
+): ReactElement<Record<string, unknown>> | undefined {
+	for (const child of Children.toArray(node)) {
+		const element = child as ReactElement<{ children?: ReactNode }>;
+		if (element.type === type) return element;
+		const nested = findByType(element.props?.children, type);
+		if (nested) return nested;
+	}
+	return undefined;
+}
 
 const BASE_DATE = new Date("2026-06-26T00:00:00.000Z");
 const publishedWishlist = {
@@ -74,6 +91,9 @@ const publishedWishlist = {
 	motifTreatment: null,
 	motifPalette: null,
 	showHowItWorks: true,
+	seatingPassVariant: "pass",
+	seatingPassShowMates: true,
+	seatingPassShowMap: true,
 	status: "published",
 	publishedAt: BASE_DATE,
 	archivedAt: null,
@@ -166,7 +186,10 @@ describe("personalized public wishlist route", () => {
 			params: Promise.resolve({ slug: "lista-publica", guestSlug: "ana" }),
 		})) as ReactElement<{ rsvpSection: ReactElement }>;
 
-		const rsvp = page.props.rsvpSection as ReactElement<{
+		const rsvp = findByType(
+			page.props.rsvpSection,
+			RsvpSection,
+		) as ReactElement<{
 			eventTitle: string;
 			eventDate: string;
 			eventTime: string;
@@ -183,5 +206,87 @@ describe("personalized public wishlist route", () => {
 			eventLocation: "Barranco, Lima",
 		});
 		expect(new URL(rsvp.props.inviteUrl).pathname).toBe("/w/lista-publica/ana");
+	});
+
+	describe("seating pass", () => {
+		const seated = [
+			{
+				id: "t4",
+				name: null,
+				sortOrder: 3,
+				capacity: 8,
+				assignments: [
+					{
+						inviteId: "invite_ana",
+						extraGuestId: null,
+						invite: { status: "confirmed", primaryName: "Ana" },
+						extraGuest: null,
+					},
+				],
+			},
+		];
+
+		beforeEach(() => {
+			vi.useFakeTimers({ toFake: ["Date"] });
+			vi.setSystemTime(new Date("2026-10-13T17:00:00.000Z"));
+			seatingTableFindMany.mockReset().mockResolvedValue(seated);
+			inviteFindFirst.mockResolvedValue({
+				...invite("ana"),
+				status: "confirmed",
+			});
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		function withEvent(eventDate: string) {
+			wishlistFindUnique.mockResolvedValue({
+				...publishedWishlist,
+				eventDate: new Date(eventDate),
+			});
+		}
+
+		it("adds the pass beside the hero on mobile and in the RSVP slot on desktop", async () => {
+			withEvent("2026-10-17T00:00:00.000Z");
+			const page = (await PersonalizedWishlistPage({
+				params: Promise.resolve({ slug: "lista-publica", guestSlug: "ana" }),
+			})) as ReactElement<{
+				rsvpSection: ReactElement;
+				seatingPassSection: ReactElement;
+			}>;
+
+			// Mobile: pass beside the hero; desktop: pass in the RSVP slot, which
+			// hides the RSVP section (both are always rendered, CSS picks one).
+			for (const slot of [
+				page.props.seatingPassSection,
+				page.props.rsvpSection,
+			]) {
+				expect(findByType(slot, SeatingPass)?.props).toMatchObject({
+					variant: "pass",
+					pass: { headline: { label: "Mesa 4" } },
+				});
+			}
+			expect(
+				findByType(page.props.rsvpSection, RsvpSection)?.props,
+			).toMatchObject({ className: "lg:hidden" });
+		});
+
+		it("shows no pass outside the window and does not query seating", async () => {
+			withEvent("2026-10-20T00:00:00.000Z");
+			const page = (await PersonalizedWishlistPage({
+				params: Promise.resolve({ slug: "lista-publica", guestSlug: "ana" }),
+			})) as ReactElement<{
+				rsvpSection: ReactElement;
+				seatingPassSection?: ReactElement;
+			}>;
+
+			expect(
+				findByType(page.props.rsvpSection, RsvpSection)?.props.className,
+			).toBeUndefined();
+			expect(findByType(page.props.rsvpSection, SeatingPass)).toBeUndefined();
+			expect(page.props.seatingPassSection).toBeUndefined();
+			expect(seatingTableFindMany).not.toHaveBeenCalled();
+		});
 	});
 });

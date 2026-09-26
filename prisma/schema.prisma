@@ -136,6 +136,9 @@ model Wishlist {
   motifTreatment  String?
   motifPalette    String?
   showHowItWorks  Boolean        @default(true)
+  seatingPassVariant   String   @default("pass")
+  seatingPassShowMates Boolean  @default(true)
+  seatingPassShowMap   Boolean  @default(true)
   status          WishlistStatus @default(draft)
   publishedAt     DateTime?
   archivedAt      DateTime?

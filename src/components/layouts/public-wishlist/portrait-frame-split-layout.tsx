@@ -12,6 +12,7 @@ type Props = {
 	layout: PublicLayoutPreset;
 	mode: PublicWishlistMode;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 };
 
 export function PortraitFrameSplitLayout({
@@ -19,6 +20,7 @@ export function PortraitFrameSplitLayout({
 	layout,
 	mode,
 	rsvpSection,
+	seatingPassSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	const heading = wishlist.title;
@@ -57,6 +59,7 @@ export function PortraitFrameSplitLayout({
 				layout={layout}
 				mode={mode}
 				rsvpSection={rsvpSection}
+				seatingPassSection={seatingPassSection}
 				wishlist={wishlist}
 			/>
 		</div>

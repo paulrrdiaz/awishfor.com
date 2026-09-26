@@ -32,6 +32,7 @@ type Props = {
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 };
 
 type EventDetail = { label: string; value: ReactNode };
@@ -42,6 +43,7 @@ export function SplitImageRightLayout({
 	mode,
 	surface = "standalone",
 	rsvpSection,
+	seatingPassSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	// An embedded preview (wizard steps, dashboard editor) is bounded by its
@@ -100,7 +102,10 @@ export function SplitImageRightLayout({
 	return (
 		<PublicLayoutShell heading={heading} mode={mode}>
 			<div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]">
-				<div className="order-2 p-6 sm:p-7 lg:order-1 lg:border-border lg:border-r">
+				{seatingPassSection && (
+					<div className="order-2 lg:hidden">{seatingPassSection}</div>
+				)}
+				<div className="order-3 p-6 sm:p-7 lg:order-1 lg:border-border lg:border-r">
 					<p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.2em]">
 						{eventLabel}
 					</p>

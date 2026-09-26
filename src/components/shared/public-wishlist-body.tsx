@@ -26,6 +26,7 @@ type Props = {
 	mode: PublicWishlistMode;
 	maxWidth?: string;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 };
 
 /**
@@ -39,6 +40,7 @@ export function PublicWishlistBody({
 	mode,
 	maxWidth = "max-w-4xl",
 	rsvpSection,
+	seatingPassSection,
 }: Props) {
 	const isCompact = mode === "compact";
 	const isFull = mode === "full";
@@ -54,6 +56,8 @@ export function PublicWishlistBody({
 
 	return (
 		<>
+			{seatingPassSection}
+
 			{!isCompact && <EventDetails wishlist={wishlist} />}
 
 			{!isCompact && wishlist.eventDate && (

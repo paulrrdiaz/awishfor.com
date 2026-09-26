@@ -100,6 +100,9 @@ export type PublicWishlistViewModel = {
 	motifTreatment: string | null;
 	motifPalette: string | null;
 	showHowItWorks: boolean;
+	seatingPassVariant: string;
+	seatingPassShowMates: boolean;
+	seatingPassShowMap: boolean;
 	categories: PublicCategoryViewModel[];
 	gifts: PublicGiftViewModel[];
 	progress: PublicWishlistProgress;
@@ -278,6 +281,9 @@ export type DashboardWishlistCardViewModel = {
 	welcomeMessageVariant: string | null;
 	thankYouMessageVariant: string | null;
 	showHowItWorks: boolean;
+	seatingPassVariant: string;
+	seatingPassShowMates: boolean;
+	seatingPassShowMap: boolean;
 	status: string;
 	visibleGiftCount: number;
 	gifts: DashboardGiftRowViewModel[];
@@ -336,3 +342,37 @@ import type {
 	InviteFollowUpKind,
 	ViewRecency,
 } from "@/lib/dashboard/invite-follow-up";
+
+export type SeatingPassMemberViewModel = {
+	id: string;
+	name: string;
+	/** Table label, or "Mesa por confirmar" when the member has no table. */
+	label: string;
+	tableId: string | null;
+};
+
+export type SeatingPassTableViewModel = {
+	id: string;
+	label: string;
+	/** Short mark for headers/rings: the number for "Mesa N", else the label. */
+	numeral: string;
+	capacity: number;
+	memberNames: string[];
+	/** First name + last-name initial of other confirmed people at this table. */
+	mates: string[];
+};
+
+export type SeatingPassViewModel = {
+	primaryName: string;
+	daysAway: number;
+	/** "Faltan N días" / "Mañana" / "Hoy"; null after the event date. */
+	countdownLabel: string | null;
+	eventDate: string;
+	eventTime: string | null;
+	location: string | null;
+	members: SeatingPassMemberViewModel[];
+	/** Tables the party uses, ordered by floor-plan position. */
+	tables: SeatingPassTableViewModel[];
+	/** Table shown as the pass headline (the primary guest's, else the first). */
+	headline: { label: string; numeral: string };
+};

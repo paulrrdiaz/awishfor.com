@@ -49,6 +49,11 @@ import { isValidSlug } from "@/lib/slug";
 import { WISHLIST_SUBTITLE_MAX_LENGTH } from "@/lib/wishlist/subtitle";
 import { api, type RouterOutputs } from "@/trpc/react";
 
+import {
+	SeatingPassSettings,
+	type SeatingPassVariantChoice,
+} from "./seating-pass-settings";
+
 const COUNTDOWN_VARIANTS = getAllCountdownVariants();
 const WELCOME_VARIANTS = getAllWelcomeVariants();
 const THANK_YOU_VARIANTS = getAllThankYouVariants();
@@ -208,6 +213,16 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 	const [language, setLanguage] = useState<string>(wishlist.language);
 	const [currency, setCurrency] = useState<string>(wishlist.currency);
 	const [showHowItWorks, setShowHowItWorks] = useState(wishlist.showHowItWorks);
+	const [seatingPassVariant, setSeatingPassVariant] =
+		useState<SeatingPassVariantChoice>(
+			wishlist.seatingPassVariant === "ring" ? "ring" : "pass",
+		);
+	const [seatingPassShowMates, setSeatingPassShowMates] = useState(
+		wishlist.seatingPassShowMates,
+	);
+	const [seatingPassShowMap, setSeatingPassShowMap] = useState(
+		wishlist.seatingPassShowMap,
+	);
 
 	const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
 	const [slugWarningAck, setSlugWarningAck] = useState(false);
@@ -325,6 +340,9 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 			language: language as Locale,
 			currency: currency as Currency,
 			showHowItWorks,
+			seatingPassVariant,
+			seatingPassShowMates,
+			seatingPassShowMap,
 		});
 	}
 
@@ -368,6 +386,11 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 		setLanguage(wishlist.language);
 		setCurrency(wishlist.currency);
 		setShowHowItWorks(wishlist.showHowItWorks);
+		setSeatingPassVariant(
+			wishlist.seatingPassVariant === "ring" ? "ring" : "pass",
+		);
+		setSeatingPassShowMates(wishlist.seatingPassShowMates);
+		setSeatingPassShowMap(wishlist.seatingPassShowMap);
 		setSlugStatus("idle");
 		setSlugWarningAck(false);
 	}
@@ -734,6 +757,23 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 						</div>
 					)}
 				</section>
+
+				{/* Mesa asignada */}
+				<SeatingPassSettings
+					bodyFont={wishlist.bodyFont}
+					buttonStyle={wishlist.buttonStyle}
+					eventDate={eventDate ?? ""}
+					eventLocation={eventLocation}
+					eventTime={eventTime}
+					headingFont={wishlist.headingFont}
+					onShowMapChange={setSeatingPassShowMap}
+					onShowMatesChange={setSeatingPassShowMates}
+					onVariantChange={setSeatingPassVariant}
+					showMap={seatingPassShowMap}
+					showMates={seatingPassShowMates}
+					themeId={wishlist.themeId}
+					variant={seatingPassVariant}
+				/>
 
 				{/* Configuración */}
 				<section className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm">

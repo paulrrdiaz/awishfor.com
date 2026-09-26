@@ -223,6 +223,7 @@ export const wishlistBodyFontSchema = optionalNullableTrimmedString(
 export const wishlistCountdownVariantSchema = optionalNullableVariantId(
 	COUNTDOWN_VARIANT_IDS,
 );
+export const seatingPassVariantSchema = z.enum(["pass", "ring"]);
 export const wishlistMotifIdSchema = optionalNullableVariantId(
 	MOTIF_IDS as unknown as [string, ...string[]],
 );
@@ -415,6 +416,9 @@ export const updateWishlistSettingsSchema = z
 		language: localeSchema,
 		currency: currencySchema,
 		showHowItWorks: z.boolean(),
+		seatingPassVariant: seatingPassVariantSchema,
+		seatingPassShowMates: z.boolean(),
+		seatingPassShowMap: z.boolean(),
 	})
 	.refine(
 		(value) =>

@@ -5,6 +5,7 @@ import type {
 	SeatingTable,
 	SeatingTableShape,
 } from "@/generated/prisma/client";
+import { tableLabel } from "@/lib/seating/table-label";
 import type { InviteWithExtras } from "@/server/services/invite.service";
 
 export const SEATING_MIN_CAPACITY = 1;
@@ -319,8 +320,7 @@ const getScopedTable = async (
 	return table;
 };
 
-export const tableLabel = (table: Pick<SeatingTable, "name" | "sortOrder">) =>
-	table.name?.trim() ? table.name.trim() : `Mesa ${table.sortOrder + 1}`;
+export { tableLabel };
 
 /**
  * Refuses a capacity below the current seated count rather than ejecting

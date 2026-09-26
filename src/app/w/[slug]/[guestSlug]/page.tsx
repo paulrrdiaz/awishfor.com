@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicWishlistPage } from "@/components/layouts/public-wishlist/public-wishlist-page";
 import { RsvpSection } from "@/components/shared/rsvp-section";
+import { SeatingPass } from "@/components/shared/seating-pass/seating-pass";
 import { env } from "@/env";
 import {
 	buildPublicWishlistMetadata,
@@ -52,6 +53,11 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 	const inviteResult = await resolvePersonalizedInvite(publicInviteDb, {
 		wishlistId: result.wishlist.id,
 		guestSlug,
+		eventDate: result.wishlist.eventDate,
+		eventTime: result.wishlist.eventTime,
+		eventLocation: result.wishlist.eventLocation,
+		showMates: result.wishlist.seatingPassShowMates,
+		showMap: result.wishlist.seatingPassShowMap,
 	});
 
 	if (inviteResult.kind === "notFound") {
@@ -72,21 +78,42 @@ export default async function PersonalizedWishlistPage({ params }: Props) {
 			analyticsRouteVariant="personalized"
 			mode="full"
 			rsvpSection={
-				<RsvpSection
-					endTime={result.wishlist.endTime}
-					eventDate={result.wishlist.eventDate}
-					eventDescription={result.wishlist.welcomeMessage}
-					eventLocation={result.wishlist.eventLocation}
-					eventTime={result.wishlist.eventTime}
-					eventTitle={eventTitle}
-					guest={inviteResult.guest}
-					inviteUrl={new URL(
-						`/w/${result.wishlist.slug}/${guestSlug}`,
-						env.NEXT_PUBLIC_APP_URL,
-					).toString()}
-					rsvpDeadline={result.wishlist.rsvpDeadline}
-					wishlistSlug={result.wishlist.slug}
-				/>
+				<>
+					{inviteResult.seatingPass && (
+						<div className="hidden lg:block">
+							<SeatingPass
+								pass={inviteResult.seatingPass}
+								variant={result.wishlist.seatingPassVariant}
+							/>
+						</div>
+					)}
+					<RsvpSection
+						className={inviteResult.seatingPass ? "lg:hidden" : undefined}
+						endTime={result.wishlist.endTime}
+						eventDate={result.wishlist.eventDate}
+						eventDescription={result.wishlist.welcomeMessage}
+						eventLocation={result.wishlist.eventLocation}
+						eventTime={result.wishlist.eventTime}
+						eventTitle={eventTitle}
+						guest={inviteResult.guest}
+						inviteUrl={new URL(
+							`/w/${result.wishlist.slug}/${guestSlug}`,
+							env.NEXT_PUBLIC_APP_URL,
+						).toString()}
+						rsvpDeadline={result.wishlist.rsvpDeadline}
+						wishlistSlug={result.wishlist.slug}
+					/>
+				</>
+			}
+			seatingPassSection={
+				inviteResult.seatingPass ? (
+					<div className="lg:hidden">
+						<SeatingPass
+							pass={inviteResult.seatingPass}
+							variant={result.wishlist.seatingPassVariant}
+						/>
+					</div>
+				) : undefined
 			}
 			surface="standalone"
 			viewAuthorization={viewAuthorization}

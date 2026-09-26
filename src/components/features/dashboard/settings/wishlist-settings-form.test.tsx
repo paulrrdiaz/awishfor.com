@@ -15,6 +15,11 @@ function getSaveButton() {
 	return button;
 }
 
+vi.mock("@/components/layouts/public-wishlist/public-theme-provider", () => ({
+	PublicThemeProvider: ({ children }: { children: React.ReactNode }) =>
+		children,
+}));
+
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ refresh: vi.fn() }),
 }));
@@ -94,6 +99,9 @@ const wishlist = {
 	motifTreatment: null,
 	motifPalette: null,
 	showHowItWorks: true,
+	seatingPassVariant: "pass",
+	seatingPassShowMates: true,
+	seatingPassShowMap: true,
 	status: "draft",
 	isOwner: true,
 };
@@ -177,5 +185,59 @@ describe("WishlistSettingsForm owner-reserved controls", () => {
 			/>,
 		);
 		expect(screen.queryByText("Zona peligrosa")).not.toBeInTheDocument();
+	});
+});
+
+describe("WishlistSettingsForm seating pass", () => {
+	it("shows the defaults: pass variant with both toggles on", () => {
+		render(<WishlistSettingsForm wishlist={wishlist as never} />);
+		expect(screen.getByLabelText(/Pase de mesa/)).toBeChecked();
+		expect(screen.getByLabelText(/Anillo de asientos/)).not.toBeChecked();
+		expect(screen.getByLabelText("Mostrar compañeros de mesa")).toBeChecked();
+		expect(screen.getByLabelText("Mostrar cómo llegar")).toBeChecked();
+		expect(
+			screen.getByText(/desde 5 días antes del evento/),
+		).toBeInTheDocument();
+	});
+
+	it("updates the preview when the variant changes", async () => {
+		const user = userEvent.setup();
+		const { container } = render(
+			<WishlistSettingsForm wishlist={wishlist as never} />,
+		);
+		expect(screen.getByText("Tu grupo")).toBeInTheDocument();
+		await user.click(screen.getByLabelText(/Anillo de asientos/));
+		expect(screen.queryByText("Tu grupo")).not.toBeInTheDocument();
+		expect(screen.getByText("Sus lugares")).toBeInTheDocument();
+		expect(container.querySelectorAll("[data-seat]").length).toBeGreaterThan(0);
+	});
+
+	it("hides tablemates and venue in the preview when toggled off", async () => {
+		const user = userEvent.setup();
+		render(<WishlistSettingsForm wishlist={wishlist as never} />);
+		expect(screen.getByText(/Ana R\., Pedro R\./)).toBeInTheDocument();
+		expect(screen.getByText("Google Maps")).toBeInTheDocument();
+
+		await user.click(screen.getByLabelText("Mostrar compañeros de mesa"));
+		await user.click(screen.getByLabelText("Mostrar cómo llegar"));
+
+		expect(screen.queryByText(/Ana R\./)).not.toBeInTheDocument();
+		expect(screen.queryByText("Google Maps")).not.toBeInTheDocument();
+	});
+
+	it("submits the seating pass settings", async () => {
+		const user = userEvent.setup();
+		render(<WishlistSettingsForm wishlist={wishlist as never} />);
+		await user.click(screen.getByLabelText(/Anillo de asientos/));
+		await user.click(screen.getByLabelText("Mostrar cómo llegar"));
+		await user.click(getSaveButton());
+
+		expect(updateSettingsMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				seatingPassVariant: "ring",
+				seatingPassShowMates: true,
+				seatingPassShowMap: false,
+			}),
+		);
 	});
 });

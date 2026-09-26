@@ -32,6 +32,7 @@ type Props = {
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 	analyticsRouteVariant?: "public" | "personalized";
 	viewAuthorization?: string;
 };
@@ -42,6 +43,7 @@ type LayoutComponentType = (props: {
 	mode: PublicWishlistMode;
 	surface?: PublicWishlistSurface;
 	rsvpSection?: ReactNode;
+	seatingPassSection?: ReactNode;
 }) => ReturnType<typeof MagazineEditorialLayout>;
 
 const LAYOUT_COMPONENTS: Record<string, LayoutComponentType> = {
@@ -61,6 +63,7 @@ export function PublicWishlistPage({
 	mode,
 	surface = "embedded",
 	rsvpSection,
+	seatingPassSection,
 	analyticsRouteVariant = "public",
 	viewAuthorization,
 }: Props) {
@@ -127,6 +130,7 @@ export function PublicWishlistPage({
 					layout={layout}
 					mode={mode}
 					rsvpSection={rsvpSection}
+					seatingPassSection={seatingPassSection}
 					surface={surface}
 					wishlist={wishlist}
 				/>

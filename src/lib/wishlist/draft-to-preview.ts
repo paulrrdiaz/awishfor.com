@@ -168,6 +168,9 @@ export function draftToPreview(draft: WishlistDraft): PublicWishlistViewModel {
 		motifTreatment: draft.motifTreatment,
 		motifPalette: draft.motifPalette,
 		showHowItWorks: draft.showHowItWorks,
+		seatingPassVariant: "pass",
+		seatingPassShowMates: true,
+		seatingPassShowMap: true,
 		categories,
 		gifts,
 		progress: {

@@ -108,6 +108,9 @@ function makeStoredWishlist(overrides: Record<string, unknown> = {}) {
 		welcomeMessageVariant: null,
 		thankYouMessageVariant: null,
 		showHowItWorks: true,
+		seatingPassVariant: "pass",
+		seatingPassShowMates: true,
+		seatingPassShowMap: true,
 		status: "draft",
 		publishedAt: null,
 		archivedAt: null,
@@ -505,6 +508,9 @@ describe("wishlistRouter.updateSettings", () => {
 			language: "es",
 			currency: "PEN",
 			showHowItWorks: true,
+			seatingPassVariant: "pass",
+			seatingPassShowMates: true,
+			seatingPassShowMap: true,
 		});
 
 		expect(wishlistUpdate).toHaveBeenCalledWith(
@@ -538,6 +544,9 @@ describe("wishlistRouter.updateSettings", () => {
 			language: "es",
 			currency: "PEN",
 			showHowItWorks: true,
+			seatingPassVariant: "pass",
+			seatingPassShowMates: true,
+			seatingPassShowMap: true,
 		});
 
 		expect(wishlistUpdate).toHaveBeenCalledWith(
@@ -560,6 +569,9 @@ describe("wishlistRouter.updateSettings", () => {
 				language: "es",
 				currency: "PEN",
 				showHowItWorks: true,
+				seatingPassVariant: "pass",
+				seatingPassShowMates: true,
+				seatingPassShowMap: true,
 			}),
 		).rejects.toThrow("Subtitle must be at most 160 characters");
 		expect(wishlistUpdate).not.toHaveBeenCalled();
@@ -589,6 +601,9 @@ describe("wishlistRouter.updateSettings", () => {
 			language: "es",
 			currency: "PEN",
 			showHowItWorks: true,
+			seatingPassVariant: "pass",
+			seatingPassShowMates: true,
+			seatingPassShowMap: true,
 		});
 
 		expect(wishlistUpdate).toHaveBeenCalledWith(
@@ -627,6 +642,9 @@ describe("wishlistRouter.updateSettings", () => {
 			language: "es",
 			currency: "PEN",
 			showHowItWorks: true,
+			seatingPassVariant: "pass",
+			seatingPassShowMates: true,
+			seatingPassShowMap: true,
 		});
 
 		expect(wishlistUpdate).toHaveBeenCalledWith(
@@ -662,6 +680,9 @@ describe("wishlistRouter.updateSettings", () => {
 				language: "es",
 				currency: "PEN",
 				showHowItWorks: true,
+				seatingPassVariant: "pass",
+				seatingPassShowMates: true,
+				seatingPassShowMap: true,
 			}),
 		).rejects.toThrow();
 		expect(wishlistUpdate).not.toHaveBeenCalled();
@@ -689,6 +710,9 @@ describe("wishlistRouter.updateSettings", () => {
 				language: "es",
 				currency: "PEN",
 				showHowItWorks: true,
+				seatingPassVariant: "pass",
+				seatingPassShowMates: true,
+				seatingPassShowMap: true,
 			}),
 		).rejects.toThrow(TRPCError);
 		expect(wishlistUpdate).not.toHaveBeenCalled();
@@ -719,6 +743,9 @@ describe("wishlistRouter.updateSettings", () => {
 			language: "es",
 			currency: "PEN",
 			showHowItWorks: true,
+			seatingPassVariant: "pass",
+			seatingPassShowMates: true,
+			seatingPassShowMap: true,
 		});
 
 		expect(wishlistUpdate).toHaveBeenCalledWith(
@@ -754,6 +781,9 @@ describe("wishlistRouter.updateSettings", () => {
 			language: "es",
 			currency: "PEN",
 			showHowItWorks: true,
+			seatingPassVariant: "pass",
+			seatingPassShowMates: true,
+			seatingPassShowMap: true,
 		});
 
 		expect(wishlistUpdate).toHaveBeenCalledWith(
@@ -784,6 +814,9 @@ describe("wishlistRouter.updateSettings", () => {
 				language: "es",
 				currency: "PEN",
 				showHowItWorks: true,
+				seatingPassVariant: "pass",
+				seatingPassShowMates: true,
+				seatingPassShowMap: true,
 			}),
 		).rejects.toThrow();
 		expect(wishlistUpdate).not.toHaveBeenCalled();

@@ -132,6 +132,9 @@ describe("wishlist message attribution validation", () => {
 		language: "es",
 		currency: "PEN",
 		showHowItWorks: true,
+		seatingPassVariant: "pass",
+		seatingPassShowMates: true,
+		seatingPassShowMap: true,
 	};
 
 	it("trims an attribution and turns an empty value into null", () => {
@@ -168,6 +171,9 @@ describe("wishlist delivery details validation", () => {
 		language: "es",
 		currency: "PEN",
 		showHowItWorks: true,
+		seatingPassVariant: "pass",
+		seatingPassShowMates: true,
+		seatingPassShowMap: true,
 	};
 
 	it("trims delivery fields and turns whitespace-only values into null", () => {
@@ -243,6 +249,9 @@ describe("wishlist gift list message validation", () => {
 		language: "es",
 		currency: "PEN",
 		showHowItWorks: true,
+		seatingPassVariant: "pass",
+		seatingPassShowMates: true,
+		seatingPassShowMap: true,
 	};
 
 	it("trims a gift list message and turns an empty value into null", () => {
@@ -316,6 +325,40 @@ describe("wishlist restore validation", () => {
 			restoreWishlistSchema.parse({
 				wishlistId: "wishlist_123",
 				targetStatus: "archived",
+			}),
+		).toThrow();
+	});
+});
+
+describe("wishlist seating pass settings validation", () => {
+	const validSettings = {
+		id: "wishlist_123",
+		title: "Lista de boda",
+		slug: "lista-de-boda",
+		language: "es",
+		currency: "PEN",
+		showHowItWorks: true,
+		seatingPassVariant: "pass",
+		seatingPassShowMates: true,
+		seatingPassShowMap: true,
+	};
+
+	it("accepts the pass and ring variants", () => {
+		for (const seatingPassVariant of ["pass", "ring"]) {
+			expect(
+				updateWishlistSettingsSchema.parse({
+					...validSettings,
+					seatingPassVariant,
+				}).seatingPassVariant,
+			).toBe(seatingPassVariant);
+		}
+	});
+
+	it("rejects an unknown variant", () => {
+		expect(() =>
+			updateWishlistSettingsSchema.parse({
+				...validSettings,
+				seatingPassVariant: "arch",
 			}),
 		).toThrow();
 	});
