@@ -13,10 +13,10 @@
 
 ## 3. Verify production ingestion and configure reporting
 
-- [ ] 3.1 Deploy or otherwise run a production-configured build that targets PostHog project `575376`, then perform a controlled creator wizard and published guest wishlist journey.
-- [ ] 3.2 Inspect the PostHog data schema and sampled payloads to confirm all expected events arrived, the wizard payload contains only the allowlisted step property, and no anonymous guest person profile was created.
+- [x] 3.1 Deploy or otherwise run a production-configured build that targets PostHog project `575376`, then perform a controlled creator wizard and published guest wishlist journey.
+- [x] 3.2 Inspect the PostHog data schema and sampled payloads to confirm all expected events arrived, the wizard payload contains only the allowlisted step property, and no anonymous guest person profile was created.
 - [x] 3.3 Create and attach a saved public-wishlist activity trends insight to dashboard `2028895` using only verified public event definitions.
-- [ ] 3.4 Create and attach a saved ordered creator-wizard funnel to dashboard `2028895`, filtering each repeated step-completion stage by its verified `step` value and using a 30-day conversion window.
+- [x] 3.4 Create and attach a saved ordered creator-wizard funnel to dashboard `2028895`, filtering each repeated step-completion stage by its verified `step` value and using a 30-day conversion window.
 
 ## 4. Validate and document
 

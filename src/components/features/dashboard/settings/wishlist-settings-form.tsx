@@ -35,6 +35,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { TimePicker } from "@/components/ui/time-picker";
 import { isMotifGatedEventType } from "@/config/motifs";
 import {
 	getAllCountdownVariants,
@@ -520,20 +521,18 @@ export function WishlistSettingsForm({ wishlist }: Props) {
 					<div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 						<div className="space-y-1.5">
 							<Label htmlFor="eventTime">Hora de inicio</Label>
-							<Input
+							<TimePicker
 								id="eventTime"
-								onChange={(e) => setEventTime(e.target.value)}
-								type="time"
-								value={eventTime}
+								onTimeChange={(time) => setEventTime(time ?? "")}
+								time={eventTime || null}
 							/>
 						</div>
 						<div className="space-y-1.5">
 							<Label htmlFor="endTime">Hora de fin</Label>
-							<Input
+							<TimePicker
 								id="endTime"
-								onChange={(e) => setEndTime(e.target.value)}
-								type="time"
-								value={endTime}
+								onTimeChange={(time) => setEndTime(time ?? "")}
+								time={endTime || null}
 							/>
 							{eventTimeRangeError && (
 								<p className="text-destructive text-xs">

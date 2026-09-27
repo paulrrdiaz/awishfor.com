@@ -97,12 +97,10 @@ describe("DetailsStep event schedule", () => {
 		);
 
 		fireEvent.click(screen.getByLabelText("Fecha del evento"));
-		fireEvent.change(screen.getByLabelText("Hora de inicio"), {
-			target: { value: "16:00" },
-		});
-		fireEvent.change(screen.getByLabelText("Hora de fin"), {
-			target: { value: "20:00" },
-		});
+		fireEvent.click(screen.getByLabelText("Hora de inicio"));
+		fireEvent.click(screen.getByRole("option", { name: "4:00 p. m." }));
+		fireEvent.click(screen.getByLabelText("Hora de fin"));
+		fireEvent.click(screen.getByRole("option", { name: "8:00 p. m." }));
 
 		expect(store.getState().draft).toMatchObject({
 			eventDate: "2026-09-27",

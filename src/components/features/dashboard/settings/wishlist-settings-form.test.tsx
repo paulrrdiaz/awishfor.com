@@ -153,12 +153,10 @@ describe("WishlistSettingsForm event times", () => {
 	it("submits the configured end time", async () => {
 		const user = userEvent.setup();
 		render(<WishlistSettingsForm wishlist={wishlist as never} />);
-		fireEvent.change(screen.getByLabelText("Hora de inicio"), {
-			target: { value: "16:00" },
-		});
-		fireEvent.change(screen.getByLabelText("Hora de fin"), {
-			target: { value: "20:00" },
-		});
+		fireEvent.click(screen.getByLabelText("Hora de inicio"));
+		fireEvent.click(screen.getByRole("option", { name: "4:00 p. m." }));
+		fireEvent.click(screen.getByLabelText("Hora de fin"));
+		fireEvent.click(screen.getByRole("option", { name: "8:00 p. m." }));
 
 		await user.click(getSaveButton());
 

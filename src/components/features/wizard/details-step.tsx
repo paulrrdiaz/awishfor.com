@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TimePicker } from "@/components/ui/time-picker";
 import { resolveButtonStyle } from "@/config/public-button-styles";
 import { resolveBodyFont, resolveHeadingFont } from "@/config/public-fonts";
 import { resolveTheme } from "@/config/public-themes";
@@ -237,14 +238,11 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 								>
 									Hora de inicio
 								</FieldLabel>
-								<Input
-									className="min-h-11 rounded-[10px] text-[13.5px]"
+								<TimePicker
+									className="rounded-[10px] text-[13.5px]"
 									id="eventTime"
-									onChange={(e) =>
-										setField("eventTime", e.target.value || null)
-									}
-									type="time"
-									value={draft.eventTime ?? ""}
+									onTimeChange={(time) => setField("eventTime", time)}
+									time={draft.eventTime ?? null}
 								/>
 							</Field>
 
@@ -255,12 +253,11 @@ export function DetailsStep({ validationAttempt = 0 }: Props) {
 								>
 									Hora de fin
 								</FieldLabel>
-								<Input
-									className="min-h-11 rounded-[10px] text-[13.5px]"
+								<TimePicker
+									className="rounded-[10px] text-[13.5px]"
 									id="endTime"
-									onChange={(e) => setField("endTime", e.target.value || null)}
-									type="time"
-									value={draft.endTime ?? ""}
+									onTimeChange={(time) => setField("endTime", time)}
+									time={draft.endTime ?? null}
 								/>
 							</Field>
 						</div>
