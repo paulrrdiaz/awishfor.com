@@ -194,3 +194,23 @@ database-free and can safely verify a public view and purchase-form activation,
 but it cannot generate a client-confirmed purchase success/undo or RSVP
 outcome. A mutable published wishlist and personalized invite are required to
 complete task 9.8 without manufacturing production analytics data.
+
+## 2026-09-27 follow-up — 9.7 closed, 9.8 still open
+
+PostHog MCP query over the last 30 days now shows `wizard_started` arriving
+(6 events, 5 visitors). Anonymous visitors `2053a563-602d-4049-9774-445cd04b5c1f`
+and `14abab7e-452e-42aa-a96e-4e76044907a0` each carry `$pageview`,
+`cta_clicked`, and `wizard_started` under a single distinct_id, with no
+`$creator_event_uuid` person property (identified-only profile policy
+holding). Task 9.7 is satisfied.
+
+Task 9.8 remains open: the project has `public_wishlist_viewed` (246),
+`gift_store_opened` (46), `gift_purchase_started` (78), `gift_marked_purchased`
+(24), `rsvp_submitted` (19), but zero `guest_finder_used` events, so no single
+visitor shows guest-finder use followed by a public view, store/purchase-start,
+and confirmed outcome. Generating it requires a real guest lookup plus a
+mutating purchase/RSVP against a live wishlist.
+
+Task 9.8 was removed from `tasks.md` by product decision on 2026-09-27. The
+end-to-end guest-finder → public view → purchase outcome chain was not verified
+in a single anonymous visitor; `guest_finder_used` had no events in PostHog.

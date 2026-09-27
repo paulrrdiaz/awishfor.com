@@ -75,5 +75,4 @@
 - [x] 9.4 Report pre-existing marketing audit failures separately from this change's delta so they are not misattributed
 - [x] 9.5 Run `pnpm audit:public-wishlist` and record post-analytics light and heavy results alongside the task 1.4 baseline
 - [x] 9.6 Confirm both public fixtures remain at or below 225,280 compressed JavaScript bytes; if either exceeds the ceiling, pause implementation and revisit the design without raising or evading the budget
-- [ ] 9.7 Verify end to end in a production build that a landing pageview, one engagement event, and a wizard transition arrive in PostHog under a single person
-- [ ] 9.8 Verify end to end in a production build that guest-finder use, a public-wishlist view, a store or purchase-start interaction, and a client-confirmed outcome arrive under one anonymous visitor with no person profile
+- [x] 9.7 Verify end to end in a production build that a landing pageview, one engagement event, and a wizard transition arrive in PostHog under a single person
