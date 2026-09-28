@@ -9,6 +9,10 @@ import type { HomeActionWishlistInput } from "@/lib/dashboard/home-actions";
 import type { PublishReadinessResult } from "@/lib/wishlist/publish-readiness";
 import { evaluatePublishReadiness } from "@/lib/wishlist/publish-readiness";
 import { mapDashboardGift } from "@/server/mappers/dashboard-gift.mapper";
+import {
+	computeApproxGiftValue,
+	isVisibleAndNotDeleted,
+} from "@/server/mappers/gift-value";
 import type {
 	DashboardActivityEntryViewModel,
 	DashboardWishlistCardViewModel,
@@ -69,10 +73,6 @@ type DashboardWishlistOverviewOptions = {
 	analytics?: WishlistViewAnalytics;
 	viewSeries?: WishlistViewSeriesPointViewModel[];
 };
-
-function isVisibleAndNotDeleted(gift: Gift): boolean {
-	return gift.deletedAt === null && gift.visibilityStatus !== "hidden";
-}
 
 function sumPurchasedQuantity(purchases: Purchase[]): number {
 	return purchases.reduce((sum, purchase) => sum + purchase.quantity, 0);
@@ -320,6 +320,7 @@ export function mapDashboardWishlistOverview(
 	}: DashboardWishlistOverviewOptions,
 ): DashboardWishlistOverviewViewModel {
 	const aggregates = getVisibleGiftAggregates(wishlist.gifts);
+	const approxValue = computeApproxGiftValue(wishlist.gifts, wishlist.currency);
 	const engagement = summarizeInviteEngagement(invites);
 	const unseatedGuests = countUnseatedGuests(invites, seating);
 	const conversionRate =
@@ -340,6 +341,7 @@ export function mapDashboardWishlistOverview(
 		subtitle: wishlist.subtitle,
 		eventType: wishlist.eventType,
 		language: wishlist.language,
+		currency: wishlist.currency,
 		status: wishlist.status,
 		eventDate: wishlist.eventDate?.toISOString() ?? null,
 		eventTime: wishlist.eventTime,
@@ -348,6 +350,7 @@ export function mapDashboardWishlistOverview(
 		publicUrlPath,
 		publicUrl,
 		whatsAppUrl,
+		approxValue,
 		metrics: {
 			totalGifts: aggregates.totalGiftCount,
 			availableGifts: aggregates.availableGiftCount,

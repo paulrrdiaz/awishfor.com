@@ -3,9 +3,18 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
+	ApproxValuePanel,
 	InvitationProgressPanel,
 	PurchaseProgressPanel,
 } from "./progress-panels";
+
+const filledApproxValue = {
+	receivedAmount: "100.00",
+	goalAmount: "250.00",
+	pricedGiftCount: 2,
+	visibleGiftCount: 2,
+	foreignReceived: [],
+};
 
 describe("PurchaseProgressPanel", () => {
 	it("reflects purchased units as a percentage", () => {
@@ -49,5 +58,94 @@ describe("InvitationProgressPanel", () => {
 		expect(
 			screen.getByText("Aún no se han enviado invitaciones."),
 		).toBeVisible();
+	});
+});
+
+describe("ApproxValuePanel", () => {
+	it("shows received value, goal, and coverage when prices are partial", () => {
+		render(
+			<ApproxValuePanel
+				approxValue={{ ...filledApproxValue, visibleGiftCount: 3 }}
+				currency="PEN"
+				language="es"
+			/>,
+		);
+
+		expect(screen.getByText("Valor aproximado recibido")).toBeVisible();
+		expect(screen.getByText(/de.*250/)).toBeVisible();
+		expect(screen.getByText("2 de 3 regalos con precio")).toBeVisible();
+	});
+
+	it("hides the coverage line when all visible gifts are priced", () => {
+		render(
+			<ApproxValuePanel
+				approxValue={filledApproxValue}
+				currency="PEN"
+				language="es"
+			/>,
+		);
+
+		expect(screen.queryByText(/regalos con precio/)).toBeNull();
+	});
+
+	it("footnotes received foreign-currency values without including them in the headline", () => {
+		render(
+			<ApproxValuePanel
+				approxValue={{
+					...filledApproxValue,
+					foreignReceived: [{ currency: "USD", amount: "45.00" }],
+				}}
+				currency="PEN"
+				language="es"
+			/>,
+		);
+
+		expect(screen.getByText(/en otra moneda \(no incluido\)/)).toBeVisible();
+	});
+
+	it("shows an empty state without a zero amount", () => {
+		render(
+			<ApproxValuePanel
+				approxValue={{
+					receivedAmount: "0.00",
+					goalAmount: "0.00",
+					pricedGiftCount: 0,
+					visibleGiftCount: 1,
+					foreignReceived: [],
+				}}
+				currency="PEN"
+				language="es"
+			/>,
+		);
+
+		expect(
+			screen.getByText(
+				"Agrega precios a tus regalos para ver el valor aproximado.",
+			),
+		).toBeVisible();
+		expect(screen.queryByText(/S\/.*0/)).toBeNull();
+	});
+
+	it("keeps the foreign-currency footnote in the foreign-only empty state", () => {
+		render(
+			<ApproxValuePanel
+				approxValue={{
+					receivedAmount: "0.00",
+					goalAmount: "0.00",
+					pricedGiftCount: 0,
+					visibleGiftCount: 1,
+					foreignReceived: [{ currency: "USD", amount: "45.00" }],
+				}}
+				currency="PEN"
+				language="es"
+			/>,
+		);
+
+		expect(
+			screen.getByText(
+				"Agrega precios a tus regalos para ver el valor aproximado.",
+			),
+		).toBeVisible();
+		expect(screen.getByText(/en otra moneda \(no incluido\)/)).toBeVisible();
 	});
 });

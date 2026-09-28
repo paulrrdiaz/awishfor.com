@@ -10,6 +10,7 @@ import {
 	mapDashboardWishlistOverview,
 	mapDashboardWishlistSummary,
 } from "@/server/mappers/dashboard-wishlist.mapper";
+import { mapPublicWishlist } from "@/server/mappers/public-wishlist.mapper";
 import type { InviteWithExtras } from "@/server/services/invite.service";
 import { OWNER_MANUAL_PURCHASE_DEFAULT_NAME } from "@/server/services/purchase.service";
 
@@ -356,6 +357,58 @@ describe("mapDashboardWishlistOverview", () => {
 			seatingTables: 0,
 			unseatedGuests: 0,
 		});
+	});
+
+	it("includes currency and approximate value for owners and collaborators only", () => {
+		const wishlist = {
+			...makeWishlist(),
+			gifts: [
+				{
+					...makeGift({
+						priceAmount: {
+							toString: () => "100.00",
+						} as unknown as Gift["priceAmount"],
+					}),
+					purchases: [makePurchase()],
+				},
+			],
+		};
+		const options = {
+			publicUrlPath: "/w/my-wishlist",
+			publicUrl: "https://awishfor.com/w/my-wishlist",
+			whatsAppUrl: "https://wa.me/?text=hello",
+			readiness,
+			recentPurchases: [],
+			invites: [],
+			pendingInvitations: 0,
+			totalInvitations: 0,
+			totalGuests: 0,
+			seating: { tableCount: 0, assignments: [] },
+		};
+
+		for (const isOwner of [true, false]) {
+			expect(
+				mapDashboardWishlistOverview(wishlist, { ...options, isOwner }),
+			).toMatchObject({
+				currency: "PEN",
+				approxValue: {
+					receivedAmount: "100.00",
+					goalAmount: "100.00",
+					pricedGiftCount: 1,
+					visibleGiftCount: 1,
+					foreignReceived: [],
+				},
+			});
+		}
+
+		const publicWishlist = mapPublicWishlist({
+			...wishlist,
+			categories: [],
+			images: [],
+		});
+		expect(publicWishlist).not.toHaveProperty("approxValue");
+		expect(publicWishlist).not.toHaveProperty("receivedAmount");
+		expect(publicWishlist).not.toHaveProperty("goalAmount");
 	});
 
 	it("includes serialized analytics and conversion rate only for the owner", () => {

@@ -1,4 +1,5 @@
 import type { ImageOrientation } from "@/config/public-layouts";
+import type { Currency } from "@/generated/prisma/enums";
 import type { PublishReadinessChecks } from "@/lib/wishlist/publish-readiness";
 import type { GiftPublicStatus } from "@/server/services/purchase.service";
 
@@ -184,6 +185,7 @@ export type DashboardWishlistOverviewViewModel = {
 	subtitle: string | null;
 	eventType: string;
 	language: string;
+	currency: Currency;
 	status: string;
 	eventDate: string | null;
 	eventTime: string | null;
@@ -192,6 +194,13 @@ export type DashboardWishlistOverviewViewModel = {
 	publicUrlPath: string;
 	publicUrl: string;
 	whatsAppUrl: string;
+	approxValue: {
+		receivedAmount: string;
+		goalAmount: string;
+		pricedGiftCount: number;
+		visibleGiftCount: number;
+		foreignReceived: { currency: string; amount: string }[];
+	};
 	metrics: {
 		totalGifts: number;
 		availableGifts: number;

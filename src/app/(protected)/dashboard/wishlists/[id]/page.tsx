@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ActivityFeed } from "@/components/features/dashboard/overview/activity-feed";
 import { MetricCards } from "@/components/features/dashboard/overview/metric-cards";
 import {
+	ApproxValuePanel,
 	InvitationProgressPanel,
 	PurchaseProgressPanel,
 } from "@/components/features/dashboard/overview/progress-panels";
@@ -49,6 +50,11 @@ export default async function DashboardWishlistOverviewPage({ params }: Props) {
 						<PurchaseProgressPanel
 							purchasedUnits={wishlist.metrics.purchasedUnits}
 							totalUnits={wishlist.metrics.totalUnits}
+						/>
+						<ApproxValuePanel
+							approxValue={wishlist.approxValue}
+							currency={wishlist.currency}
+							language={wishlist.language}
 						/>
 						<InvitationProgressPanel
 							openedInvitations={wishlist.metrics.openedInvitations}
